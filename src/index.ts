@@ -13,8 +13,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 /**
- * Setup routes here
+ * TODO: Figure out if Mailtrain is going to queue up messages
  *
+ * TODO: Add middleware to inject requester user object. If the requester does not have a db entry (i.e. organizer, then generate it using SAML/jwt data)
+ *
+ * Setup routes here
  * - /api/action
  *   - endpoints that trigger a more complicated action, such as joining a team
  *
