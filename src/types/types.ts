@@ -1,1 +1,1 @@
-export type APICallback = (error: { code: number, message: string }, data?: any) => undefined;
+export type Callback = (error: { code: number, message: string }, data?: any) => undefined;

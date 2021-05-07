@@ -1,12 +1,12 @@
 import * as User from '../models/user/User';
-import { APICallback } from '../types/types';
+import { Callback } from '../types/types';
 
 const mongooseModels = {
   'user': User,
 };
 
 // TODO: Add strict type for requester (object)
-export const getObject = async (requester: any, objectTypeName: string, query: any, callback: APICallback) => {
+export const getObject = async (requester: any, objectTypeName: string, query: any, callback: Callback) => {
 
   const objectType: any = (mongooseModels as any)[objectTypeName];
 
