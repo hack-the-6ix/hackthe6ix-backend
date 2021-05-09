@@ -1,11 +1,10 @@
 import bodyParser from 'body-parser';
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
 import actionRouter from './routes/action';
 
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
-import { sendEmail } from './services/mailer';
 
 const app = express();
 dotenv.config();
@@ -17,6 +16,8 @@ app.use(bodyParser.json());
  * TODO: Add middleware to inject requester user object. If the requester does not have a db entry (i.e. organizer, then generate it using SAML/jwt data)
  *
  * TODO: Do not send the full internal error message to the client in production mode (for security reasons)
+ *
+ * TODO: setup nodemon
  *
  * Setup routes here
  * - /api/action
