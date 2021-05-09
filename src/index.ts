@@ -16,6 +16,8 @@ app.use(bodyParser.json());
 /** *
  * TODO: Add middleware to inject requester user object. If the requester does not have a db entry (i.e. organizer, then generate it using SAML/jwt data)
  *
+ * TODO: Do not send the full internal error message to the client in production mode (for security reasons)
+ *
  * Setup routes here
  * - /api/action
  *   - endpoints that trigger a more complicated action, such as joining a team

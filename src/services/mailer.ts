@@ -1,18 +1,6 @@
 import axios from 'axios';
-import { Callback } from '../types/types';
-import dotenv from 'dotenv';
 import querystring from 'querystring';
-
-/**
- * Does this work? Good question. I haven't tested it yet...
- *
- * TODO: Check if mailtrain will accept JSON payload? The documentation doesn't seem to be using JSON
- *
- * TODO:
- *  - Sync mailing lists (accepted, applied, rejected, waitlisted, not submitted, confirmed, etc.)
- *  - Function to send a single email (transaction)
- *  - Function to sync email statuses back to DB (whether use has been sent email; this is not essential)?
- */
+import { Callback } from '../types/types';
 
 /**
  * Sends a singular email using the mailtrain transcation API
@@ -21,7 +9,7 @@ import querystring from 'querystring';
  * @param templateID
  * @param callback
  */
-export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string] : string }, callback: Callback) => {
+export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }, callback: Callback) => {
 
   try {
 
@@ -34,7 +22,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
     const result = await axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/templates/${templateID}/send?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
       EMAIL: recipientEmail,
       SUBJECT: subject,
-      ...parsedTags
+      ...parsedTags,
     }));
 
     if (result.status != 200 || !result.data) {
@@ -44,7 +32,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
     return callback(null, { message: 'Success' });
 
   } catch (e) {
-    return callback({ code: 500, message: JSON.stringify(e) });
+    return callback({ code: 500, message: e });
   }
 
 };
@@ -72,26 +60,23 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
   try {
     const result = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 
-    console.log(`Fetching existing list: ${result}`);
-
-    if (result.status != 200 || !result.data['subscriptions']) {
+    if (result.status != 200 || !result?.data?.data?.subscriptions) {
       return callback({ code: 500, message: 'Unable to fetch existing subscribers' });
     }
 
     beforeSubscribers = new Set<string>(
-      result.data['subscriptions'].map(
+      result?.data?.data?.subscriptions.map(
         (x: any) => x.email,
       ),
     );
   } catch (e) {
-    return callback({ code: 500, message: JSON.stringify(e) });
+    return callback({ code: 500, message: e });
   }
 
   // Step 2: Subscribe users that aren't on the list yet that should be
   const toBeAdded = [...afterSubscribers].filter(x => !beforeSubscribers.has(x));
 
   try {
-
     /**
      * TODO: Update this to fetch the user's name from the database too
      */
@@ -107,11 +92,8 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
         return callback({ code: 500, message: 'Unable to update subscriber' });
       }
     }
-
-    console.log('New subscribers added successfully');
-
   } catch (e) {
-    return callback({ code: 500, message: JSON.stringify(e) });
+    return callback({ code: 500, message: e });
   }
 
   // Step 3: Delete users that are on the list that shouldn't be
@@ -129,12 +111,9 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
         return callback({ code: 500, message: 'Unable to delete subscriber' });
       }
     }
-
-    console.log('New subscribers added successfully');
-
   } catch (e) {
-    return callback({ code: 500, message: JSON.stringify(e) });
+    return callback({ code: 500, message: e });
   }
 
-  return callback(null, { message: 'Success' })
+  return callback(null, { message: 'Success' });
 };

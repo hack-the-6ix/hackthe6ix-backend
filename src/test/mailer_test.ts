@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
-import { sendEmail } from '../services/mailer';
-import * as mailer from '../services/mailer';
+import { syncMailingLists } from '../services/mailer';
 
 dotenv.config();
 
+/*
 (async () => {
 
   console.log(await sendEmail(
@@ -14,6 +14,22 @@ dotenv.config();
     (error: { code: number, message: string }, data?: any) => {
       console.log(error, data);
     }
+  ));
+
+})();*/
+
+(async () => {
+
+  console.log(await syncMailingLists(
+    'nCCDTUijMH',
+    [
+      'tester@henrytu.me',
+      'tester4@henrytu.me',
+      'tester3@henrytu.me'
+    ],
+    (error: { code: number, message: string }, data?: any) => {
+      console.log(error, data);
+    },
   ));
 
 })();
