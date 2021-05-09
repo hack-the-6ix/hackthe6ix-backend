@@ -25,7 +25,7 @@ dotenv.config();
     [
       'tester@henrytu.me',
       'tester4@henrytu.me',
-      'tester3@henrytu.me'
+      'tester13@henrytu.me'
     ],
     (error: { code: number, message: string }, data?: any) => {
       console.log(error, data);

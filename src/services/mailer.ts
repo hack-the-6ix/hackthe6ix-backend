@@ -103,9 +103,35 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
       }
     }
 
+    // Step 4: Verify sync was successful
+    const updatedEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
+
+    if (updatedEmailsResult.status != 200 || !updatedEmailsResult?.data?.data?.subscriptions) {
+      return callback({ code: 500, message: 'Unable to verify subscribers' });
+    }
+
+    const updatedSubscribers = new Set<string>(
+      updatedEmailsResult?.data?.data?.subscriptions.map(
+        (x: any) => x.email,
+      ),
+    );
+
+    // Verify length of mailing list
+    if (updatedSubscribers.size != emails.length) {
+      return callback({ code: 500, message: 'Mismatch length between updated and target emails!' });
+    }
+
+    // Verify all emails in list are valid
+    for (const email of emails) {
+      if (!updatedSubscribers.has(email)) {
+        return callback({ code: 500, message: 'Mismatch between updated and target emails!' });
+      }
+    }
+
+
+
+    return callback(null, { message: 'Success', added: toBeAdded, deleted: toBeDeleted });
   } catch (e) {
     return callback({ code: 500, message: 'Unable to sync mailing list', stacktrace: e });
   }
-
-  return callback(null, { message: 'Success' });
 };
