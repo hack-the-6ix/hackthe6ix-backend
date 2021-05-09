@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { Callback } from '../types/types';
+import dotenv from 'dotenv';
+import querystring from 'querystring';
 
 /**
  * Does this work? Good question. I haven't tested it yet...
@@ -18,17 +20,22 @@ import { Callback } from '../types/types';
  * @param recipientEmail
  * @param templateID
  * @param callback
- * @param sendConfigurationID - optionally, what send configuration to use
  */
-export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string] : string }, callback: Callback, sendConfigurationID = "system") => {
+export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string] : string }, callback: Callback) => {
 
   try {
-    const result = await axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/templates/${templateID}/send?access_token=${process.env.MAILTRAIN_API_KEY}`, {
+
+    const parsedTags: any = {};
+
+    for (const t of Object.keys(tags)) {
+      parsedTags[`TAGS[${t}]`] = tags[t];
+    }
+
+    const result = await axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/templates/${templateID}/send?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
       EMAIL: recipientEmail,
-      SEND_CONFIGURATION_ID: sendConfigurationID,
       SUBJECT: subject,
-      TAGS: tags
-    });
+      ...parsedTags
+    }));
 
     if (result.status != 200 || !result.data) {
       return callback({ code: 500, message: 'Unable to send email' });
@@ -90,9 +97,9 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
      */
 
     const results = await Promise.all(toBeAdded.map(
-      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, {
+      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
         EMAIL: userEmail,
-      }),
+      })),
     ));
 
     for (const result of results) {
@@ -112,9 +119,9 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
   try {
     const results = await Promise.all(toBeDeleted.map(
-      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/delete/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, {
+      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/delete/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
         EMAIL: userEmail,
-      }),
+      })),
     ));
 
     for (const result of results) {

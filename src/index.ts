@@ -5,6 +5,7 @@ import actionRouter from './routes/action';
 
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
+import { sendEmail } from './services/mailer';
 
 const app = express();
 dotenv.config();

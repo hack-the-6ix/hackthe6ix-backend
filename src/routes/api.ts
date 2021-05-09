@@ -13,7 +13,7 @@ apiRouter.use(express.json());
 apiRouter.get('/getOne/:objectType/:objectID', (req: express.Request, res: express.Response) => {
   console.log(req.params);
 
-  getObject(req.token, // TODO: Inject JWT token in here using middleware. Will need a modified interface too
+  getObject('', //req.token, // TODO: Inject JWT token in here using middleware. Will need a modified interface too
     req.params.objectType,
     {
       _id: req.params.objectID,
