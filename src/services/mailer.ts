@@ -32,7 +32,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
     return callback(null, { message: 'Success' });
 
   } catch (e) {
-    return callback({ code: 500, message: e });
+    return callback({ code: 500, message: 'Unable to send email', stacktrace: e });
   }
 
 };
@@ -53,66 +53,58 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
    * TODO: Inject custom field for the subscriber's name and other metadata
    */
 
-  const afterSubscribers = new Set(emails);
-  let beforeSubscribers: Set<string>;
-
-  // Step 1: Fetch a list of the current emails from the relevant mailing list
   try {
-    const result = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
+    const afterSubscribers = new Set(emails);
 
-    if (result.status != 200 || !result?.data?.data?.subscriptions) {
+    // Step 1: Fetch a list of the current emails from the relevant mailing list
+    const currentEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
+
+    if (currentEmailsResult.status != 200 || !currentEmailsResult?.data?.data?.subscriptions) {
       return callback({ code: 500, message: 'Unable to fetch existing subscribers' });
     }
 
-    beforeSubscribers = new Set<string>(
-      result?.data?.data?.subscriptions.map(
+    const beforeSubscribers = new Set<string>(
+      currentEmailsResult?.data?.data?.subscriptions.map(
         (x: any) => x.email,
       ),
     );
-  } catch (e) {
-    return callback({ code: 500, message: e });
-  }
 
-  // Step 2: Subscribe users that aren't on the list yet that should be
-  const toBeAdded = [...afterSubscribers].filter(x => !beforeSubscribers.has(x));
+    // Step 2: Subscribe users that aren't on the list yet that should be
+    const toBeAdded = [...afterSubscribers].filter(x => !beforeSubscribers.has(x));
 
-  try {
     /**
      * TODO: Update this to fetch the user's name from the database too
      */
 
-    const results = await Promise.all(toBeAdded.map(
+    const subscribeNewResults = await Promise.all(toBeAdded.map(
       (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
         EMAIL: userEmail,
       })),
     ));
 
-    for (const result of results) {
+    for (const result of subscribeNewResults) {
       if (result.status != 200 || !result.data) {
         return callback({ code: 500, message: 'Unable to update subscriber' });
       }
     }
-  } catch (e) {
-    return callback({ code: 500, message: e });
-  }
 
-  // Step 3: Delete users that are on the list that shouldn't be
-  const toBeDeleted = [...beforeSubscribers].filter(x => !afterSubscribers.has(x));
+    // Step 3: Delete users that are on the list that shouldn't be
+    const toBeDeleted = [...beforeSubscribers].filter(x => !afterSubscribers.has(x));
 
-  try {
-    const results = await Promise.all(toBeDeleted.map(
+    const deleteOldResults = await Promise.all(toBeDeleted.map(
       (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/delete/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
         EMAIL: userEmail,
       })),
     ));
 
-    for (const result of results) {
+    for (const result of deleteOldResults) {
       if (result.status != 200 || !result.data) {
         return callback({ code: 500, message: 'Unable to delete subscriber' });
       }
     }
+
   } catch (e) {
-    return callback({ code: 500, message: e });
+    return callback({ code: 500, message: 'Unable to sync mailing list', stacktrace: e });
   }
 
   return callback(null, { message: 'Success' });
