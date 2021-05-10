@@ -1,3 +1,4 @@
+import { IUser } from '../models/user/fields';
 import * as User from '../models/user/User';
 import { Callback } from '../types/types';
 
@@ -6,11 +7,15 @@ const mongooseModels = {
 };
 
 // TODO: Add strict type for requester (object)
-export const getObject = async (requester: any, objectTypeName: string, query: any, callback: Callback) => {
+export const getObject = async (requester: IUser, objectTypeName: string, query: any, callback: Callback) => {
 
-  const objectType: any = (mongooseModels as any)[objectTypeName];
+  // TODO: WE can optimize this by checking if the user even has permission to run this query in the first place
 
-  if (objectType === undefined) {
+  // TODO: Add pagination, sort, and limit support
+
+  const objectModel: any = (mongooseModels as any)[objectTypeName];
+
+  if (objectModel === undefined) {
     // Invalid object type
 
     return callback({
@@ -20,11 +25,11 @@ export const getObject = async (requester: any, objectTypeName: string, query: a
   }
 
   try {
-    const obj = await objectType.find(query);
+    const obj = await objectModel.find(query);
 
 
     /**
-     * TODO: Go through and check every field to see if the request has access to it
+     * TODO: Go through and check every field to see if the request has access to it (async)
      */
 
   } catch (e) {

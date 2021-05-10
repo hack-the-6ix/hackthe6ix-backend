@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { getObject } from '../controller/ModelController';
 
 const apiRouter = express.Router();
@@ -10,10 +10,10 @@ apiRouter.use(express.json());
  */
 
 // Get a single object
-apiRouter.get('/getOne/:objectType/:objectID', (req: express.Request, res: express.Response) => {
+apiRouter.get('/getOne/:objectType/:objectID', (req: Request, res: Response) => {
   console.log(req.params);
 
-  getObject('', //req.token, // TODO: Inject JWT token in here using middleware. Will need a modified interface too
+  getObject(null, //req.executor, TODO: Inject the executor user object + permissions here
     req.params.objectType,
     {
       _id: req.params.objectID,
@@ -23,7 +23,7 @@ apiRouter.get('/getOne/:objectType/:objectID', (req: express.Request, res: expre
 });
 
 // Get many objects
-apiRouter.get('/getMany/:objectType', (req: express.Request, res: express.Response) => {
+apiRouter.get('/getMany/:objectType', (req: Request, res: Response) => {
   console.log(req.query);
 });
 
