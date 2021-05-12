@@ -13,6 +13,18 @@ export const notApplied = (requestUser: any, targetUser: any) =>
 
 
 /* Value properties */
-export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string>) => request?.value.length < maxLength;
+export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request?.value.length <= maxLength;
+export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[]>) => request?.value.length >= minLength;
+
+// Validate that all selections are valid
+export const multiInEnum = (validStates: string[]) => (request: WriteCheckRequest<string[]>) => {
+  for (const x of request?.value || []) {
+    if (validStates.indexOf(x) == -1) {
+      return false;
+    }
+  }
+
+  return true;
+};
 
 export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string>) => validStates.indexOf(request?.value) != -1;

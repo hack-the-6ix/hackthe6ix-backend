@@ -1,9 +1,12 @@
-import { IUser } from '../models/user/fields';
+import * as userFields from '../models/user/fields';
 import * as User from '../models/user/User';
 import { Callback } from '../types/types';
 
-const mongooseModels = {
-  'user': User,
+const models = {
+  'user': {
+    'mongoose': User,
+    'raw': userFields
+  },
 };
 
 // TODO: Add strict type for requester (object)
@@ -16,7 +19,7 @@ export const getObject = async (requester: IUser, objectTypeName: string, query:
   // TODO: Since organizers do not have an account in the mongo database (only for hackers), we should
   //       generate a "fake" user object for the purposes of creating a WriteCheckRequest
 
-  const objectModel: any = (mongooseModels as any)[objectTypeName];
+  const objectModel: any = (models as any)[objectTypeName];
 
   if (objectModel === undefined) {
     // Invalid object type

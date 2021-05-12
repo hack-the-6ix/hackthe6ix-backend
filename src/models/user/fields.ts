@@ -1,5 +1,5 @@
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
-import { inEnum, maxLength, userOrAdmin } from './validator';
+import { inEnum, maxLength, minLength, multiInEnum } from './validator';
 
 const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == targetUser._id ||
   requestUser.jwt.roles.admin;
@@ -21,9 +21,32 @@ const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == ta
  * TODO: Add interceptor for admission status
  */
 
+/**
+ * TODO: Validate submission
+ */
+
 // Main application
 const hackerApplication = {
+
+  /**
+   * TODO: Add write check for submitted application
+   */
+
+  writeCheck: false,
+  readCheck: true,
+
   fields: {
+
+    /* About You */
+    emailConsent: {
+      type: Boolean,
+      required: false,
+      caption: 'Email consent',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
     gender: {
       type: String,
       required: true,
@@ -36,7 +59,7 @@ const hackerApplication = {
 
     pronouns: {
       type: String,
-      required: true,
+      required: false,
       caption: 'Pronouns',
       inTextSearch: true,
 
@@ -44,6 +67,9 @@ const hackerApplication = {
       readCheck: true,
     },
 
+    /**
+     * TODO: Update list of ethnicities
+     */
     ethnicity: {
       type: String,
       required: true,
@@ -54,16 +80,247 @@ const hackerApplication = {
       readCheck: true,
     },
 
+    /**
+     * TODO: Update list of timezones
+     */
+    timezone: {
+      type: String,
+      required: true,
+      caption: 'Timezone',
+      inTextSearch: true,
+
+      writeCheck: inEnum(['Banana']),
+      readCheck: true,
+    },
+
     wantSwag: {
       type: Boolean,
-      required: true,
+      required: false,
       caption: 'I live in Canada and want to receive HT6 swag',
+    },
+
+    /* Address */
+
+    addressLine1: {
+      type: String,
+      required: false,
+      caption: 'Address Line 1',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    addressLine2: {
+      type: String,
+      required: false,
+      caption: 'Address Line 2',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    city: {
+      type: String,
+      required: false,
+      caption: 'City',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    /**
+     * TODO: Upload list of provinces
+     */
+    province: {
+      type: String,
+      required: false,
+      caption: 'Province',
+      inTextSearch: true,
+
+      writeCheck: inEnum(['Banana']),
+      readCheck: true,
+    },
+
+    /**
+     * TODO: Add postal code validator
+     */
+    postalCode: {
+      type: String,
+      required: false,
+      caption: 'Postal Code',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    /* Your experience */
+    school: {
+      type: String,
+      required: true,
+      caption: 'School',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    program: {
+      type: String,
+      required: true,
+      caption: 'Program',
+      inTextSearch: true,
+
+      writeCheck: maxLength(64),
+      readCheck: true,
+    },
+
+    /**
+     * TODO: Update years of study enum
+     */
+    yearsOfStudy: {
+      type: String,
+      required: true,
+      caption: 'Years of study',
+      inTextSearch: true,
+
+      writeCheck: inEnum(['Banana']),
+      readCheck: true,
+    },
+
+    /**
+     * TODO: Update this
+     */
+    hackathonsAttended: {
+      type: String,
+      required: true,
+      caption: 'Hackathons attended',
+      inTextSearch: true,
+
+      writeCheck: inEnum(['Banana']),
+      readCheck: true,
+    },
+
+    /**
+     * TODO: Update this? Idk what we're doing for resume this year
+     */
+    resumeLink: {
+      type: String,
+      required: false,
+      caption: 'Resume',
+      inTextSearch: true,
+
+      writeCheck: maxLength(256),
+      readCheck: true,
+    },
+
+    githubLink: {
+      type: String,
+      required: false,
+      caption: 'GitHub',
+      inTextSearch: true,
+
+      writeCheck: maxLength(256),
+      readCheck: true,
+    },
+
+    portfolioLink: {
+      type: String,
+      required: false,
+      caption: 'Portfolio',
+      inTextSearch: true,
+
+      writeCheck: maxLength(256),
+      readCheck: true,
+    },
+
+    linkedinLink: {
+      type: String,
+      required: false,
+      caption: 'LinkedIn',
+      inTextSearch: true,
+
+      writeCheck: maxLength(256),
+      readCheck: true,
+    },
+
+    projectEssay: {
+      type: String,
+      required: false,
+      caption: 'Proud project',
+      inTextSearch: true,
+
+      writeCheck: (request: WriteCheckRequest<string>) => minLength(50)(request) && maxLength(2056)(request),
+      readCheck: true,
+    },
+
+    /* At HT6 */
+    hasTeam: {
+      type: Boolean,
+      required: false,
+      caption: 'Has Team',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
+    requestedWorkshops: {
+      type: [String],
+      required: false,
+      caption: 'Requested workshop',
+
+      // Cannot select more than 3 workshops
+      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
+      readCheck: true,
+    },
+
+    attendingEssay: {
+      type: String,
+      required: true,
+      caption: 'Accomplishment',
+      inTextSearch: true,
+
+      writeCheck: (request: WriteCheckRequest<string>) => minLength(50)(request) && maxLength(2056)(request),
+      readCheck: true,
+    },
+
+    mlhCOC: {
+      type: Boolean,
+      required: true,
+      caption: 'MLH COC',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
+    mlhEmail: {
+      type: Boolean,
+      required: true,
+      caption: 'MLH COC',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
+    mlhData: {
+      type: Boolean,
+      required: true,
+      caption: 'MLH Data',
+
+      writeCheck: true,
+      readCheck: true,
     },
   },
 };
 
 // User application state
 const status = {
+  writeCheck: false,
+  readCheck: true,
+
   fields: {
     applied: {
       type: Boolean,
@@ -93,6 +350,15 @@ export default {
 
   // Root fields
   fields: {
+    samlID: {
+      type: String,
+      required: true,
+      caption: 'SAML ID',
+      inTextSearch: true,
+
+      readCheck: true,
+      writeCheck: false,
+    },
 
     firstName: {
       type: String,
@@ -130,18 +396,10 @@ export default {
       default: 0,
     },
 
-    samlNameID: {
-      type: String,
-      required: true,
-      index: true,
-    },
-
     status: status,
 
     hackerApplication: hackerApplication,
   },
-
-
 };
 
 export interface IUser extends mongoose.Document {
