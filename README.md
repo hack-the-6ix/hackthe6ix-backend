@@ -61,6 +61,10 @@ To be safe, the return value is presumed to be `false` unless explicitly stated 
 The request object passed into the tester function is defined in `src/types/types.ts` and generally contains the user objects of the
 requester and target user. For write operations, the new value for the field is also provided.
 
+When a `read` check returns `false`, there will be no error. Instead, the relevant field(s) will simply be omitted from the results.
+On the other hand, when a `write` or `delete` operation fails, the entire request will be rejected and terminated. Reading is more of a passive action, whereas
+writing is active.
+
 #### Interceptors
 
 Sometimes it's nice to be able to swap fields as its being read/write. Interceptors allow for this kind of logic to be integrated into
@@ -71,7 +75,6 @@ dependent on the type of the field.
 
 ```typescript
 {
-  
   fields: {
     field1: {
       type: String,
