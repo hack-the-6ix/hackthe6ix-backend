@@ -291,9 +291,9 @@ const hackerApplication = {
       required: false,
       caption: 'Requested workshop',
 
-      // Cannot select more than 3 workshops
-      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
-      readCheck: true,
+      // Cannot select anything other than 3 workshops
+      writeCheck:  (request: WriteCheckRequest<string[]>) => request.value && request.value.length === 3 && multiInEnum(['banana'])(request),
+      readCheck: true
     },
 
     attendingEssay: {

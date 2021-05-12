@@ -8,8 +8,7 @@ export const admin = (requestUser: any, targetUser: any) => requestUser.jwt.role
 export const userOrAdmin = (requestUser: any, targetUser: any) =>
   admin(requestUser, targetUser) || requestUser._id == targetUser._id;
 
-export const notApplied = (requestUser: any, targetUser: any) =>
-  admin(requestUser, targetUser) || !requestUser?.status?.applied;
+export const notApplied = (requestUser: any, targetUser: any) => !requestUser?.status?.applied;
 
 
 /* Value properties */
