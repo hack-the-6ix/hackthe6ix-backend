@@ -23,3 +23,65 @@ npm install
 npm run build
 npm start
 ```
+
+### Object management
+
+This system was designed to handle data as general as possible. As such, validation and access is
+governed through a system of tester functions embedded in the models.
+
+
+#### Schema Structure
+```typescript
+{
+  // Rule here says that only organizers can read, but anyone is allowed to write
+  readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.roles.organizer,
+  deleteCheck: (request: DeleteCheckRequest) => request.requestUser.jwt.roles.organizer,
+  writeCheck: true
+  
+  fields: {
+    field1: {
+      type: String,
+      
+      // These rules are applied on top of the rules from the higher scope
+      
+      // The read will only succeed if the user has a uid of 1234, and 
+      // write will only succeed of the length of the new value is less than 5
+      readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.uid == 1234,
+      writeCheck: (request: WriteCheckRequest) => request.value.length < 5, 
+    }
+  }
+}
+```
+On each nested level of the schema, `readCheck` and `writeCheck` rules should be specified. The fields
+for that level should be in a map under the key `fields`. The controller will be expecting this structure for all read/write operations.
+
+On `read`, `write`, and `delete` operations, `readCheck`, `writeCheck`, and `deleteCheck` are called with a `ModelRequest` object respectively.
+To be safe, the return value is presumed to be `false` unless explicitly stated otherwise.
+
+The request object passed into the tester function is defined in `src/types/types.ts` and generally contains the user objects of the
+requester and target user. For write operations, the new value for the field is also provided.
+
+#### Interceptors
+
+Sometimes it's nice to be able to swap fields as its being read/write. Interceptors allow for this kind of logic to be integrated into
+the schema and dynamically loaded. If no interceptors are specified, the system will perform the usual read/write operation.
+
+Note that interceptors may only be applied to the individual fields and **NOT** to groups of fields, since the interception is highly
+dependent on the type of the field. 
+
+```typescript
+{
+  
+  fields: {
+    field1: {
+      type: String,
+      
+      // When we read, the value of `field1` will have a suffix of `is very cool!`
+      readInterceptor: (request: ReadInterceptRequest) => request.value + " is very cool!"
+      
+      // When we write, we will prefix the value with `banana`
+      writeInterceptor: (request: WriteInterceptRequest) => "banana" + request.value
+    }
+  }
+}
+```

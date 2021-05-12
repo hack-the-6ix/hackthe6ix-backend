@@ -13,6 +13,9 @@ export const getObject = async (requester: IUser, objectTypeName: string, query:
 
   // TODO: Add pagination, sort, and limit support
 
+  // TODO: Since organizers do not have an account in the mongo database (only for hackers), we should
+  //       generate a "fake" user object for the purposes of creating a WriteCheckRequest
+
   const objectModel: any = (mongooseModels as any)[objectTypeName];
 
   if (objectModel === undefined) {
@@ -30,6 +33,10 @@ export const getObject = async (requester: IUser, objectTypeName: string, query:
 
     /**
      * TODO: Go through and check every field to see if the request has access to it (async)
+     */
+
+    /**
+     * TODO: Go through and verify enums
      */
 
   } catch (e) {
