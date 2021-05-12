@@ -267,6 +267,25 @@ const hackerApplication = {
       readCheck: true,
     },
 
+    teammateEmails: {
+      type: [String],
+      required: false,
+      caption: 'Teammate emails',
+
+      writeCheck:  (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && (() => {
+
+        // Verify all emails are less than 64 chars in length
+        for (const x of request.value || []) {
+          if (x.length > 64) {
+            return false;
+          }
+        }
+
+        return true;
+      }),
+      readCheck: true
+    },
+
     requestedWorkshops: {
       type: [String],
       required: false,
