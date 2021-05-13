@@ -18,6 +18,8 @@ export const getObject = async (requester: IUser, objectTypeName: string, query:
 
   // TODO: Since organizers do not have an account in the mongo database (only for hackers), we should
   //       generate a "fake" user object for the purposes of creating a WriteCheckRequest
+  //
+  //       For organizers, use the saml id as the fake mongo _id
 
   const objectModel: any = (models as any)[objectTypeName];
 

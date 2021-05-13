@@ -3,17 +3,14 @@
 // Admins can do anything and bypass validation
 import { WriteCheckRequest } from '../../types/types';
 
-export const admin = (requestUser: any, targetUser: any) => requestUser.jwt.roles.organizer;
+export const isAdmin = (requestUser: any) => requestUser.jwt.roles.organizer;
 
-export const userOrAdmin = (requestUser: any, targetUser: any) =>
-  admin(requestUser, targetUser) || requestUser._id == targetUser._id;
-
-export const notApplied = (requestUser: any, targetUser: any) => !requestUser?.status?.applied;
-
+export const isUserOrAdmin = (requestUser: any, targetUser: any) =>
+  isAdmin(requestUser) || requestUser._id == targetUser._id;
 
 /* Value properties */
-export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request?.value.length <= maxLength;
-export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[]>) => request?.value.length >= minLength;
+export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request.value && request?.value.length <= maxLength;
+export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[]>) => request.value && request?.value.length >= minLength;
 
 // Validate that all selections are valid
 export const multiInEnum = (validStates: string[]) => (request: WriteCheckRequest<string[]>) => {

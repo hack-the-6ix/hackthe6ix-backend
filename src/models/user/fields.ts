@@ -1,3 +1,6 @@
+import { ReadCheckRequest, ReadInterceptRequest, WriteCheckRequest } from '../../types/types';
+import { maskStatus } from './interceptors';
+import { isAdmin, isUserOrAdmin, maxLength, inEnum, minLength, multiInEnum } from './validator';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { inEnum, maxLength, minLength, multiInEnum } from './validator';
 
@@ -5,20 +8,11 @@ const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == ta
   requestUser.jwt.roles.admin;
 
 /**
- * TODO: The requestUser.jwt.roles.admin; above is temporary. Change it to match whatever we end up
+ * TODO: The requestUser.jwt.roles.isAdmin; above is temporary. Change it to match whatever we end up
  *       doing.
  *
  *       We can fetch the request user's profile from their ID using the jwt and inject the jwt data
  *       into that object too so that we can easily access permissions.
- */
-
-/**
- * Each field has a read and write verifier/validator function that gets called when a read/write
- * operation is attempted. If for any reason one of
- */
-
-/**
- * TODO: Add interceptor for admission status
  */
 
 /**
@@ -292,7 +286,7 @@ const hackerApplication = {
       caption: 'Requested workshop',
 
       // Cannot select anything other than 3 workshops
-      writeCheck:  (request: WriteCheckRequest<string[]>) => request.value && request.value.length === 3 && multiInEnum(['banana'])(request),
+      writeCheck:  (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
       readCheck: true
     },
 
@@ -335,21 +329,127 @@ const hackerApplication = {
   },
 };
 
+// Internal fields; Only organizers can access them
+const internal = {
+
+  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+
+  fields: {
+
+    notes: {
+      type: String,
+      required: true,
+      caption: "Organizer Notes",
+
+      writeCheck: true,
+      readCheck: true
+    },
+
+    applicationScore: {
+      type: Number,
+      required: true,
+      caption: "Application score",
+
+      writeCheck: true,
+      readCheck: true
+    },
+
+    reviewer: {
+      type: String,
+      required: true,
+      caption: "Application Reviewer",
+
+      writeCheck: true,
+      readCheck: true
+    }
+
+  }
+
+};
+
 // User application state
 const status = {
-  writeCheck: false,
+
+  // Only organizers can modify statuses
+  writeCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
   readCheck: true,
 
   fields: {
+    // Only admins can read this field
+    statusReleased: {
+      type: Boolean,
+      required: true,
+      caption: 'Status Released',
+
+      writeCheck: true,
+      readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+    },
+
     applied: {
       type: Boolean,
       required: true,
       caption: 'Applied',
 
-      writeCheck: false,
+      writeCheck: true,
       readCheck: true,
     },
-  },
+
+    accepted: {
+      type: Boolean,
+      required: true,
+      caption: 'Accepted',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false)
+    },
+
+    rejected: {
+      type: Boolean,
+      required: true,
+      caption: 'Rejected',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false)
+    },
+
+    waitlisted: {
+      type: Boolean,
+      required: true,
+      caption: 'Waitlisted',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false)
+    },
+
+    confirmed: {
+      type: Boolean,
+      required: true,
+      caption: 'Confirmed',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false)
+    },
+
+    checkedIn: {
+      type: Boolean,
+      required: true,
+      caption: 'Checked In',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false)
+    }
+  }
 };
 
 export default {
@@ -364,8 +464,8 @@ export default {
    *
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
-  writeCheck: (request: WriteCheckRequest<any>) => userOrAdmin(request.requestUser, request.targetUser),
-  readCheck: (request: ReadCheckRequest) => userOrAdmin(request.requestUser, request.targetUser),
+  writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetUser),
+  readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetUser),
 
   // Root fields
   fields: {
@@ -375,8 +475,8 @@ export default {
       caption: 'SAML ID',
       inTextSearch: true,
 
-      readCheck: true,
-      writeCheck: false,
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      readCheck: true
     },
 
     firstName: {
@@ -385,7 +485,7 @@ export default {
       caption: 'First Name',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -395,7 +495,7 @@ export default {
       caption: 'Last Name',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -405,7 +505,7 @@ export default {
       caption: 'Email',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -416,9 +516,9 @@ export default {
     },
 
     status: status,
-
     hackerApplication: hackerApplication,
-  },
+    internal: internal
+  }
 };
 
 export interface IUser extends mongoose.Document {
