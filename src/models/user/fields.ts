@@ -29,7 +29,7 @@ const hackerApplication = {
   writeCheck: false,
   readCheck: true,
 
-  fields: {
+  FIELDS: {
 
     /* About You */
     emailConsent: {
@@ -329,13 +329,13 @@ const hackerApplication = {
   },
 };
 
-// Internal fields; Only organizers can access them
+// Internal FIELDS; Only organizers can access them
 const internal = {
 
   writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
   readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
 
-  fields: {
+  FIELDS: {
 
     notes: {
       type: String,
@@ -375,7 +375,7 @@ const status = {
   writeCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
   readCheck: true,
 
-  fields: {
+  FIELDS: {
     // Only admins can read this field
     statusReleased: {
       type: Boolean,
@@ -467,8 +467,8 @@ export default {
   writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetUser),
   readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetUser),
 
-  // Root fields
-  fields: {
+  // Root FIELDS
+  FIELDS: {
     samlID: {
       type: String,
       required: true,

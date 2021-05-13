@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import { extractFields } from '../util';
 import { fields, IUser } from './fields';
 
-const schema = new mongoose.Schema(fields.fields);
+const schema = new mongoose.Schema(extractFields(fields));
 
 /**
  * TODO: Write function to recursively fetch all the mongoose fields before injecting it into mongoose.Schema
