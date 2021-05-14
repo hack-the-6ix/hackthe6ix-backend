@@ -1,12 +1,28 @@
-import * as userFields from '../models/user/fields';
+import { type } from 'os';
+import userFields from '../models/user/fields';
 import User from '../models/user/User';
-import { Callback, ReadCheckRequest } from '../types/types';
+import { Callback, ReadCheckRequest, WriteCheckRequest } from '../types/types';
 
 const models = {
   user: {
     mongoose: User,
     rawFields: userFields
   },
+};
+
+/**
+ * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
+ */
+const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any>) => {
+  try {
+    return checkerFunction(request);
+  } catch (e) {
+    if (e.toString().includes("is not a function")) {
+      return checkerFunction === true;
+    }
+
+    throw e;
+  }
 };
 
 // TODO: Add strict type for requester (object)
@@ -38,30 +54,33 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
     }
 
     // If the user cannot read fields at this level, we don't need to check any further
-    if (rawFields.readCheck === true || rawFields.readCheck(request)) {
-      for (const k of Object.keys(rawFields)) {
+    if (evaluateChecker(rawFields.readCheck, request)) {
+
+      for (const k of Object.keys(rawFields.FIELDS)) {
 
         const fieldMetadata = rawFields.FIELDS[k];
 
-        if (fieldMetadata.FIELDS !== undefined) {
-          // This is another nested dictionary, so we can recurse
-          out[k] = cleanObject(fieldMetadata, object[k], request)
+        if (fieldMetadata) {
+          if (fieldMetadata.FIELDS !== undefined) {
+            // This is another nested dictionary, so we can recurse
+            out[k] = cleanObject(fieldMetadata, object[k], request)
 
-        } else {
-          // This is just a regular field, so we'll check to make sure we have access to that field
+          } else {
+            // This is just a regular field, so we'll check to make sure we have access to that field
 
-          if (fieldMetadata.readCheck === true || fieldMetadata.readCheck(request)) {
+            if (evaluateChecker(fieldMetadata.readCheck, request)) {
 
-            // Handle read interceptor
-            if (!fieldMetadata.readInterceptor) {
-              out[k] = object[k];
-            } else {
-              out[k] = fieldMetadata.readInterceptor({
-                fieldValue: object[k],
-                ...request
-              });
+              // Handle read interceptor
+              if (!fieldMetadata.readInterceptor) {
+                out[k] = object[k];
+              } else {
+                out[k] = fieldMetadata.readInterceptor({
+                  fieldValue: object[k],
+                  ...request
+                });
+              }
+
             }
-
           }
         }
       }
@@ -111,7 +130,7 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
       }
     }
 
-    return out;
+    return callback(null, out);
   } catch (e) {
     return callback({
       code: 500,

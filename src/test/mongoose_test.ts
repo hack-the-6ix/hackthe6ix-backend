@@ -1,16 +1,30 @@
+import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { getObject } from '../controller/ModelController';
-import { syncMailingLists } from '../services/mailer';
 
 dotenv.config();
 
 (async () => {
+
+  await mongoose.connect('mongodb://localhost:27017/ht6', {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  });
+
   getObject({
-    _id: 1234
-  },
-    "user", {}, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+      _id: new ObjectID("5f081f878c60690dd9b9fd57"),
+      jwt: {
+        roles: {
 
-    console.log(error, data)
+        }
+      }
+    },
+    'user', {}, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
-    })
+      console.log(error, data);
+
+    });
+
 })();
