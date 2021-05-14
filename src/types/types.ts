@@ -14,13 +14,20 @@ export interface UserRequest extends Request {
 }
 
 /**
+ * Status of the universe
+ */
+export type UniverseState = {
+
+}
+
+/**
  * When writing a model, this object is passed onto the validator
  */
 export type WriteCheckRequest<T> = {
-  value: T,
-  requestUser: any,
-  targetUser: any,
-  universeState: any
+  fieldValue: T,      // Field we're updating
+  requestUser: any,   // User producing the request
+  targetObject: any,   // State of the object we're modifying (the entire raw object)
+  universeState: UniverseState  // External variables that may be relevant to us
 }
 
 /**
@@ -33,8 +40,8 @@ export type WriteInterceptRequest<T> = WriteCheckRequest<T>;
  */
 export type ReadCheckRequest = {
   requestUser: any,
-  targetUser: any,
-  universeState: any
+  targetObject: any,
+  universeState: UniverseState
 }
 
 /**
@@ -47,8 +54,8 @@ export type ReadInterceptRequest<T> = WriteCheckRequest<T>;
  */
 export type DeleteCheckRequest = {
   requestUser: any,
-  targetUser: any,
-  universeState: any
+  targetObject: any,
+  universeState: UniverseState
 }
 
 

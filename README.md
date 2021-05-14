@@ -45,7 +45,7 @@ governed through a system of tester functions embedded in the models.
       // These rules are applied on top of the rules from the higher scope
       
       // The read will only succeed if the user has a uid of 1234, and 
-      // write will only succeed of the length of the new value is less than 5
+      fieldValue
       readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.uid == 1234,
       writeCheck: (request: WriteCheckRequest) => request.value.length < 5, 
     }

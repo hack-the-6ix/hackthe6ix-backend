@@ -1,8 +1,6 @@
-import { ReadCheckRequest, ReadInterceptRequest, WriteCheckRequest } from '../../types/types';
-import { maskStatus } from './interceptors';
-import { isAdmin, isUserOrAdmin, maxLength, inEnum, minLength, multiInEnum } from './validator';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
-import { inEnum, maxLength, minLength, multiInEnum } from './validator';
+import { maskStatus } from './interceptors';
+import { inEnum, isAdmin, isUserOrAdmin, maxLength, minLength, multiInEnum } from './validator';
 
 const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == targetUser._id ||
   requestUser.jwt.roles.admin;
@@ -266,10 +264,10 @@ const hackerApplication = {
       required: false,
       caption: 'Teammate emails',
 
-      writeCheck:  (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && (() => {
+      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && (() => {
 
         // Verify all emails are less than 64 chars in length
-        for (const x of request.value || []) {
+        for (const x of request.fieldValue || []) {
           if (x.length > 64) {
             return false;
           }
@@ -277,7 +275,7 @@ const hackerApplication = {
 
         return true;
       }),
-      readCheck: true
+      readCheck: true,
     },
 
     requestedWorkshops: {
@@ -286,8 +284,8 @@ const hackerApplication = {
       caption: 'Requested workshop',
 
       // Cannot select anything other than 3 workshops
-      writeCheck:  (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
-      readCheck: true
+      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
+      readCheck: true,
     },
 
     attendingEssay: {
@@ -340,31 +338,31 @@ const internal = {
     notes: {
       type: String,
       required: true,
-      caption: "Organizer Notes",
+      caption: 'Organizer Notes',
 
       writeCheck: true,
-      readCheck: true
+      readCheck: true,
     },
 
     applicationScore: {
       type: Number,
       required: true,
-      caption: "Application score",
+      caption: 'Application score',
 
       writeCheck: true,
-      readCheck: true
+      readCheck: true,
     },
 
     reviewer: {
       type: String,
       required: true,
-      caption: "Application Reviewer",
+      caption: 'Application Reviewer',
 
       writeCheck: true,
-      readCheck: true
-    }
+      readCheck: true,
+    },
 
-  }
+  },
 
 };
 
@@ -403,7 +401,7 @@ const status = {
       writeCheck: true,
       readCheck: true,
 
-      readInterceptor: maskStatus<boolean>(false)
+      readInterceptor: maskStatus<boolean>(false),
     },
 
     rejected: {
@@ -414,7 +412,7 @@ const status = {
       writeCheck: true,
       readCheck: true,
 
-      readInterceptor: maskStatus<boolean>(false)
+      readInterceptor: maskStatus<boolean>(false),
     },
 
     waitlisted: {
@@ -425,7 +423,7 @@ const status = {
       writeCheck: true,
       readCheck: true,
 
-      readInterceptor: maskStatus<boolean>(false)
+      readInterceptor: maskStatus<boolean>(false),
     },
 
     confirmed: {
@@ -436,7 +434,7 @@ const status = {
       writeCheck: true,
       readCheck: true,
 
-      readInterceptor: maskStatus<boolean>(false)
+      readInterceptor: maskStatus<boolean>(false),
     },
 
     checkedIn: {
@@ -447,9 +445,9 @@ const status = {
       writeCheck: true,
       readCheck: true,
 
-      readInterceptor: maskStatus<boolean>(false)
-    }
-  }
+      readInterceptor: maskStatus<boolean>(false),
+    },
+  },
 };
 
 export default {
@@ -464,8 +462,8 @@ export default {
    *
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
-  writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetUser),
-  readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetUser),
+  writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetObject),
+  readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetObject),
 
   // Root FIELDS
   FIELDS: {
@@ -476,7 +474,7 @@ export default {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
-      readCheck: true
+      readCheck: true,
     },
 
     firstName: {
@@ -517,8 +515,8 @@ export default {
 
     status: status,
     hackerApplication: hackerApplication,
-    internal: internal
-  }
+    internal: internal,
+  },
 };
 
 export interface IUser extends mongoose.Document {
