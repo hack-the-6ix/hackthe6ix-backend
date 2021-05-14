@@ -1,5 +1,5 @@
 import * as userFields from '../models/user/fields';
-import * as User from '../models/user/User';
+import User from '../models/user/User';
 import { Callback, ReadCheckRequest } from '../types/types';
 
 const models = {
