@@ -17,7 +17,7 @@ export interface UserRequest extends Request {
  * Status of the universe
  */
 export type UniverseState = {
-
+  globalApplicationOpen: boolean
 }
 
 /**

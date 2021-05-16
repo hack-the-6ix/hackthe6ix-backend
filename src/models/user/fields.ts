@@ -21,10 +21,10 @@ const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == ta
 const hackerApplication = {
 
   /**
-   * TODO: Add write check for submitted application
+   * TODO: Add a dynamic way to check for whether or not this user can submit
    */
 
-  writeCheck: false,
+  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
   readCheck: true,
 
   FIELDS: {
@@ -356,7 +356,7 @@ const internal = {
     reviewer: {
       type: String,
       required: true,
-      caption: 'Application Reviewer',
+      caption: 'Application Reviewer Email',
 
       writeCheck: true,
       readCheck: true,
@@ -450,6 +450,34 @@ const status = {
   },
 };
 
+// User roles state
+const roles = {
+
+  // Only organizers can modify statuses
+  writeCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+  readCheck: true,
+
+  FIELDS: {
+    hacker: {
+      type: Boolean,
+      required: true,
+      caption: 'Hacker',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
+    admin: {
+      type: Boolean,
+      required: true,
+      caption: 'Admin',
+
+      writeCheck: true,
+      readCheck: true
+    }
+  },
+};
+
 export default {
 
   /**
@@ -467,14 +495,24 @@ export default {
 
   // Root FIELDS
   FIELDS: {
-    samlID: {
+    lastLogout: {
+      type: Number,
+      required: true,
+      caption: 'Last logout',
+      default: 0,
+
+      readCheck: false,
+      writeCheck: false
+    },
+
+    samlNameID: {
       type: String,
       required: true,
-      caption: 'SAML ID',
-      inTextSearch: true,
+      caption: 'SAML Name ID',
+      index: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
-      readCheck: true,
+      readCheck: false,
+      writeCheck: false
     },
 
     firstName: {
@@ -507,12 +545,30 @@ export default {
       readCheck: true,
     },
 
-    lastLogout: {
+    rsvpDeadline: {
       type: Number,
       required: true,
-      default: 0,
+      caption: 'RSVP Deadline',
+      inTextSearch: true,
+      default: () => -1,
+
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      readCheck: true,
     },
 
+    // Some hackers are special and want to apply after the global deadline
+    personalApplicationDeadline: {
+      type: Number,
+      required: true,
+      caption: 'Personal Application Deadline',
+      inTextSearch: true,
+      default: () => -1,
+
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      readCheck: true,
+    },
+
+    roles: roles,
     status: status,
     hackerApplication: hackerApplication,
     internal: internal,

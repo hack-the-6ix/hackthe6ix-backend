@@ -25,69 +25,63 @@ const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | Write
   }
 };
 
+/**
+ * Recursively traverses the schema fields + permission checker and the object in parallel
+ * to filter out data that should not appear in the output.
+ *
+ * @param rawField - fields interlaced with read/write checkers at each level
+ * @param object
+ * @param request
+ */
+const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => {
+
+  const out: any = {};
+
+  if (!rawFields || !object) {
+    throw Error("Field or object is not truthy!");
+  }
+
+  // If the user cannot read fields at this level, we don't need to check any further
+  if (evaluateChecker(rawFields.readCheck, request)) {
+
+    for (const k of Object.keys(rawFields.FIELDS)) {
+
+      const fieldMetadata = rawFields.FIELDS[k];
+
+      if (fieldMetadata) {
+        if (fieldMetadata.FIELDS !== undefined) {
+          // This is another nested dictionary, so we can recurse
+          out[k] = cleanObject(fieldMetadata, object[k], request)
+
+        } else {
+          // This is just a regular field, so we'll check to make sure we have access to that field
+
+          if (evaluateChecker(fieldMetadata.readCheck, request)) {
+
+            // Handle read interceptor
+            if (!fieldMetadata.readInterceptor) {
+              out[k] = object[k];
+            } else {
+              out[k] = fieldMetadata.readInterceptor({
+                fieldValue: object[k],
+                ...request
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return out;
+};
+
 // TODO: Add strict type for requester (object)
 export const getObject = async (requestUser: any, objectTypeName: string, query: any, callback: Callback) => {
 
   // TODO: WE can optimize this by checking if the user even has permission to run this query in the first place
 
   // TODO: Add pagination, sort, and limit support
-
-  // TODO: Since organizers do not have an account in the mongo database (only for hackers), we should
-  //       generate a "fake" user object for the purposes of creating a WriteCheckRequest
-  //
-  //       For organizers, use the saml id as the fake mongo _id
-
-  /**
-   * Recursively traverses the schema fields + permission checker and the object in parallel
-   * to filter out data that should not appear in the output.
-   *
-   * @param rawField - fields interlaced with read/write checkers at each level
-   * @param object
-   * @param request
-   */
-  const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => {
-
-    const out: any = {};
-
-    if (!rawFields || !object) {
-      throw Error("Field or object is not truthy!");
-    }
-
-    // If the user cannot read fields at this level, we don't need to check any further
-    if (evaluateChecker(rawFields.readCheck, request)) {
-
-      for (const k of Object.keys(rawFields.FIELDS)) {
-
-        const fieldMetadata = rawFields.FIELDS[k];
-
-        if (fieldMetadata) {
-          if (fieldMetadata.FIELDS !== undefined) {
-            // This is another nested dictionary, so we can recurse
-            out[k] = cleanObject(fieldMetadata, object[k], request)
-
-          } else {
-            // This is just a regular field, so we'll check to make sure we have access to that field
-
-            if (evaluateChecker(fieldMetadata.readCheck, request)) {
-
-              // Handle read interceptor
-              if (!fieldMetadata.readInterceptor) {
-                out[k] = object[k];
-              } else {
-                out[k] = fieldMetadata.readInterceptor({
-                  fieldValue: object[k],
-                  ...request
-                });
-              }
-
-            }
-          }
-        }
-      }
-    }
-
-    return out;
-  };
 
   // Fetch metadata about the universe first that might be necessary for making validation decisions
   // e.g. whether applications are currently open, etc.
@@ -105,7 +99,21 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
 
   // Sanitize data before sending it out into the world
   try {
-    const results = await objectModel.mongoose.find(query);
+
+    if (!query) {
+      return callback({
+        code: 400,
+        message: "Invalid request! Must specify query!"
+      })
+    }
+
+    const page = parseInt(query.page || '1');
+    const size = parseInt(query.size || '20');
+
+    const results = await objectModel.mongoose.find(query.filter)
+                                              .sort(query.sort || {})
+                                              .skip((page - 1) * size)
+                                              .limit(size);
 
     const out: any[] = [];
 
