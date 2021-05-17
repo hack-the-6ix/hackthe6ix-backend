@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express, {ErrorRequestHandler} from 'express';
 import "express-async-errors";
 import actionRouter from './routes/action';
+import mongoSanitize from 'express-mongo-sanitize';
 
 import mongoose from "mongoose";
 
@@ -18,6 +19,17 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Sanitize requests with mongoDB ops
+app.use(mongoSanitize());
+
+/**
+ * TODO: Verify that taking in the raw query won't be a security risk
+ *
+ *       We already know that $where may allow for arbitrary code execution
+ *
+ *       Maybe add a check for who is allowed to execute "advanced" queries?
+ */
 
 /** *
  * TODO: Add middleware to inject requester user object. If the requester does not have a db entry (i.e. organizer, then generate it using SAML/jwt data)

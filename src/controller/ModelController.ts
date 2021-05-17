@@ -1,12 +1,11 @@
-import { type } from 'os';
 import userFields from '../models/user/fields';
 import User from '../models/user/User';
-import { Callback, ReadCheckRequest, WriteCheckRequest } from '../types/types';
+import { Callback, ReadCheckRequest, UniverseState, WriteCheckRequest } from '../types/types';
 
 const models = {
   user: {
     mongoose: User,
-    rawFields: userFields
+    rawFields: userFields,
   },
 };
 
@@ -17,7 +16,7 @@ const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | Write
   try {
     return checkerFunction(request);
   } catch (e) {
-    if (e.toString().includes("is not a function")) {
+    if (e.toString().includes('is not a function')) {
       return checkerFunction === true;
     }
 
@@ -38,7 +37,7 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => 
   const out: any = {};
 
   if (!rawFields || !object) {
-    throw Error("Field or object is not truthy!");
+    throw Error('Field or object is not truthy!');
   }
 
   // If the user cannot read fields at this level, we don't need to check any further
@@ -51,7 +50,7 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => 
       if (fieldMetadata) {
         if (fieldMetadata.FIELDS !== undefined) {
           // This is another nested dictionary, so we can recurse
-          out[k] = cleanObject(fieldMetadata, object[k], request)
+          out[k] = cleanObject(fieldMetadata, object[k], request);
 
         } else {
           // This is just a regular field, so we'll check to make sure we have access to that field
@@ -64,7 +63,7 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => 
             } else {
               out[k] = fieldMetadata.readInterceptor({
                 fieldValue: object[k],
-                ...request
+                ...request,
               });
             }
           }
@@ -76,7 +75,20 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => 
   return out;
 };
 
-// TODO: Add strict type for requester (object)
+export const escapeStringRegexp = (x: string) => {
+  return x
+    .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+    .replace(/-/g, '\\x2d');
+};
+
+/**
+ * Fetch an object with mongo query
+ *
+ * @param requestUser
+ * @param objectTypeName
+ * @param query
+ * @param callback
+ */
 export const getObject = async (requestUser: any, objectTypeName: string, query: any, callback: Callback) => {
 
   // TODO: WE can optimize this by checking if the user even has permission to run this query in the first place
@@ -85,7 +97,9 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
 
   // Fetch metadata about the universe first that might be necessary for making validation decisions
   // e.g. whether applications are currently open, etc.
-  const universeState = {};
+  const universeState: UniverseState = {
+    globalApplicationOpen: true,
+  };
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
@@ -93,8 +107,8 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
   if (objectModel === undefined) {
     return callback({
       code: 400,
-      message: "Invalid Object Type"
-    })
+      message: 'Invalid Object Type',
+    });
   }
 
   // Sanitize data before sending it out into the world
@@ -103,17 +117,50 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
     if (!query) {
       return callback({
         code: 400,
-        message: "Invalid request! Must specify query!"
-      })
+        message: 'Invalid request! Must specify query!',
+      });
     }
 
-    const page = parseInt(query.page || '1');
-    const size = parseInt(query.size || '20');
+    const page = parseInt(query.page);
+    const size = parseInt(query.size);
+    const sort = query.sort || {};
 
-    const results = await objectModel.mongoose.find(query.filter)
-                                              .sort(query.sort || {})
-                                              .skip((page - 1) * size)
-                                              .limit(size);
+    const filters: any = {};
+    const text = query.text;
+    const and: { [k: string]: RegExp }[] = [];
+    const or: { [k: string]: RegExp }[] = [];
+
+    if (text) {
+      const regex = new RegExp(escapeStringRegexp(text), 'i'); // filters regex chars, sets to case insensitive
+
+      or.push({ email: regex });
+      or.push({ 'firstName': regex });
+      or.push({ 'lastName': regex });
+      or.push({ 'teamCode': regex });
+      or.push({ 'profile.school': regex });
+      or.push({ 'profile.departing': regex });
+    }
+
+    if (or && or.length) {
+      if ('$or' in filters) {
+        filters['$or'].concat(or);
+      } else {
+        filters['$or'] = or;
+      }
+    }
+
+    if (and && and.length) {
+      if ('$and' in filters) {
+        filters['$and'].concat(and);
+      } else {
+        filters['$and'] = and;
+      }
+    }
+
+    const results = await objectModel.mongoose.find(filters)
+    .sort(sort)
+    .skip((page - 1) * size)
+    .limit(size);
 
     const out: any[] = [];
 
@@ -127,8 +174,8 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
       cleanObject(objectModel.rawFields, result, {
         requestUser: requestUser,
         targetObject: result,
-        universeState: universeState
-      })
+        universeState: universeState,
+      }),
     ));
 
     for (const cleanedResult of cleanedResults) {
@@ -142,8 +189,8 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
   } catch (e) {
     return callback({
       code: 500,
-      message: "An error occurred",
-      stacktrace: e.toString()
-    })
+      message: 'An error occurred',
+      stacktrace: e.toString(),
+    });
   }
 };

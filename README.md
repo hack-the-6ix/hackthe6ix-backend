@@ -65,7 +65,7 @@ When a `read` check returns `false`, there will be no error. Instead, the releva
 On the other hand, when a `write` or `delete` operation fails, the entire request will be rejected and terminated. Reading is more of a passive action, whereas
 writing is active.
 
-#### Interceptors
+#### Read/Write Interceptors
 
 Sometimes it's nice to be able to swap fields as its being read/write. Interceptors allow for this kind of logic to be integrated into
 the schema and dynamically loaded. If no interceptors are specified, the system will perform the usual read/write operation.
@@ -88,3 +88,7 @@ dependent on the type of the field.
   }
 }
 ```
+
+#### Query Interceptors
+
+We do not want to let any user run arbitrary queries against our database. 
