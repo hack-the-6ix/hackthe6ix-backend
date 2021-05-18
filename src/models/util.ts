@@ -42,19 +42,47 @@ export const extractFields = (rawFields: any) => {
   // Precondition: rawFields meets the input specification
 
   const out: any = {
-    ...rawFields.FIELDS // Get current level fields
+    ...rawFields.FIELDS, // Get current level fields
   };
 
   for (const k of Object.keys(rawFields.FIELDS)) {
     const v = rawFields.FIELDS[k];
 
     if (v.FIELDS !== undefined) {
-        // This field itself has fields, so we're going to need to recurse
+      // This field itself has fields, so we're going to need to recurse
 
-        out[k] = extractFields(v);
+      out[k] = extractFields(v);
     }
   }
 
   return out;
 
+};
+
+/**
+ * Get an array of fields that should be queried as part of an in text search
+ * @param rawFields
+ * @param prefix
+ */
+export const getInTextSearchableFields = (rawFields: any, prefix = '') => {
+
+  let out: string[] = [];
+
+  for (const k of Object.keys(rawFields.FIELDS)) {
+    const v = rawFields.FIELDS[k];
+
+    if (v.FIELDS !== undefined) {
+      // This field itself has fields, so we're going to need to recurse
+
+      out = [...out, ...getInTextSearchableFields(v, k)];
+    } else {
+      // This is a plain old field
+
+      if (v.inTextSearch) {
+        out.push(`${prefix}${prefix.length > 0 ? '.' : ''}${k}`);
+      }
+    }
+  }
+
+  return out;
 };

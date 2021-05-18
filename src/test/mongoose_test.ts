@@ -19,12 +19,14 @@ dotenv.config();
       _id: new ObjectID("5f081f878c60690dd9b9fd57"),
       jwt: {
         roles: {
-          //organizer: true
+          organizer: true
         }
       }
     },
     'user', {
-
+      page: 1,
+      size: 10,
+      text: "tu"
     }, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
       console.log(error, data);

@@ -1,5 +1,6 @@
 import userFields from '../models/user/fields';
 import User from '../models/user/User';
+import { getInTextSearchableFields } from '../models/util';
 import { Callback, ReadCheckRequest, UniverseState, WriteCheckRequest } from '../types/types';
 
 const models = {
@@ -77,23 +78,22 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => 
 
 export const escapeStringRegexp = (x: string) => {
   return x
-    .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
-    .replace(/-/g, '\\x2d');
+  .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+  .replace(/-/g, '\\x2d');
 };
 
 /**
  * Fetch an object with mongo query
  *
+ * WARNING: Only allow admins/trusted users to access this function. It may be possible to have
+ *          arbitrary code execution if care is not taken.
+ *
  * @param requestUser
  * @param objectTypeName
- * @param query
+ * @param query - { page: number, size: number, sortField?: string, sortCriteria?: string, text?: string, filter?: any }
  * @param callback
  */
 export const getObject = async (requestUser: any, objectTypeName: string, query: any, callback: Callback) => {
-
-  // TODO: WE can optimize this by checking if the user even has permission to run this query in the first place
-
-  // TODO: Add pagination, sort, and limit support
 
   // Fetch metadata about the universe first that might be necessary for making validation decisions
   // e.g. whether applications are currently open, etc.
@@ -117,28 +117,52 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
     if (!query) {
       return callback({
         code: 400,
-        message: 'Invalid request! Must specify query!',
+        message: 'Invalid request! Must specify page and size!',
+      });
+    }
+
+    if (!query.page || query.page <= 0) {
+      return callback({
+        code: 400,
+        message: 'Invalid request! Page must be >= 1!',
+      });
+    }
+
+    if (!query.size || query.size <= 0) {
+      return callback({
+        code: 400,
+        message: 'Invalid request! Size must be >= 1!',
       });
     }
 
     const page = parseInt(query.page);
     const size = parseInt(query.size);
-    const sort = query.sort || {};
 
-    const filters: any = {};
-    const text = query.text;
+    const filters: any = query.filter || {};
     const and: { [k: string]: RegExp }[] = [];
     const or: { [k: string]: RegExp }[] = [];
 
+    // Sort
+    const sort: any = {};
+    if (query.sortField && query.sortCriteria) {
+      sort[query.sortField] = query.sortCriteria;
+    }
+
+    // In text search
+    const text = query.text;
     if (text) {
       const regex = new RegExp(escapeStringRegexp(text), 'i'); // filters regex chars, sets to case insensitive
 
-      or.push({ email: regex });
-      or.push({ 'firstName': regex });
-      or.push({ 'lastName': regex });
-      or.push({ 'teamCode': regex });
-      or.push({ 'profile.school': regex });
-      or.push({ 'profile.departing': regex });
+      const inTextSearchFields = getInTextSearchableFields(objectModel.rawFields);
+
+      // Apply regex against fields with in text search
+      for (const f of inTextSearchFields) {
+        const textQuery: any = {};
+
+        textQuery[f] = regex;
+
+        or.push(textQuery);
+      }
     }
 
     if (or && or.length) {

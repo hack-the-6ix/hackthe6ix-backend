@@ -549,7 +549,6 @@ export default {
       type: Number,
       required: true,
       caption: 'RSVP Deadline',
-      inTextSearch: true,
       default: () => -1,
 
       writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
@@ -561,7 +560,6 @@ export default {
       type: Number,
       required: true,
       caption: 'Personal Application Deadline',
-      inTextSearch: true,
       default: () => -1,
 
       writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
