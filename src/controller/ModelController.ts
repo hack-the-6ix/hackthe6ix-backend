@@ -1,13 +1,26 @@
 import userFields from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
-import { Callback, ReadCheckRequest, UniverseState, WriteCheckRequest } from '../types/types';
+import { Callback, ReadCheckRequest, UniverseState, WriteCheckRequest, WriteDeniedException } from '../types/types';
 
 const models = {
   user: {
     mongoose: User,
     rawFields: userFields,
   },
+};
+
+/**
+ * Fetch metadata about the universe first that might be necessary for making validation decisions
+ * e.g. whether applications are currently open, etc.
+ */
+const fetchUniverseState = async (): Promise<UniverseState> => {
+
+  return {
+    globalApplicationOpen: true,
+  };
+
+
 };
 
 /**
@@ -85,7 +98,7 @@ export const escapeStringRegexp = (x: string) => {
 /**
  * Fetch an object with mongo query
  *
- * WARNING: Only allow admins/trusted users to access this function. It may be possible to have
+ * WARNING: Only allow admins/trusted users to have unfiltered access this function. It may be possible to have
  *          arbitrary code execution if care is not taken.
  *
  * @param requestUser
@@ -94,12 +107,6 @@ export const escapeStringRegexp = (x: string) => {
  * @param callback
  */
 export const getObject = async (requestUser: any, objectTypeName: string, query: any, callback: Callback) => {
-
-  // Fetch metadata about the universe first that might be necessary for making validation decisions
-  // e.g. whether applications are currently open, etc.
-  const universeState: UniverseState = {
-    globalApplicationOpen: true,
-  };
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
@@ -113,7 +120,6 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
 
   // Sanitize data before sending it out into the world
   try {
-
     if (!query) {
       return callback({
         code: 400,
@@ -198,7 +204,7 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
       cleanObject(objectModel.rawFields, result, {
         requestUser: requestUser,
         targetObject: result,
-        universeState: universeState,
+        universeState: await fetchUniverseState(),
       }),
     ));
 
@@ -217,4 +223,143 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
       stacktrace: e.toString(),
     });
   }
+};
+
+const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckRequest<any>) => {
+  if (!rawFields || !changes) {
+    throw Error('Field or object is not truthy!');
+  }
+
+  // If the user cannot read fields at this level, we don't need to check any further
+  if (evaluateChecker(rawFields.writeCheck, request)) {
+    for (const k of Object.keys(changes)) {
+      const fieldMetadata = rawFields.FIELDS[k];
+
+      if (fieldMetadata) {
+        if (fieldMetadata.FIELDS !== undefined) {
+          // Nested object; Recurse
+          validateObjectEdit(fieldMetadata, changes[k], request);
+
+        } else {
+          // Top level field
+
+          /**
+           * TODO: Pass in the existing value in here too.
+           */
+
+          if (!evaluateChecker(fieldMetadata.writeCheck, {...request, fieldValue: })) {
+            // Validation failed for this field
+            throw new WriteDeniedException(`Write check failed at field: ${ JSON.stringify( fieldMetadata ) } with policy ${ fieldMetadata.writeCheck }`);
+          }
+
+        }
+      } else {
+        // Invalid field
+        throw new WriteDeniedException(`Invalid field: ${ k }`);
+      }
+    }
+
+    return true;
+  } else {
+    // Validation Failed
+    throw new WriteDeniedException(`Write check failed at level: ${ JSON.stringify( changes ) } with policy ${ rawFields.writeCheck }`);
+  }
+};
+
+/**
+ * Fetch an object with mongo query
+ *
+ * WARNING: Only allow admins/trusted users to have unfiltered access this function. It may be possible to have
+ *          arbitrary code execution if care is not taken.
+ *
+ * @param requestUser
+ * @param objectTypeName
+ * @param filter - filter map (same format as query selector for find())
+ * @param changes - map of fields to update
+ * @param callback
+ */
+export const editObject = async (requestUser: any, objectTypeName: string, filter: any, changes: any, callback: Callback) => {
+
+  // Since this function can handle any model type, we must fetch the mongoose schema first
+  const objectModel: any = (models as any)[objectTypeName];
+
+  if (objectModel === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid Object Type',
+    });
+  }
+
+  try {
+    const amendedIDs: string[] = [];
+
+    // Validate the proposed amendments
+    const results = await objectModel.mongoose.find(filter);
+
+    await Promise.all(results.map(async (result: any) =>
+        validateObjectEdit(objectModel.rawFields, changes, {
+          requestUser: requestUser,
+          targetObject: result,
+          universeState: await fetchUniverseState(),
+        })
+    ));
+
+    // Keep track of IDs that were affected
+    for (const o of Object.keys(results)) {
+      amendedIDs.push(results[o]._id);
+    }
+
+    // Changes accepted and are made
+    await objectModel.mongoose.updateMany(
+      filter,
+      changes,
+    );
+
+    return callback(null, amendedIDs);
+
+  } catch (e) {
+    if (e instanceof WriteDeniedException) {
+      return callback({
+        code: 401,
+        message: 'Write check violation!',
+        stacktrace: e.toString(),
+      });
+    } else {
+      return callback({
+        code: 500,
+        message: 'An error occurred',
+        stacktrace: e.toString(),
+      });
+    }
+  }
+};
+
+/**
+ * Fetch an object with mongo query
+ *
+ * WARNING: Only allow admins/trusted users to have unfiltered access this function. It may be possible to have
+ *          arbitrary code execution if care is not taken.
+ *
+ * @param requestUser
+ * @param objectTypeName
+ * @param filter - filter map (same format as query selector for find())
+ * @param callback
+ */
+export const deleteObject = async (requestUser: any, objectTypeName: string, filter: any, callback: Callback) => {
+
+};
+
+/**
+ * Fetch an object with mongo query
+ *
+ * WARNING: Only allow admins/trusted users to have unfiltered access this function. It may be possible to have
+ *          arbitrary code execution if care is not taken.
+ *
+ * @param requestUser
+ * @param objectTypeName
+ * @param parameters - initial parameters to initialize the object
+ * @param callback
+ */
+export const createObject = async (requestUser: any, objectTypeName: string, parameters: any, callback: Callback) => {
+
 };

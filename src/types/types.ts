@@ -58,7 +58,12 @@ export type DeleteCheckRequest = {
   universeState: UniverseState
 }
 
-
+export class WriteDeniedException extends Error {
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, WriteDeniedException.prototype);
+  }
+}
 /*
  * TODO: Add a state for model creation? I don't think we really need it right now
  */
