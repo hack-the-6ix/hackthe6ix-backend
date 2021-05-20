@@ -243,11 +243,7 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
         } else {
           // Top level field
 
-          /**
-           * TODO: Pass in the existing value in here too.
-           */
-
-          if (!evaluateChecker(fieldMetadata.writeCheck, {...request, fieldValue: })) {
+          if (!evaluateChecker(fieldMetadata.writeCheck, {...request, fieldValue: changes[k] })) {
             // Validation failed for this field
             throw new WriteDeniedException(`Write check failed at field: ${ JSON.stringify( fieldMetadata ) } with policy ${ fieldMetadata.writeCheck }`);
           }
@@ -301,6 +297,7 @@ export const editObject = async (requestUser: any, objectTypeName: string, filte
           requestUser: requestUser,
           targetObject: result,
           universeState: await fetchUniverseState(),
+          fieldValue: undefined
         })
     ));
 
