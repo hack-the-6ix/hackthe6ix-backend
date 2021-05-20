@@ -1,7 +1,14 @@
 import userFields from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
-import { Callback, ReadCheckRequest, UniverseState, WriteCheckRequest, WriteDeniedException } from '../types/types';
+import {
+  Callback,
+  DeleteCheckRequest, DeleteDeniedException,
+  ReadCheckRequest,
+  UniverseState,
+  WriteCheckRequest,
+  WriteDeniedException,
+} from '../types/types';
 
 const models = {
   user: {
@@ -331,6 +338,20 @@ export const editObject = async (requestUser: any, objectTypeName: string, filte
   }
 };
 
+
+const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest) => {
+  if (!rawFields) {
+    throw Error('Field is not truthy!');
+  }
+
+  // For delete operations, we only check the top level
+  if (!evaluateChecker(rawFields.deleteCheck, request)) {
+    throw new DeleteDeniedException(`Write check failed with policy ${ rawFields.deleteCheck }`);
+  }
+
+  return true;
+};
+
 /**
  * Fetch an object with mongo query
  *
@@ -343,7 +364,57 @@ export const editObject = async (requestUser: any, objectTypeName: string, filte
  * @param callback
  */
 export const deleteObject = async (requestUser: any, objectTypeName: string, filter: any, callback: Callback) => {
+  // Since this function can handle any model type, we must fetch the mongoose schema first
+  const objectModel: any = (models as any)[objectTypeName];
 
+  if (objectModel === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid Object Type',
+    });
+  }
+
+  try {
+    const amendedIDs: string[] = [];
+
+    // Validate the proposed amendments
+    const results = await objectModel.mongoose.find(filter);
+
+    await Promise.all(results.map(async (result: any) =>
+      validateObjectDelete(objectModel.rawFields, {
+        requestUser: requestUser,
+        targetObject: result,
+        universeState: await fetchUniverseState()
+      })
+    ));
+
+    // Keep track of IDs that were affected
+    for (const o of Object.keys(results)) {
+      amendedIDs.push(results[o]._id);
+    }
+
+    // Changes accepted and are made
+    await objectModel.mongoose.deleteMany(
+      filter
+    );
+
+    return callback(null, amendedIDs);
+
+  } catch (e) {
+    if (e instanceof DeleteDeniedException) {
+      return callback({
+        code: 401,
+        message: 'Delete check violation!',
+        stacktrace: e.toString(),
+      });
+    } else {
+      return callback({
+        code: 500,
+        message: 'An error occurred',
+        stacktrace: e.toString(),
+      });
+    }
+  }
 };
 
 /**

@@ -491,6 +491,7 @@ export default {
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
   writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetObject),
+  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
   readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetObject),
 
   // Root FIELDS

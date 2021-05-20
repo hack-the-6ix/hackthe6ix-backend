@@ -64,6 +64,13 @@ export class WriteDeniedException extends Error {
     Object.setPrototypeOf(this, WriteDeniedException.prototype);
   }
 }
+
+export class DeleteDeniedException extends Error {
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, DeleteDeniedException.prototype);
+  }
+}
 /*
  * TODO: Add a state for model creation? I don't think we really need it right now
  */
