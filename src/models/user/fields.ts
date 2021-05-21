@@ -32,7 +32,6 @@ const hackerApplication = {
     /* About You */
     emailConsent: {
       type: Boolean,
-      required: false,
       caption: 'Email consent',
 
       writeCheck: true,
@@ -41,7 +40,6 @@ const hackerApplication = {
 
     gender: {
       type: String,
-      required: true,
       caption: 'Gender',
       inTextSearch: true,
 
@@ -51,7 +49,6 @@ const hackerApplication = {
 
     pronouns: {
       type: String,
-      required: false,
       caption: 'Pronouns',
       inTextSearch: true,
 
@@ -64,7 +61,6 @@ const hackerApplication = {
      */
     ethnicity: {
       type: String,
-      required: true,
       caption: 'Ethnicity',
       inTextSearch: true,
 
@@ -77,7 +73,6 @@ const hackerApplication = {
      */
     timezone: {
       type: String,
-      required: true,
       caption: 'Timezone',
       inTextSearch: true,
 
@@ -87,7 +82,6 @@ const hackerApplication = {
 
     wantSwag: {
       type: Boolean,
-      required: false,
       caption: 'I live in Canada and want to receive HT6 swag',
     },
 
@@ -95,7 +89,6 @@ const hackerApplication = {
 
     addressLine1: {
       type: String,
-      required: false,
       caption: 'Address Line 1',
       inTextSearch: true,
 
@@ -105,7 +98,6 @@ const hackerApplication = {
 
     addressLine2: {
       type: String,
-      required: false,
       caption: 'Address Line 2',
       inTextSearch: true,
 
@@ -115,7 +107,6 @@ const hackerApplication = {
 
     city: {
       type: String,
-      required: false,
       caption: 'City',
       inTextSearch: true,
 
@@ -128,7 +119,6 @@ const hackerApplication = {
      */
     province: {
       type: String,
-      required: false,
       caption: 'Province',
       inTextSearch: true,
 
@@ -141,7 +131,6 @@ const hackerApplication = {
      */
     postalCode: {
       type: String,
-      required: false,
       caption: 'Postal Code',
       inTextSearch: true,
 
@@ -152,7 +141,6 @@ const hackerApplication = {
     /* Your experience */
     school: {
       type: String,
-      required: true,
       caption: 'School',
       inTextSearch: true,
 
@@ -162,7 +150,6 @@ const hackerApplication = {
 
     program: {
       type: String,
-      required: true,
       caption: 'Program',
       inTextSearch: true,
 
@@ -175,7 +162,6 @@ const hackerApplication = {
      */
     yearsOfStudy: {
       type: String,
-      required: true,
       caption: 'Years of study',
       inTextSearch: true,
 
@@ -188,7 +174,6 @@ const hackerApplication = {
      */
     hackathonsAttended: {
       type: String,
-      required: true,
       caption: 'Hackathons attended',
       inTextSearch: true,
 
@@ -201,7 +186,6 @@ const hackerApplication = {
      */
     resumeLink: {
       type: String,
-      required: false,
       caption: 'Resume',
       inTextSearch: true,
 
@@ -211,7 +195,6 @@ const hackerApplication = {
 
     githubLink: {
       type: String,
-      required: false,
       caption: 'GitHub',
       inTextSearch: true,
 
@@ -221,7 +204,6 @@ const hackerApplication = {
 
     portfolioLink: {
       type: String,
-      required: false,
       caption: 'Portfolio',
       inTextSearch: true,
 
@@ -231,7 +213,6 @@ const hackerApplication = {
 
     linkedinLink: {
       type: String,
-      required: false,
       caption: 'LinkedIn',
       inTextSearch: true,
 
@@ -241,7 +222,6 @@ const hackerApplication = {
 
     projectEssay: {
       type: String,
-      required: false,
       caption: 'Proud project',
       inTextSearch: true,
 
@@ -252,7 +232,6 @@ const hackerApplication = {
     /* At HT6 */
     hasTeam: {
       type: Boolean,
-      required: false,
       caption: 'Has Team',
 
       writeCheck: true,
@@ -261,7 +240,6 @@ const hackerApplication = {
 
     teammateEmails: {
       type: [String],
-      required: false,
       caption: 'Teammate emails',
 
       writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && (() => {
@@ -280,7 +258,6 @@ const hackerApplication = {
 
     requestedWorkshops: {
       type: [String],
-      required: false,
       caption: 'Requested workshop',
 
       // Cannot select anything other than 3 workshops
@@ -290,7 +267,6 @@ const hackerApplication = {
 
     attendingEssay: {
       type: String,
-      required: true,
       caption: 'Accomplishment',
       inTextSearch: true,
 
@@ -300,7 +276,6 @@ const hackerApplication = {
 
     mlhCOC: {
       type: Boolean,
-      required: true,
       caption: 'MLH COC',
 
       writeCheck: true,
@@ -309,7 +284,6 @@ const hackerApplication = {
 
     mlhEmail: {
       type: Boolean,
-      required: true,
       caption: 'MLH COC',
 
       writeCheck: true,
@@ -318,7 +292,6 @@ const hackerApplication = {
 
     mlhData: {
       type: Boolean,
-      required: true,
       caption: 'MLH Data',
 
       writeCheck: true,
@@ -337,7 +310,7 @@ const internal = {
 
     notes: {
       type: String,
-      required: true,
+      default: "",
       caption: 'Organizer Notes',
 
       writeCheck: true,
@@ -346,7 +319,7 @@ const internal = {
 
     applicationScore: {
       type: Number,
-      required: true,
+      default: -1,
       caption: 'Application score',
 
       writeCheck: true,
@@ -355,7 +328,7 @@ const internal = {
 
     reviewer: {
       type: String,
-      required: true,
+      default: '',
       caption: 'Application Reviewer Email',
 
       writeCheck: true,
@@ -378,6 +351,7 @@ const status = {
     statusReleased: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Status Released',
 
       writeCheck: true,
@@ -387,6 +361,7 @@ const status = {
     applied: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Applied',
 
       writeCheck: true,
@@ -396,6 +371,7 @@ const status = {
     accepted: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Accepted',
 
       writeCheck: true,
@@ -407,6 +383,7 @@ const status = {
     rejected: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Rejected',
 
       writeCheck: true,
@@ -418,6 +395,7 @@ const status = {
     waitlisted: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Waitlisted',
 
       writeCheck: true,
@@ -429,6 +407,7 @@ const status = {
     confirmed: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Confirmed',
 
       writeCheck: true,
@@ -440,6 +419,7 @@ const status = {
     checkedIn: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Checked In',
 
       writeCheck: true,
@@ -461,6 +441,7 @@ const roles = {
     hacker: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Hacker',
 
       writeCheck: true,
@@ -470,6 +451,7 @@ const roles = {
     admin: {
       type: Boolean,
       required: true,
+      default: false,
       caption: 'Admin',
 
       writeCheck: true,
@@ -491,8 +473,10 @@ export default {
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
   writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetObject),
-  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
   readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetObject),
+
+  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  createCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
 
   // Root FIELDS
   FIELDS: {
@@ -503,7 +487,7 @@ export default {
       default: 0,
 
       readCheck: false,
-      writeCheck: false
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
     },
 
     samlNameID: {
@@ -513,7 +497,7 @@ export default {
       index: true,
 
       readCheck: false,
-      writeCheck: false
+      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
     },
 
     firstName: {
@@ -550,7 +534,7 @@ export default {
       type: Number,
       required: true,
       caption: 'RSVP Deadline',
-      default: () => -1,
+      default: -1,
 
       writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
       readCheck: true,
@@ -561,7 +545,7 @@ export default {
       type: Number,
       required: true,
       caption: 'Personal Application Deadline',
-      default: () => -1,
+      default: -1,
 
       writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
       readCheck: true,

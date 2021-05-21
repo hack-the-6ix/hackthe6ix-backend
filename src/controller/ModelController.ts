@@ -2,7 +2,7 @@ import userFields from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
 import {
-  Callback,
+  Callback, CreateCheckRequest, CreateDeniedException,
   DeleteCheckRequest, DeleteDeniedException,
   ReadCheckRequest,
   UniverseState,
@@ -33,7 +33,7 @@ const fetchUniverseState = async (): Promise<UniverseState> => {
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
  */
-const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any>) => {
+const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any> | CreateCheckRequest<any> | DeleteCheckRequest) => {
   try {
     return checkerFunction(request);
   } catch (e) {
@@ -237,7 +237,7 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
     throw Error('Field or object is not truthy!');
   }
 
-  // If the user cannot read fields at this level, we don't need to check any further
+  // If the user cannot write fields at this level, we don't need to check any further
   if (evaluateChecker(rawFields.writeCheck, request)) {
     for (const k of Object.keys(changes)) {
       const fieldMetadata = rawFields.FIELDS[k];
@@ -417,6 +417,25 @@ export const deleteObject = async (requestUser: any, objectTypeName: string, fil
   }
 };
 
+const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCheckRequest<any>) => {
+  if (!rawFields || !parameters) {
+    throw Error('Field or object is not truthy!');
+  }
+
+  // If the user cannot create the object, we don't need to go any further
+  if (evaluateChecker(rawFields.createCheck, request)) {
+
+    // Call the edit checker to validate the fields
+    validateObjectEdit(rawFields, parameters, {
+      ...request,
+      targetObject: {} // The object doesn't exist yet, so we cannot rely on any validation metrics that rely on existing values
+    });
+
+  } else {
+    throw new CreateDeniedException(`Create check failed with policy ${ rawFields.createCheck }`);
+  }
+};
+
 /**
  * Fetch an object with mongo query
  *
@@ -429,5 +448,42 @@ export const deleteObject = async (requestUser: any, objectTypeName: string, fil
  * @param callback
  */
 export const createObject = async (requestUser: any, objectTypeName: string, parameters: any, callback: Callback) => {
+  // Since this function can handle any model type, we must fetch the mongoose schema first
+  const objectModel: any = (models as any)[objectTypeName];
 
+  if (objectModel === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid Object Type',
+    });
+  }
+
+  try {
+
+    // Validate the proposed object fields
+    validateObjectCreate(objectModel.rawFields, parameters, {
+      requestUser: requestUser,
+      universeState: await fetchUniverseState(),
+      fieldValue: undefined
+    });
+
+    const newObject = await objectModel.mongoose.create(parameters);
+
+    return callback(null, newObject._id);
+
+  } catch (e) {
+    if (e instanceof WriteDeniedException) {
+      return callback({
+        code: 401,
+        message: 'Write check violation!',
+        stacktrace: e.toString(),
+      });
+    } else {
+      return callback({
+        code: 500,
+        message: 'An error occurred',
+        stacktrace: e.toString(),
+      });
+    }
+  }
 };

@@ -33,10 +33,13 @@ governed through a system of tester functions embedded in the models.
 #### Schema Structure
 ```typescript
 {
-  // Rule here says that only organizers can read, but anyone is allowed to write
+  // Rule here says that only organizers can read, delete, and create, but anyone is allowed to write
   readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.roles.organizer,
+  writeCheck: true,
+  
+  // NOTE: These checks are ONLY performed on the top level
   deleteCheck: (request: DeleteCheckRequest) => request.requestUser.jwt.roles.organizer,
-  writeCheck: true
+  createCheck: (request: CreateCheckRequest) => request.requestUser.jwt.roles.organizer,
   
   fields: {
     field1: {
@@ -55,8 +58,10 @@ governed through a system of tester functions embedded in the models.
 On each nested level of the schema, `readCheck` and `writeCheck` rules should be specified. The fields
 for that level should be in a map under the key `fields`. The controller will be expecting this structure for all read/write operations.
 
-On `read`, `write`, and `delete` operations, `readCheck`, `writeCheck`, and `deleteCheck` are called with a `ModelRequest` object respectively.
+On `read`, `write`, `create`, and `delete` operations, `readCheck`, `writeCheck`, `createCheck`, and `deleteCheck` are called with a `ModelRequest` object respectively.
 To be safe, the return value is presumed to be `false` unless explicitly stated otherwise.
+
+**createCheck and deleteCheck are ONLY checked on the top level!**
 
 The request object passed into the tester function is defined in `src/types/types.ts` and generally contains the user objects of the
 requester and target user. For write operations, the new value for the field is also provided.
@@ -88,7 +93,3 @@ dependent on the type of the field.
   }
 }
 ```
-
-#### Query Interceptors
-
-We do not want to let any user run arbitrary queries against our database. 

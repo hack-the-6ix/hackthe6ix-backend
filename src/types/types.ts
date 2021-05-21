@@ -58,6 +58,22 @@ export type DeleteCheckRequest = {
   universeState: UniverseState
 }
 
+/**
+ * When creating a model, this object is passed onto the verifier
+ */
+export type CreateCheckRequest<T> = {
+  fieldValue: T,      // Field we're updating
+  requestUser: any,
+  universeState: UniverseState
+}
+
+export class CreateDeniedException extends Error {
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, CreateDeniedException.prototype);
+  }
+}
+
 export class WriteDeniedException extends Error {
   constructor(m: string) {
     super(m);

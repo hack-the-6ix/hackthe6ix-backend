@@ -19,7 +19,7 @@ dotenv.config();
       _id: new ObjectID("5f081f878c60690dd9b9fd57"),
       jwt: {
         roles: {
-          //organizer: true
+          organizer: true
         }
       }
     },

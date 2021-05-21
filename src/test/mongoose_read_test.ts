@@ -25,8 +25,7 @@ dotenv.config();
     },
     'user', {
       page: 1,
-      size: 10,
-      text: "tu"
+      size: 1
     }, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
       console.log(error, data);
