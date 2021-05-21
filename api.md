@@ -2,6 +2,8 @@
 
 Unless otherwise stated, request fields are (probably) optional.
 
+Also, pretend that the JSON is valid :) I left out some double quotes to make it a bit more cleaner.
+
 ## API - General Object Operations
 
 #### POST - Get Object (Admin)
@@ -10,7 +12,7 @@ Get the result of a search query for any object type. Queries are checked agains
 
 ##### Input Specification
 The API requires the object type passed in as a query parameter. Additionally, a search query must be specified in the body of the request.
-```json
+```
 {
   page: 1, // Required - 1 indexed page number to fetch
   size: 20, // Required - Number of objects per page
@@ -25,7 +27,11 @@ The API requires the object type passed in as a query parameter. Additionally, a
     "$and": [ // All these expressions need to be true
       { lastName: "foo" },
       { firstName: "baz", bop: "beep" },
-    ]
+    ],
+    beep: "boop", // Statements like this on the top level also need to be true
+    internal: {
+      notes: "trash" // Nested field
+    }
   }
 }
 ```
@@ -34,7 +40,7 @@ The API requires the object type passed in as a query parameter. Additionally, a
 The API will return an array of maps corresponding to the queried object. 
 Note that the number of items returned may not match the limit specified in the query if some objects were
 filtered out as part of field sanitation.
-```json
+```
 {
   status: 200,
   data: [
