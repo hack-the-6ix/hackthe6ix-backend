@@ -1,5 +1,7 @@
 # Hack the 6ix Backend
 
+View [API Documentation](api.md) for a detailed breakdown of the API.
+
 ## Setup
 
 We are using Mailtrain (https://github.com/hack-the-6ix/mailtrain) to handle mailing lists and 

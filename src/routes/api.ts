@@ -5,7 +5,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import { getObject } from '../controller/ModelController';
+import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
 import { isAdmin } from '../services/auth';
 
 const apiRouter = express.Router();
@@ -15,15 +15,12 @@ apiRouter.use(express.json());
 /**
  * (Admin)
  *
- * Fetch an object given its ID
+ * Get the result of a search query for any object type.
  */
-apiRouter.get('/getOne/:objectType/:objectID', isAdmin, (req: Request, res: Response) => {
-
+apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
   getObject(null, //req.executor, TODO: Inject the executor user object + permissions here
     req.params.objectType,
-    {
-      _id: req.params.objectID,
-    },
+    req.body,
     null, // TODO: call logger here
   );
 });
@@ -31,15 +28,42 @@ apiRouter.get('/getOne/:objectType/:objectID', isAdmin, (req: Request, res: Resp
 /**
  * (Admin)
  *
- * Get the result of a search query for any object type.
+ * Edit object
  */
-apiRouter.get('/getMany/:objectType', isAdmin,(req: Request, res: Response) => {
-
-  getObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
+  editObject(null, //req.executor, TODO: Inject the executor user object + permissions here
     req.params.objectType,
-    req.query,
+    req.body?.filter,
+    req.body?.changes,
     null, // TODO: call logger here
   );
 });
+
+/**
+ * (Admin)
+ *
+ * Delete objects based on a query
+ */
+apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
+  deleteObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+    req.params.objectType,
+    req.body,
+    null, // TODO: call logger here
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Create object
+ */
+apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
+  createObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+    req.params.objectType,
+    req.body,
+    null, // TODO: call logger here
+  );
+});
+
 
 export default apiRouter;

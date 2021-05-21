@@ -87,6 +87,3 @@ export class DeleteDeniedException extends Error {
     Object.setPrototypeOf(this, DeleteDeniedException.prototype);
   }
 }
-/*
- * TODO: Add a state for model creation? I don't think we really need it right now
- */

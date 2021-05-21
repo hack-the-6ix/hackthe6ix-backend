@@ -2,8 +2,11 @@ import userFields from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
 import {
-  Callback, CreateCheckRequest, CreateDeniedException,
-  DeleteCheckRequest, DeleteDeniedException,
+  Callback,
+  CreateCheckRequest,
+  CreateDeniedException,
+  DeleteCheckRequest,
+  DeleteDeniedException,
   ReadCheckRequest,
   UniverseState,
   WriteCheckRequest,
@@ -110,10 +113,20 @@ export const escapeStringRegexp = (x: string) => {
  *
  * @param requestUser
  * @param objectTypeName
- * @param query - { page: number, size: number, sortField?: string, sortCriteria?: string, text?: string, filter?: any }
+ * @param query - { page: number, size: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
  * @param callback
  */
-export const getObject = async (requestUser: any, objectTypeName: string, query: any, callback: Callback) => {
+export const getObject = async (
+  requestUser: any,
+  objectTypeName: string,
+  query: {
+    page: string,
+    size: string,
+    sortField?: string,
+    sortCriteria?: 'asc' | 'desc',
+    text?: string,
+    filter?: any
+  }, callback: Callback) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
@@ -130,26 +143,26 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
     if (!query) {
       return callback({
         code: 400,
-        message: 'Invalid request! Must specify page and size!',
+        message: 'Invalid request! Must specify page and size in query!',
       });
     }
 
-    if (!query.page || query.page <= 0) {
+    const page = query.page ? parseInt(query.page) : -1;
+    const size = query.size ? parseInt(query.size) : -1;
+
+    if (page <= 0) {
       return callback({
         code: 400,
         message: 'Invalid request! Page must be >= 1!',
       });
     }
 
-    if (!query.size || query.size <= 0) {
+    if (size <= 0) {
       return callback({
         code: 400,
         message: 'Invalid request! Size must be >= 1!',
       });
     }
-
-    const page = parseInt(query.page);
-    const size = parseInt(query.size);
 
     const filters: any = query.filter || {};
     const and: { [k: string]: RegExp }[] = [];
@@ -157,6 +170,14 @@ export const getObject = async (requestUser: any, objectTypeName: string, query:
 
     // Sort
     const sort: any = {};
+
+    if (query.sortCriteria && !['asc', 'desc'].includes(query.sortCriteria)) {
+      return callback({
+        code: 400,
+        message: 'Invalid sort criteria! Must be asc or desc!!',
+      });
+    }
+
     if (query.sortField && query.sortCriteria) {
       sort[query.sortField] = query.sortCriteria;
     }
@@ -250,22 +271,22 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
         } else {
           // Top level field
 
-          if (!evaluateChecker(fieldMetadata.writeCheck, {...request, fieldValue: changes[k] })) {
+          if (!evaluateChecker(fieldMetadata.writeCheck, { ...request, fieldValue: changes[k] })) {
             // Validation failed for this field
-            throw new WriteDeniedException(`Write check failed at field: ${ JSON.stringify( fieldMetadata ) } with policy ${ fieldMetadata.writeCheck }`);
+            throw new WriteDeniedException(`Write check failed at field: ${JSON.stringify(fieldMetadata)} with policy ${fieldMetadata.writeCheck}`);
           }
 
         }
       } else {
         // Invalid field
-        throw new WriteDeniedException(`Invalid field: ${ k }`);
+        throw new WriteDeniedException(`Invalid field: ${k}`);
       }
     }
 
     return true;
   } else {
     // Validation Failed
-    throw new WriteDeniedException(`Write check failed at level: ${ JSON.stringify( changes ) } with policy ${ rawFields.writeCheck }`);
+    throw new WriteDeniedException(`Write check failed at level: ${JSON.stringify(changes)} with policy ${rawFields.writeCheck}`);
   }
 };
 
@@ -293,6 +314,20 @@ export const editObject = async (requestUser: any, objectTypeName: string, filte
     });
   }
 
+  if (filter === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid filter',
+    });
+  }
+
+  if (changes === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid changes',
+    });
+  }
+
   try {
     const amendedIDs: string[] = [];
 
@@ -300,12 +335,12 @@ export const editObject = async (requestUser: any, objectTypeName: string, filte
     const results = await objectModel.mongoose.find(filter);
 
     await Promise.all(results.map(async (result: any) =>
-        validateObjectEdit(objectModel.rawFields, changes, {
-          requestUser: requestUser,
-          targetObject: result,
-          universeState: await fetchUniverseState(),
-          fieldValue: undefined
-        })
+      validateObjectEdit(objectModel.rawFields, changes, {
+        requestUser: requestUser,
+        targetObject: result,
+        universeState: await fetchUniverseState(),
+        fieldValue: undefined,
+      }),
     ));
 
     // Keep track of IDs that were affected
@@ -346,7 +381,7 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest) => {
 
   // For delete operations, we only check the top level
   if (!evaluateChecker(rawFields.deleteCheck, request)) {
-    throw new DeleteDeniedException(`Write check failed with policy ${ rawFields.deleteCheck }`);
+    throw new DeleteDeniedException(`Write check failed with policy ${rawFields.deleteCheck}`);
   }
 
   return true;
@@ -374,6 +409,13 @@ export const deleteObject = async (requestUser: any, objectTypeName: string, fil
     });
   }
 
+  if (filter === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid filter',
+    });
+  }
+
   try {
     const amendedIDs: string[] = [];
 
@@ -384,8 +426,8 @@ export const deleteObject = async (requestUser: any, objectTypeName: string, fil
       validateObjectDelete(objectModel.rawFields, {
         requestUser: requestUser,
         targetObject: result,
-        universeState: await fetchUniverseState()
-      })
+        universeState: await fetchUniverseState(),
+      }),
     ));
 
     // Keep track of IDs that were affected
@@ -395,7 +437,7 @@ export const deleteObject = async (requestUser: any, objectTypeName: string, fil
 
     // Changes accepted and are made
     await objectModel.mongoose.deleteMany(
-      filter
+      filter,
     );
 
     return callback(null, amendedIDs);
@@ -428,11 +470,11 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
     // Call the edit checker to validate the fields
     validateObjectEdit(rawFields, parameters, {
       ...request,
-      targetObject: {} // The object doesn't exist yet, so we cannot rely on any validation metrics that rely on existing values
+      targetObject: {}, // The object doesn't exist yet, so we cannot rely on any validation metrics that rely on existing values
     });
 
   } else {
-    throw new CreateDeniedException(`Create check failed with policy ${ rawFields.createCheck }`);
+    throw new CreateDeniedException(`Create check failed with policy ${rawFields.createCheck}`);
   }
 };
 
@@ -458,13 +500,20 @@ export const createObject = async (requestUser: any, objectTypeName: string, par
     });
   }
 
+  if (parameters === undefined) {
+    return callback({
+      code: 400,
+      message: 'Invalid parameters',
+    });
+  }
+
   try {
 
     // Validate the proposed object fields
     validateObjectCreate(objectModel.rawFields, parameters, {
       requestUser: requestUser,
       universeState: await fetchUniverseState(),
-      fieldValue: undefined
+      fieldValue: undefined,
     });
 
     const newObject = await objectModel.mongoose.create(parameters);
