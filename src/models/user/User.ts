@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import fields from './fields';
+import {fields, IUser} from './fields';
 
 const schema = new mongoose.Schema(fields);
 
-module.exports = mongoose.model('User', schema);
+export default mongoose.model<IUser>('User', schema);

@@ -1,3 +1,5 @@
+import * as mongoose from "mongoose";
+
 const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == targetUser._id ||
                                                            requestUser.jwt.roles.admin;
 
@@ -9,7 +11,7 @@ const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == ta
  *       into that object too so that we can easily access permissions.
  */
 
-export default {
+export const fields = {
   firstName: {
     type: String,
     required: true,
@@ -31,4 +33,24 @@ export default {
     onWrite: (value: string, requestUser: any, targetUser: any) => value.length <= 50,
     caption: 'Email',
   },
+
+  lastLogout: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+
+  samlNameID: {
+    type: String,
+    required: true,
+    index: true
+  }
 };
+
+export interface IUser extends mongoose.Document {
+  firstName: string,
+  lastName: string,
+  email: string,
+  lastLogout: number,
+  samlNameID: string
+}
