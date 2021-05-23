@@ -1,7 +1,7 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { deleteObject, editObject, getObject } from '../controller/ModelController';
+import { deleteObject } from '../controller/ModelController';
 
 dotenv.config();
 
@@ -13,20 +13,18 @@ dotenv.config();
     useCreateIndex: true,
   });
 
-  console.log("Connected")
+  console.log('Connected');
 
   deleteObject({
-      _id: new ObjectID("5f081f878c60690dd9b9fd57"),
+      _id: new ObjectID('5f081f878c60690dd9b9fd57'),
       jwt: {
         roles: {
-          organizer: true
-        }
-      }
+          organizer: true,
+        },
+      },
     },
     'user',
-    {
-
-    },
+    {},
     (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
       console.log(error, data);
