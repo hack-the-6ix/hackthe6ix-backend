@@ -1,4 +1,5 @@
 import Request from 'express';
+import { IUser } from '../models/user/fields';
 
 /**
  * message - user facing message (do not include confidential information)
@@ -25,7 +26,7 @@ export type UniverseState = {
  */
 export type WriteCheckRequest<T> = {
   fieldValue: T,      // Field we're updating
-  requestUser: any,   // User producing the request
+  requestUser: IRequestUser,   // User producing the request
   targetObject: any,   // State of the object we're modifying (the entire raw object)
   universeState: UniverseState  // External variables that may be relevant to us
 }
@@ -39,7 +40,7 @@ export type WriteInterceptRequest<T> = WriteCheckRequest<T>;
  * When reading a model, this object is passed onto the verifier
  */
 export type ReadCheckRequest = {
-  requestUser: any,
+  requestUser: IRequestUser,
   targetObject: any,
   universeState: UniverseState
 }
@@ -53,7 +54,7 @@ export type ReadInterceptRequest<T> = WriteCheckRequest<T>;
  * When deleting a model, this object is passed onto the verifier
  */
 export type DeleteCheckRequest = {
-  requestUser: any,
+  requestUser: IRequestUser,
   targetObject: any,
   universeState: UniverseState
 }
@@ -63,7 +64,7 @@ export type DeleteCheckRequest = {
  */
 export type CreateCheckRequest<T> = {
   fieldValue: T,      // Field we're updating
-  requestUser: any,
+  requestUser: IRequestUser,
   universeState: UniverseState
 }
 
@@ -86,4 +87,8 @@ export class DeleteDeniedException extends Error {
     super(m);
     Object.setPrototypeOf(this, DeleteDeniedException.prototype);
   }
+}
+
+export interface IRequestUser extends IUser {
+  jwt: any
 }

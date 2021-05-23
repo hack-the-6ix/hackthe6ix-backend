@@ -1,11 +1,11 @@
 /* Permissions */
 
 // Admins can do anything and bypass validation
-import { WriteCheckRequest } from '../../types/types';
+import { IRequestUser, WriteCheckRequest } from '../../types/types';
 
-export const isAdmin = (requestUser: any) => requestUser.jwt.roles.organizer;
+export const isAdmin = (requestUser: IRequestUser) => requestUser.jwt.roles.organizer;
 
-export const isUserOrAdmin = (requestUser: any, targetUser: any) => isAdmin(requestUser) || (requestUser._id && requestUser._id.equals(targetUser._id));
+export const isUserOrAdmin = (requestUser: IRequestUser, targetUser: any) => isAdmin(requestUser) || (requestUser._id && requestUser._id.equals(targetUser._id));
 
 /* Value properties */
 export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request.fieldValue && request?.fieldValue.length <= maxLength;
