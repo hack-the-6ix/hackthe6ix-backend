@@ -1,5 +1,4 @@
-import express, {Router} from "express";
-import bodyParser from "body-parser";
+import express, {Request, Response, Router} from "express";
 
 import User from '../models/user/User';
 
@@ -7,22 +6,18 @@ import * as permissions from '../services/permissions';
 import {fetchSAMLBundle, fetchSP} from "../services/multisaml";
 
 const router : Router = express.Router();
-const parseURLEncoded = bodyParser.urlencoded({
-    extended: true
-})
-
 
 // Endpoint to retrieve metadata
-router.get("/:provider/metadata.xml", async function(req, res) {
+router.get("/:provider/metadata.xml", async (req:Request, res:Response) => {
     const sp = await fetchSP(req.params.provider.toLowerCase());
     res.type('application/xml');
     res.send(sp.create_metadata());
 });
 
 // Starting point for login
-router.get("/:provider/login", async function(req, res) {
+router.get("/:provider/login", async (req:Request, res:Response) => {
     const {sp, idp} = await fetchSAMLBundle(req.params.provider.toLowerCase());
-    sp.create_login_request_url(idp, {}, function(err, login_url, request_id) {
+    sp.create_login_request_url(idp, {}, (err:Error | null, login_url:string) => {
         if (err != null)
             return res.send(500);
 
@@ -33,10 +28,10 @@ router.get("/:provider/login", async function(req, res) {
 });
 
 // Assert endpoint for when login completes
-router.post("/:provider/acs", async function(req, res) {
+router.post("/:provider/acs", async (req:Request, res:Response) => {
     const options = {request_body: req.body};
     const {sp, idp} = await fetchSAMLBundle(req.params.provider.toLowerCase());
-    sp.post_assert(idp, options, async function(err, saml_response) {
+    sp.post_assert(idp, options, async (err, saml_response) => {
         if (err != null){
             console.log(err);
             return res.send(500);
@@ -71,7 +66,7 @@ router.post("/:provider/acs", async function(req, res) {
 
             sp.create_logout_response_url(idp, {
                 in_response_to: saml_response.response_header.id
-            }, function(error, response_url) {
+            }, (error:Error | null, response_url:string) => {
                 return res.redirect(response_url);
             })
 
@@ -126,7 +121,7 @@ router.post("/:provider/acs", async function(req, res) {
 });
 
 // Starting point for logout
-router.post("/:provider/logout", async function(req, res) {
+router.post("/:provider/logout", async (req:Request, res:Response) => {
     if(!req.body.token){
         return res.status(400).json({
             status: 400,
@@ -141,7 +136,7 @@ router.post("/:provider/logout", async function(req, res) {
     sp.create_logout_request_url(idp, {
         name_id: tokenInfo.samlNameID,
         session_index: tokenInfo.samlSessionIndex
-    }, function(err, logout_url) {
+    }, (err:Error | null, logout_url:string) => {
         if (err != null)
             return res.send(500);
 
