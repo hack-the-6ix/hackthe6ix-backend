@@ -1,4 +1,4 @@
-import userFields from '../models/user/fields';
+import { fields as userFields } from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
 import {
