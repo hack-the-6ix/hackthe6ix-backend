@@ -1,17 +1,16 @@
 import bodyParser from 'body-parser';
 import 'dotenv/config';
-import express, {ErrorRequestHandler} from 'express';
-import "express-async-errors";
-import actionRouter from './routes/action';
+import express, { ErrorRequestHandler } from 'express';
+import 'express-async-errors';
 import mongoSanitize from 'express-mongo-sanitize';
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+// Bootstrap scripts
+import './bootstrap/settings';
+import actionRouter from './routes/action';
 
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
-
-// Bootstrap scripts
-import './bootstrap/settings';
 
 const database = process.env.DATABASE || 'mongodb://localhost:27017/ht6backend';
 
@@ -61,19 +60,19 @@ app.use('/auth', authRouter);
 mongoose.connect(database, {
   useNewUrlParser: true,
   useFindAndModify: false,
-  useCreateIndex: true
+  useCreateIndex: true,
 }).then(() => {
   app.listen(process.env.PORT, () => {
-    console.log(`Sewvew wunnying on powt owo ${process.env.PORT}`);
+    console.log(`Server running on port ${process.env.PORT}`);
   });
 }).catch((err) => {
   console.log(err);
-  console.log("Error connecting to mongodb. Exiting.");
+  console.log('Error connecting to mongodb. Exiting.');
   process.exit(1);
-})
+});
 
-app.use(function(err, req, res, next) {
-  return res.status(err.code ?? 500).json({
-    error: err.message
-  })
-} as ErrorRequestHandler)
+app.use(function(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
+  return res.status(err.code || 500).json({
+    error: err.message,
+  });
+} as ErrorRequestHandler);

@@ -1,9 +1,7 @@
+import mongoose from 'mongoose';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { maskStatus } from './interceptors';
 import { inEnum, isAdmin, isUserOrAdmin, maxLength, minLength, multiInEnum } from './validator';
-
-const userOrAdmin = (requestUser: any, targetUser: any) => requestUser._id == targetUser._id ||
-  requestUser.jwt.roles.admin;
 
 /**
  * TODO: The requestUser.jwt.roles.isAdmin; above is temporary. Change it to match whatever we end up
@@ -310,7 +308,7 @@ const internal = {
 
     notes: {
       type: String,
-      default: "",
+      default: '',
       caption: 'Organizer Notes',
 
       writeCheck: true,
@@ -455,12 +453,12 @@ const roles = {
       caption: 'Admin',
 
       writeCheck: true,
-      readCheck: true
-    }
+      readCheck: true,
+    },
   },
 };
 
-export default {
+export const fields = {
 
   /**
    * NOTE: READ/WRITE RULES ARE TESTED OUTSIDE IN.
