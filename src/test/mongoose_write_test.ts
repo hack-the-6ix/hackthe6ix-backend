@@ -2,12 +2,13 @@ import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { editObject, getObject } from '../controller/ModelController';
+import { IRequestUser } from '../types/types';
 
 dotenv.config();
 
 (async () => {
 
-  await mongoose.connect('mongodb://localhost:27017/ht6', {
+  await mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/ht6backend', {
     useNewUrlParser: true,
     useFindAndModify: false,
     useCreateIndex: true,
@@ -22,7 +23,7 @@ dotenv.config();
           organizer: true
         }
       }
-    },
+    } as IRequestUser,
     'user',
     {
     }, {
