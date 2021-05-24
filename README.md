@@ -13,6 +13,9 @@ admin dashboard, or somewhere else; it hasn't been decided yet).
 You will also need to configure SAML authentication. Copy `settings.json.bak` to `settings.json` in `src/bootstrap/data` and configure the settings as desired.
 For certificates, you must encode the PEM certificate (with headers) to base64. Note that you can add as many providers as desired, the given ones are there as examples.
 
+
+Note: You must clear the settings collection in the database for the SAML settings to be updated from the bootstrap config.
+
 ### Development
 Note: This is WIP and will definitely need to be updated later on
 ```
