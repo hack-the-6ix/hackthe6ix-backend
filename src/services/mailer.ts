@@ -129,7 +129,6 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
     }
 
 
-
     return callback(null, { message: 'Success', added: toBeAdded, deleted: toBeDeleted });
   } catch (e) {
     return callback({ code: 500, message: 'Unable to sync mailing list', stacktrace: e });

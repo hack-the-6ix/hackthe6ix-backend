@@ -228,32 +228,6 @@ const hackerApplication = {
     },
 
     /* At HT6 */
-    hasTeam: {
-      type: Boolean,
-      caption: 'Has Team',
-
-      writeCheck: true,
-      readCheck: true,
-    },
-
-    teammateEmails: {
-      type: [String],
-      caption: 'Teammate emails',
-
-      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && (() => {
-
-        // Verify all emails are less than 64 chars in length
-        for (const x of request.fieldValue || []) {
-          if (x.length > 64) {
-            return false;
-          }
-        }
-
-        return true;
-      }),
-      readCheck: true,
-    },
-
     requestedWorkshops: {
       type: [String],
       caption: 'Requested workshop',
@@ -557,9 +531,57 @@ export const fields = {
 };
 
 export interface IUser extends mongoose.Document {
+  lastLogout: number,
+  samlNameID: string,
   firstName: string,
   lastName: string,
   email: string,
-  lastLogout: number,
-  samlNameID: string
+  rsvpDeadline: number,
+  personalApplicationDeadline: number,
+  roles: {
+    hacker: boolean,
+    admin: boolean
+  },
+  status: {
+    statusReleased: boolean,
+    applied: boolean,
+    accepted: boolean,
+    rejected: boolean,
+    waitlisted: boolean,
+    confirmed: boolean,
+    checkedIn: boolean,
+  },
+  hackerApplication: {
+    emailConsent: boolean,
+    gender: string,
+    pronouns: string,
+    ethnicity: string,
+    timezone: string
+    wantSwag: boolean,
+    addressLine1: string,
+    addressLine2: string,
+    city: string,
+    province: string,
+    postalCode: string,
+    school: string,
+    program: string,
+    yearsOfStudy: string,
+    hackathonsAttended: string,
+    resumeLink: string,
+    githubLink: string,
+    portfolioLink: string,
+    linkedinLink: string,
+    projectEssay: string,
+    requestedWorkshops: string[],
+    attendingEssay: string,
+    mlhCOC: boolean,
+    mlhEmail: boolean,
+    mlhData: boolean
+
+  },
+  internal: {
+    notes: string,
+    applicationScore: number,
+    reviewer: string
+  }
 }
