@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { maskStatus } from './interceptors';
-import { inEnum, isAdmin, isUserOrAdmin, maxLength, minLength, multiInEnum } from './validator';
+import { inEnum, isAdmin, isUserOrAdmin, maxLength, minLength, multiInEnum } from '../validator';
 
 /**
  * TODO: The requestUser.jwt.roles.isAdmin; above is temporary. Change it to match whatever we end up

@@ -1,5 +1,7 @@
 import { fields as userFields } from '../models/user/fields';
+import { fields as settingsFields } from '../models/settings/fields';
 import User from '../models/user/User';
+import Settings from '../models/settings/Settings';
 import { getInTextSearchableFields } from '../models/util';
 import {
   Callback,
@@ -19,19 +21,22 @@ const models = {
     mongoose: User,
     rawFields: userFields,
   },
+  settings: {
+    mongoose: Settings,
+    rawFields: settingsFields
+  }
 };
 
 /**
  * Fetch metadata about the universe first that might be necessary for making validation decisions
  * e.g. whether applications are currently open, etc.
+ *
+ * TODO: Update this with actual state
  */
 const fetchUniverseState = async (): Promise<UniverseState> => {
-
   return {
     globalApplicationOpen: true,
   };
-
-
 };
 
 /**

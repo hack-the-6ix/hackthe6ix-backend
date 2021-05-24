@@ -1,7 +1,7 @@
 /* Permissions */
 
 // Admins can do anything and bypass validation
-import { IRequestUser, WriteCheckRequest } from '../../types/types';
+import { IRequestUser, WriteCheckRequest } from '../types/types';
 
 export const isAdmin = (requestUser: IRequestUser) => requestUser.jwt.roles.organizer;
 
