@@ -1,5 +1,8 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import Settings from '../models/settings/Settings';
-import settingsData from './data/settings.json';
+
+const settingsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'settings.json')).toString('utf8'));
 
 const settings = Settings.findOne({}).then((settings) => {
     if(!settings) {
