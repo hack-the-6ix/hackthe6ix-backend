@@ -6,4 +6,5 @@ RUN npm ci
 
 COPY . .
 EXPOSE $PORT
+RUN ls -la
 CMD ["npm", "start"]
