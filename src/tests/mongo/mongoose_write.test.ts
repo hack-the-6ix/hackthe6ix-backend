@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { editObject, getObject } from '../controller/ModelController';
-import { IRequestUser } from '../types/types';
+import { editObject, getObject } from '../../controller/ModelController';
+import { IRequestUser } from '../../types/types';
 
 dotenv.config();
 

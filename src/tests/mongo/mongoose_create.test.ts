@@ -1,9 +1,7 @@
-import { ObjectID } from 'bson';
-import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
-import { IRequestUser } from '../types/types';
-import jest from 'jest';
+import { createObject } from '../../controller/ModelController';
 
 import * as dbHandler from './db-handler';
+import { newHackerUser, organizerUser } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -21,33 +19,28 @@ afterEach(async () => await dbHandler.clearDatabase());
 afterAll(async () => await dbHandler.closeDatabase());
 
 
-describe("wtf", () => {
-
-  test("Wtf", () => {
-
-    createObject({
-        _id: new ObjectID("5f081f878c60690dd9b9fd57"),
-        jwt: {
-          roles: {
-            organizer: true
-          }
-        }
-      } as IRequestUser,
+describe('Testing checkers', () => {
+  test('No permission to create', (done: any) => {
+    createObject(
+      organizerUser,
       'user',
-      {
-        firstName: "Test",
-        lastName: "Testerson",
-        samlNameID: "wtf",
-        email: "test@test.ca",
-        roles: {
-          hacker: true,
-          admin: false
-        }
-      },
+      newHackerUser,
       (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
-
         console.log(error, data);
 
+        done();
+      });
+  });
+
+  test('Write conditions not satisfied', (done: any) => {
+    createObject(
+      organizerUser,
+      'user',
+      newHackerUser,
+      (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        console.log(error, data);
+
+        done();
       });
   });
 });

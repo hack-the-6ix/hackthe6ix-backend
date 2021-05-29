@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { deleteObject } from '../controller/ModelController';
-import { IRequestUser } from '../types/types';
+import { deleteObject } from '../../controller/ModelController';
+import { IRequestUser } from '../../types/types';
 
 dotenv.config();
 
