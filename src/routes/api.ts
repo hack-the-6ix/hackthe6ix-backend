@@ -7,6 +7,7 @@
 import express, { Request, Response } from 'express';
 import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
 import { isAdmin } from '../services/auth';
+import { logResponse } from '../services/logger';
 
 const apiRouter = express.Router();
 
@@ -21,7 +22,7 @@ apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
   getObject(req.executor,
     req.params.objectType,
     req.body,
-    null, // TODO: call logger here
+    logResponse(req, res)
   );
 });
 
@@ -33,9 +34,9 @@ apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
 apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
   editObject(req.executor,
     req.params.objectType,
-    req.body?.filter,
-    req.body?.changes,
-    null, // TODO: call logger here
+    req.body.filter,
+    req.body.changes,
+    logResponse(req, res)
   );
 });
 
@@ -48,7 +49,7 @@ apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
   deleteObject(req.executor,
     req.params.objectType,
     req.body,
-    null, // TODO: call logger here
+    logResponse(req, res)
   );
 });
 
@@ -61,7 +62,7 @@ apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
   createObject(req.executor,
     req.params.objectType,
     req.body,
-    null, // TODO: call logger here
+    logResponse(req, res)
   );
 });
 

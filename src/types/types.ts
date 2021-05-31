@@ -1,12 +1,13 @@
 import Request from 'express';
 import { IUser } from '../models/user/fields';
-import { JWT } from './jwt';
+
+export type ErrorMessage = { code: number, message: string, stacktrace?: string };
 
 /**
  * message - user facing message (do not include confidential information)
  * stacktrace - full stack trace sent to logger
  */
-export type Callback = (error: { code: number, message: string, stacktrace?: string }, data?: any) => void;
+export type Callback = (error: ErrorMessage, data?: any) => void;
 
 /**
  * We will inject the executor user's object into the request
@@ -91,5 +92,5 @@ export class DeleteDeniedException extends Error {
 }
 
 export interface IRequestUser extends IUser {
-  jwt: JWT
+  jwt: Record<string, any>
 }
