@@ -4,21 +4,22 @@
 
 import { NextFunction, Response, Request } from 'express';
 
-export const injectExecutor = (req: Request, res: Response, next: NextFunction) => {
+export const getToken = (req: Request) => {
+  let token = req['headers']['x-access-token'] || false;
 
-  next();
+  if (!token) {
+    token = req.body.token;
+  }
+
+  return token;
 };
 
-/**
- * TODO: Check if admin here
- * @param req
- * @param res
- * @param next
- */
-export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const injectExecutor = (req: Request, res: Response) => {
 
-  // TODO: Inject executor user object into the request
+};
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  injectExecutor(req, res);
 
   next();
-
 };

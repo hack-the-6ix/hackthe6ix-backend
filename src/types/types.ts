@@ -1,5 +1,6 @@
 import Request from 'express';
 import { IUser } from '../models/user/fields';
+import { JWT } from './jwt';
 
 /**
  * message - user facing message (do not include confidential information)
@@ -90,5 +91,5 @@ export class DeleteDeniedException extends Error {
 }
 
 export interface IRequestUser extends IUser {
-  jwt: any
+  jwt: JWT
 }

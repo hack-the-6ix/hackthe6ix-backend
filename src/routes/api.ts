@@ -18,7 +18,7 @@ apiRouter.use(express.json());
  * Get the result of a search query for any object type.
  */
 apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
-  getObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+  getObject(req.executor,
     req.params.objectType,
     req.body,
     null, // TODO: call logger here
@@ -31,7 +31,7 @@ apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
  * Edit object
  */
 apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
-  editObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+  editObject(req.executor,
     req.params.objectType,
     req.body?.filter,
     req.body?.changes,
@@ -45,7 +45,7 @@ apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
  * Delete objects based on a query
  */
 apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
-  deleteObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+  deleteObject(req.executor,
     req.params.objectType,
     req.body,
     null, // TODO: call logger here
@@ -58,7 +58,7 @@ apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
  * Create object
  */
 apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
-  createObject(null, //req.executor, TODO: Inject the executor user object + permissions here
+  createObject(req.executor,
     req.params.objectType,
     req.body,
     null, // TODO: call logger here
