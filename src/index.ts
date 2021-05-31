@@ -53,6 +53,8 @@ app.use(mongoSanitize());
  * - We can use this in the anonymous functions written for each field of the database
  */
 
+const port = process.env.PORT || 6972;
+
 app.use('/api', apiRouter);
 app.use('/api/action', actionRouter);
 app.use('/auth', authRouter);
@@ -62,8 +64,8 @@ mongoose.connect(database, {
   useFindAndModify: false,
   useCreateIndex: true,
 }).then(() => {
-  app.listen(process.env.PORT, () => {
-    console.log(`Server running on port ${process.env.PORT}`);
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
   });
 }).catch((err) => {
   console.log(err);

@@ -15,6 +15,10 @@ export const logResponse = (req: Request, res: Response) => (error: ErrorMessage
     // When we send out the actual error, we do NOT send the stacktrace for security
     return res.status(error.code || 500).json({ message: error.message, code: error.code });
   } else {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[${ new Date() }] ${ JSON.stringify(data) }`);
+    }
+
     return res.json(data);
   }
 };
