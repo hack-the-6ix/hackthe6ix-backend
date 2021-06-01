@@ -1,9 +1,9 @@
-import { IRequestUser } from '../../src/types/types';
+import { IUser } from '../../src/models/user/fields';
 
 declare global {
   namespace Express {
     interface Request {
-      executor?: IRequestUser
+      executor?: IUser
     }
   }
 }

@@ -1,7 +1,7 @@
-import { fields as userFields } from '../models/user/fields';
 import { fields as settingsFields } from '../models/settings/fields';
-import User from '../models/user/User';
 import Settings from '../models/settings/Settings';
+import { fields as userFields, IUser } from '../models/user/fields';
+import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
 import {
   Callback,
@@ -9,7 +9,6 @@ import {
   CreateDeniedException,
   DeleteCheckRequest,
   DeleteDeniedException,
-  IRequestUser,
   ReadCheckRequest,
   UniverseState,
   WriteCheckRequest,
@@ -23,8 +22,8 @@ const models = {
   },
   settings: {
     mongoose: Settings,
-    rawFields: settingsFields
-  }
+    rawFields: settingsFields,
+  },
 };
 
 /**
@@ -123,7 +122,7 @@ export const escapeStringRegexp = (x: string) => {
  * @param callback
  */
 export const getObject = async (
-  requestUser: IRequestUser,
+  requestUser: IUser,
   objectTypeName: string,
   query: {
     page: string,
@@ -308,7 +307,7 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  * @param changes - map of fields to update
  * @param callback
  */
-export const editObject = async (requestUser: IRequestUser, objectTypeName: string, filter: any, changes: any, callback: Callback) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, callback: Callback) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
@@ -404,7 +403,7 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest) => {
  * @param filter - filter map (same format as query selector for find())
  * @param callback
  */
-export const deleteObject = async (requestUser: IRequestUser, objectTypeName: string, filter: any, callback: Callback) => {
+export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, callback: Callback) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
 
@@ -495,7 +494,7 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
  * @param parameters - initial parameters to initialize the object
  * @param callback
  */
-export const createObject = async (requestUser: IRequestUser, objectTypeName: string, parameters: any, callback: Callback) => {
+export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, callback: Callback) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (models as any)[objectTypeName];
 

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { ErrorMessage, IRequestUser } from '../types/types';
+import { ErrorMessage } from '../types/types';
 
 export const verifyToken = (token: string): Record<string, any> => {
   return jwt.verify(token, process.env.JWT_SECRET, {
@@ -19,14 +20,11 @@ export const createJwt = (data: Record<string, unknown>): string => {
   });
 };
 
-export const authenticate = async (token: string): Promise<IRequestUser> | null => {
+export const authenticate = async (token: string): Promise<IUser> | null => {
   const tokenData = verifyToken(token);
-  const userInfo = {
-    ...await User.findOne({
-      samlNameID: tokenData.samlNameID,
-    }),
-    jwt: tokenData,
-  } as IRequestUser;
+  const userInfo = await User.findOne({
+    samlNameID: tokenData.samlNameID,
+  }) as IUser;
 
   if (userInfo.lastLogout > tokenData.iat) {
     return null;

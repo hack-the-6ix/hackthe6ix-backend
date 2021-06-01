@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { editObject, getObject } from '../../controller/ModelController';
-import { IRequestUser } from '../../types/types';
+import { editObject } from '../../controller/ModelController';
+import { IUser } from '../../models/user/fields';
 
 dotenv.config();
 
@@ -14,20 +14,17 @@ dotenv.config();
     useCreateIndex: true,
   });
 
-  console.log("Connected")
+  console.log('Connected');
 
   editObject({
-      _id: new ObjectID("5f081f878c60690dd9b9fd57"),
-      jwt: {
-        roles: {
-          organizer: true
-        }
-      }
-    } as IRequestUser,
+      _id: new ObjectID('5f081f878c60690dd9b9fd57'),
+      roles: {
+        organizer: true,
+      },
+    } as IUser,
     'user',
-    {
-    }, {
-      lastName: "Meme!"
+    {}, {
+      lastName: 'Meme!',
     },
     (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 

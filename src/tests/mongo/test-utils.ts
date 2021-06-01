@@ -1,14 +1,12 @@
 import { ObjectID } from 'bson';
-import { IRequestUser } from '../../types/types';
+import { IUser } from '../../models/user/fields';
 
 export const organizerUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd57'),
-  jwt: {
-    roles: {
-      organizer: true,
-    },
+  roles: {
+    organizer: true,
   },
-} as IRequestUser;
+} as IUser;
 
 export const newHackerUser = {
   firstName: 'Test',

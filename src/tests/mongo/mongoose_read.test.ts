@@ -2,7 +2,7 @@ import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { getObject } from '../../controller/ModelController';
-import { IRequestUser } from '../../types/types';
+import { IUser } from '../../models/user/fields';
 
 dotenv.config();
 
@@ -18,12 +18,10 @@ dotenv.config();
 
   getObject({
       _id: new ObjectID("5f081f878c60690dd9b9fd57"),
-      jwt: {
-        roles: {
-          organizer: true
-        }
+      roles: {
+        organizer: true
       }
-    } as IRequestUser,
+    } as IUser,
     'user', {
       page: "1",
       size: "1"
