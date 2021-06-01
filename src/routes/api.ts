@@ -6,8 +6,8 @@
 
 import express, { Request, Response } from 'express';
 import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
-import { isAdmin } from '../services/auth';
 import { logResponse } from '../services/logger';
+import { isAdmin } from '../services/permissions';
 
 const apiRouter = express.Router();
 
