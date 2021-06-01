@@ -103,7 +103,7 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
                     email: assertAttributes.email[0],
                     firstName: assertAttributes.firstName[0],
                     lastName: assertAttributes.lastName[0],
-                    roles: groups
+                    groups: groups
                 }, {
                     upsert: true,
                     new: true
@@ -115,7 +115,7 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
                     id: userInfo._id,
                     samlNameID: name_id,
                     samlSessionIndex: saml_response.user.session_index,
-                    groups: assertAttributes.groups
+                    groups: userInfo.roles
                 });
 
                 return res.json({

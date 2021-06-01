@@ -53,6 +53,11 @@ export const extractFields = (rawFields: any) => {
 
       out[k] = extractFields(v);
     }
+
+    // Don't include virtual fields in the schema
+    if (v.virtual) {
+      delete out[k];
+    }
   }
 
   return out;

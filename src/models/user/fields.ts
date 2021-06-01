@@ -395,11 +395,16 @@ const status = {
 };
 
 // User roles state
+// **
+//  These are VIRTUAL fields which are derived from "groups" and include all
+//  roles this user has access to (even if the SAML assertion didn't explicitly
+//  list all of them, e.g. admin has organizer access implicitly)
+// **
 const roles = {
 
-  // Only organizers can modify statuses
-  writeCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+  writeCheck: false,
   readCheck: true,
+  virtual: true,
 
   FIELDS: {
     hacker: {
@@ -407,8 +412,7 @@ const roles = {
       required: true,
       default: false,
       caption: 'Hacker',
-
-      writeCheck: true,
+      virtual: true,
       readCheck: true,
     },
 
@@ -416,9 +420,9 @@ const roles = {
       type: Boolean,
       required: true,
       default: false,
+      virtual: true,
       caption: 'Admin',
 
-      writeCheck: true,
       readCheck: true,
     },
 
@@ -426,9 +430,9 @@ const roles = {
       type: Boolean,
       required: true,
       default: false,
+      virtual: true,
       caption: 'Organizer',
 
-      writeCheck: true,
       readCheck: true,
     },
 
@@ -436,10 +440,51 @@ const roles = {
       type: Boolean,
       required: true,
       default: false,
+      virtual: true,
       caption: 'Volunteer',
 
-      writeCheck: true,
       readCheck: true,
+    },
+  },
+};
+
+// User groups state
+// **
+//  These are directly passed in by Keycloak and may not reflect all the
+//  roles a user has. Please use the "roles" field fro that
+// **
+const groups = {
+
+  writeCheck: false,
+  readCheck: false,
+
+  FIELDS: {
+    hacker: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Hacker'
+    },
+
+    admin: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Admin'
+    },
+
+    organizer: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Organizer'
+    },
+
+    volunteer: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Volunteer'
     },
   },
 };
@@ -536,6 +581,7 @@ export const fields = {
     },
 
     roles: roles,
+    groups: groups,
     status: status,
     hackerApplication: hackerApplication,
     internal: internal,
@@ -550,7 +596,13 @@ export interface IUser extends mongoose.Document {
   email: string,
   rsvpDeadline: number,
   personalApplicationDeadline: number,
-  roles: {
+  roles: { // Virtual field with all "lesser" roles populated
+    hacker: boolean,
+    admin: boolean,
+    organizer: boolean,
+    volunteer: boolean
+  },
+  groups: { // Raw group from KEYCLOAK
     hacker: boolean,
     admin: boolean,
     organizer: boolean,

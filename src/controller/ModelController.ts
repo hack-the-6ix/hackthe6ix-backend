@@ -264,7 +264,8 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
   }
 
   // If the user cannot write fields at this level, we don't need to check any further
-  if (evaluateChecker(rawFields.writeCheck, request)) {
+  // We also cannot write to virtual fields
+  if (evaluateChecker(rawFields.writeCheck, request) && !rawFields.virtual) {
     for (const k of Object.keys(changes)) {
       const fieldMetadata = rawFields.FIELDS[k];
 
@@ -530,6 +531,12 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
       return callback({
         code: 401,
         message: 'Write check violation!',
+        stacktrace: e.toString(),
+      });
+    } else if (e instanceof CreateDeniedException) {
+      return callback({
+        code: 401,
+        message: 'Create check violation!',
         stacktrace: e.toString(),
       });
     } else {

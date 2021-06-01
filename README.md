@@ -31,13 +31,6 @@ npm start
 Users are assigned groups (which are embedded in the SAML assertion) which determine what they can do.
 By default, there are 4 roles:
 
-
-
-### Object management
-
-This system was designed to handle data as general as possible. As such, validation and access is
-governed through a system of tester functions embedded in the models.
-
 | Role        | Description     |
 | ----------- |:-------------|
 | Hacker      | Hacker stuff | 
@@ -45,6 +38,10 @@ governed through a system of tester functions embedded in the models.
 | Organizer   | General organizer stuff like reviewing applications, etc.      |
 | Admin       | Full system access      |
 
+### Object management
+
+This system was designed to handle data as general as possible. As such, validation and access is
+governed through a system of tester functions embedded in the models.
 
 #### Schema Structure
 ```typescript

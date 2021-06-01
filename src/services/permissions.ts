@@ -63,14 +63,14 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
 const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response> => {
   if (!await injectExecutor(req)) {
     return res.status(401).send({
-      message: 'Access Denied',
+      message: 'Access Denied - Invalid Token',
       code: 401,
     } as ErrorMessage);
   }
 
-  if (req.executor.roles[role]) {
+  if (!req.executor.roles[role]) {
     return res.status(403).send({
-      message: 'Access Denied',
+      message: 'Access Denied - Insufficient permissions',
       code: 403,
     } as ErrorMessage);
   }
