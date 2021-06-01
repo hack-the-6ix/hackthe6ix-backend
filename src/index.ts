@@ -11,6 +11,7 @@ import actionRouter from './routes/action';
 
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
+import { logResponse } from './services/logger';
 
 const database = process.env.DATABASE || 'mongodb://localhost:27017/ht6backend';
 
@@ -74,7 +75,9 @@ mongoose.connect(database, {
 });
 
 app.use(function(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
-  return res.status(err.code || 500).json({
-    error: err.message,
-  });
+  logResponse(req, res)({
+    code: err.status || 500,
+    message: "An error occurred",
+    stacktrace: err.stack
+  })
 } as ErrorRequestHandler);
