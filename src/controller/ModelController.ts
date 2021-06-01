@@ -118,15 +118,15 @@ export const escapeStringRegexp = (x: string) => {
  *
  * @param requestUser
  * @param objectTypeName
- * @param query - { page: number, size: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
+ * @param query - { page?: number, size?: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
  * @param callback
  */
 export const getObject = async (
   requestUser: IUser,
   objectTypeName: string,
   query: {
-    page: string,
-    size: string,
+    page?: string,
+    size?: string,
     sortField?: string,
     sortCriteria?: 'asc' | 'desc',
     text?: string,
@@ -152,17 +152,27 @@ export const getObject = async (
       });
     }
 
+    // Default to page 1
+    if (query.page === undefined) {
+      query.page = "1";
+    }
+
+    // Default to a query size of 10k
+    if (query.size === undefined) {
+      query.size = "10000";
+    }
+
     const page = query.page ? parseInt(query.page) : -1;
     const size = query.size ? parseInt(query.size) : -1;
 
-    if (page <= 0) {
+    if (page <= 0 || !page) {
       return callback({
         code: 400,
         message: 'Invalid request! Page must be >= 1!',
       });
     }
 
-    if (size <= 0) {
+    if (size <= 0 || !size) {
       return callback({
         code: 400,
         message: 'Invalid request! Size must be >= 1!',
