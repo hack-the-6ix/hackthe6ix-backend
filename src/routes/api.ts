@@ -7,7 +7,7 @@
 import express, { Request, Response } from 'express';
 import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
 import { logResponse } from '../services/logger';
-import { isAdmin } from '../services/permissions';
+import { isOrganizer } from '../services/permissions';
 
 const apiRouter = express.Router();
 
@@ -18,7 +18,7 @@ apiRouter.use(express.json());
  *
  * Get the result of a search query for any object type.
  */
-apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
+apiRouter.post('/get/:objectType', isOrganizer,(req: Request, res: Response) => {
   getObject(req.executor,
     req.params.objectType,
     req.body,
@@ -31,7 +31,7 @@ apiRouter.post('/get/:objectType', isAdmin,(req: Request, res: Response) => {
  *
  * Edit object
  */
-apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
+apiRouter.post('/edit/:objectType', isOrganizer,(req: Request, res: Response) => {
   editObject(req.executor,
     req.params.objectType,
     req.body.filter,
@@ -45,7 +45,7 @@ apiRouter.post('/edit/:objectType', isAdmin,(req: Request, res: Response) => {
  *
  * Delete objects based on a query
  */
-apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
+apiRouter.post('/delete/:objectType', isOrganizer,(req: Request, res: Response) => {
   deleteObject(req.executor,
     req.params.objectType,
     req.body,
@@ -58,7 +58,7 @@ apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
  *
  * Create object
  */
-apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
+apiRouter.post('/create/:objectType', isOrganizer,(req: Request, res: Response) => {
   createObject(req.executor,
     req.params.objectType,
     req.body,

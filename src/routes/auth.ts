@@ -89,23 +89,34 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
             }
 
             try {
+                const groups: any = {};
+
+                // Update the groups this user is in in the database
+                for (const group of assertAttributes.groups || []) {
+                    // Remove the leading /
+                    groups[group.substring(1)] = true;
+                }
+
                 const userInfo = await User.findOneAndUpdate({
                     samlNameID: name_id,
                 }, {
                     email: assertAttributes.email[0],
                     firstName: assertAttributes.firstName[0],
-                    lastName: assertAttributes.lastName[0]
+                    lastName: assertAttributes.lastName[0],
+                    roles: groups
                 }, {
                     upsert: true,
                     new: true
                 });
+
+                console.log(assertAttributes);
 
                 const token = permissions.createJwt({
                     id: userInfo._id,
                     samlNameID: name_id,
                     samlSessionIndex: saml_response.user.session_index,
                     groups: assertAttributes.groups
-                })
+                });
 
                 return res.json({
                     token: token

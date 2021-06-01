@@ -1,15 +1,7 @@
 import mongoose from 'mongoose';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { maskStatus } from './interceptors';
-import { inEnum, isAdmin, isUserOrAdmin, maxLength, minLength, multiInEnum } from '../validator';
-
-/**
- * TODO: The requestUser.jwt.roles.isAdmin; above is temporary. Change it to match whatever we end up
- *       doing.
- *
- *       We can fetch the request user's profile from their ID using the jwt and inject the jwt data
- *       into that object too so that we can easily access permissions.
- */
+import { inEnum, isOrganizer, isUserOrOrganizer, maxLength, minLength, multiInEnum } from '../validator';
 
 /**
  * TODO: Validate submission
@@ -22,7 +14,7 @@ const hackerApplication = {
    * TODO: Add a dynamic way to check for whether or not this user can submit
    */
 
-  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
+  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
   readCheck: true,
 
   FIELDS: {
@@ -275,8 +267,8 @@ const hackerApplication = {
 // Internal FIELDS; Only organizers can access them
 const internal = {
 
-  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
-  readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
+  readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
 
   FIELDS: {
 
@@ -315,7 +307,7 @@ const internal = {
 const status = {
 
   // Only organizers can modify statuses
-  writeCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+  writeCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
   readCheck: true,
 
   FIELDS: {
@@ -327,7 +319,7 @@ const status = {
       caption: 'Status Released',
 
       writeCheck: true,
-      readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+      readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
     },
 
     applied: {
@@ -406,7 +398,7 @@ const status = {
 const roles = {
 
   // Only organizers can modify statuses
-  writeCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
+  writeCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
   readCheck: true,
 
   FIELDS: {
@@ -429,6 +421,26 @@ const roles = {
       writeCheck: true,
       readCheck: true,
     },
+
+    organizer: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Organizer',
+
+      writeCheck: true,
+      readCheck: true,
+    },
+
+    volunteer: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Volunteer',
+
+      writeCheck: true,
+      readCheck: true,
+    },
   },
 };
 
@@ -444,11 +456,11 @@ export const fields = {
    *
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
-  writeCheck: (request: WriteCheckRequest<any>) => isUserOrAdmin(request.requestUser, request.targetObject),
-  readCheck: (request: ReadCheckRequest) => isUserOrAdmin(request.requestUser, request.targetObject),
+  writeCheck: (request: WriteCheckRequest<any>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+  readCheck: (request: ReadCheckRequest) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
-  createCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  deleteCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
+  createCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
 
   // Root FIELDS
   FIELDS: {
@@ -459,7 +471,7 @@ export const fields = {
       default: 0,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
     },
 
     samlNameID: {
@@ -469,7 +481,7 @@ export const fields = {
       index: true,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
     },
 
     firstName: {
@@ -478,7 +490,7 @@ export const fields = {
       caption: 'First Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -488,7 +500,7 @@ export const fields = {
       caption: 'Last Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -498,7 +510,7 @@ export const fields = {
       caption: 'Email',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -508,7 +520,7 @@ export const fields = {
       caption: 'RSVP Deadline',
       default: -1,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -519,7 +531,7 @@ export const fields = {
       caption: 'Personal Application Deadline',
       default: -1,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isAdmin(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -540,7 +552,9 @@ export interface IUser extends mongoose.Document {
   personalApplicationDeadline: number,
   roles: {
     hacker: boolean,
-    admin: boolean
+    admin: boolean,
+    organizer: boolean,
+    volunteer: boolean
   },
   status: {
     statusReleased: boolean,

@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { WriteCheckRequest } from '../../types/types';
-import { isAdmin } from '../validator';
+import { isOrganizer } from '../validator';
 
 const SAMLProvider = {
   name: {
@@ -44,7 +44,7 @@ const saml = {
 export const fields = {
 
   readCheck: true,
-  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
+  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
 
   FIELDS: {
     saml: saml,

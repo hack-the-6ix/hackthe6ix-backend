@@ -62,7 +62,7 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
   return true;
 };
 
-export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response> => {
   if (!await injectExecutor(req)) {
     return res.status(401).send({
       message: 'Access Denied',
@@ -70,7 +70,7 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction): 
     } as ErrorMessage);
   }
 
-  if (req.executor.roles.admin) {
+  if (req.executor.roles[role]) {
     return res.status(403).send({
       message: 'Access Denied',
       code: 403,
@@ -80,20 +80,18 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction): 
   next();
 };
 
+export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+  return isRole(req, res, next, 'admin');
+};
+
+export const isOrganizer = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+  return isRole(req, res, next, 'organizer');
+};
+
+export const isVolunteer = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+  return isRole(req, res, next, 'volunteer');
+};
+
 export const isHacker = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
-  if (!await injectExecutor(req)) {
-    return res.status(401).send({
-      message: 'Access Denied',
-      code: 401,
-    } as ErrorMessage);
-  }
-
-  if (req.executor.roles.hacker) {
-    return res.status(403).send({
-      message: 'Access Denied',
-      code: 403,
-    } as ErrorMessage);
-  }
-
-  next();
+  return isRole(req, res, next, 'hacker');
 };

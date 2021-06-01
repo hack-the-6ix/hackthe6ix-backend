@@ -26,10 +26,24 @@ npm run build
 npm start
 ```
 
+### Permission System
+
+Users are assigned groups (which are embedded in the SAML assertion) which determine what they can do.
+By default, there are 4 roles:
+
+
+
 ### Object management
 
 This system was designed to handle data as general as possible. As such, validation and access is
 governed through a system of tester functions embedded in the models.
+
+| Role        | Description     |
+| ----------- |:-------------|
+| Hacker      | Hacker stuff | 
+| Volunteer   | Barebones permissions for checking in user (Currently not really used)      |
+| Organizer   | General organizer stuff like reviewing applications, etc.      |
+| Admin       | Full system access      |
 
 
 #### Schema Structure
