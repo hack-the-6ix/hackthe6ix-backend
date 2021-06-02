@@ -1,7 +1,7 @@
 import { createObject } from '../../controller/ModelController';
 
 import * as dbHandler from './db-handler';
-import { newHackerUser, organizerUser } from './test-utils';
+import { hackerUser, mockModels, newHackerUser, organizerUser, voluteerUser } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -20,16 +20,44 @@ afterAll(async () => await dbHandler.closeDatabase());
 
 
 describe('Testing checkers', () => {
-  test('No permission to create', (done: any) => {
-    createObject(
-      organizerUser,
-      'user',
-      newHackerUser,
-      (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
-        console.log(error, data);
 
-        done();
-      });
+  describe('No permission to create', () => {
+    test('Denied', (done: any) => {
+      createObject(
+        hackerUser,
+        'test',
+        {},
+        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+          try {
+            expect(error).toBeTruthy();
+            done();
+          } catch (e) {
+            done(e);
+          }
+
+        },
+        mockModels);
+    });
+
+    test('Allowed', (done: any) => {
+      createObject(
+        voluteerUser,
+        'test',
+        {},
+        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+          try {
+            expect(error).toBeFalsy();
+            expect(data).toBeTruthy();
+            done();
+          } catch (e) {
+            done(e);
+          }
+
+        },
+        mockModels);
+    });
   });
 
   test('Write conditions not satisfied', (done: any) => {

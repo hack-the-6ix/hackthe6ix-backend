@@ -504,10 +504,14 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
  * @param objectTypeName
  * @param parameters - initial parameters to initialize the object
  * @param callback
+ * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, callback: Callback) => {
+export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, callback: Callback, additionalObjectModels?: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = (models as any)[objectTypeName];
+  const objectModel: any = ({
+    ...models,
+    ...(additionalObjectModels || {})
+  } as any)[objectTypeName];
 
   if (objectModel === undefined) {
     return callback({
