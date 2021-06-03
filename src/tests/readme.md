@@ -1,3 +1,3 @@
 # Tests
 
-Yeah so these tests weren't done very well so uh I guess don't rely on them
+Don't look too closely at the code... you'll probably want to clean your eyes
