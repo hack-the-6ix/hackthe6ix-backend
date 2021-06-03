@@ -1,33 +1,149 @@
-import { ObjectID } from 'bson';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { deleteObject } from '../../../controller/ModelController';
-import { IUser } from '../../../models/user/fields';
+import { generateTestModel, hackerUser } from '../test-utils';
+import * as dbHandler from './db-handler';
 
-dotenv.config();
+/**
+ * Connect to a new in-memory database before running any tests.
+ */
+beforeAll(async () => await dbHandler.connect());
 
-(async () => {
+/**
+ * Clear all test data after every test.
+ */
+afterEach(async () => await dbHandler.clearDatabase());
 
-  await mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/ht6backend', {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
+/**
+ * Remove and close the db and server.
+ */
+afterAll(async () => await dbHandler.closeDatabase());
+
+describe('Model Delete', () => {
+
+  test('Does it actually delete?', (done: any) => {
+    const successDeleteTest = generateTestModel({
+      deleteCheck: true,
+      FIELDS: {
+        field1: {
+          type: String
+        }
+      },
+    }, 'DeleteTest');
+    const model = successDeleteTest['DeleteTest'].mongoose;
+
+    (async () => {
+
+      // Create some objects to fill the DB
+      await model.create({ field1: "Banana" });
+      await model.create({});
+      await model.create({});
+      const resultObject = await model.find({});
+      expect(resultObject.length).toEqual(3);
+
+      deleteObject(
+        hackerUser,
+        'DeleteTest',
+        {
+          field1: {
+            $ne: "Banana" // We should only be deleting non-bananas
+          }
+        },
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+          try {
+            // No errors
+            expect(error).toBeFalsy();
+
+            // Non-bananas deleted
+            const resultObject = await model.find({});
+            expect(resultObject.length).toEqual(1);
+
+            done();
+          } catch (e) {
+            done(e);
+          }
+
+        }, successDeleteTest);
+    })();
+
   });
 
-  console.log('Connected');
+  describe('Delete Check', () => {
+    test('Success', (done: any) => {
+      const successDeleteTest = generateTestModel({
+        deleteCheck: true,
+        FIELDS: {},
+      }, 'SuccessDeleteTest');
+      const model = successDeleteTest['SuccessDeleteTest'].mongoose;
 
-  deleteObject({
-      _id: new ObjectID('5f081f878c60690dd9b9fd57'),
-      roles: {
-        organizer: true,
-      },
-    } as IUser,
-    'user',
-    {},
-    (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+      (async () => {
 
-      console.log(error, data);
+        // Create some objects to fill the DB
+        await model.create({});
+        const resultObject = await model.find({});
+        expect(resultObject.length).toEqual(1);
+
+        deleteObject(
+          hackerUser,
+          'SuccessDeleteTest',
+          {},
+          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+            try {
+              // No error
+              expect(error).toBeFalsy();
+
+              // Object deleted
+              const resultObject = await model.find({});
+              expect(resultObject.length).toEqual(0);
+
+              done();
+            } catch (e) {
+              done(e);
+            }
+
+          }, successDeleteTest);
+      })();
 
     });
 
-})();
+    test('Fail', (done: any) => {
+      const successDeleteTest = generateTestModel({
+        deleteCheck: false,
+        FIELDS: {},
+      }, 'FailDeleteTest');
+      const model = successDeleteTest['FailDeleteTest'].mongoose;
+
+      (async () => {
+
+        // Create some objects to fill the DB
+        await model.create({});
+        const resultObject = await model.find({});
+        expect(resultObject.length).toEqual(1);
+
+        deleteObject(
+          hackerUser,
+          'FailDeleteTest',
+          {},
+          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+            try {
+              // We get an error
+              expect(error.message).toEqual('Delete check violation!');
+
+              // Database is still intact
+              const resultObject = await model.find({});
+              expect(resultObject.length).toEqual(1);
+
+              done();
+            } catch (e) {
+              done(e);
+            }
+
+          }, successDeleteTest);
+      })();
+
+    });
+  });
+
+});
+

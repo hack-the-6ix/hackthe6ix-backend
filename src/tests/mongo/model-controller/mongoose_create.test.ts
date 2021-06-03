@@ -44,12 +44,13 @@ describe('Model Create', () => {
       async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
         try {
+          // Ensure no errors
           expect(error).toBeFalsy();
 
+          // Ensure object is actually created
           const resultObject = await createTestModel['CreateTest'].mongoose.findOne({
             _id: data
           });
-
           expect(resultObject.field1).toEqual("Banana");
 
           done();
@@ -86,26 +87,36 @@ describe('Model Create', () => {
     });
 
     test('Fail', (done: any) => {
-      createObject(
-        hackerUser,
-        'FailCreateTest',
-        {},
-        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
-
-          try {
-            expect(error.message).toEqual('Create check violation!');
-            done();
-          } catch (e) {
-            done(e);
-          }
-
-        },
+      const failCreateTestModel =
         generateTestModel({
           createCheck: false,
           writeCheck: true,
 
           FIELDS: {},
-        }, 'FailCreateTest'));
+        }, 'FailCreateTest');
+
+      const model = failCreateTestModel['FailCreateTest'].mongoose;
+
+      createObject(
+        hackerUser,
+        'FailCreateTest',
+        {},
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+          try {
+            // Ensure error is sent
+            expect(error.message).toEqual('Create check violation!');
+
+            // Ensure no object created
+            const resultObject = await model.find({});
+            expect(resultObject.length).toEqual(0);
+
+            done();
+          } catch (e) {
+            done(e);
+          }
+
+        }, failCreateTestModel);
     });
   });
 

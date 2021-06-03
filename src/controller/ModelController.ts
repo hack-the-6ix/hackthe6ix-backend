@@ -120,6 +120,7 @@ export const escapeStringRegexp = (x: string) => {
  * @param objectTypeName
  * @param query - { page?: number, size?: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
  * @param callback
+ * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
 export const getObject = async (
   requestUser: IUser,
@@ -131,10 +132,15 @@ export const getObject = async (
     sortCriteria?: 'asc' | 'desc',
     text?: string,
     filter?: any
-  }, callback: Callback) => {
+  },
+  callback: Callback,
+  additionalObjectModels?: any) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = (models as any)[objectTypeName];
+  const objectModel: any = ({
+    ...models,
+    ...(additionalObjectModels || {})
+  } as any)[objectTypeName];
 
   if (objectModel === undefined) {
     return callback({
@@ -317,11 +323,15 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  * @param filter - filter map (same format as query selector for find())
  * @param changes - map of fields to update
  * @param callback
+ * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, callback: Callback) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, callback: Callback, additionalObjectModels?: any) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = (models as any)[objectTypeName];
+  const objectModel: any = ({
+    ...models,
+    ...(additionalObjectModels || {})
+  } as any)[objectTypeName];
 
   if (objectModel === undefined) {
     return callback({
@@ -413,10 +423,14 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest) => {
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
  * @param callback
+ * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, callback: Callback) => {
+export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, callback: Callback, additionalObjectModels?: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = (models as any)[objectTypeName];
+  const objectModel: any = ({
+    ...models,
+    ...(additionalObjectModels || {})
+  } as any)[objectTypeName];
 
   if (objectModel === undefined) {
     return callback({
