@@ -1,34 +1,22 @@
-import { ObjectID } from 'bson';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import { getObject } from '../../../controller/ModelController';
-import { IUser } from '../../../models/user/fields';
+import * as dbHandler from './db-handler';
 
-dotenv.config();
+/**
+ * Connect to a new in-memory database before running any tests.
+ */
+beforeAll(async () => await dbHandler.connect());
 
-(async () => {
+/**
+ * Clear all test data after every test.
+ */
+afterEach(async () => await dbHandler.clearDatabase());
 
-  await mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/ht6backend', {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  });
+/**
+ * Remove and close the db and server.
+ */
+afterAll(async () => await dbHandler.closeDatabase());
 
-  console.log("Connected")
+describe('Model Read', () => {
 
-  getObject({
-      _id: new ObjectID("5f081f878c60690dd9b9fd57"),
-      roles: {
-        organizer: true
-      }
-    } as IUser,
-    'user', {
-      page: "1",
-      size: "1"
-    }, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+  // Interceptors
 
-      console.log(error, data);
-
-    });
-
-})();
+});

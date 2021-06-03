@@ -34,8 +34,8 @@ describe('Model Delete', () => {
 
       // Create some objects to fill the DB
       await model.create({ field1: "Banana" });
-      await model.create({});
-      await model.create({});
+      const fail1 = await model.create({});
+      const fail2 = await model.create({});
       const resultObject = await model.find({});
       expect(resultObject.length).toEqual(3);
 
@@ -56,6 +56,11 @@ describe('Model Delete', () => {
             // Non-bananas deleted
             const resultObject = await model.find({});
             expect(resultObject.length).toEqual(1);
+
+            // Verify deleted IDs are returned
+            expect(data).toContainEqual(fail1._id);
+            expect(data).toContainEqual(fail2._id);
+            expect(data.length).toEqual(2);
 
             done();
           } catch (e) {
@@ -78,7 +83,7 @@ describe('Model Delete', () => {
       (async () => {
 
         // Create some objects to fill the DB
-        await model.create({});
+        const originalObject = await model.create({});
         const resultObject = await model.find({});
         expect(resultObject.length).toEqual(1);
 
@@ -95,6 +100,10 @@ describe('Model Delete', () => {
               // Object deleted
               const resultObject = await model.find({});
               expect(resultObject.length).toEqual(0);
+
+              // Verify deleted IDs are returned
+              expect(data).toContainEqual(originalObject._id);
+              expect(data.length).toEqual(1);
 
               done();
             } catch (e) {
@@ -133,6 +142,9 @@ describe('Model Delete', () => {
               // Database is still intact
               const resultObject = await model.find({});
               expect(resultObject.length).toEqual(1);
+
+              // Verify nothing is returned under data
+              expect(data).toBeFalsy();
 
               done();
             } catch (e) {

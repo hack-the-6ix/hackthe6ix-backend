@@ -64,26 +64,34 @@ describe('Model Create', () => {
 
   describe('Create check', () => {
     test('Success', (done: any) => {
+      const successCreateTestModel = generateTestModel({
+        createCheck: true,
+        writeCheck: true,
+
+        FIELDS: {},
+      }, 'SuccessCreateTest');
+      const model = successCreateTestModel['SuccessCreateTest'].mongoose;
+
       createObject(
         hackerUser,
         'SuccessCreateTest',
         {},
-        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
+            // Ensure no errors
             expect(error).toBeFalsy();
+
+            // Ensure object created
+            const resultObject = await model.find({});
+            expect(resultObject.length).toEqual(1);
+
             done();
           } catch (e) {
             done(e);
           }
 
-        },
-        generateTestModel({
-          createCheck: true,
-          writeCheck: true,
-
-          FIELDS: {},
-        }, 'SuccessCreateTest'));
+        }, successCreateTestModel);
     });
 
     test('Fail', (done: any) => {
@@ -111,6 +119,9 @@ describe('Model Create', () => {
             const resultObject = await model.find({});
             expect(resultObject.length).toEqual(0);
 
+            // Ensure no ID returned
+            expect(data).toBeFalsy();
+
             done();
           } catch (e) {
             done(e);
@@ -123,63 +134,95 @@ describe('Model Create', () => {
   describe('Write check', () => {
 
     test('Success', (done: any) => {
+      const successCreateWriteTest = generateTestModel({
+        createCheck: true,
+        writeCheck: true,
+
+        FIELDS: {
+          test: {
+            writeCheck: true,
+
+            FIELDS: {
+              field1: {
+                type: String,
+                writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+              },
+            }
+          }
+        },
+      }, 'SuccessCreateWriteTest');
+      const model = successCreateWriteTest['SuccessCreateWriteTest'].mongoose;
+
       createObject(
         hackerUser,
-        'SuccessWriteTest',
+        'SuccessCreateWriteTest',
         {
-          field1: 'foobar',
+          test: {
+            field1: 'foobar',
+          }
         },
-        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
+            // Ensure no errors
             expect(error).toBeFalsy();
+
+            // Ensure object created
+            const resultObject = await model.find({});
+            expect(resultObject.length).toEqual(1);
+
             done();
           } catch (e) {
             done(e);
           }
 
-        },
-        generateTestModel({
-          createCheck: true,
-          writeCheck: true,
-
-          FIELDS: {
-            field1: {
-              type: String,
-              writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
-            },
-          },
-        }, 'SuccessWriteTest'));
+        }, successCreateWriteTest);
     });
 
     test('Fail', (done: any) => {
+      const failCreateWriteTest = generateTestModel({
+        createCheck: true,
+        writeCheck: true,
+
+        FIELDS: {
+          test: {
+            writeCheck: true,
+
+            FIELDS: {
+              field1: {
+                type: String,
+                writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+              },
+            }
+          }
+        },
+      }, 'FailCreateWriteTest');
+      const model = failCreateWriteTest['FailCreateWriteTest'].mongoose;
+
       createObject(
         hackerUser,
-        'FailWriteTest',
+        'FailCreateWriteTest',
         {
-          field1: 'barbar',
+          test: {
+            field1: 'barbar',
+          }
         },
-        (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
+            // Ensure error detected
             expect(error.message).toEqual('Write check violation!');
+
+            // Ensure no object created
+            const resultObject = await model.find({});
+            expect(resultObject.length).toEqual(0);
+
             done();
           } catch (e) {
             done(e);
           }
 
-        },
-        generateTestModel({
-          createCheck: true,
-          writeCheck: true,
-
-          FIELDS: {
-            field1: {
-              type: String,
-              writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
-            },
-          },
-        }, 'FailWriteTest'));
+        }, failCreateWriteTest);
     });
   });
 

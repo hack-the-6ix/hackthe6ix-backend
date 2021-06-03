@@ -1,35 +1,128 @@
-import { ObjectID } from 'bson';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import { editObject } from '../../../controller/ModelController';
-import { IUser } from '../../../models/user/fields';
+import { createObject } from '../../../controller/ModelController';
+import { WriteCheckRequest } from '../../../types/types';
+import { generateTestModel, hackerUser } from '../test-utils';
+import * as dbHandler from './db-handler';
 
-dotenv.config();
+/**
+ * Connect to a new in-memory database before running any tests.
+ */
+beforeAll(async () => await dbHandler.connect());
 
-(async () => {
+/**
+ * Clear all test data after every test.
+ */
+afterEach(async () => await dbHandler.clearDatabase());
 
-  await mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/ht6backend', {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
+/**
+ * Remove and close the db and server.
+ */
+afterAll(async () => await dbHandler.closeDatabase());
+
+describe('Model Write', () => {
+
+  test('Success', (done: any) => {
+    const successWriteTestModel = generateTestModel({
+        createCheck: true,
+        writeCheck: true,
+
+        FIELDS: {
+          test: {
+            writeCheck: true,
+
+            FIELDS: {
+              huh: {
+                writeCheck: true,
+
+                FIELDS: {
+                  field1: {
+                    type: String,
+                    writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+                  },
+                }
+              }
+            }
+          }
+        },
+      }, 'SuccessWriteTest');
+    const model = successWriteTestModel['SuccessWriteTest'].mongoose;
+
+    (async () => {
+
+      createObject(
+        hackerUser,
+        'SuccessWriteTest',
+        {
+          test: {
+            huh: {
+              field1: 'foobar',
+            }
+          }
+        },
+        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+          try {
+            // Ensure no error
+            expect(error).toBeFalsy();
+
+            // Ensure object created
+            const resultObject = await model.findOne({});
+            expect(resultObject.length).toEqual(1);
+
+            done();
+          } catch (e) {
+            done(e);
+          }
+
+        }, successWriteTestModel);
+
+    })();
+
   });
 
-  console.log('Connected');
-
-  editObject({
-      _id: new ObjectID('5f081f878c60690dd9b9fd57'),
-      roles: {
-        organizer: true,
+  test('Fail', (done: any) => {
+    createObject(
+      hackerUser,
+      'FailWriteTest',
+      {
+        test: {
+          huh: {
+            field1: 'barbar',
+          }
+        }
       },
-    } as IUser,
-    'user',
-    {}, {
-      lastName: 'Meme!',
-    },
-    (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+      (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
-      console.log(error, data);
+        try {
+          expect(error.message).toEqual('Write check violation!');
+          done();
+        } catch (e) {
+          done(e);
+        }
 
-    });
+      },
+      generateTestModel({
+        createCheck: true,
+        writeCheck: true,
 
-})();
+        FIELDS: {
+          test: {
+            writeCheck: true,
+
+            FIELDS: {
+              huh: {
+                writeCheck: true,
+
+                FIELDS: {
+                  field1: {
+                    type: String,
+                    writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+                  },
+                }
+              }
+            }
+          }
+        },
+      }, 'FailWriteTest'));
+  });
+
+});
