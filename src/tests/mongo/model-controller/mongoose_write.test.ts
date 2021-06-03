@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { editObject } from '../../controller/ModelController';
-import { IUser } from '../../models/user/fields';
+import { editObject } from '../../../controller/ModelController';
+import { IUser } from '../../../models/user/fields';
 
 dotenv.config();
 

@@ -41,7 +41,7 @@ const fetchUniverseState = async (): Promise<UniverseState> => {
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
  */
-const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any> | CreateCheckRequest<any> | DeleteCheckRequest) => {
+export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any> | CreateCheckRequest<any> | DeleteCheckRequest) => {
   try {
     return checkerFunction(request);
   } catch (e) {

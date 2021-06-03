@@ -59,105 +59,34 @@ export const hackerUser = {
   },
 } as IUser;
 
+export const nopermUser = {
+  _id: new ObjectID('5f081f878c60690dd9b9fd17'),
+  firstName: 'Noperm',
+  lastName: 'Noperm',
+  samlNameID: 'noperm',
+  email: 'ihavenoperms@test.ca',
+  roles: {},
+} as IUser;
+
 /**
  * Test model
  */
-
-const testFields = {
-  createCheck: (request: ReadCheckRequest) => isVolunteer(request.requestUser),
-  deleteCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
-  readCheck: true,
-  writeCheck: true,
-
-  FIELDS: {
-
-    read: {
-      writeCheck: false,
-      readCheck: true,
-
-      FIELDS: {
-        adminOnly: {
-          type: Boolean,
-          caption: 'Admin read only',
-
-          writeCheck: false,
-          readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
-        },
-
-        userOnly: {
-          type: Boolean,
-          caption: 'Hacker read only',
-
-          writeCheck: false,
-          readCheck: (request: ReadCheckRequest) => isUserOrOrganizer(request.requestUser, request.targetObject),
-        },
-
-        anyone: {
-          type: Boolean,
-          caption: 'Anyone can read',
-
-          writeCheck: false,
-          readCheck: true,
-        },
-      }
+export const generateTestModel = (testFields: any) => {
+  const testSchema = new mongoose.Schema(extractFields(testFields), {
+    toObject: {
+      virtuals: true
     },
-
-    write: {
-      writeCheck: true,
-      readCheck: false,
-
-      FIELDS: {
-        adminOnly: {
-          type: Boolean,
-          caption: 'Admin write only',
-
-          readCheck: false,
-          writeCheck: (request: WriteCheckRequest<boolean>) => isAdmin(request.requestUser),
-        },
-
-        userOnly: {
-          type: Boolean,
-          caption: 'Hacker write only',
-
-          readCheck: false,
-          writeCheck: (request: WriteCheckRequest<boolean>) => isUserOrOrganizer(request.requestUser, request.targetObject),
-        },
-
-        anyone: {
-          type: Boolean,
-          caption: 'Anyone can write',
-
-          readCheck: false,
-          writeCheck: true,
-        },
-
-        writeCondition: {
-          type: String,
-          caption: 'Condition',
-
-          readCheck: false,
-          writeCheck: (request: WriteCheckRequest<string>) => maxLength(20),
-        },
-      }
+    toJSON: {
+      virtuals: true
     }
+  });
 
-  }
-};
+  const Test = mongoose.model('Test', testSchema);
 
-const testSchema = new mongoose.Schema(extractFields(testFields), {
-  toObject: {
-    virtuals: true
-  },
-  toJSON: {
-    virtuals: true
-  }
-});
-
-const Test = mongoose.model('Test', testSchema);
-
-export const mockModels = {
-  test: {
-    mongoose: Test,
-    rawFields: testFields
-  }
+  return  {
+    test: {
+      mongoose: Test,
+      rawFields: testFields
+    }
+  };
 };

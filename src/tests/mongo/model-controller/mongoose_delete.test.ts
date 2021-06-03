@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { getObject } from '../../controller/ModelController';
-import { IUser } from '../../models/user/fields';
+import { deleteObject } from '../../../controller/ModelController';
+import { IUser } from '../../../models/user/fields';
 
 dotenv.config();
 
@@ -14,18 +14,17 @@ dotenv.config();
     useCreateIndex: true,
   });
 
-  console.log("Connected")
+  console.log('Connected');
 
-  getObject({
-      _id: new ObjectID("5f081f878c60690dd9b9fd57"),
+  deleteObject({
+      _id: new ObjectID('5f081f878c60690dd9b9fd57'),
       roles: {
-        organizer: true
-      }
+        organizer: true,
+      },
     } as IUser,
-    'user', {
-      page: "1",
-      size: "1"
-    }, (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+    'user',
+    {},
+    (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
       console.log(error, data);
 
