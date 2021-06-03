@@ -69,9 +69,9 @@ export const nopermUser = {
 } as IUser;
 
 /**
- * Test model
+ * Generate test model using fields from `testFields` and the name `name`
  */
-export const generateTestModel = (testFields: any) => {
+export const generateTestModel = (testFields: any, name: string) => {
   const testSchema = new mongoose.Schema(extractFields(testFields), {
     toObject: {
       virtuals: true
@@ -81,12 +81,14 @@ export const generateTestModel = (testFields: any) => {
     }
   });
 
-  const Test = mongoose.model('Test', testSchema);
+  const Test = mongoose.model(name, testSchema);
 
-  return  {
-    test: {
-      mongoose: Test,
-      rawFields: testFields
-    }
+  const out: any = {};
+
+  out[name] = {
+    mongoose: Test,
+    rawFields: testFields
   };
+
+  return out;
 };

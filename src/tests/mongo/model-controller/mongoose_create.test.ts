@@ -1,7 +1,8 @@
 import { createObject } from '../../../controller/ModelController';
+import { WriteCheckRequest } from '../../../types/types';
+import { generateTestModel, hackerUser } from '../test-utils';
 
 import * as dbHandler from './db-handler';
-import { hackerUser, mockModels, newHackerUser, organizerUser, voluteerUser } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -18,94 +19,93 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-/**
- * TODO: We don't really care what the test is, we just need to know that it works
- *       When writing new tests, make a new validation funciton that we can control the state of easily
- *
- *       Test the permission functions separately as this will greatly reduce the number of tests needed
- */
-
-/*
-
-  const testFields = {
-    createCheck: (request: ReadCheckRequest) => isVolunteer(request.requestUser),
-    deleteCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
-    readCheck: true,
-    writeCheck: true,
-
-    FIELDS: {
-
-      read: {
-        writeCheck: false,
-        readCheck: true,
-
-        FIELDS: {
-          adminOnly: {
-            type: Boolean,
-            caption: 'Admin read only',
-
-            writeCheck: false,
-            readCheck: (request: ReadCheckRequest) => isAdmin(request.requestUser),
-          },
-
-          userOnly: {
-            type: Boolean,
-            caption: 'Hacker read only',
-
-            writeCheck: false,
-            readCheck: (request: ReadCheckRequest) => isUserOrOrganizer(request.requestUser, request.targetObject),
-          },
-
-          anyone: {
-            type: Boolean,
-            caption: 'Anyone can read',
-
-            writeCheck: false,
-            readCheck: true,
-          },
-        }
-      },
-    }
-  };
- */
-
 describe('Model Create', () => {
+
+  test('Does it make an object?', (done: any) => {
+
+    const createTestModel = generateTestModel({
+      createCheck: true,
+      writeCheck: true,
+
+      FIELDS: {
+        field1: {
+          type: String,
+          writeCheck: true
+        },
+      },
+    }, 'CreateTest');
+
+    createObject(
+      hackerUser,
+      'CreateTest',
+      {
+        field1: "Banana"
+      },
+      async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+
+        try {
+          expect(error).toBeFalsy();
+
+          const resultObject = await createTestModel['CreateTest'].mongoose.findOne({
+            _id: data
+          });
+
+          expect(resultObject.field1).toEqual("Banana");
+
+          done();
+        } catch (e) {
+          done(e);
+        }
+
+      }, createTestModel);
+
+  });
 
   describe('Create check', () => {
     test('Success', (done: any) => {
       createObject(
         hackerUser,
-        'test',
+        'SuccessCreateTest',
         {},
         (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
-            expect(error).toBeTruthy();
+            expect(error).toBeFalsy();
             done();
           } catch (e) {
             done(e);
           }
 
         },
-        mockModels);
+        generateTestModel({
+          createCheck: true,
+          writeCheck: true,
+
+          FIELDS: {},
+        }, 'SuccessCreateTest'));
     });
 
     test('Fail', (done: any) => {
       createObject(
         hackerUser,
-        'test',
+        'FailCreateTest',
         {},
         (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
-            expect(error).toBeTruthy();
+            expect(error.message).toEqual('Create check violation!');
             done();
           } catch (e) {
             done(e);
           }
 
         },
-        mockModels);
+        generateTestModel({
+          createCheck: false,
+          writeCheck: true,
+
+          FIELDS: {},
+        }, 'FailCreateTest'));
     });
   });
 
@@ -113,40 +113,62 @@ describe('Model Create', () => {
 
     test('Success', (done: any) => {
       createObject(
-        voluteerUser,
-        'test',
-        {},
+        hackerUser,
+        'SuccessWriteTest',
+        {
+          field1: 'foobar',
+        },
         (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             expect(error).toBeFalsy();
-            expect(data).toBeTruthy();
             done();
           } catch (e) {
             done(e);
           }
 
         },
-        mockModels);
+        generateTestModel({
+          createCheck: true,
+          writeCheck: true,
+
+          FIELDS: {
+            field1: {
+              type: String,
+              writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+            },
+          },
+        }, 'SuccessWriteTest'));
     });
 
     test('Fail', (done: any) => {
       createObject(
-        voluteerUser,
-        'test',
-        {},
+        hackerUser,
+        'FailWriteTest',
+        {
+          field1: 'barbar',
+        },
         (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
-            expect(error).toBeFalsy();
-            expect(data).toBeTruthy();
+            expect(error.message).toEqual('Write check violation!');
             done();
           } catch (e) {
             done(e);
           }
 
         },
-        mockModels);
+        generateTestModel({
+          createCheck: true,
+          writeCheck: true,
+
+          FIELDS: {
+            field1: {
+              type: String,
+              writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+            },
+          },
+        }, 'FailWriteTest'));
     });
   });
 
