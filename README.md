@@ -85,6 +85,8 @@ writing is active.
 
 #### Read/Write Interceptors
 
+### NOTE: WRITE INTERCEPTORS ARE NOT CURRENTLY IMPLEMENTED!
+
 Sometimes it's nice to be able to swap fields as its being read/write. Interceptors allow for this kind of logic to be integrated into
 the schema and dynamically loaded. If no interceptors are specified, the system will perform the usual read/write operation.
 
