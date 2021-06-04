@@ -20,7 +20,14 @@ export interface UserRequest extends Request {
  * Status of the universe
  */
 export type UniverseState = {
-  globalApplicationOpen: boolean
+  public: {
+    globalApplicationDeadline: number,
+    globalConfirmationDeadline: number,
+  },
+  private: {
+    maxAccepted: number,
+    maxWaitlist: number,
+  }
 }
 
 /**

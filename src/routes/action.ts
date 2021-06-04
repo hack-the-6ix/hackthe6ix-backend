@@ -95,4 +95,16 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
  *       To be done later once plan is finalized
  */
 
+/**
+ * TODO: Add endpoint to sync mailing lists
+ */
+
+/**
+ * TODO: Add endpoint to release admission statuses
+ */
+
+/**
+ * TODO: Add endpoint to assign admission status (admitted, rejected, waitlisted, etc)
+ */
+
 export default actionRouter;

@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { maskStatus } from './interceptors';
-import { inEnum, isOrganizer, isUserOrOrganizer, maxLength, minLength, multiInEnum } from '../validator';
+import {
+  inEnum,
+  isAdmin,
+  isOrganizer,
+  isUserOrOrganizer,
+  maxLength,
+  minLength,
+  multiInEnum,
+} from '../validator';
 
 /**
  * TODO: Validate submission
@@ -504,8 +512,8 @@ export const fields = {
   writeCheck: (request: WriteCheckRequest<any>) => isUserOrOrganizer(request.requestUser, request.targetObject),
   readCheck: (request: ReadCheckRequest) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-  deleteCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
-  createCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
+  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  createCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
 
   // Root FIELDS
   FIELDS: {

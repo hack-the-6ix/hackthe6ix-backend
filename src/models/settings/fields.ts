@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
-import { WriteCheckRequest } from '../../types/types';
-import { isOrganizer } from '../validator';
+import { ReadCheckRequest, UniverseState, WriteCheckRequest } from '../../types/types';
+import { isAdmin, isOrganizer } from '../validator';
 
 const SAMLProvider = {
   name: {
@@ -41,6 +41,69 @@ const saml = {
   },
 };
 
+/**
+ * System states
+ */
+const universe = {
+
+  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  readCheck: true,
+
+  FIELDS: {
+    public: {
+      readCheck: true,
+      writeCheck: true,
+
+      FIELDS: {
+        globalApplicationDeadline: {
+          type: Number,
+          default: Date.now() + 31104000000,
+          required: true,
+
+          readCheck: true,
+          writeCheck: true
+        },
+        globalConfirmationDeadline: {
+          type: Number,
+          default: Date.now() + 31104000000,
+          required: true,
+
+          readCheck: true,
+          writeCheck: true
+        },
+      }
+
+    },
+
+    private: {
+
+      readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+      writeCheck: true,
+
+      FIELDS: {
+        // Only organizers know how many people will be let through
+        maxAccepted: {
+          type: Number,
+          default: 500,
+          required: true,
+
+          readCheck: true,
+          writeCheck: true
+        },
+
+        maxWaitlist: {
+          type: Number,
+          default: 100,
+          required: true,
+
+          readCheck: true,
+          writeCheck: true
+        }
+      }
+    }
+  }
+};
+
 export const fields = {
 
   readCheck: true,
@@ -48,6 +111,8 @@ export const fields = {
 
   FIELDS: {
     saml: saml,
+
+    universe: universe
   },
 };
 
@@ -61,5 +126,7 @@ export interface ISettings extends mongoose.Document {
       sso_login_url: string,
       sso_logout_url: string
     }[]
-  }
+  },
+
+  universe: UniverseState
 }
