@@ -4,9 +4,17 @@ Unless otherwise stated, request fields are (probably) optional.
 
 Also, pretend that the JSON is valid :) I left out some double quotes to make it a bit more cleaner.
 
+In general, APIs will respond in the following format:
+```
+{
+  status: <status code>,
+  message: <main payload>
+}
+```
+
 ## API - General Object Operations
 
-#### POST - Get Object (Organizer)
+### POST - Get Object (Organizer)
 `/api/get/:objectType`
 
 Get the result of a search query for any object type. Queries are checked against `readCheck` policy.
@@ -60,7 +68,7 @@ filtered out as part of field sanitation.
 
 
 
-#### POST - Edit Object (Organizer)
+### POST - Edit Object (Organizer)
 `/api/edit/:objectType`
 
 Edit existing objects. Changes are validated against `writeCheck` policy.
@@ -93,7 +101,7 @@ Edit existing objects. Changes are validated against `writeCheck` policy.
 }
 ```
 
-#### POST - Delete Object (Admin)
+### POST - Delete Object (Admin)
 `/api/delete/:objectType`
 
 Delete existing objects. Changes are validated against `deleteCheck` policy.
@@ -125,7 +133,7 @@ All objects that match the filter query will be deleted.
 }
 ```
 
-#### POST - Create Object (Admin)
+### POST - Create Object (Admin)
 `/api/create/:objectType`
 
 Create new object. Requests are validated against `createCheck` and `writeCheck` policy.
@@ -156,11 +164,65 @@ Note that all inputs will be validated using `writeCheck`.
 
 ## Auth - Authentication related operations
 
-#### GET - Get metadata
+### GET - Get metadata
+`/auth/:provider/metadata.xml`
 
-#### GET - Starting point for login
+Used for configuring SAML identity provider.
 
-#### POST - Assert endpoint for when login completes
+##### Input Specification
+`provider` refers to the name of the SAML provider being operated on.
 
-#### POST - Starting point for logout
+##### Output Specification
+The output is an XML file with a bunch of important metadata.
 
+### GET - Starting point for login
+`/auth/:provider/login`
+
+Users should go to the login URL specified here to begin the SSO flow.
+
+##### Input Specification
+`provider` refers to the name of the SAML provider being operated on.
+
+##### Output Specification
+```
+{
+  "loginUrl": "https://auth.hackthe6ix.com/auth/reams/..." // The full login URL would be here
+}
+```
+
+### POST - Assert endpoint for when login completes
+`/auth/:provider/acs`
+
+This endpoint is called after SAML authenticates the user and is used to issue the final JWT token.
+
+##### Input Specification
+`provider` refers to the name of the SAML provider being operated on.
+
+The SAML response goes in the request body.
+
+##### Output Specification
+Note: The return value will change in the future to redirect to the frontend
+```
+{
+  "token": "<JWT token goes here>"
+}
+```
+
+### POST - Starting point for logout
+`/auth/:provider/logout`
+
+##### Input Specification
+`provider` refers to the name of the SAML provider being operated on.
+
+```
+{
+  "token": "<JWT token to revoke goes here>"
+}
+```
+
+##### Output Specification
+```
+{
+  "logoutUrl": "<logout url goes here>" // User should go to this URL to complete logout process
+}
+```

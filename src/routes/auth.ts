@@ -19,7 +19,10 @@ router.get("/:provider/login", async (req:Request, res:Response) => {
     const {sp, idp} = await fetchSAMLBundle(req.params.provider.toLowerCase());
     sp.create_login_request_url(idp, {}, (err:Error | null, login_url:string) => {
         if (err != null)
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
 
         return res.json({
             loginUrl: login_url
@@ -34,7 +37,10 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
     sp.post_assert(idp, options, async (err, saml_response) => {
         if (err != null){
             console.log(err);
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
         }
 
         console.log(saml_response);
@@ -136,7 +142,7 @@ router.post("/:provider/logout", async (req:Request, res:Response) => {
     if(!req.body.token){
         return res.status(400).json({
             status: 400,
-            error: "Bad request"
+            message: "Bad request"
         })
     }
 
@@ -149,7 +155,10 @@ router.post("/:provider/logout", async (req:Request, res:Response) => {
         session_index: tokenInfo.samlSessionIndex
     }, (err:Error | null, logout_url:string) => {
         if (err != null)
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
 
         return res.json({
             logoutUrl: logout_url
