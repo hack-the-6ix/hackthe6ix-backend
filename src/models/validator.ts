@@ -7,8 +7,9 @@ import { IUser } from './user/fields';
 export const isAdmin = (requestUser: IUser) => requestUser.roles.admin;
 export const isOrganizer = (requestUser: IUser) => requestUser.roles.organizer;
 export const isVolunteer = (requestUser: IUser) => requestUser.roles.volunteer;
+export const isUser = (requestUser: IUser, targetUser: IUser) => requestUser._id && requestUser._id.equals(targetUser._id);
 
-export const isUserOrOrganizer = (requestUser: IUser, targetUser: IUser) => isOrganizer(requestUser) || (requestUser._id && requestUser._id.equals(targetUser._id));
+export const isUserOrOrganizer = (requestUser: IUser, targetUser: IUser) => isOrganizer(requestUser) || isUser(requestUser, targetUser);
 
 /* Value properties */
 export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request.fieldValue && request?.fieldValue.length <= maxLength;

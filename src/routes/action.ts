@@ -46,9 +46,9 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
 });
 
 /**
- * TODO: Add endpoint to submit application
+ * TODO: Add endpoint to submit/save application
  *
- *       /submit -> validates submission and locks application
+ *       /submit -> validates submission and locks application (if submit signal sent)
  */
 
 /**
@@ -89,7 +89,6 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
  * TODO: Add endpoint for application statistics that is cached
  */
 
-
 /**
  * TODO: Add endpoint to submit code for badge
  *       To be done later once plan is finalized
@@ -104,7 +103,15 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
  */
 
 /**
- * TODO: Add endpoint to assign admission status (admitted, rejected, waitlisted, etc)
+ * TODO: Add endpoint to assign admission status based on score (admitted, rejected, waitlisted, etc)
+ */
+
+/**
+ * TODO: Endpoint to fetch a random application to review
+ *
+ *       Actually, just keep an array of scores and compute the average at the end.
+ *       If two people coincidentally get the same user, then let multiple people evaluate
+ *       and take the average.
  */
 
 export default actionRouter;

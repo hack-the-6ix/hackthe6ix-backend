@@ -4,7 +4,7 @@ import { maskStatus } from './interceptors';
 import {
   inEnum,
   isAdmin,
-  isOrganizer,
+  isOrganizer, isUser,
   isUserOrOrganizer,
   maxLength,
   minLength,
@@ -22,7 +22,7 @@ const hackerApplication = {
    * TODO: Add a dynamic way to check for whether or not this user can submit
    */
 
-  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
+  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (isUser(request.requestUser, request.targetObject) && !request.targetObject.status.applied && request.universeState.public.globalApplicationDeadline <= Date.now()),
   readCheck: true,
 
   FIELDS: {

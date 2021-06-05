@@ -33,9 +33,8 @@ const models = {
  * TODO: Update this with actual state
  */
 const fetchUniverseState = async (): Promise<UniverseState> => {
-  return {
-    globalApplicationOpen: true,
-  };
+  const settings = await Settings.findOne({}) || { universe: {} as UniverseState };
+  return settings.universe;
 };
 
 /**

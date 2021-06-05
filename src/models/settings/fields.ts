@@ -107,7 +107,7 @@ const universe = {
 export const fields = {
 
   readCheck: true,
-  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (!request.targetObject.status.applied && request.universeState.globalApplicationOpen),
+  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
 
   FIELDS: {
     saml: saml,
