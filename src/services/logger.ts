@@ -28,6 +28,9 @@ export const logResponse = (req: Request, res: Response) => (error: ErrorMessage
       console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
-    return res.json(data);
+    return res.json({
+      code: 200,
+      message: data
+    });
   }
 };
