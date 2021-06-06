@@ -3,6 +3,11 @@ import { BadRequestError, InternalServerError } from '../types/types';
 import { editObject, getObject } from './ModelController';
 
 /**
+ * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
+ *       However, be sure to only update based on the public facing status
+ */
+
+/**
  * Fetch a sanitized user profile of the requester
  */
 export const fetchUser = async (requestUser: IUser) => {

@@ -3,11 +3,9 @@
  */
 
 import express, { Request, Response } from 'express';
-import { getObject } from '../controller/ModelController';
 import { fetchUser, updateApplication } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
-import { ErrorMessage, InternalServerError } from '../types/types';
 
 const actionRouter = express.Router();
 
@@ -20,7 +18,7 @@ actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUser(req.executor)
+    fetchUser(req.executor),
   );
 });
 
@@ -36,8 +34,8 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
     updateApplication(
       req.executor,
       req.body.submit,
-      req.body.application
-    )
+      req.body.application,
+    ),
   );
 });
 
