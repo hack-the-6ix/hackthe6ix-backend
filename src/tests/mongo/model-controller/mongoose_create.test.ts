@@ -1,8 +1,8 @@
 import { createObject } from '../../../controller/ModelController';
 import { CreateDeniedError, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
-import { generateTestModel, hackerUser } from '../test-utils';
 
 import * as dbHandler from '../db-handler';
+import { generateTestModel, hackerUser } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -40,11 +40,11 @@ describe('Model Create', () => {
       'CreateTest',
       {
         field1: 'Banana',
-      }, createTestModel,
+      },
     );
 
     // Ensure object is actually created
-    const resultObject = await createTestModel['CreateTest'].mongoose.findOne({
+    const resultObject = await createTestModel.findOne({
       _id: data,
     });
 
@@ -60,17 +60,15 @@ describe('Model Create', () => {
 
         FIELDS: {},
       }, 'SuccessCreateTest');
-      const model = successCreateTestModel['SuccessCreateTest'].mongoose;
 
       await createObject(
         hackerUser,
         'SuccessCreateTest',
         {},
-        successCreateTestModel,
       );
 
       // Ensure object created
-      const resultObject = await model.find({});
+      const resultObject = await successCreateTestModel.find({});
       expect(resultObject.length).toEqual(1);
 
     });
@@ -84,18 +82,15 @@ describe('Model Create', () => {
           FIELDS: {},
         }, 'FailCreateTest');
 
-      const model = failCreateTestModel['FailCreateTest'].mongoose;
-
       // Ensure error is sent
       expect(createObject(
         hackerUser,
         'FailCreateTest',
         {},
-        failCreateTestModel,
       )).rejects.toThrow(CreateDeniedError);
 
       // Ensure no object created
-      const resultObject = await model.find({});
+      const resultObject = await failCreateTestModel.find({});
       expect(resultObject.length).toEqual(0);
     });
   });
@@ -120,7 +115,6 @@ describe('Model Create', () => {
           },
         },
       }, 'SuccessCreateWriteTest');
-      const model = successCreateWriteTest['SuccessCreateWriteTest'].mongoose;
 
       await createObject(
         hackerUser,
@@ -130,11 +124,10 @@ describe('Model Create', () => {
             field1: 'foobar',
           },
         },
-        successCreateWriteTest,
       );
 
       // Ensure object created
-      const resultObject = await model.find({});
+      const resultObject = await successCreateWriteTest.find({});
       expect(resultObject.length).toEqual(1);
 
     });
@@ -157,7 +150,6 @@ describe('Model Create', () => {
           },
         },
       }, 'FailCreateWriteTest');
-      const model = failCreateWriteTest['FailCreateWriteTest'].mongoose;
 
       expect(createObject(
         hackerUser,
@@ -167,15 +159,11 @@ describe('Model Create', () => {
             field1: 'barbar',
           },
         },
-        failCreateWriteTest,
       )).rejects.toThrow(WriteDeniedError);
 
       // Ensure no object created
-      const resultObject = await model.find({});
+      const resultObject = await failCreateWriteTest.find({});
       expect(resultObject.length).toEqual(0);
-
-
     });
   });
-
 });

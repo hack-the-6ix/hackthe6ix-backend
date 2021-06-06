@@ -1,7 +1,5 @@
-import { fields as settingsFields } from '../models/settings/fields';
 import Settings from '../models/settings/Settings';
-import { fields as userFields, IUser } from '../models/user/fields';
-import User from '../models/user/User';
+import { IUser } from '../models/user/fields';
 import { getInTextSearchableFields } from '../models/util';
 import {
   BadRequestError,
@@ -14,17 +12,7 @@ import {
   WriteCheckRequest,
   WriteDeniedError,
 } from '../types/types';
-
-const models = {
-  user: {
-    mongoose: User,
-    rawFields: userFields,
-  },
-  settings: {
-    mongoose: Settings,
-    rawFields: settingsFields,
-  },
-};
+import models from './models';
 
 /**
  * Fetch metadata about the universe first that might be necessary for making validation decisions
@@ -116,7 +104,6 @@ export const escapeStringRegexp = (x: string) => {
  * @param requestUser
  * @param objectTypeName
  * @param query - { page?: number, size?: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
- * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
 export const getObject = async (
   requestUser: IUser,
@@ -128,14 +115,10 @@ export const getObject = async (
     sortCriteria?: 'asc' | 'desc',
     text?: string,
     filter?: any
-  },
-  additionalObjectModels?: any) => {
+  }) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = ({
-    ...models,
-    ...(additionalObjectModels || {}),
-  } as any)[objectTypeName];
+  const objectModel: any = (models as any)[objectTypeName];
 
   if (objectModel === undefined) {
     throw new BadRequestError('Invalid Object Type');
@@ -294,15 +277,11 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
  * @param changes - map of fields to update
- * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, additionalObjectModels?: any) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = ({
-    ...models,
-    ...(additionalObjectModels || {}),
-  } as any)[objectTypeName];
+  const objectModel: any = (models as any)[objectTypeName];
 
   if (objectModel === undefined) {
     throw new BadRequestError('Invalid Object type');
@@ -368,14 +347,10 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) 
  * @param requestUser
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
- * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, additionalObjectModels?: any) => {
+export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = ({
-    ...models,
-    ...(additionalObjectModels || {}),
-  } as any)[objectTypeName];
+  const objectModel: any = (models as any)[objectTypeName];
 
   if (objectModel === undefined) {
     throw new BadRequestError('Invalid Object Type');
@@ -439,14 +414,10 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
  * @param requestUser
  * @param objectTypeName
  * @param parameters - initial parameters to initialize the object
- * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, additionalObjectModels?: any) => {
+export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
-  const objectModel: any = ({
-    ...models,
-    ...(additionalObjectModels || {}),
-  } as any)[objectTypeName];
+  const objectModel: any = (models as any)[objectTypeName];
 
   if (objectModel === undefined) {
     throw new BadRequestError('Invalid Object Type');

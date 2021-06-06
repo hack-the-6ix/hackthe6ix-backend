@@ -1,9 +1,15 @@
 import { fetchUser } from '../../../controller/UserController';
 import { IUser } from '../../../models/user/fields';
-import User from '../../../models/user/User';
-import { NotFoundError } from '../../../types/types';
+import {
+  canSubmitApplication,
+  isOrganizer,
+  isUserOrOrganizer,
+  maxLength,
+} from '../../../models/validator';
+import { NotFoundError, ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
 import * as dbHandler from '../db-handler';
-import { adminUser, hackerUser, organizerUser } from '../test-utils';
+import { adminUser, generateTestModel, hackerUser, organizerUser } from '../test-utils';
+import models from "../../../controller/models";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -22,20 +28,72 @@ afterAll(async () => await dbHandler.closeDatabase());
 
 describe('Get profile', () => {
 
-  test('Success', async () => {
-    await User.create(adminUser);
-    await User.create(hackerUser);
-    await User.create(organizerUser);
+  const userTestModel = generateTestModel({
+    writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+    readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-    expect((await User.find({})).length).toEqual(3);
+    FIELDS: {
+      firstName: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      },
+      lastName: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      },
+      email: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      },
+      internal: {
+        readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+        writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+
+        FIELDS: {
+          secretNode: {
+            type: String,
+            readCheck: true,
+            writeCheck: true,
+          },
+        },
+      },
+      application: {
+        readCheck: true,
+        writeCheck: canSubmitApplication(),
+
+        FIELDS: {
+          applicationField: {
+            type: String,
+            readCheck: true,
+            writeCheck: true,
+          },
+        },
+      },
+    },
+  }, 'user');
+
+  test('Success', async () => {
+    await userTestModel.create(adminUser);
+    await userTestModel.create(hackerUser);
+    await userTestModel.create(organizerUser);
+
+    expect((await userTestModel.find({})).length).toEqual(3);
 
     const data = await fetchUser(hackerUser);
 
     // Expect to get the correct user object
-    expect(data.firstName).toEqual(hackerUser.firstName);
-
-    // No internal fields should be revealed
-    expect(Object.keys(data.internal).length).toEqual(0);
+    expect(data).toEqual({
+      firstName: hackerUser.firstName,
+      lastName: hackerUser.lastName,
+      email: hackerUser.email,
+      internal: {},
+      application: {
+        applicationField: undefined
+      }
+    });
   });
 
   test('Fail', async () => {

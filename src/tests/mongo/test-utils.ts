@@ -1,15 +1,8 @@
 import { ObjectID } from 'bson';
-import mongoose from "mongoose";
-import { fields, IUser } from '../../models/user/fields';
+import mongoose from 'mongoose';
+import models from '../../controller/models';
+import { IUser } from '../../models/user/fields';
 import { extractFields } from '../../models/util';
-import {
-  isAdmin,
-  isVolunteer,
-  isOrganizer,
-  isUserOrOrganizer,
-  maxLength,
-} from '../../models/validator';
-import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 
 export const adminUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd50'),
@@ -21,7 +14,7 @@ export const adminUser = {
     admin: true,
     organizer: true,
     volunteer: true,
-    hacker: true
+    hacker: true,
   },
 } as IUser;
 
@@ -33,7 +26,7 @@ export const organizerUser = {
   email: 'organizer@test.ca',
   roles: {
     organizer: true,
-    volunteer: true
+    volunteer: true,
   },
 } as IUser;
 
@@ -44,7 +37,7 @@ export const voluteerUser = {
   samlNameID: 'volunteer',
   email: 'volunteer@test.ca',
   roles: {
-    volunteer: true
+    volunteer: true,
   },
 } as IUser;
 
@@ -55,11 +48,11 @@ export const hackerUser = {
   samlNameID: 'hacker',
   email: 'hacker@test.ca',
   roles: {
-    hacker: true
+    hacker: true,
   },
   internal: {
-    notes: "This is a bad person"
-  }
+    notes: 'This is a bad person',
+  },
 } as IUser;
 
 export const nopermUser = {
@@ -73,25 +66,30 @@ export const nopermUser = {
 
 /**
  * Generate test model using fields from `testFields` and the name `name`
+ *
+ * @param testFields
+ * @param name
+ * @param doNotRegister - if true, we will not override the models module
+ * @return Test mongoose model
  */
-export const generateTestModel = (testFields: any, name: string) => {
+export const generateTestModel = (testFields: any, name: string, doNotRegister?: boolean) => {
   const testSchema = new mongoose.Schema(extractFields(testFields), {
     toObject: {
-      virtuals: true
+      virtuals: true,
     },
     toJSON: {
-      virtuals: true
-    }
+      virtuals: true,
+    },
   });
 
   const Test = mongoose.model(name, testSchema);
 
-  const out: any = {};
+  if (!doNotRegister) {
+    (models as any)[name] = {
+      mongoose: Test,
+      rawFields: testFields
+    };
+  }
 
-  out[name] = {
-    mongoose: Test,
-    rawFields: testFields
-  };
-
-  return out;
+  return Test;
 };

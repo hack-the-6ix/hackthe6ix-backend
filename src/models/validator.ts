@@ -27,3 +27,14 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
 };
 
 export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string, any>) => validStates.indexOf(request?.fieldValue) != -1;
+
+export const canSubmitApplication = () => (request: WriteCheckRequest<any, IUser>) =>
+  isOrganizer(request.requestUser) ||
+  (
+    isUser(request.requestUser, request.targetObject) &&
+    !request.targetObject.status.applied &&
+    (
+      request.universeState.public.globalApplicationDeadline <= Date.now() ||
+      request.targetObject.personalApplicationDeadline <= Date.now()
+    )
+  );

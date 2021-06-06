@@ -1,5 +1,5 @@
 import { getObject } from '../../../controller/ModelController';
-import { IUser } from '../../../models/user/fields';
+import { IUser } from '../../../readCheckModelTests/user/fields';
 import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
 import { adminUser, generateTestModel } from '../test-utils';
 import * as dbHandler from '../db-handler';
@@ -84,8 +84,7 @@ describe('Model Read', () => {
     intercepted: 'Watermelon',
   };
 
-  const readCheckModel = generateTestModel(fields, 'ReadCheckModel');
-  const model = readCheckModel['ReadCheckModel'].mongoose;
+  const readCheckModelTest = generateTestModel(fields, 'ReadCheckModel');
 
   /**
    * TODO: Test the other parameters like size, page, etc.
@@ -94,21 +93,21 @@ describe('Model Read', () => {
 
   test('Basic Query', async () => {
 
-    const object1 = await model.create(testObject);
-    const object2 = await model.create({
+    const object1 = await readCheckModelTest.create(testObject);
+    const object2 = await readCheckModelTest.create({
       ...testObject,
       publicNest: {
         field2: 'Not bar',
       },
       intercepted: 'Triangle',
     });
-    await model.create({
+    await readCheckModelTest.create({
       ...testObject,
       field1: 'Banana',
       intercepted: 'this is not a triangle',
     });
 
-    expect((await model.find({})).length).toEqual(3);
+    expect((await readCheckModelTest.find({})).length).toEqual(3);
 
     const data = await getObject(
       adminUser,
@@ -117,8 +116,7 @@ describe('Model Read', () => {
         filter: {
           field1: 'Test',
         },
-      },
-      readCheckModel,
+      }
     );
 
     // Expect to get object 1 and 2 filtered
@@ -142,7 +140,7 @@ describe('Model Read', () => {
     describe('Restricted field', () => {
       test('Success', async () => {
 
-        await model.create(testObject);
+        await readCheckModelTest.create(testObject);
 
         const data = await getObject(
           {
@@ -150,8 +148,7 @@ describe('Model Read', () => {
             firstName: 'Foo',
           } as IUser,
           'ReadCheckModel',
-          {},
-          readCheckModel,
+          {}
         );
 
         // Expect to get the field
@@ -161,7 +158,7 @@ describe('Model Read', () => {
 
       test('Fail (field hidden)', async () => {
 
-        await model.create(testObject);
+        await readCheckModelTest.create(testObject);
 
         const data = await getObject(
           {
@@ -169,8 +166,7 @@ describe('Model Read', () => {
             firstName: 'Not Foo',
           } as IUser,
           'ReadCheckModel',
-          {},
-          readCheckModel,
+          {}
         );
 
         // Expect to have field hidden
@@ -184,7 +180,7 @@ describe('Model Read', () => {
     describe('Restricted group', () => {
 
       test('Success', async () => {
-        await model.create(testObject);
+        await readCheckModelTest.create(testObject);
 
         const data = await getObject(
           {
@@ -192,8 +188,7 @@ describe('Model Read', () => {
             firstName: 'Bar',
           } as IUser,
           'ReadCheckModel',
-          {},
-          readCheckModel,
+          {}
         );
 
         // Expect to get the field
@@ -207,7 +202,7 @@ describe('Model Read', () => {
       });
 
       test('Fail (group hidden)', async () => {
-        await model.create(testObject);
+        await readCheckModelTest.create(testObject);
 
         const data = await getObject(
           {
@@ -215,8 +210,7 @@ describe('Model Read', () => {
             firstName: 'Not the right person lol',
           } as IUser,
           'ReadCheckModel',
-          {},
-          readCheckModel,
+          {}
         );
 
         // Expect to have nest be empty
@@ -230,7 +224,7 @@ describe('Model Read', () => {
   describe('Interceptor', () => {
 
     test('Intercept', async () => {
-      await model.create(testObject);
+      await readCheckModelTest.create(testObject);
 
       const data = await getObject(
         {
@@ -238,8 +232,7 @@ describe('Model Read', () => {
           firstName: 'Banana',
         } as IUser,
         'ReadCheckModel',
-        {},
-        readCheckModel,
+        {}
       );
 
       // Expect to get the field
@@ -248,7 +241,7 @@ describe('Model Read', () => {
     });
 
     test('No intercept', async () => {
-      await model.create(testObject);
+      await readCheckModelTest.create(testObject);
 
       const data = await getObject(
         {
@@ -256,8 +249,7 @@ describe('Model Read', () => {
           firstName: 'Not Banana',
         } as IUser,
         'ReadCheckModel',
-        {},
-        readCheckModel,
+        {}
       );
 
       // Expect to get the field

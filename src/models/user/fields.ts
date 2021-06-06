@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
 import { maskStatus } from './interceptors';
 import {
+  canSubmitApplication,
   inEnum,
   isAdmin,
   isOrganizer, isUser,
@@ -22,16 +23,7 @@ export const hackerApplication = {
    * TODO: Add a dynamic way to check for whether or not this user can submit
    */
 
-  writeCheck: (request: WriteCheckRequest<any, IUser>) =>
-            isOrganizer(request.requestUser) ||
-            (
-              isUser(request.requestUser, request.targetObject) &&
-              !request.targetObject.status.applied &&
-              (
-                request.universeState.public.globalApplicationDeadline <= Date.now() ||
-                request.targetObject.personalApplicationDeadline <= Date.now()
-              )
-            ),
+  writeCheck: canSubmitApplication(),
   readCheck: true,
 
   FIELDS: {
