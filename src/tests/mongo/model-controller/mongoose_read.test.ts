@@ -123,12 +123,10 @@ describe('Model Read', () => {
     expect(data).toEqual([
       {
         publicNest: {},
-        privateNest: {},
         intercepted: 'Watermelon',
       },
       {
         publicNest: {},
-        privateNest: {},
         intercepted: 'Triangle',
       },
     ]);
@@ -215,7 +213,7 @@ describe('Model Read', () => {
 
         // Expect to have nest be empty
         expect(data.length).toEqual(1);
-        expect(data[0].privateNest).toEqual({});
+        expect(data[0].privateNest).toEqual(undefined);
       });
     });
 

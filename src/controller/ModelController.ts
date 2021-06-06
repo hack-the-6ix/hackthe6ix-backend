@@ -63,8 +63,11 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>
 
       if (fieldMetadata) {
         if (fieldMetadata.FIELDS !== undefined) {
-          // This is another nested dictionary, so we can recurse
-          out[k] = cleanObject(fieldMetadata, object[k], request);
+
+          if (evaluateChecker(fieldMetadata.readCheck, request)) {
+            // This is another nested dictionary, so we can recurse
+            out[k] = cleanObject(fieldMetadata, object[k], request);
+          }
 
         } else {
           // This is just a regular field, so we'll check to make sure we have access to that field

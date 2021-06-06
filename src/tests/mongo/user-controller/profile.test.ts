@@ -9,7 +9,6 @@ import {
 import { NotFoundError, ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
 import * as dbHandler from '../db-handler';
 import { adminUser, generateTestModel, hackerUser, organizerUser } from '../test-utils';
-import models from "../../../controller/models";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -91,8 +90,8 @@ describe('Get profile', () => {
       email: hackerUser.email,
       internal: {},
       application: {
-        applicationField: undefined
-      }
+        applicationField: undefined,
+      },
     });
   });
 

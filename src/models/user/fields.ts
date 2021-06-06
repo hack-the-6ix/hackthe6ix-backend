@@ -82,6 +82,9 @@ export const hackerApplication = {
     wantSwag: {
       type: Boolean,
       caption: 'I live in Canada and want to receive HT6 swag',
+
+      writeCheck: true,
+      readCheck: true,
     },
 
     /* Address */
