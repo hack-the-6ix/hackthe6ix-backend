@@ -1,6 +1,6 @@
 import { getObject } from '../../../controller/ModelController';
 import { IUser } from '../../../models/user/fields';
-import { ErrorMessage, ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
+import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
 import { adminUser, generateTestModel } from '../test-utils';
 import * as dbHandler from './db-handler';
 
@@ -35,13 +35,13 @@ describe('Model Read', () => {
         FIELDS: {
           field2: {
             type: String,
-            readCheck: (request: ReadCheckRequest) => request.requestUser.firstName === 'Foo',
+            readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Foo',
           },
         },
       },
 
       privateNest: {
-        readCheck: (request: ReadCheckRequest) => request.requestUser.firstName === 'Bar',
+        readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Bar',
 
         FIELDS: {
           field3: {
@@ -79,7 +79,7 @@ describe('Model Read', () => {
       field3: 'Baz',
       evenMoreNests: {
         field4: 'Banana',
-      }
+      },
     },
     intercepted: 'Watermelon',
   };
@@ -92,154 +92,136 @@ describe('Model Read', () => {
    *       I don't really care about that right now :D
    */
 
-  test('Basic Query', (done: any) => {
+  test('Basic Query', async () => {
 
-    (async () => {
+    const object1 = await model.create(testObject);
+    const object2 = await model.create({
+      ...testObject,
+      publicNest: {
+        field2: 'Not bar',
+      },
+      intercepted: 'Triangle',
+    });
+    await model.create({
+      ...testObject,
+      field1: 'Banana',
+      intercepted: 'this is not a triangle',
+    });
 
-      const object1 = await model.create(testObject);
-      const object2 = await model.create({
-        ...testObject,
-        publicNest: {
-          field2: 'Not bar',
-        },
-        intercepted: 'Triangle',
-      });
-      await model.create({
-        ...testObject,
-        field1: 'Banana',
-        intercepted: 'this is not a triangle'
-      });
+    expect((await model.find({})).length).toEqual(3);
 
-      expect((await model.find({})).length).toEqual(3);
-
-      getObject(adminUser, 'ReadCheckModel', {
+    const data = await getObject(
+      adminUser,
+      'ReadCheckModel',
+      {
         filter: {
           field1: 'Test',
         },
-      }, (error: ErrorMessage, data?: any) => {
+      },
+      readCheckModel,
+    );
 
-        // Expect no errors
-        expect(error).toBeFalsy();
-
-        // Expect to get object 1 and 2 filtered
-        expect(data).toEqual([
-          {
-            publicNest: {},
-            privateNest: {},
-            intercepted: 'Watermelon',
-          },
-          {
-            publicNest: {},
-            privateNest: {},
-            intercepted: 'Triangle',
-          },
-        ]);
-
-        done();
-
-      }, readCheckModel);
-
-    })();
+    // Expect to get object 1 and 2 filtered
+    expect(data).toEqual([
+      {
+        publicNest: {},
+        privateNest: {},
+        intercepted: 'Watermelon',
+      },
+      {
+        publicNest: {},
+        privateNest: {},
+        intercepted: 'Triangle',
+      },
+    ]);
 
   });
 
   describe('Read Check', () => {
 
     describe('Restricted field', () => {
-      test('Success', (done: any) => {
-        (async () => {
-          await model.create(testObject);
+      test('Success', async () => {
 
-          getObject({
+        await model.create(testObject);
+
+        const data = await getObject(
+          {
             ...adminUser,
             firstName: 'Foo',
-          } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+          } as IUser,
+          'ReadCheckModel',
+          {},
+          readCheckModel,
+        );
 
-            // Expect no errors
-            expect(error).toBeFalsy();
-
-            // Expect to get the field
-            expect(data.length).toEqual(1);
-            expect(data[0].publicNest.field2).toEqual('Bar');
-
-            done();
-
-          }, readCheckModel);
-        })();
+        // Expect to get the field
+        expect(data.length).toEqual(1);
+        expect(data[0].publicNest.field2).toEqual('Bar');
       });
 
-      test('Fail (field hidden)', (done: any) => {
-        (async () => {
-          await model.create(testObject);
+      test('Fail (field hidden)', async () => {
 
-          getObject({
+        await model.create(testObject);
+
+        const data = await getObject(
+          {
             ...adminUser,
             firstName: 'Not Foo',
-          } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+          } as IUser,
+          'ReadCheckModel',
+          {},
+          readCheckModel,
+        );
 
-            // Expect no errors
-            expect(error).toBeFalsy();
+        // Expect to have field hidden
+        expect(data.length).toEqual(1);
+        expect(data[0].publicNest.field2).toEqual(undefined);
 
-            // Expect to have field hidden
-            expect(data.length).toEqual(1);
-            expect(data[0].publicNest.field2).toEqual(undefined);
 
-            done();
-
-          }, readCheckModel);
-        })();
       });
     });
 
     describe('Restricted group', () => {
 
-      test('Success', (done: any) => {
-        (async () => {
-          await model.create(testObject);
+      test('Success', async () => {
+        await model.create(testObject);
 
-          getObject({
+        const data = await getObject(
+          {
             ...adminUser,
             firstName: 'Bar',
-          } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+          } as IUser,
+          'ReadCheckModel',
+          {},
+          readCheckModel,
+        );
 
-            // Expect no errors
-            expect(error).toBeFalsy();
-
-            // Expect to get the field
-            expect(data.length).toEqual(1);
-            expect(data[0].privateNest).toEqual({
-              field3: 'Baz',
-              evenMoreNests: {
-                field4: 'Banana',
-              },
-            });
-
-            done();
-
-          }, readCheckModel);
-        })();
+        // Expect to get the field
+        expect(data.length).toEqual(1);
+        expect(data[0].privateNest).toEqual({
+          field3: 'Baz',
+          evenMoreNests: {
+            field4: 'Banana',
+          },
+        });
       });
 
-      test('Fail (group hidden)', (done: any) => {
-        (async () => {
-          await model.create(testObject);
+      test('Fail (group hidden)', async () => {
+        await model.create(testObject);
 
-          getObject({
+        const data = await getObject(
+          {
             ...adminUser,
             firstName: 'Not the right person lol',
-          } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+          } as IUser,
+          'ReadCheckModel',
+          {},
+          readCheckModel,
+        );
 
-            // Expect no errors
-            expect(error).toBeFalsy();
-
-            // Expect to have nest be empty
-            expect(data.length).toEqual(1);
-            expect(data[0].privateNest).toEqual({});
-
-            done();
-
-          }, readCheckModel);
-        })();
+        // Expect to have nest be empty
+        expect(data.length).toEqual(1);
+        expect(data[0].privateNest).toEqual({});
       });
     });
 
@@ -247,48 +229,40 @@ describe('Model Read', () => {
 
   describe('Interceptor', () => {
 
-    test('Intercept', (done: any) => {
-      (async () => {
-        await model.create(testObject);
+    test('Intercept', async () => {
+      await model.create(testObject);
 
-        getObject({
+      const data = await getObject(
+        {
           ...adminUser,
           firstName: 'Banana',
-        } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+        } as IUser,
+        'ReadCheckModel',
+        {},
+        readCheckModel,
+      );
 
-          // Expect no errors
-          expect(error).toBeFalsy();
-
-          // Expect to get the field
-          expect(data.length).toEqual(1);
-          expect(data[0].intercepted).toEqual('Intercepted!');
-
-          done();
-
-        }, readCheckModel);
-      })();
+      // Expect to get the field
+      expect(data.length).toEqual(1);
+      expect(data[0].intercepted).toEqual('Intercepted!');
     });
 
-    test('No intercept', (done: any) => {
-      (async () => {
-        await model.create(testObject);
+    test('No intercept', async () => {
+      await model.create(testObject);
 
-        getObject({
+      const data = await getObject(
+        {
           ...adminUser,
           firstName: 'Not Banana',
-        } as IUser, 'ReadCheckModel', {}, (error: ErrorMessage, data?: any) => {
+        } as IUser,
+        'ReadCheckModel',
+        {},
+        readCheckModel,
+      );
 
-          // Expect no errors
-          expect(error).toBeFalsy();
-
-          // Expect to get the field
-          expect(data.length).toEqual(1);
-          expect(data[0].intercepted).toEqual('Watermelon');
-
-          done();
-
-        }, readCheckModel);
-      })();
+      // Expect to get the field
+      expect(data.length).toEqual(1);
+      expect(data[0].intercepted).toEqual('Watermelon');
     });
   });
 });
