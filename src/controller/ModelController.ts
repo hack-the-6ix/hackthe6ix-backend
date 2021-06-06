@@ -4,12 +4,14 @@ import { fields as userFields, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { getInTextSearchableFields } from '../models/util';
 import {
-  Callback,
+  BadRequestError,
   CreateCheckRequest,
   CreateDeniedException,
   DeleteCheckRequest,
   DeleteDeniedException,
+  InternalServerError,
   ReadCheckRequest,
+  UnauthorizedError,
   UniverseState,
   WriteCheckRequest,
   WriteDeniedException,
@@ -116,7 +118,6 @@ export const escapeStringRegexp = (x: string) => {
  * @param requestUser
  * @param objectTypeName
  * @param query - { page?: number, size?: number, sortField?: string, sortCriteria?: 'asc' | 'desc', text?: string, filter?: any }
- * @param callback
  * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
 export const getObject = async (
@@ -130,56 +131,43 @@ export const getObject = async (
     text?: string,
     filter?: any
   },
-  callback: Callback,
   additionalObjectModels?: any) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = ({
     ...models,
-    ...(additionalObjectModels || {})
+    ...(additionalObjectModels || {}),
   } as any)[objectTypeName];
 
   if (objectModel === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid Object Type',
-    });
+    throw new BadRequestError('Invalid Object Type');
   }
 
   // Sanitize data before sending it out into the world
   try {
     if (!query) {
-      return callback({
-        status: 400,
-        message: 'Invalid request! Must specify page and size in query!',
-      });
+      throw new BadRequestError('Must specify page and size in query!');
     }
 
     // Default to page 1
     if (query.page === undefined) {
-      query.page = "1";
+      query.page = '1';
     }
 
     // Default to a query size of 10k
     if (query.size === undefined) {
-      query.size = "10000";
+      query.size = '10000';
     }
 
     const page = query.page ? parseInt(query.page) : -1;
     const size = query.size ? parseInt(query.size) : -1;
 
     if (page <= 0 || !page) {
-      return callback({
-        status: 400,
-        message: 'Invalid request! Page must be >= 1!',
-      });
+      throw new BadRequestError('Page must be >= 1!');
     }
 
     if (size <= 0 || !size) {
-      return callback({
-        status: 400,
-        message: 'Invalid request! Size must be >= 1!',
-      });
+      throw new BadRequestError('Size must be >= 1!');
     }
 
     const filters: any = query.filter || {};
@@ -190,10 +178,7 @@ export const getObject = async (
     const sort: any = {};
 
     if (query.sortCriteria && !['asc', 'desc'].includes(query.sortCriteria)) {
-      return callback({
-        status: 400,
-        message: 'Invalid sort criteria! Must be asc or desc!!',
-      });
+      throw new BadRequestError('Invalid sort criteria! Must be asc or desc!!');
     }
 
     if (query.sortField && query.sortCriteria) {
@@ -261,13 +246,9 @@ export const getObject = async (
       }
     }
 
-    return callback(null, out);
+    return out;
   } catch (e) {
-    return callback({
-      status: 500,
-      message: 'An error occurred',
-      stacktrace: e.toString(),
-    });
+    throw new InternalServerError('An error occurred', e);
   }
 };
 
@@ -319,36 +300,27 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
  * @param changes - map of fields to update
- * @param callback
  * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, callback: Callback, additionalObjectModels?: any) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, additionalObjectModels?: any) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = ({
     ...models,
-    ...(additionalObjectModels || {})
+    ...(additionalObjectModels || {}),
   } as any)[objectTypeName];
 
   if (objectModel === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid Object Type',
-    });
+    throw new BadRequestError('Invalid Object type');
+
   }
 
   if (filter === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid filter',
-    });
+    throw new BadRequestError('Invalid filter');
   }
 
   if (changes === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid changes',
-    });
+    throw new BadRequestError('Invalid changes');
   }
 
   try {
@@ -377,21 +349,14 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
       changes,
     );
 
-    return callback(null, amendedIDs);
+    return amendedIDs;
 
   } catch (e) {
     if (e instanceof WriteDeniedException) {
-      return callback({
-        status: 401,
-        message: 'Write check violation!',
-        stacktrace: e.toString(),
-      });
+      throw new UnauthorizedError('Write check violation!', e);
+
     } else {
-      return callback({
-        status: 500,
-        message: 'An error occurred',
-        stacktrace: e.toString(),
-      });
+      throw new InternalServerError('An error occurred', e);
     }
   }
 };
@@ -419,28 +384,21 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) 
  * @param requestUser
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
- * @param callback
  * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, callback: Callback, additionalObjectModels?: any) => {
+export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any, additionalObjectModels?: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = ({
     ...models,
-    ...(additionalObjectModels || {})
+    ...(additionalObjectModels || {}),
   } as any)[objectTypeName];
 
   if (objectModel === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid Object Type',
-    });
+    throw new BadRequestError('Invalid Object Type');
   }
 
   if (filter === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid filter',
-    });
+    throw new BadRequestError('Invalid filter');
   }
 
   try {
@@ -467,21 +425,13 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
       filter,
     );
 
-    return callback(null, amendedIDs);
+    return amendedIDs;
 
   } catch (e) {
     if (e instanceof DeleteDeniedException) {
-      return callback({
-        status: 401,
-        message: 'Delete check violation!',
-        stacktrace: e.toString(),
-      });
+      throw new UnauthorizedError('Delete check violation!', e);
     } else {
-      return callback({
-        status: 500,
-        message: 'An error occurred',
-        stacktrace: e.toString(),
-      });
+      throw new InternalServerError('An error occurred', e);
     }
   }
 };
@@ -514,28 +464,21 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
  * @param requestUser
  * @param objectTypeName
  * @param parameters - initial parameters to initialize the object
- * @param callback
  * @param additionalObjectModels - any additional models to inject (basically only used for testing)
  */
-export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, callback: Callback, additionalObjectModels?: any) => {
+export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any, additionalObjectModels?: any) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = ({
     ...models,
-    ...(additionalObjectModels || {})
+    ...(additionalObjectModels || {}),
   } as any)[objectTypeName];
 
   if (objectModel === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid Object Type',
-    });
+    throw new BadRequestError('Invalid Object Type');
   }
 
   if (parameters === undefined) {
-    return callback({
-      status: 400,
-      message: 'Invalid parameters',
-    });
+    throw new BadRequestError('Invalid parameters');
   }
 
   try {
@@ -549,27 +492,15 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
 
     const newObject = await objectModel.mongoose.create(parameters);
 
-    return callback(null, newObject._id);
+    return newObject._id;
 
   } catch (e) {
     if (e instanceof WriteDeniedException) {
-      return callback({
-        status: 401,
-        message: 'Write check violation!',
-        stacktrace: e.toString(),
-      });
+      throw new UnauthorizedError('Write check violation!', e);
     } else if (e instanceof CreateDeniedException) {
-      return callback({
-        status: 401,
-        message: 'Create check violation!',
-        stacktrace: e.toString(),
-      });
+      throw new UnauthorizedError('Create check violation!', e);
     } else {
-      return callback({
-        status: 500,
-        message: 'An error occurred',
-        stacktrace: e.toString(),
-      });
+      throw new InternalServerError('An error occurred', e);
     }
   }
 };

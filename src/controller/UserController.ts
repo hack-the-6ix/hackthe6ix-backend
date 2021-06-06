@@ -1,6 +1,28 @@
 import { IApplication, IUser } from '../models/user/fields';
-import { Callback, ErrorMessage } from '../types/types';
-import { editObject } from './ModelController';
+import { BadRequestError, InternalServerError } from '../types/types';
+import { editObject, getObject } from './ModelController';
+
+/**
+ * Fetch a sanitized user profile of the requester
+ */
+export const fetchUser = async (requestUser: IUser) => {
+  const data = await getObject(
+    requestUser,
+    'user',
+    {
+      filter: {
+        _id: requestUser._id,
+      },
+      size: '1',
+    },
+  );
+
+  if (!data) {
+    throw new InternalServerError('Unable to fetch user');
+  }
+
+  return data[0];
+};
 
 /**
  * Validates a submitted application against all the required fields in the application
@@ -14,13 +36,10 @@ const validateApplication = (application: IApplication) => {
   return { success: true, errors: [] as string[] };
 };
 
-export const updateApplication = async (requestUser: IUser, submit: boolean, application: IApplication, callback: Callback) => {
+export const updateApplication = async (requestUser: IUser, submit: boolean, application: IApplication) => {
 
   if (!application) {
-    return callback({
-      status: 400,
-      message: "Bad Request - Application is empty"
-    });
+    throw new BadRequestError('Application must be truthy!');
   }
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
@@ -28,10 +47,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
     const validationResult = validateApplication(application);
 
     if (!validationResult.success) {
-      return callback({
-        status: 400,
-        message: `Bad Request - Submission is invalid: ${ validationResult.errors.join(', ') }`
-      });
+      throw new BadRequestError(`Submission is invalid: ${validationResult.errors.join(', ')}`);
     }
   }
 
@@ -39,19 +55,13 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
   // NOTE: The check for whether a user is eligible to submit (i.e. if it's within the deadline, etc. is done within the write check)
   await editObject(
     requestUser,
-    "user",
+    'user',
     {
-      _id: requestUser._id
+      _id: requestUser._id,
     },
     {
-      hackerApplication: application
+      hackerApplication: application,
     },
-    (error: ErrorMessage, data: any) => {
-      if (error) {
-        return callback(error);
-      }
-
-    }
   );
 
   // Lastly, if the user intends to submit we will amend their user object with the new status
@@ -59,5 +69,5 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
     // TODO: Implement this too
   }
 
-  return callback(null, "Success");
+  return 'Success';
 };

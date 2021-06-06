@@ -19,10 +19,13 @@ apiRouter.use(express.json());
  * Get the result of a search query for any object type.
  */
 apiRouter.post('/get/:objectType', isOrganizer,(req: Request, res: Response) => {
-  getObject(req.executor,
-    req.params.objectType,
-    req.body,
-    logResponse(req, res)
+  logResponse(
+    req,
+    res,
+    getObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
   );
 });
 
@@ -32,11 +35,14 @@ apiRouter.post('/get/:objectType', isOrganizer,(req: Request, res: Response) => 
  * Edit object
  */
 apiRouter.post('/edit/:objectType', isOrganizer,(req: Request, res: Response) => {
-  editObject(req.executor,
-    req.params.objectType,
-    req.body.filter,
-    req.body.changes,
-    logResponse(req, res)
+  logResponse(
+    req,
+    res,
+    editObject(req.executor,
+      req.params.objectType,
+      req.body.filter,
+      req.body.changes
+    )
   );
 });
 
@@ -46,10 +52,13 @@ apiRouter.post('/edit/:objectType', isOrganizer,(req: Request, res: Response) =>
  * Delete objects based on a query
  */
 apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
-  deleteObject(req.executor,
-    req.params.objectType,
-    req.body,
-    logResponse(req, res)
+  logResponse(
+    req,
+    res,
+    deleteObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
   );
 });
 
@@ -59,10 +68,13 @@ apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
  * Create object
  */
 apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
-  createObject(req.executor,
-    req.params.objectType,
-    req.body,
-    logResponse(req, res)
+  logResponse(
+    req,
+    res,
+    createObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
   );
 });
 

@@ -12,6 +12,7 @@ import actionRouter from './routes/action';
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
+import { InternalServerError } from './types/types';
 
 const database = process.env.DATABASE || 'mongodb://localhost:27017/ht6backend';
 
@@ -75,9 +76,9 @@ mongoose.connect(database, {
 });
 
 app.use(function(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
-  logResponse(req, res)({
-    status: err.status || 500,
-    message: "An error occurred",
-    stacktrace: err.stack
-  })
+  logResponse(req, res, (
+    async () => {
+      throw new InternalServerError("An error occurred", err.stack);
+    }
+  )());
 } as ErrorRequestHandler);

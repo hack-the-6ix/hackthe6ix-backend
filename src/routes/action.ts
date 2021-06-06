@@ -4,10 +4,10 @@
 
 import express, { Request, Response } from 'express';
 import { getObject } from '../controller/ModelController';
-import { updateApplication } from '../controller/UserController';
+import { fetchUser, updateApplication } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
-import { ErrorMessage } from '../types/types';
+import { ErrorMessage, InternalServerError } from '../types/types';
 
 const actionRouter = express.Router();
 
@@ -17,33 +17,10 @@ const actionRouter = express.Router();
  * Get hacker profile
  */
 actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
-  getObject(
-    req.executor,
-    "user",
-    {
-      filter: {
-        _id: req.executor._id
-      },
-      size: "1"
-    },
-    (error: ErrorMessage, data: any) => {
-
-      let result: any;
-
-      if (!error) {
-        // We only want the first result, if any
-        result = data[0];
-
-        if (!result) {
-          error = {
-            status: 500,
-            message: "Unable to fetch user profile"
-          }
-        }
-      }
-
-      logResponse(req, res)(error, result);
-    }
+  logResponse(
+    req,
+    res,
+    fetchUser(req.executor)
   );
 });
 
@@ -53,11 +30,14 @@ actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
  * Submit/Save hacker application
  */
 actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
-  updateApplication(
-    req.executor,
-    req.body.submit,
-    req.body.application,
-    logResponse(req, res)
+  logResponse(
+    req,
+    res,
+    updateApplication(
+      req.executor,
+      req.body.submit,
+      req.body.application
+    )
   );
 });
 

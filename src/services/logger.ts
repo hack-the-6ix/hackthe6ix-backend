@@ -1,36 +1,48 @@
 import { Request, Response } from 'express';
-import { ErrorMessage } from '../types/types';
+import { HTTPError } from '../types/types';
 
 /**
- * Intercepts the callback from APIs calls and handles errors, or forwards data for a successful req.
+ * Handles the promise from APIs calls and handles errors, or forwards data for a successful req.
  *
  * @param req
  * @param res
+ * @param promise
  */
-export const logResponse = (req: Request, res: Response) => (error: ErrorMessage, data?: any) => {
-  if (error) {
-    // TODO: Add proper logger here
-    console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(error)}`);
+export const logResponse = (req: Request, res: Response, promise: Promise<any>) => {
 
-    // When we send out the actual error, we do NOT send the stacktrace by default for security
-    const body: any = {
-      message: error.message,
-      status: error.status
-    };
-
-    if (req?.executor?.roles?.organizer) {
-      body.stacktrace = error.stacktrace;
-    }
-
-    return res.status(error.status || 500).json(body);
-  } else {
+  promise
+  .then((data) => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
     return res.json({
       status: 200,
-      message: data
+      message: data,
     });
-  }
+  })
+  .catch((error) => {
+    // TODO: Add proper logger here
+    console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()}`);
+
+    const status = error.status || 500;
+
+    // When we send out the actual error, we do NOT send the stacktrace by default for security
+    const body: any = {
+      status: status,
+    };
+
+    if (error instanceof HTTPError || req?.executor?.roles?.organizer) {
+      body.message = error.message;
+    } else {
+      body.message = "An error occurred";
+    }
+
+    if (req?.executor?.roles?.organizer) {
+      body.stacktrace = error.stacktrace;
+    }
+
+    return res.status(status).json(body);
+  });
+
 };
