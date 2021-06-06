@@ -38,6 +38,20 @@ const validateApplication = (application: IApplication, applicationFields: any) 
   /**
    * TODO: Implement this
    *       Recursively go through all the fields to ensure the conditions are satisfied
+   *
+   *       Should also run this for saves (but less strict) to report user friendly write violations.
+   *       The checker for editObject is strict and will terminate immediately upon a failure. We don't
+   *       want the user to have to constantly resubmit.
+   *
+   *       Strict Mode - We will ensure ALL write checks succeed
+   *       Non-strict Mode - We will ensure all write checks for specified fields succeed
+   *
+   *       Problem arises when a user edits their submissions and puts themselves in an invalid submission state,
+   *       but not an invalid save state...
+   *
+   *       Solutions:
+   *       1. Add a separate checker for saving?
+   *       2. Add some more metadata that can be passed into the checker to let it know we're trying to validate for submission
    */
 
   return { success: true, errors: [] as string[] };
