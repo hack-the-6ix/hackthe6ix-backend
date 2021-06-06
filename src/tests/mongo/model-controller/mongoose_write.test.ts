@@ -1,5 +1,5 @@
-import { createObject, editObject } from '../../../controller/ModelController';
-import { WriteCheckRequest } from '../../../types/types';
+import { editObject } from '../../../controller/ModelController';
+import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from './db-handler';
 
@@ -37,153 +37,121 @@ describe('Model Write', () => {
                 field1: {
                   type: String,
                   writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-                }
-              }
-            }
-          }
-        }
+                },
+              },
+            },
+          },
+        },
       },
     }, 'RecursionWriteTest');
     const model = recursionCreateWriteTest['RecursionWriteTest'].mongoose;
 
-    test('Success', (done: any) => {
+    test('Success', async () => {
 
-      (async () => {
+      await model.create({});
+      const originalObject = await model.create({
+        test: {
+          huh: {
+            field1: 'Banana',
+          },
+        },
+      });
 
-        await model.create({});
-        const originalObject = await model.create({
+      expect((await model.find({})).length).toEqual(2);
+
+      const data = await editObject(
+        hackerUser,
+        'RecursionWriteTest',
+        {
           test: {
             huh: {
-              field1: "Banana"
-            }
-          }
-        });
-
-        expect((await model.find({})).length).toEqual(2);
-
-        editObject(
-          hackerUser,
-          'RecursionWriteTest',
-          {
-            test: {
-              huh: {
-                field1: "Banana"
-              }
-            }
+              field1: 'Banana',
+            },
           },
-          {
-            test: {
-              huh: {
-                field1: 'foobar',
-              }
-            }
-          },
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
-
-            try {
-              // Ensure no error
-              expect(error).toBeFalsy();
-
-              // Ensure only amended object is modified
-              expect(data.length).toEqual(1);
-              expect(data).toContainEqual(originalObject._id);
-
-              const resultObject = await model.find({_id: data[0]});
-              expect(resultObject.length).toEqual(1);
-
-              const resultJSON = resultObject[0].toJSON();
-              delete resultJSON['_id'];
-              delete resultJSON['id'];
-              delete resultJSON['__v'];
-
-              expect(resultJSON).toEqual({
-                test: {
-                  huh: {
-                    field1: 'foobar',
-                  }
-                }
-              });
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, recursionCreateWriteTest);
-
-      })();
-    });
-
-    test('Fail', (done: any) => {
-
-      (async () => {
-
-        await model.create({});
-        const originalObject = await model.create({
+        },
+        {
           test: {
             huh: {
-              field1: "Banana"
-            }
-          }
-        });
-
-        expect((await model.find({})).length).toEqual(2);
-
-        editObject(
-          hackerUser,
-          'RecursionWriteTest',
-          {
-            test: {
-              huh: {
-                field1: "Banana"
-              }
-            }
+              field1: 'foobar',
+            },
           },
-          {
-            test: {
-              huh: {
-                field1: 'ASdasdasd',
-              }
-            }
+        }, recursionCreateWriteTest);
+
+      // Ensure only amended object is modified
+      expect(data.length).toEqual(1);
+      expect(data).toContainEqual(originalObject._id);
+
+      const resultObject = await model.find({ _id: data[0] });
+      expect(resultObject.length).toEqual(1);
+
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
+
+      expect(resultJSON).toEqual({
+        test: {
+          huh: {
+            field1: 'foobar',
           },
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
+        },
+      });
 
-            try {
-              // Ensure no error
-              expect(error.message).toEqual("Write check violation!");
 
-              // Ensure no amendment made
-              expect(data).toBeFalsy();
-
-              const resultObject = await model.find({_id: originalObject._id});
-              expect(resultObject.length).toEqual(1);
-
-              const resultJSON = resultObject[0].toJSON();
-              delete resultJSON['_id'];
-              delete resultJSON['id'];
-              delete resultJSON['__v'];
-
-              expect(resultJSON).toEqual({
-                test: {
-                  huh: {
-                    field1: "Banana"
-                  }
-                }
-              });
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, recursionCreateWriteTest);
-
-      })();
     });
 
+    test('Fail', async () => {
+
+      await model.create({});
+      const originalObject = await model.create({
+        test: {
+          huh: {
+            field1: 'Banana',
+          },
+        },
+      });
+
+      expect((await model.find({})).length).toEqual(2);
+
+      expect(editObject(
+        hackerUser,
+        'RecursionWriteTest',
+        {
+          test: {
+            huh: {
+              field1: 'Banana',
+            },
+          },
+        },
+        {
+          test: {
+            huh: {
+              field1: 'ASdasdasd',
+            },
+          },
+        }, recursionCreateWriteTest,
+      )).rejects.toThrow(WriteDeniedError);
+
+      // Ensure no amendments were made
+      const resultObject = await model.find({ _id: originalObject._id });
+      expect(resultObject.length).toEqual(1);
+
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
+
+      expect(resultJSON).toEqual({
+        test: {
+          huh: {
+            field1: 'Banana',
+          },
+        },
+      });
+    });
   });
 
-  describe("Write check", () => {
+  describe('Write check', () => {
 
     const writeTestModel = generateTestModel({
       createCheck: true,
@@ -203,114 +171,81 @@ describe('Model Write', () => {
     const model = writeTestModel['WriteTest'].mongoose;
 
 
-    test('Success', (done: any) => {
+    test('Success', async () => {
 
-      (async () => {
+      await model.create({});
+      const originalObject = await model.create({
+        field1: 'Banana',
+        field2: 'Apple',
+      });
 
-        await model.create({});
-        const originalObject = await model.create({
-          field1: "Banana",
-          field2: "Apple"
-        });
+      expect((await model.find({})).length).toEqual(2);
 
-        expect((await model.find({})).length).toEqual(2);
+      const data = await editObject(
+        hackerUser,
+        'WriteTest',
+        {
+          field1: 'Banana',
+        },
+        {
+          field2: 'Orange',
+        }, writeTestModel,
+      );
 
-        editObject(
-          hackerUser,
-          'WriteTest',
-          {
-            field1: "Banana"
-          },
-          {
-            field2: "Orange"
-          },
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
+      // Ensure only amended object is modified
+      expect(data.length).toEqual(1);
+      expect(data).toContainEqual(originalObject._id);
 
-            try {
-              // Ensure no error
-              expect(error).toBeFalsy();
+      const resultObject = await model.find({ _id: data[0] });
+      expect(resultObject.length).toEqual(1);
 
-              // Ensure only amended object is modified
-              expect(data.length).toEqual(1);
-              expect(data).toContainEqual(originalObject._id);
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
 
-              const resultObject = await model.find({_id: data[0]});
-              expect(resultObject.length).toEqual(1);
-
-              const resultJSON = resultObject[0].toJSON();
-              delete resultJSON['_id'];
-              delete resultJSON['id'];
-              delete resultJSON['__v'];
-
-              expect(resultJSON).toEqual({
-                field1: "Banana",
-                field2: "Orange"
-              });
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, writeTestModel);
-
-      })();
+      expect(resultJSON).toEqual({
+        field1: 'Banana',
+        field2: 'Orange',
+      });
     });
 
-    test('Fail', (done: any) => {
+    test('Fail', async () => {
 
-      (async () => {
+      await model.create({});
+      const originalObject = await model.create({
+        field1: 'Banana',
+        field2: 'Apple',
+      });
 
-        await model.create({});
-        const originalObject = await model.create({
-          field1: "Banana",
-          field2: "Apple"
-        });
+      expect((await model.find({})).length).toEqual(2);
 
-        expect((await model.find({})).length).toEqual(2);
+      expect(editObject(
+        hackerUser,
+        'WriteTest',
+        {
+          field1: 'Banana',
+        },
+        {
+          field1: 'Orange',
+        }, writeTestModel
+      )).rejects.toThrow(WriteDeniedError);
 
-        editObject(
-          hackerUser,
-          'WriteTest',
-          {
-            field1: "Banana"
-          },
-          {
-            field1: "Orange"
-          },
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
+      // Ensure no changes made
+      const resultObject = await model.find({ _id: originalObject._id });
+      expect(resultObject.length).toEqual(1);
 
-            try {
-              // Ensure no error
-              expect(error.message).toEqual("Write check violation!");
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
 
-              // Ensure only amended object is modified
-              expect(data).toBeFalsy();
+      expect(resultJSON).toEqual({
+        field1: 'Banana',
+        field2: 'Apple',
+      });
 
-              const resultObject = await model.find({_id: originalObject._id});
-              expect(resultObject.length).toEqual(1);
-
-              const resultJSON = resultObject[0].toJSON();
-              delete resultJSON['_id'];
-              delete resultJSON['id'];
-              delete resultJSON['__v'];
-
-              expect(resultJSON).toEqual({
-                field1: "Banana",
-                field2: "Apple"
-              });
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, writeTestModel);
-
-      })();
     });
-
-
   });
 
 });
