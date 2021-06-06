@@ -100,7 +100,7 @@ dependent on the type of the field.
       type: String,
       
       // When we read, the value of `field1` will have a suffix of `is very cool!`
-      readInterceptor: (request: ReadInterceptRequest<ObjectType>) => request.value + " is very cool!"
+      readInterceptor: (request: ReadInterceptRequest<FieldType, ObjectType>) => request.value + " is very cool!"
       
       // When we write, we will prefix the value with `banana`
       writeInterceptor: (request: WriteInterceptRequest<FieldType, ObjectType>) => "banana" + request.value

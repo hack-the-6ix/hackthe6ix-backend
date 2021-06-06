@@ -36,7 +36,7 @@ describe('Model Write', () => {
               FIELDS: {
                 field1: {
                   type: String,
-                  writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+                  writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
                 }
               }
             }
@@ -192,7 +192,7 @@ describe('Model Write', () => {
       FIELDS: {
         field1: {
           type: String,
-          writeCheck: (request: WriteCheckRequest<string>) => request.fieldValue === 'foobar',
+          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
         },
         field2: {
           type: String,

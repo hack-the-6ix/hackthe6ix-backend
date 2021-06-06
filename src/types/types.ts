@@ -97,3 +97,56 @@ export class DeleteDeniedException extends Error {
     Object.setPrototypeOf(this, DeleteDeniedException.prototype);
   }
 }
+
+/**
+ * Corresponds to HTTP error codes
+ */
+export class HTTPError extends Error {
+  status: number;
+  stacktrace: string;
+  message: string;
+  name: string;
+
+  constructor(name: string, status: number, message: string, stacktrace?: string) {
+    super(`${name} - ${message || "An error occurred"} wtf ${ stacktrace }`);
+    this.status = status;
+    this.stacktrace = stacktrace;
+    this.message = message;
+    this.name = name;
+  }
+}
+
+export class InternalServerError extends HTTPError {
+  constructor(message: string, stacktrace?: string) {
+    super('InternalServerError', 500, message, stacktrace);
+    Object.setPrototypeOf(this, InternalServerError.prototype);
+  }
+}
+
+export class BadRequestError extends HTTPError {
+  constructor(message: string, stacktrace?: string) {
+    super('BadRequest', 400, message, stacktrace);
+    Object.setPrototypeOf(this, BadRequestError.prototype);
+  }
+}
+
+export class UnauthorizedError extends HTTPError {
+  constructor(message: string, stacktrace?: string) {
+    super('Unauthorized', 401, message, stacktrace);
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+  }
+}
+
+export class ForbiddenError extends HTTPError {
+  constructor(message: string, stacktrace?: string) {
+    super('Forbidden', 403, message, stacktrace);
+    Object.setPrototypeOf(this, ForbiddenError.prototype);
+  }
+}
+
+export class NotFoundError extends HTTPError {
+  constructor(message: string, stacktrace?: string) {
+    super('Not Found', 404, message, stacktrace);
+    Object.setPrototypeOf(this, NotFoundError.prototype);
+  }
+}

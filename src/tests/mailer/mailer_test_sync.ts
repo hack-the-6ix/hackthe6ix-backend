@@ -11,10 +11,7 @@ dotenv.config();
       'tester@henrytu.me',
       'tester4@henrytu.me',
       'tester13@henrytu.me'
-    ],
-    (error: { status: number, message: string }, data?: any) => {
-      console.log(error, data);
-    },
+    ]
   ));
 
 })();

@@ -65,7 +65,7 @@ describe('Model Read', () => {
       intercepted: {
         type: String,
         readCheck: true,
-        readInterceptor: (request: ReadInterceptRequest<string>) => request.requestUser.firstName === 'Banana' ? 'Intercepted!' : request.fieldValue,
+        readInterceptor: (request: ReadInterceptRequest<string, any>) => request.requestUser.firstName === 'Banana' ? 'Intercepted!' : request.fieldValue,
       },
     },
   };

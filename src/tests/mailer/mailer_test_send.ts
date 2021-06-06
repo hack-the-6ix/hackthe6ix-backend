@@ -8,10 +8,7 @@ dotenv.config();
     'tester@henrytu.me',
     '2',
     'This is a test',
-    {},
-    (error: { status: number, message: string }, data?: any) => {
-      console.log(error, data);
-    },
+    {}
   ));
 
 })();
