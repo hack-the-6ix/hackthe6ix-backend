@@ -41,7 +41,7 @@ describe('Model Create', () => {
       {
         field1: "Banana"
       },
-      async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+      async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
         try {
           // Ensure no errors
@@ -76,7 +76,7 @@ describe('Model Create', () => {
         hackerUser,
         'SuccessCreateTest',
         {},
-        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             // Ensure no errors
@@ -109,7 +109,7 @@ describe('Model Create', () => {
         hackerUser,
         'FailCreateTest',
         {},
-        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             // Ensure error is sent
@@ -161,7 +161,7 @@ describe('Model Create', () => {
             field1: 'foobar',
           }
         },
-        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             // Ensure no errors
@@ -207,7 +207,7 @@ describe('Model Create', () => {
             field1: 'barbar',
           }
         },
-        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             // Ensure error detected

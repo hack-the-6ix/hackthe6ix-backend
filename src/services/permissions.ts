@@ -64,14 +64,14 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
   if (!await injectExecutor(req)) {
     return res.status(401).send({
       message: 'Access Denied - Invalid Token',
-      code: 401,
+      status: 401,
     } as ErrorMessage);
   }
 
   if (!req.executor.roles[role]) {
     return res.status(403).send({
       message: 'Access Denied - Insufficient permissions',
-      code: 403,
+      status: 403,
     } as ErrorMessage);
   }
 

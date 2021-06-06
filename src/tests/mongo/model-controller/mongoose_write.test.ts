@@ -78,7 +78,7 @@ describe('Model Write', () => {
               }
             }
           },
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // Ensure no error
@@ -146,7 +146,7 @@ describe('Model Write', () => {
               }
             }
           },
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // Ensure no error
@@ -224,7 +224,7 @@ describe('Model Write', () => {
           {
             field2: "Orange"
           },
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // Ensure no error
@@ -278,7 +278,7 @@ describe('Model Write', () => {
           {
             field1: "Orange"
           },
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // Ensure no error

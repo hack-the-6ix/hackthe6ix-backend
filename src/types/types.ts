@@ -1,7 +1,7 @@
 import Request from 'express';
 import { IUser } from '../models/user/fields';
 
-export type ErrorMessage = { code: number, message: string, stacktrace?: string };
+export type ErrorMessage = { status: number, message: string, stacktrace?: string };
 
 /**
  * message - user facing message (do not include confidential information)
@@ -33,38 +33,38 @@ export type UniverseState = {
 /**
  * When writing a model, this object is passed onto the validator
  */
-export type WriteCheckRequest<T> = {
+export type WriteCheckRequest<T, O> = {
   fieldValue: T,      // Field we're updating
   requestUser: IUser,   // User producing the request
-  targetObject: any,   // State of the object we're modifying (the entire raw object)
+  targetObject: O,   // State of the object we're modifying (the entire raw object)
   universeState: UniverseState  // External variables that may be relevant to us
 }
 
 /**
  * Passed into the write interceptor
  */
-export type WriteInterceptRequest<T> = WriteCheckRequest<T>;
+export type WriteInterceptRequest<T, O> = WriteCheckRequest<T, O>;
 
 /**
  * When reading a model, this object is passed onto the verifier
  */
-export type ReadCheckRequest = {
+export type ReadCheckRequest<O> = {
   requestUser: IUser,
-  targetObject: any,
+  targetObject: O,
   universeState: UniverseState
 }
 
 /**
  * Passed into the read interceptor
  */
-export type ReadInterceptRequest<T> = WriteCheckRequest<T>;
+export type ReadInterceptRequest<T, O> = WriteCheckRequest<T, O>;
 
 /**
  * When deleting a model, this object is passed onto the verifier
  */
-export type DeleteCheckRequest = {
+export type DeleteCheckRequest<O> = {
   requestUser: IUser,
-  targetObject: any,
+  targetObject: O,
   universeState: UniverseState
 }
 

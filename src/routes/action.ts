@@ -4,6 +4,7 @@
 
 import express, { Request, Response } from 'express';
 import { getObject } from '../controller/ModelController';
+import { updateApplication } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
 import { ErrorMessage } from '../types/types';
@@ -15,8 +16,9 @@ const actionRouter = express.Router();
  *
  * Get hacker profile
  */
-actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
-  getObject(req.executor,
+actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
+  getObject(
+    req.executor,
     "user",
     {
       filter: {
@@ -34,7 +36,7 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
 
         if (!result) {
           error = {
-            code: 500,
+            status: 500,
             message: "Unable to fetch user profile"
           }
         }
@@ -46,10 +48,18 @@ actionRouter.get('/profile', isHacker,(req: Request, res: Response) => {
 });
 
 /**
- * TODO: Add endpoint to submit/save application
+ * (Hacker)
  *
- *       /submit -> validates submission and locks application (if submit signal sent)
+ * Submit/Save hacker application
  */
+actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
+  updateApplication(
+    req.executor,
+    req.body.submit,
+    req.body.application,
+    logResponse(req, res)
+  );
+});
 
 /**
  * TODO: Add endpoint to RSVP

@@ -15,21 +15,21 @@ export const logResponse = (req: Request, res: Response) => (error: ErrorMessage
     // When we send out the actual error, we do NOT send the stacktrace by default for security
     const body: any = {
       message: error.message,
-      code: error.code
+      status: error.status
     };
 
     if (req?.executor?.roles?.organizer) {
       body.stacktrace = error.stacktrace;
     }
 
-    return res.status(error.code || 500).json(body);
+    return res.status(error.status || 500).json(body);
   } else {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
     return res.json({
-      code: 200,
+      status: 200,
       message: data
     });
   }

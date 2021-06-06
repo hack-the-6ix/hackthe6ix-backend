@@ -22,7 +22,16 @@ const hackerApplication = {
    * TODO: Add a dynamic way to check for whether or not this user can submit
    */
 
-  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser) || (isUser(request.requestUser, request.targetObject) && !request.targetObject.status.applied && request.universeState.public.globalApplicationDeadline <= Date.now()),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) =>
+            isOrganizer(request.requestUser) ||
+            (
+              isUser(request.requestUser, request.targetObject) &&
+              !request.targetObject.status.applied &&
+              (
+                request.universeState.public.globalApplicationDeadline <= Date.now() ||
+                request.targetObject.personalApplicationDeadline <= Date.now()
+              )
+            ),
   readCheck: true,
 
   FIELDS: {
@@ -127,7 +136,7 @@ const hackerApplication = {
     /**
      * TODO: Add postal code validator
      */
-    postalCode: {
+    postalstatus: {
       type: String,
       caption: 'Postal Code',
       inTextSearch: true,
@@ -223,7 +232,7 @@ const hackerApplication = {
       caption: 'Proud project',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -233,7 +242,7 @@ const hackerApplication = {
       caption: 'Requested workshop',
 
       // Cannot select anything other than 3 workshops
-      writeCheck: (request: WriteCheckRequest<string[]>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
+      writeCheck: (request: WriteCheckRequest<string[], IUser>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
       readCheck: true,
     },
 
@@ -242,7 +251,7 @@ const hackerApplication = {
       caption: 'Accomplishment',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -275,8 +284,8 @@ const hackerApplication = {
 // Internal FIELDS; Only organizers can access them
 const internal = {
 
-  writeCheck: (request: WriteCheckRequest<any>) => isOrganizer(request.requestUser),
-  readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) => isOrganizer(request.requestUser),
+  readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
 
   FIELDS: {
 
@@ -315,7 +324,7 @@ const internal = {
 const status = {
 
   // Only organizers can modify statuses
-  writeCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+  writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
   readCheck: true,
 
   FIELDS: {
@@ -327,7 +336,7 @@ const status = {
       caption: 'Status Released',
 
       writeCheck: true,
-      readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
     },
 
     applied: {
@@ -509,11 +518,11 @@ export const fields = {
    *
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
-  writeCheck: (request: WriteCheckRequest<any>) => isUserOrOrganizer(request.requestUser, request.targetObject),
-  readCheck: (request: ReadCheckRequest) => isUserOrOrganizer(request.requestUser, request.targetObject),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+  readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-  deleteCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
-  createCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  deleteCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
+  createCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
 
   // Root FIELDS
   FIELDS: {
@@ -524,7 +533,7 @@ export const fields = {
       default: 0,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },
 
     samlNameID: {
@@ -534,7 +543,7 @@ export const fields = {
       index: true,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },
 
     firstName: {
@@ -543,7 +552,7 @@ export const fields = {
       caption: 'First Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -553,7 +562,7 @@ export const fields = {
       caption: 'Last Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -563,7 +572,7 @@ export const fields = {
       caption: 'Email',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -573,7 +582,7 @@ export const fields = {
       caption: 'RSVP Deadline',
       default: -1,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -584,7 +593,7 @@ export const fields = {
       caption: 'Personal Application Deadline',
       default: -1,
 
-      writeCheck: (request: WriteCheckRequest<string>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -625,37 +634,38 @@ export interface IUser extends mongoose.Document {
     confirmed: boolean,
     checkedIn: boolean,
   },
-  hackerApplication: {
-    emailConsent: boolean,
-    gender: string,
-    pronouns: string,
-    ethnicity: string,
-    timezone: string
-    wantSwag: boolean,
-    addressLine1: string,
-    addressLine2: string,
-    city: string,
-    province: string,
-    postalCode: string,
-    school: string,
-    program: string,
-    yearsOfStudy: string,
-    hackathonsAttended: string,
-    resumeLink: string,
-    githubLink: string,
-    portfolioLink: string,
-    linkedinLink: string,
-    projectEssay: string,
-    requestedWorkshops: string[],
-    attendingEssay: string,
-    mlhCOC: boolean,
-    mlhEmail: boolean,
-    mlhData: boolean
-
-  },
+  hackerApplication: IApplication,
   internal: {
     notes: string,
     applicationScore: number,
     reviewer: string
   }
+}
+
+export interface IApplication {
+  emailConsent: boolean,
+  gender: string,
+  pronouns: string,
+  ethnicity: string,
+  timezone: string
+  wantSwag: boolean,
+  addressLine1: string,
+  addressLine2: string,
+  city: string,
+  province: string,
+  postalstatus: string,
+  school: string,
+  program: string,
+  yearsOfStudy: string,
+  hackathonsAttended: string,
+  resumeLink: string,
+  githubLink: string,
+  portfolioLink: string,
+  linkedinLink: string,
+  projectEssay: string,
+  requestedWorkshops: string[],
+  attendingEssay: string,
+  mlhCOC: boolean,
+  mlhEmail: boolean,
+  mlhData: boolean
 }

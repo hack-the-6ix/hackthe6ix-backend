@@ -47,12 +47,12 @@ governed through a system of tester functions embedded in the models.
 ```typescript
 {
   // Rule here says that only organizers can read, delete, and create, but anyone is allowed to write
-  readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.roles.organizer,
+  readCheck: (request: ReadCheckRequest<ObjectType>) => request.requestUser.jwt.roles.organizer,
   writeCheck: true,
   
   // NOTE: These checks are ONLY performed on the top level
-  deleteCheck: (request: DeleteCheckRequest) => request.requestUser.jwt.roles.organizer,
-  createCheck: (request: CreateCheckRequest) => request.requestUser.jwt.roles.organizer,
+  deleteCheck: (request: DeleteCheckRequest<ObjectType>) => request.requestUser.jwt.roles.organizer,
+  createCheck: (request: CreateCheckRequest<ObjectType>) => request.requestUser.jwt.roles.organizer,
   
   fields: {
     field1: {
@@ -62,8 +62,8 @@ governed through a system of tester functions embedded in the models.
       
       // The read will only succeed if the user has a uid of 1234, and 
       fieldValue
-      readCheck: (request: ReadCheckRequest) => request.requestUser.jwt.uid == 1234,
-      writeCheck: (request: WriteCheckRequest) => request.value.length < 5, 
+      readCheck: (request: ReadCheckRequest<ObjectType>) => request.requestUser.jwt.uid == 1234,
+      writeCheck: (request: WriteCheckRequest<FieldType, ObjectType>) => request.value.length < 5, 
     }
   }
 }
@@ -100,10 +100,10 @@ dependent on the type of the field.
       type: String,
       
       // When we read, the value of `field1` will have a suffix of `is very cool!`
-      readInterceptor: (request: ReadInterceptRequest) => request.value + " is very cool!"
+      readInterceptor: (request: ReadInterceptRequest<ObjectType>) => request.value + " is very cool!"
       
       // When we write, we will prefix the value with `banana`
-      writeInterceptor: (request: WriteInterceptRequest) => "banana" + request.value
+      writeInterceptor: (request: WriteInterceptRequest<FieldType, ObjectType>) => "banana" + request.value
     }
   }
 }

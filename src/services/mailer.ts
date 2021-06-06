@@ -26,13 +26,13 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
     }));
 
     if (result.status != 200 || !result.data) {
-      return callback({ code: 500, message: 'Unable to send email' });
+      return callback({ status: 500, message: 'Unable to send email' });
     }
 
     return callback(null, { message: 'Success' });
 
   } catch (e) {
-    return callback({ code: 500, message: 'Unable to send email', stacktrace: e });
+    return callback({ status: 500, message: 'Unable to send email', stacktrace: e });
   }
 
 };
@@ -60,7 +60,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
     const currentEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 
     if (currentEmailsResult.status != 200 || !currentEmailsResult?.data?.data?.subscriptions) {
-      return callback({ code: 500, message: 'Unable to fetch existing subscribers' });
+      return callback({ status: 500, message: 'Unable to fetch existing subscribers' });
     }
 
     const beforeSubscribers = new Set<string>(
@@ -84,7 +84,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     for (const result of subscribeNewResults) {
       if (result.status != 200 || !result.data) {
-        return callback({ code: 500, message: 'Unable to update subscriber' });
+        return callback({ status: 500, message: 'Unable to update subscriber' });
       }
     }
 
@@ -99,7 +99,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     for (const result of deleteOldResults) {
       if (result.status != 200 || !result.data) {
-        return callback({ code: 500, message: 'Unable to delete subscriber' });
+        return callback({ status: 500, message: 'Unable to delete subscriber' });
       }
     }
 
@@ -107,7 +107,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
     const updatedEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 
     if (updatedEmailsResult.status != 200 || !updatedEmailsResult?.data?.data?.subscriptions) {
-      return callback({ code: 500, message: 'Unable to verify subscribers' });
+      return callback({ status: 500, message: 'Unable to verify subscribers' });
     }
 
     const updatedSubscribers = new Set<string>(
@@ -118,19 +118,19 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     // Verify length of mailing list
     if (updatedSubscribers.size != emails.length) {
-      return callback({ code: 500, message: 'Mismatch length between updated and target emails!' });
+      return callback({ status: 500, message: 'Mismatch length between updated and target emails!' });
     }
 
     // Verify all emails in list are valid
     for (const email of emails) {
       if (!updatedSubscribers.has(email)) {
-        return callback({ code: 500, message: 'Mismatch between updated and target emails!' });
+        return callback({ status: 500, message: 'Mismatch between updated and target emails!' });
       }
     }
 
 
     return callback(null, { message: 'Success', added: toBeAdded, deleted: toBeDeleted });
   } catch (e) {
-    return callback({ code: 500, message: 'Unable to sync mailing list', stacktrace: e });
+    return callback({ status: 500, message: 'Unable to sync mailing list', stacktrace: e });
   }
 };

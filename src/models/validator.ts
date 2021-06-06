@@ -12,11 +12,11 @@ export const isUser = (requestUser: IUser, targetUser: IUser) => requestUser._id
 export const isUserOrOrganizer = (requestUser: IUser, targetUser: IUser) => isOrganizer(requestUser) || isUser(requestUser, targetUser);
 
 /* Value properties */
-export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[]>) => request.fieldValue && request?.fieldValue.length <= maxLength;
-export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[]>) => request.fieldValue && request?.fieldValue.length >= minLength;
+export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[], any>) => request.fieldValue && request?.fieldValue.length <= maxLength;
+export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[], any>) => request.fieldValue && request?.fieldValue.length >= minLength;
 
 // Validate that all selections are valid
-export const multiInEnum = (validStates: string[]) => (request: WriteCheckRequest<string[]>) => {
+export const multiInEnum = (validStates: string[]) => (request: WriteCheckRequest<string[], any>) => {
   for (const x of request?.fieldValue || []) {
     if (validStates.indexOf(x) == -1) {
       return false;
@@ -26,4 +26,4 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
   return true;
 };
 
-export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string>) => validStates.indexOf(request?.fieldValue) != -1;
+export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string, any>) => validStates.indexOf(request?.fieldValue) != -1;

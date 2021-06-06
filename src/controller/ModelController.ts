@@ -29,8 +29,6 @@ const models = {
 /**
  * Fetch metadata about the universe first that might be necessary for making validation decisions
  * e.g. whether applications are currently open, etc.
- *
- * TODO: Update this with actual state
  */
 const fetchUniverseState = async (): Promise<UniverseState> => {
   const settings = await Settings.findOne({}) || { universe: {} as UniverseState };
@@ -40,7 +38,7 @@ const fetchUniverseState = async (): Promise<UniverseState> => {
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
  */
-export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest | WriteCheckRequest<any> | CreateCheckRequest<any> | DeleteCheckRequest) => {
+export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<any> | WriteCheckRequest<any, any> | CreateCheckRequest<any> | DeleteCheckRequest<any>) => {
   try {
     return checkerFunction(request);
   } catch (e) {
@@ -60,7 +58,7 @@ export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest 
  * @param object
  * @param request
  */
-const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest) => {
+const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>) => {
 
   const out: any = {};
 
@@ -143,7 +141,7 @@ export const getObject = async (
 
   if (objectModel === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid Object Type',
     });
   }
@@ -152,7 +150,7 @@ export const getObject = async (
   try {
     if (!query) {
       return callback({
-        code: 400,
+        status: 400,
         message: 'Invalid request! Must specify page and size in query!',
       });
     }
@@ -172,14 +170,14 @@ export const getObject = async (
 
     if (page <= 0 || !page) {
       return callback({
-        code: 400,
+        status: 400,
         message: 'Invalid request! Page must be >= 1!',
       });
     }
 
     if (size <= 0 || !size) {
       return callback({
-        code: 400,
+        status: 400,
         message: 'Invalid request! Size must be >= 1!',
       });
     }
@@ -193,7 +191,7 @@ export const getObject = async (
 
     if (query.sortCriteria && !['asc', 'desc'].includes(query.sortCriteria)) {
       return callback({
-        code: 400,
+        status: 400,
         message: 'Invalid sort criteria! Must be asc or desc!!',
       });
     }
@@ -266,14 +264,14 @@ export const getObject = async (
     return callback(null, out);
   } catch (e) {
     return callback({
-      code: 500,
+      status: 500,
       message: 'An error occurred',
       stacktrace: e.toString(),
     });
   }
 };
 
-const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckRequest<any>) => {
+const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckRequest<any, any>) => {
   if (!rawFields || !changes) {
     throw Error('Field or object is not truthy!');
   }
@@ -334,21 +332,21 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
 
   if (objectModel === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid Object Type',
     });
   }
 
   if (filter === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid filter',
     });
   }
 
   if (changes === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid changes',
     });
   }
@@ -384,13 +382,13 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
   } catch (e) {
     if (e instanceof WriteDeniedException) {
       return callback({
-        code: 401,
+        status: 401,
         message: 'Write check violation!',
         stacktrace: e.toString(),
       });
     } else {
       return callback({
-        code: 500,
+        status: 500,
         message: 'An error occurred',
         stacktrace: e.toString(),
       });
@@ -399,7 +397,7 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
 };
 
 
-const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest) => {
+const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) => {
   if (!rawFields) {
     throw Error('Field is not truthy!');
   }
@@ -433,14 +431,14 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
 
   if (objectModel === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid Object Type',
     });
   }
 
   if (filter === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid filter',
     });
   }
@@ -474,13 +472,13 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
   } catch (e) {
     if (e instanceof DeleteDeniedException) {
       return callback({
-        code: 401,
+        status: 401,
         message: 'Delete check violation!',
         stacktrace: e.toString(),
       });
     } else {
       return callback({
-        code: 500,
+        status: 500,
         message: 'An error occurred',
         stacktrace: e.toString(),
       });
@@ -528,14 +526,14 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
 
   if (objectModel === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid Object Type',
     });
   }
 
   if (parameters === undefined) {
     return callback({
-      code: 400,
+      status: 400,
       message: 'Invalid parameters',
     });
   }
@@ -556,19 +554,19 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
   } catch (e) {
     if (e instanceof WriteDeniedException) {
       return callback({
-        code: 401,
+        status: 401,
         message: 'Write check violation!',
         stacktrace: e.toString(),
       });
     } else if (e instanceof CreateDeniedException) {
       return callback({
-        code: 401,
+        status: 401,
         message: 'Create check violation!',
         stacktrace: e.toString(),
       });
     } else {
       return callback({
-        code: 500,
+        status: 500,
         message: 'An error occurred',
         stacktrace: e.toString(),
       });

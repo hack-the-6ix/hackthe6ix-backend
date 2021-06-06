@@ -47,7 +47,7 @@ describe('Model Delete', () => {
             $ne: "Banana" // We should only be deleting non-bananas
           }
         },
-        async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
           try {
             // No errors
@@ -91,7 +91,7 @@ describe('Model Delete', () => {
           hackerUser,
           'SuccessDeleteTest',
           {},
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // No error
@@ -133,7 +133,7 @@ describe('Model Delete', () => {
           hackerUser,
           'FailDeleteTest',
           {},
-          async (error: { code: number, message: string, stacktrace?: string }, data?: any) => {
+          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
 
             try {
               // We get an error

@@ -46,7 +46,7 @@ const saml = {
  */
 const universe = {
 
-  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any, ISettings>) => isAdmin(request.requestUser),
   readCheck: true,
 
   FIELDS: {
@@ -77,7 +77,7 @@ const universe = {
 
     private: {
 
-      readCheck: (request: ReadCheckRequest) => isOrganizer(request.requestUser),
+      readCheck: (request: ReadCheckRequest<ISettings>) => isOrganizer(request.requestUser),
       writeCheck: true,
 
       FIELDS: {
@@ -107,7 +107,7 @@ const universe = {
 export const fields = {
 
   readCheck: true,
-  writeCheck: (request: WriteCheckRequest<any>) => isAdmin(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any, ISettings>) => isAdmin(request.requestUser),
 
   FIELDS: {
     saml: saml,

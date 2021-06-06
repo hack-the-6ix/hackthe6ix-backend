@@ -162,6 +162,44 @@ Note that all inputs will be validated using `writeCheck`.
 
 ## Action - Operations for specific object types
 
+### GET - Get hacker profile (Hacker)
+`/api/action/profile`
+
+Get the sanitized user object corresponding to the requesting user.
+
+#### Output Specification
+```
+{
+  status: 200,
+  data: {
+    // User object goes here
+  }
+}
+```
+
+### POST - Update Application (Hacker)
+`/api/action/updateapp`
+
+Update the hacker application
+
+#### Input Specification
+```
+{
+  submit: true, // Whether to mark the application for submission
+  application: {
+    // Application content goes here
+  }
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "Success" 
+}
+```
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata

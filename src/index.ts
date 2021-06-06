@@ -76,7 +76,7 @@ mongoose.connect(database, {
 
 app.use(function(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
   logResponse(req, res)({
-    code: err.status || 500,
+    status: err.status || 500,
     message: "An error occurred",
     stacktrace: err.stack
   })

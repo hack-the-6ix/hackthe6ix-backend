@@ -9,7 +9,7 @@ dotenv.config();
     '2',
     'This is a test',
     {},
-    (error: { code: number, message: string }, data?: any) => {
+    (error: { status: number, message: string }, data?: any) => {
       console.log(error, data);
     },
   ));
