@@ -1,4 +1,5 @@
 import { deleteObject } from '../../../controller/ModelController';
+import { DeleteDeniedError } from '../../../types/types';
 import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from './db-handler';
 
@@ -19,7 +20,7 @@ afterAll(async () => await dbHandler.closeDatabase());
 
 describe('Model Delete', () => {
 
-  test('Does it actually delete?', (done: any) => {
+  test('Does it actually delete?', async () => {
     const successDeleteTest = generateTestModel({
       deleteCheck: true,
       FIELDS: {
@@ -30,132 +31,84 @@ describe('Model Delete', () => {
     }, 'DeleteTest');
     const model = successDeleteTest['DeleteTest'].mongoose;
 
-    (async () => {
+    // Create some objects to fill the DB
+    await model.create({ field1: "Banana" });
+    const fail1 = await model.create({});
+    const fail2 = await model.create({});
+    const resultObject1 = await model.find({});
+    expect(resultObject1.length).toEqual(3);
 
-      // Create some objects to fill the DB
-      await model.create({ field1: "Banana" });
-      const fail1 = await model.create({});
-      const fail2 = await model.create({});
-      const resultObject = await model.find({});
-      expect(resultObject.length).toEqual(3);
+    const data = await deleteObject(
+      hackerUser,
+      'DeleteTest',
+      {
+        field1: {
+          $ne: "Banana" // We should only be deleting non-bananas
+        }
+      }, successDeleteTest);
 
-      deleteObject(
-        hackerUser,
-        'DeleteTest',
-        {
-          field1: {
-            $ne: "Banana" // We should only be deleting non-bananas
-          }
-        },
-        async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
+    // Non-bananas deleted
+    const resultObject2 = await model.find({});
+    expect(resultObject2.length).toEqual(1);
 
-          try {
-            // No errors
-            expect(error).toBeFalsy();
-
-            // Non-bananas deleted
-            const resultObject = await model.find({});
-            expect(resultObject.length).toEqual(1);
-
-            // Verify deleted IDs are returned
-            expect(data).toContainEqual(fail1._id);
-            expect(data).toContainEqual(fail2._id);
-            expect(data.length).toEqual(2);
-
-            done();
-          } catch (e) {
-            done(e);
-          }
-
-        }, successDeleteTest);
-    })();
-
+    // Verify deleted IDs are returned
+    expect(data).toContainEqual(fail1._id);
+    expect(data).toContainEqual(fail2._id);
+    expect(data.length).toEqual(2);
   });
 
   describe('Delete Check', () => {
-    test('Success', (done: any) => {
+    test('Success', async () => {
       const successDeleteTest = generateTestModel({
         deleteCheck: true,
         FIELDS: {},
       }, 'SuccessDeleteTest');
       const model = successDeleteTest['SuccessDeleteTest'].mongoose;
 
-      (async () => {
+      // Create some objects to fill the DB
+      const originalObject = await model.create({});
+      const resultObject1 = await model.find({});
+      expect(resultObject1.length).toEqual(1);
 
-        // Create some objects to fill the DB
-        const originalObject = await model.create({});
-        const resultObject = await model.find({});
-        expect(resultObject.length).toEqual(1);
+      const data = await deleteObject(
+        hackerUser,
+        'SuccessDeleteTest',
+        {},
+        successDeleteTest
+      );
 
-        deleteObject(
-          hackerUser,
-          'SuccessDeleteTest',
-          {},
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
+      // Object deleted
+      const resultObject2 = await model.find({});
+      expect(resultObject2.length).toEqual(0);
 
-            try {
-              // No error
-              expect(error).toBeFalsy();
-
-              // Object deleted
-              const resultObject = await model.find({});
-              expect(resultObject.length).toEqual(0);
-
-              // Verify deleted IDs are returned
-              expect(data).toContainEqual(originalObject._id);
-              expect(data.length).toEqual(1);
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, successDeleteTest);
-      })();
-
+      // Verify deleted IDs are returned
+      expect(data).toContainEqual(originalObject._id);
+      expect(data.length).toEqual(1);
     });
 
-    test('Fail', (done: any) => {
+    test('Fail', async () => {
       const successDeleteTest = generateTestModel({
         deleteCheck: false,
         FIELDS: {},
       }, 'FailDeleteTest');
       const model = successDeleteTest['FailDeleteTest'].mongoose;
 
-      (async () => {
+      // Create some objects to fill the DB
+      await model.create({});
+      const resultObject1 = await model.find({});
+      expect(resultObject1.length).toEqual(1);
 
-        // Create some objects to fill the DB
-        await model.create({});
-        const resultObject = await model.find({});
-        expect(resultObject.length).toEqual(1);
+      expect(deleteObject(
+        hackerUser,
+        'FailDeleteTest',
+        {},
+        successDeleteTest
+      )).rejects.toThrow(DeleteDeniedError);
 
-        deleteObject(
-          hackerUser,
-          'FailDeleteTest',
-          {},
-          async (error: { status: number, message: string, stacktrace?: string }, data?: any) => {
-
-            try {
-              // We get an error
-              expect(error.message).toEqual('Delete check violation!');
-
-              // Database is still intact
-              const resultObject = await model.find({});
-              expect(resultObject.length).toEqual(1);
-
-              // Verify nothing is returned under data
-              expect(data).toBeFalsy();
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-
-          }, successDeleteTest);
-      })();
-
+      // Database is still intact
+      const resultObject2 = await model.find({});
+      expect(resultObject2.length).toEqual(1);
     });
   });
-
 });
 
