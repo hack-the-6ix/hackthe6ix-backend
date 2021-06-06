@@ -22,12 +22,10 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
     });
   })
   .catch((error) => {
-    // TODO: Add proper logger here
-    console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()}`);
 
     const status = error.status || 500;
 
-    // When we send out the actual error, we do NOT send the stacktrace by default for security
+    // When we send out the response, we do NOT send the full error by default for security
     const body: any = {
       status: status,
     };
@@ -39,8 +37,11 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
     }
 
     if (req?.executor?.roles?.organizer) {
-      body.stacktrace = error.stacktrace;
+      body.error = error.error;
     }
+
+    // TODO: Add proper logger here
+    console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()} ${JSON.stringify(body)}`);
 
     return res.status(status).json(body);
   });

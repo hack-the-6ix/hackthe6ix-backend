@@ -1,7 +1,7 @@
 import Request from 'express';
 import { IUser } from '../models/user/fields';
 
-export type ErrorMessage = { status: number, message: string, stacktrace?: string };
+export type ErrorMessage = { status: number, message: string, error?: string };
 
 /**
  * We will inject the executor user's object into the request
@@ -76,71 +76,71 @@ export type CreateCheckRequest<T> = {
  */
 export class HTTPError extends Error {
   status: number;
-  stacktrace: string;
+  error: string;
   message: string;
   name: string;
 
-  constructor(name: string, status: number, message: string, stacktrace?: string | Error) {
-    super(`${name} - ${message || 'An error occurred'}\n${stacktrace}`);
+  constructor(name: string, status: number, message: string, error?: string | Error) {
+    super(`${name} - ${message || 'An error occurred'}\n${error}`);
     this.status = status;
-    this.stacktrace = (stacktrace || '').toString();
+    this.error = (error || '').toString();
     this.message = message;
     this.name = name;
   }
 }
 
 export class InternalServerError extends HTTPError {
-  constructor(message?: string, stacktrace?: string | Error) {
-    super('InternalServerError', 500, message, stacktrace);
+  constructor(message?: string, error?: string | Error) {
+    super('InternalServerError', 500, message, error);
     Object.setPrototypeOf(this, InternalServerError.prototype);
   }
 }
 
 export class BadRequestError extends HTTPError {
-  constructor(message?: string, stacktrace?: string | Error) {
-    super('BadRequest', 400, message, stacktrace);
+  constructor(message?: string, error?: string | Error) {
+    super('BadRequest', 400, message, error);
     Object.setPrototypeOf(this, BadRequestError.prototype);
   }
 }
 
 export class UnauthorizedError extends HTTPError {
-  constructor(message?: string, stacktrace?: string | Error) {
-    super('Unauthorized', 401, message, stacktrace);
+  constructor(message?: string, error?: string | Error) {
+    super('Unauthorized', 401, message, error);
     Object.setPrototypeOf(this, UnauthorizedError.prototype);
   }
 }
 
 export class ForbiddenError extends HTTPError {
-  constructor(message?: string, stacktrace?: string | Error) {
-    super('Forbidden', 403, message, stacktrace);
+  constructor(message?: string, error?: string | Error) {
+    super('Forbidden', 403, message, error);
     Object.setPrototypeOf(this, ForbiddenError.prototype);
   }
 }
 
 export class NotFoundError extends HTTPError {
-  constructor(message?: string, stacktrace?: string | Error) {
-    super('Not Found', 404, message, stacktrace);
+  constructor(message?: string, error?: string | Error) {
+    super('Not Found', 404, message, error);
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 }
 
 export class CreateDeniedError extends ForbiddenError {
-  constructor(stacktrace: string) {
-    super("Create Denied", stacktrace);
+  constructor(error: string) {
+    super("Create Denied", error);
     Object.setPrototypeOf(this, CreateDeniedError.prototype);
   }
 }
 
 export class WriteDeniedError extends ForbiddenError {
-  constructor(stacktrace: string) {
-    super("Write Denied", stacktrace);
+  constructor(error: string) {
+    super("Write Denied", error);
     Object.setPrototypeOf(this, WriteDeniedError.prototype);
   }
 }
 
 export class DeleteDeniedError extends ForbiddenError {
-  constructor(stacktrace: string) {
-    super("Delete Denied", stacktrace);
+  constructor(error: string) {
+    super("Delete Denied", error);
     Object.setPrototypeOf(this, DeleteDeniedError.prototype);
   }
 }
