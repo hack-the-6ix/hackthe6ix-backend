@@ -2,7 +2,7 @@ import { createObject } from '../../../controller/ModelController';
 import { CreateDeniedError, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import { generateTestModel, hackerUser } from '../test-utils';
 
-import * as dbHandler from './db-handler';
+import * as dbHandler from '../db-handler';
 
 /**
  * Connect to a new in-memory database before running any tests.

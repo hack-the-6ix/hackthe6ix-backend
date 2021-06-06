@@ -121,7 +121,7 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
                     id: userInfo._id,
                     samlNameID: name_id,
                     samlSessionIndex: saml_response.user.session_index,
-                    groups: userInfo.roles
+                    roles: userInfo.roles
                 });
 
                 return res.json({

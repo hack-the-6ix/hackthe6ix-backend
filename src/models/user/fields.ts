@@ -16,7 +16,7 @@ import {
  */
 
 // Main application
-const hackerApplication = {
+export const hackerApplication = {
 
   /**
    * TODO: Add a dynamic way to check for whether or not this user can submit

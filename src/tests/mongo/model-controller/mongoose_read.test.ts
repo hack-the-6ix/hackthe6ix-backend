@@ -2,7 +2,7 @@ import { getObject } from '../../../controller/ModelController';
 import { IUser } from '../../../models/user/fields';
 import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
 import { adminUser, generateTestModel } from '../test-utils';
-import * as dbHandler from './db-handler';
+import * as dbHandler from '../db-handler';
 
 /**
  * Connect to a new in-memory database before running any tests.

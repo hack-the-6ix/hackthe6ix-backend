@@ -9,6 +9,8 @@ import { isHacker } from '../services/permissions';
 
 const actionRouter = express.Router();
 
+// Application endpoints
+
 /**
  * (Hacker)
  *
@@ -46,21 +48,6 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
  */
 
 /**
- * TODO: Add endpoint for discord verification
- *       Make this a separate model and link it back to the user object
- *
- *       /verify -> given an email, determine if it can be verified and return roles to give + name
- *                  When a user RSVPs, create a DiscordObj for them
- *
- *       DiscordObj
- *       |-Full Name
- *       |-roles
- *       |-discord username
- *       |-discord ID
- *       |-time of verification
- */
-
-/**
  * TODO: Add team apis
  *
  *       /create -> create a new team and join it
@@ -73,14 +60,19 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
  *       |-inject team member names (virtual field?)
  */
 
-/**
- * TODO: Add endpoint for application statistics that is cached
- */
+// Post application endpoints
 
 /**
  * TODO: Add endpoint to submit code for badge
  *       To be done later once plan is finalized
  */
+
+// Admin endpoints
+
+/**
+ * TODO: Add endpoint for application statistics that is cached
+ */
+
 
 /**
  * TODO: Add endpoint to sync mailing lists
@@ -101,5 +93,21 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
  *       If two people coincidentally get the same user, then let multiple people evaluate
  *       and take the average.
  */
+
+/**
+ * TODO: Add endpoint for discord verification
+ *       Make this a separate model and link it back to the user object
+ *
+ *       /verify -> given an email, determine if it can be verified and return roles to give + name
+ *                  When a user RSVPs, create a DiscordObj for them
+ *
+ *       DiscordObj
+ *       |-Full Name
+ *       |-roles
+ *       |-discord username
+ *       |-discord ID
+ *       |-time of verification
+ */
+
 
 export default actionRouter;

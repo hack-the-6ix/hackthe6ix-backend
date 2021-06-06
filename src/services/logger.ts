@@ -13,7 +13,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
   promise
   .then((data) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
+      console.log(`[${new Date()}] [${ req.url }] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
     return res.json({
@@ -41,7 +41,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
     }
 
     // TODO: Add proper logger here
-    console.log(`[${new Date()}] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()} ${JSON.stringify(body)}`);
+    console.log(`[${new Date()}] [${ req.url }] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()} ${JSON.stringify(body)}`);
 
     return res.status(status).json(body);
   });

@@ -36,7 +36,6 @@
  *
  * @param rawFields
  */
-
 export const extractFields = (rawFields: any) => {
 
   // Precondition: rawFields meets the input specification
