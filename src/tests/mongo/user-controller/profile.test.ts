@@ -88,7 +88,6 @@ describe('Get profile', () => {
       firstName: hackerUser.firstName,
       lastName: hackerUser.lastName,
       email: hackerUser.email,
-      internal: {},
       application: {
         applicationField: undefined,
       },

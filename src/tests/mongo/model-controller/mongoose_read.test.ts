@@ -1,4 +1,5 @@
 import { getObject } from '../../../controller/ModelController';
+import { getModels } from '../../../controller/util';
 import { IUser } from '../../../readCheckModelTests/user/fields';
 import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
 import { adminUser, generateTestModel } from '../test-utils';
@@ -18,6 +19,13 @@ afterEach(async () => await dbHandler.clearDatabase());
  * Remove and close the db and server.
  */
 afterAll(async () => await dbHandler.closeDatabase());
+
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
 
 describe('Model Read', () => {
 
@@ -84,7 +92,9 @@ describe('Model Read', () => {
     intercepted: 'Watermelon',
   };
 
-  const readCheckModelTest = generateTestModel(fields, 'ReadCheckModel');
+  const [readCheckModelTest, mockModels] = generateTestModel(fields, 'ReadCheckModel');
+
+  getModels.mockReturnValue(mockModels);
 
   /**
    * TODO: Test the other parameters like size, page, etc.

@@ -1,8 +1,9 @@
 import { ObjectID } from 'bson';
 import mongoose from 'mongoose';
-import models from '../../controller/models';
+import { getModels } from '../../controller/util';
 import { IUser } from '../../models/user/fields';
 import { extractFields } from '../../models/util';
+import { UniverseState } from '../../types/types';
 
 export const adminUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd50'),
@@ -69,10 +70,9 @@ export const nopermUser = {
  *
  * @param testFields
  * @param name
- * @param doNotRegister - if true, we will not override the models module
  * @return Test mongoose model
  */
-export const generateTestModel = (testFields: any, name: string, doNotRegister?: boolean) => {
+export const generateTestModel = (testFields: any, name: string) => {
   const testSchema = new mongoose.Schema(extractFields(testFields), {
     toObject: {
       virtuals: true,
@@ -84,12 +84,26 @@ export const generateTestModel = (testFields: any, name: string, doNotRegister?:
 
   const Test = mongoose.model(name, testSchema);
 
-  if (!doNotRegister) {
-    (models as any)[name] = {
-      mongoose: Test,
-      rawFields: testFields
-    };
-  }
+  const models: any = {};
 
-  return Test;
+  (models as any)[name] = {
+    mongoose: Test,
+    rawFields: testFields,
+  };
+
+  return [Test, models];
 };
+
+export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 100000) => new Promise(
+  () => ({
+      public: {
+        globalApplicationDeadline: Date.now() + applyOffset,
+        globalConfirmationDeadline: Date.now() + confirmOffset,
+      },
+      private: {
+        maxAccepted: 100,
+        maxWaitlist: 100,
+      },
+    } as UniverseState
+  ),
+);

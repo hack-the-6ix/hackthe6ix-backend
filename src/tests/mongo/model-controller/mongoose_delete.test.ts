@@ -1,4 +1,5 @@
 import { deleteObject } from '../../../controller/ModelController';
+import { getModels } from '../../../controller/util';
 import { DeleteDeniedError } from '../../../types/types';
 import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from '../db-handler';
@@ -18,10 +19,17 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
+
 describe('Model Delete', () => {
 
   test('Does it actually delete?', async () => {
-    const successDeleteTestModel = generateTestModel({
+    const [successDeleteTestModel, mockModels] = generateTestModel({
       deleteCheck: true,
       FIELDS: {
         field1: {
@@ -29,6 +37,8 @@ describe('Model Delete', () => {
         }
       },
     }, 'DeleteTest');
+
+    getModels.mockReturnValue(mockModels);
 
     // Create some objects to fill the DB
     await successDeleteTestModel.create({ field1: "Banana" });
@@ -58,10 +68,12 @@ describe('Model Delete', () => {
 
   describe('Delete Check', () => {
     test('Success', async () => {
-      const successDeleteTestModel = generateTestModel({
+      const [successDeleteTestModel, mockModels] = generateTestModel({
         deleteCheck: true,
         FIELDS: {},
       }, 'SuccessDeleteTest');
+
+      getModels.mockReturnValue(mockModels);
 
       // Create some objects to fill the DB
       const originalObject = await successDeleteTestModel.create({});
@@ -84,10 +96,12 @@ describe('Model Delete', () => {
     });
 
     test('Fail', async () => {
-      const successDeleteTestModel = generateTestModel({
+      const [successDeleteTestModel, mockModels] = generateTestModel({
         deleteCheck: false,
         FIELDS: {},
       }, 'FailDeleteTest');
+
+      getModels.mockReturnValue(mockModels);
 
       // Create some objects to fill the DB
       await successDeleteTestModel.create({});

@@ -1,4 +1,5 @@
 import { updateApplication } from '../../../controller/UserController';
+import { fetchUniverseState, getModels } from '../../../controller/util';
 import { IUser } from '../../../models/user/fields';
 import {
   canSubmitApplication,
@@ -8,7 +9,7 @@ import {
 } from '../../../models/validator';
 import { ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
 import * as dbHandler from '../db-handler';
-import { generateTestModel, hackerUser } from '../test-utils';
+import { generateMockUniverseState, generateTestModel, hackerUser } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -25,7 +26,14 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-const userTestModel = generateTestModel({
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
+
+const [userTestModel, mockModels] = generateTestModel({
   writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
   readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
@@ -92,29 +100,66 @@ const userTestModel = generateTestModel({
   },
 }, 'user');
 
+
 describe('Update Application', () => {
-  test('Success', async () => {
-    await userTestModel.create(hackerUser);
 
-    await updateApplication(
-      hackerUser,
-      false,
-      {
+  describe('Success', () => {
+    test('Normal Deadline', async () => {
+      getModels.mockReturnValue(mockModels);
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      await userTestModel.create(hackerUser);
+
+      await updateApplication(
+        hackerUser,
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.application).toEqual({
         optionalField2: 'Test',
-      } as any,
-    );
-
-    const resultObject = await userTestModel.findOne({
-      _id: hackerUser._id,
+      });
     });
 
-    console.log(resultObject);
+    test('Personal Deadline', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-    expect(resultObject).toEqual({
-      optionalField2: 'Test',
+      await userTestModel.create(hackerUser);
+
+      await updateApplication(
+        hackerUser,
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.application).toEqual({
+        optionalField2: 'Test',
+      });
     });
+
+
   });
-  test('Fail', async () => {
+  describe('Fail', () => {
+
+    test('Already submitted', async () => {
+
+    });
+
+    test('Deadline passed', async () => {
+
+    });
 
   });
 

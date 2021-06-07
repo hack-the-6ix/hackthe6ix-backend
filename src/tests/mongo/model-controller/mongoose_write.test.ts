@@ -1,4 +1,5 @@
 import { editObject } from '../../../controller/ModelController';
+import { getModels } from '../../../controller/util';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from '../db-handler';
@@ -18,10 +19,21 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
+
 describe('Model Write', () => {
 
   describe('Recursion', () => {
-    const recursionCreateWriteTestModel = generateTestModel({
+    /**
+     * TODO: Figure out why tests don't work for write operations
+     */
+
+    const [recursionCreateWriteTestModel, mockModels] = generateTestModel({
       createCheck: true,
       writeCheck: true,
 
@@ -44,6 +56,9 @@ describe('Model Write', () => {
         },
       },
     }, 'RecursionWriteTest');
+
+    getModels.mockReturnValue(mockModels);
+
     test('Success', async () => {
 
       await recursionCreateWriteTestModel.create({});
@@ -151,7 +166,7 @@ describe('Model Write', () => {
 
   describe('Write check', () => {
 
-    const writeTestModel = generateTestModel({
+    const [writeTestModel, mockModels] = generateTestModel({
       createCheck: true,
       writeCheck: true,
 
@@ -166,6 +181,8 @@ describe('Model Write', () => {
         },
       },
     }, 'WriteTest');
+
+    getModels.mockReturnValue(mockModels);
 
     test('Success', async () => {
 

@@ -1,4 +1,5 @@
 import { createObject } from '../../../controller/ModelController';
+import { getModels } from '../../../controller/util';
 import { CreateDeniedError, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 
 import * as dbHandler from '../db-handler';
@@ -19,11 +20,18 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
+
 describe('Model Create', () => {
 
   test('Does it make an object?', async () => {
 
-    const createTestModel = generateTestModel({
+    const [createTestModel, mockModels] = generateTestModel({
       createCheck: true,
       writeCheck: true,
 
@@ -34,6 +42,8 @@ describe('Model Create', () => {
         },
       },
     }, 'CreateTest');
+
+    getModels.mockReturnValue(mockModels);
 
     const data = await createObject(
       hackerUser,
@@ -54,12 +64,14 @@ describe('Model Create', () => {
 
   describe('Create check', () => {
     test('Success', async () => {
-      const successCreateTestModel = generateTestModel({
+      const [successCreateTestModel, mockModels] = generateTestModel({
         createCheck: true,
         writeCheck: true,
 
         FIELDS: {},
       }, 'SuccessCreateTest');
+
+      getModels.mockReturnValue(mockModels);
 
       await createObject(
         hackerUser,
@@ -74,13 +86,15 @@ describe('Model Create', () => {
     });
 
     test('Fail', async () => {
-      const failCreateTestModel =
+      const [failCreateTestModel, mockModels] =
         generateTestModel({
           createCheck: false,
           writeCheck: true,
 
           FIELDS: {},
         }, 'FailCreateTest');
+
+      getModels.mockReturnValue(mockModels);
 
       // Ensure error is sent
       expect(createObject(
@@ -98,7 +112,7 @@ describe('Model Create', () => {
   describe('Write check', () => {
 
     test('Success', async () => {
-      const successCreateWriteTest = generateTestModel({
+      const [successCreateWriteTest, mockModels] = generateTestModel({
         createCheck: true,
         writeCheck: true,
 
@@ -115,6 +129,8 @@ describe('Model Create', () => {
           },
         },
       }, 'SuccessCreateWriteTest');
+
+      getModels.mockReturnValue(mockModels);
 
       await createObject(
         hackerUser,
@@ -133,7 +149,7 @@ describe('Model Create', () => {
     });
 
     test('Fail', async () => {
-      const failCreateWriteTest = generateTestModel({
+      const [failCreateWriteTest, mockModels] = generateTestModel({
         createCheck: true,
         writeCheck: true,
 
@@ -150,6 +166,8 @@ describe('Model Create', () => {
           },
         },
       }, 'FailCreateWriteTest');
+
+      getModels.mockReturnValue(mockModels);
 
       expect(createObject(
         hackerUser,
