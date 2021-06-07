@@ -99,13 +99,12 @@ const [userTestModel, mockModels] = generateTestModel({
     },
   },
 }, 'user');
-
+getModels.mockReturnValue(mockModels);
 
 describe('Update Application', () => {
 
   describe('Success', () => {
     test('Normal Deadline', async () => {
-      getModels.mockReturnValue(mockModels);
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
       await userTestModel.create(hackerUser);

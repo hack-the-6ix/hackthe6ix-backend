@@ -27,74 +27,75 @@ jest.mock('../../../controller/util', () => (
   }
 ));
 
-describe('Model Read', () => {
+const fields = {
+  readCheck: true,
+  FIELDS: {
+    field1: {
+      type: String,
+      read: true,
+    },
 
-  const fields = {
-    readCheck: true,
-    FIELDS: {
-      field1: {
-        type: String,
-        read: true,
-      },
+    publicNest: {
+      readCheck: true,
 
-      publicNest: {
-        readCheck: true,
-
-        FIELDS: {
-          field2: {
-            type: String,
-            readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Foo',
-          },
+      FIELDS: {
+        field2: {
+          type: String,
+          readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Foo',
         },
       },
+    },
 
-      privateNest: {
-        readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Bar',
+    privateNest: {
+      readCheck: (request: ReadCheckRequest<string>) => request.requestUser.firstName === 'Bar',
 
-        FIELDS: {
-          field3: {
-            type: String,
-            readCheck: true,
-          },
+      FIELDS: {
+        field3: {
+          type: String,
+          readCheck: true,
+        },
 
-          evenMoreNests: {
-            readCheck: true,
+        evenMoreNests: {
+          readCheck: true,
 
-            FIELDS: {
-              field4: {
-                type: String,
-                readCheck: true,
-              },
+          FIELDS: {
+            field4: {
+              type: String,
+              readCheck: true,
             },
           },
         },
       },
-
-      intercepted: {
-        type: String,
-        readCheck: true,
-        readInterceptor: (request: ReadInterceptRequest<string, any>) => request.requestUser.firstName === 'Banana' ? 'Intercepted!' : request.fieldValue,
-      },
     },
-  };
 
-  const testObject = {
-    field1: 'Test',
-    publicNest: {
-      field2: 'Bar',
+    intercepted: {
+      type: String,
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, any>) => request.requestUser.firstName === 'Banana' ? 'Intercepted!' : request.fieldValue,
     },
-    privateNest: {
-      field3: 'Baz',
-      evenMoreNests: {
-        field4: 'Banana',
-      },
+  },
+};
+
+const [readCheckModelTest, mockModels] = generateTestModel(fields, 'ReadCheckModel');
+
+getModels.mockReturnValue(mockModels);
+
+const testObject = {
+  field1: 'Test',
+  publicNest: {
+    field2: 'Bar',
+  },
+  privateNest: {
+    field3: 'Baz',
+    evenMoreNests: {
+      field4: 'Banana',
     },
-    intercepted: 'Watermelon',
-  };
+  },
+  intercepted: 'Watermelon',
+};
 
-  const [readCheckModelTest, mockModels] = generateTestModel(fields, 'ReadCheckModel');
+describe('Model Read', () => {
 
-  getModels.mockReturnValue(mockModels);
 
   /**
    * TODO: Test the other parameters like size, page, etc.

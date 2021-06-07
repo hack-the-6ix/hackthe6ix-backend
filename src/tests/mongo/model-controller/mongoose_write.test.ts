@@ -26,39 +26,56 @@ jest.mock('../../../controller/util', () => (
   }
 ));
 
-describe('Model Write', () => {
 
-  describe('Recursion', () => {
-    /**
-     * TODO: Figure out why tests don't work for write operations
-     */
+const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = generateTestModel({
+  createCheck: true,
+  writeCheck: true,
 
-    const [recursionCreateWriteTestModel, mockModels] = generateTestModel({
-      createCheck: true,
+  FIELDS: {
+    test: {
       writeCheck: true,
 
       FIELDS: {
-        test: {
+        huh: {
           writeCheck: true,
 
           FIELDS: {
-            huh: {
-              writeCheck: true,
-
-              FIELDS: {
-                field1: {
-                  type: String,
-                  writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-                },
-              },
+            field1: {
+              type: String,
+              writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
             },
           },
         },
       },
-    }, 'RecursionWriteTest');
+    },
+  },
+}, 'RecursionWriteTest');
 
-    getModels.mockReturnValue(mockModels);
+const [writeTestModel, mockWriteTestModels] = generateTestModel({
+  createCheck: true,
+  writeCheck: true,
 
+  FIELDS: {
+    field1: {
+      type: String,
+      writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+    },
+    field2: {
+      type: String,
+      writeCheck: true,
+    },
+  },
+}, 'WriteTest');
+
+const mockModels = {
+  ...mockRecrusionCreateWriteTestModels,
+  ...mockWriteTestModels
+};
+
+getModels.mockReturnValue(mockModels);
+
+describe('Model Write', () => {
+  describe('Recursion', () => {
     test('Success', async () => {
 
       await recursionCreateWriteTestModel.create({});
@@ -165,24 +182,6 @@ describe('Model Write', () => {
   });
 
   describe('Write check', () => {
-
-    const [writeTestModel, mockModels] = generateTestModel({
-      createCheck: true,
-      writeCheck: true,
-
-      FIELDS: {
-        field1: {
-          type: String,
-          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-        },
-        field2: {
-          type: String,
-          writeCheck: true,
-        },
-      },
-    }, 'WriteTest');
-
-    getModels.mockReturnValue(mockModels);
 
     test('Success', async () => {
 

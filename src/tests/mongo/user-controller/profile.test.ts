@@ -1,4 +1,5 @@
 import { fetchUser } from '../../../controller/UserController';
+import { getModels } from '../../../controller/util';
 import { IUser } from '../../../models/user/fields';
 import {
   canSubmitApplication,
@@ -25,55 +26,63 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-describe('Get profile', () => {
+jest.mock('../../../controller/util', () => (
+  {
+    fetchUniverseState: jest.fn(),
+    getModels: jest.fn()
+  }
+));
 
-  const userTestModel = generateTestModel({
-    writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
-    readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+const [userTestModel, mockModels] = generateTestModel({
+  writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+  readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-    FIELDS: {
-      firstName: {
-        type: String,
-        readCheck: true,
-        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-      },
-      lastName: {
-        type: String,
-        readCheck: true,
-        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-      },
-      email: {
-        type: String,
-        readCheck: true,
-        writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-      },
-      internal: {
-        readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-        writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+  FIELDS: {
+    firstName: {
+      type: String,
+      readCheck: true,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+    },
+    lastName: {
+      type: String,
+      readCheck: true,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+    },
+    email: {
+      type: String,
+      readCheck: true,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+    },
+    internal: {
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
 
-        FIELDS: {
-          secretNode: {
-            type: String,
-            readCheck: true,
-            writeCheck: true,
-          },
-        },
-      },
-      application: {
-        readCheck: true,
-        writeCheck: canSubmitApplication(),
-
-        FIELDS: {
-          applicationField: {
-            type: String,
-            readCheck: true,
-            writeCheck: true,
-          },
+      FIELDS: {
+        secretNode: {
+          type: String,
+          readCheck: true,
+          writeCheck: true,
         },
       },
     },
-  }, 'user');
+    application: {
+      readCheck: true,
+      writeCheck: canSubmitApplication(),
 
+      FIELDS: {
+        applicationField: {
+          type: String,
+          readCheck: true,
+          writeCheck: true,
+        },
+      },
+    },
+  },
+}, 'user');
+
+getModels.mockReturnValue(mockModels);
+
+describe('Get profile', () => {
   test('Success', async () => {
     await userTestModel.create(adminUser);
     await userTestModel.create(hackerUser);
