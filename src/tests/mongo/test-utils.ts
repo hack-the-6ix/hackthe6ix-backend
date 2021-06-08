@@ -95,7 +95,7 @@ export const generateTestModel = (testFields: any, name: string) => {
 };
 
 export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 100000) => new Promise(
-  () => ({
+  (resolve) => resolve({
       public: {
         globalApplicationDeadline: Date.now() + applyOffset,
         globalConfirmationDeadline: Date.now() + confirmOffset,

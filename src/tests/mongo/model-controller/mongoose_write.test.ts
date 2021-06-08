@@ -48,6 +48,9 @@ const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = gene
         },
       },
     },
+    banana: {
+      type: String
+    }
   },
 }, 'RecursionWriteTest');
 
@@ -85,6 +88,7 @@ describe('Model Write', () => {
             field1: 'Banana',
           },
         },
+        banana: "test"
       });
 
       expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
@@ -104,7 +108,7 @@ describe('Model Write', () => {
             huh: {
               field1: 'foobar',
             },
-          },
+          }
         },);
 
       // Ensure only amended object is modified
@@ -125,6 +129,7 @@ describe('Model Write', () => {
             field1: 'foobar',
           },
         },
+        banana: "test"
       });
 
 
@@ -139,6 +144,7 @@ describe('Model Write', () => {
             field1: 'Banana',
           },
         },
+        banana: "test"
       });
 
       expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
@@ -158,7 +164,7 @@ describe('Model Write', () => {
             huh: {
               field1: 'ASdasdasd',
             },
-          },
+          }
         }
       )).rejects.toThrow(WriteDeniedError);
 
@@ -177,6 +183,7 @@ describe('Model Write', () => {
             field1: 'Banana',
           },
         },
+        banana: "test"
       });
     });
   });

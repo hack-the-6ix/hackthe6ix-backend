@@ -65,7 +65,10 @@ const [userTestModel, mockModels] = generateTestModel({
         },
       },
     },
-    application: {
+    status: {
+      applied: false
+    },
+    hackerApplication: {
       readCheck: true,
       writeCheck: canSubmitApplication(),
 
@@ -102,6 +105,10 @@ const [userTestModel, mockModels] = generateTestModel({
 getModels.mockReturnValue(mockModels);
 
 describe('Update Application', () => {
+
+  /**
+   * TODO: Create template for fields that can be reused (we will need to alter the status)
+   */
 
   describe('Success', () => {
     test('Normal Deadline', async () => {

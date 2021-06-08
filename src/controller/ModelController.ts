@@ -197,6 +197,8 @@ export const getObject = async (
 
   const out: any[] = [];
 
+  const universeState = await fetchUniverseState();
+
   // Perform all the traversals async
   const cleanedResults = await Promise.all(results.map(async (result: any) =>
     /**
@@ -207,7 +209,7 @@ export const getObject = async (
     cleanObject(objectModel.rawFields, result, {
       requestUser: requestUser,
       targetObject: result,
-      universeState: await fetchUniverseState(),
+      universeState: universeState,
     }),
   ));
 
@@ -293,11 +295,13 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
   // Validate the proposed amendments
   const results = await objectModel.mongoose.find(filter);
 
+  const universeState = await fetchUniverseState();
+
   await Promise.all(results.map(async (result: any) =>
     validateObjectEdit(objectModel.rawFields, changes, {
       requestUser: requestUser,
       targetObject: result,
-      universeState: await fetchUniverseState(),
+      universeState: universeState,
       fieldValue: undefined,
     }),
   ));
@@ -357,11 +361,13 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
   // Validate the proposed amendments
   const results = await objectModel.mongoose.find(filter);
 
+  const universeState = await fetchUniverseState();
+
   await Promise.all(results.map(async (result: any) =>
     validateObjectDelete(objectModel.rawFields, {
       requestUser: requestUser,
       targetObject: result,
-      universeState: await fetchUniverseState(),
+      universeState: universeState,
     }),
   ));
 
