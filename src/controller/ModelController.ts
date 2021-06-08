@@ -244,20 +244,20 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
 
           if (!evaluateChecker(fieldMetadata.writeCheck, { ...request, fieldValue: changes[k] })) {
             // Validation failed for this field
-            throw new WriteDeniedError(`Write check failed at field: ${JSON.stringify(fieldMetadata)} with policy ${fieldMetadata.writeCheck}`);
+            throw new WriteDeniedError(fieldMetadata, fieldMetadata.writeCheck, request);
           }
 
         }
       } else {
         // Invalid field
-        throw new WriteDeniedError(`Invalid field: ${k}`);
+        throw new WriteDeniedError(`Invalid field: ${k}`, 'Update fields must be part of schema', request);
       }
     }
 
     return true;
   } else {
     // Validation Failed
-    throw new WriteDeniedError(`Write check failed at level: ${JSON.stringify(changes)} with policy ${rawFields.writeCheck}`);
+    throw new WriteDeniedError(changes, rawFields.writeCheck, request);
   }
 };
 
@@ -328,7 +328,7 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) 
 
   // For delete operations, we only check the top level
   if (!evaluateChecker(rawFields.deleteCheck, request)) {
-    throw new DeleteDeniedError(`Write check failed with policy ${rawFields.deleteCheck}`);
+    throw new DeleteDeniedError(rawFields.deleteCheck, request);
   }
 
   return true;
@@ -399,7 +399,7 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
     });
 
   } else {
-    throw new CreateDeniedError(`Create check failed with policy ${rawFields.createCheck}`);
+    throw new CreateDeniedError(rawFields.createCheck, request);
   }
 };
 

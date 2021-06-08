@@ -77,14 +77,14 @@ export type CreateCheckRequest<T> = {
 export class HTTPError extends Error {
   status: number;
   error: string;
-  message: string;
+  publicMessage: string;
   name: string;
 
   constructor(name: string, status: number, message: string, error?: string | Error) {
-    super(`${name} - ${message || 'An error occurred'}\n${error}`);
+    super(`${message || 'An error occurred'}\n${error}`);
     this.status = status;
     this.error = (error || '').toString();
-    this.message = message;
+    this.publicMessage = message;
     this.name = name;
   }
 }
@@ -125,22 +125,22 @@ export class NotFoundError extends HTTPError {
 }
 
 export class CreateDeniedError extends ForbiddenError {
-  constructor(error: string) {
-    super("Create Denied", error);
+  constructor(policy: any, request: CreateCheckRequest<any>) {
+    super('Create Denied', `Create check failed with policy ${policy}\n    and request ${JSON.stringify(request, null, 2)}`);
     Object.setPrototypeOf(this, CreateDeniedError.prototype);
   }
 }
 
 export class WriteDeniedError extends ForbiddenError {
-  constructor(error: string) {
-    super("Write Denied", error);
+  constructor(fieldMetadata: any, policy: any, request: WriteCheckRequest<any, any>) {
+    super('Write Denied', `Write check failed at field: ${JSON.stringify(fieldMetadata)}\n    with policy ${policy}\n    and request:\n${JSON.stringify(request, null, 2)}`);
     Object.setPrototypeOf(this, WriteDeniedError.prototype);
   }
 }
 
 export class DeleteDeniedError extends ForbiddenError {
-  constructor(error: string) {
-    super("Delete Denied", error);
+  constructor(policy: any, request: DeleteCheckRequest<any>) {
+    super('Delete Denied', `Delete check failed with policy ${policy}\n    and request ${JSON.stringify(request, null, 2)}`);
     Object.setPrototypeOf(this, DeleteDeniedError.prototype);
   }
 }

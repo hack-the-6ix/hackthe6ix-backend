@@ -31,7 +31,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
     };
 
     if (error instanceof HTTPError || req?.executor?.roles?.organizer) {
-      body.message = error.message;
+      body.message = error.publicMessage;
     } else {
       body.message = "An error occurred";
     }
