@@ -100,21 +100,32 @@ const [userTestModel, mockModels] = generateTestModel({
         },
       },
     },
+    personalApplicationDeadline: {
+      type: Number,
+      required: true,
+      caption: 'Personal Application Deadline',
+      default: -1,
+
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      readCheck: true,
+    },
+
   },
 }, 'user');
 getModels.mockReturnValue(mockModels);
 
 describe('Update Application', () => {
 
-  /**
-   * TODO: Create template for fields that can be reused (we will need to alter the status)
-   */
-
   describe('Success', () => {
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create(hackerUser);
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        }
+      });
 
       await updateApplication(
         hackerUser,
@@ -128,7 +139,7 @@ describe('Update Application', () => {
         _id: hackerUser._id,
       });
 
-      expect(resultObject.application).toEqual({
+      expect(resultObject.toJSON().hackerApplication).toEqual({
         optionalField2: 'Test',
       });
     });
@@ -136,7 +147,13 @@ describe('Update Application', () => {
     test('Personal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-      await userTestModel.create(hackerUser);
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        },
+        personalApplicationDeadline: new Date().getTime() + 10000
+      });
 
       await updateApplication(
         hackerUser,
@@ -150,7 +167,7 @@ describe('Update Application', () => {
         _id: hackerUser._id,
       });
 
-      expect(resultObject.application).toEqual({
+      expect(resultObject.toJSON().hackerApplication).toEqual({
         optionalField2: 'Test',
       });
     });

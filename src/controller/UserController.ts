@@ -88,7 +88,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
     },
   );
 
-  if (!result || result.length !== 1 || result[0] != requestUser._id) {
+  if (!result || result.length !== 1 || result[0] != requestUser._id.toString()) {
     throw new InternalServerError("Unable to update application", JSON.stringify(result));
   }
 

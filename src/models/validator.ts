@@ -34,7 +34,7 @@ export const canSubmitApplication = () => (request: WriteCheckRequest<any, IUser
     isUser(request.requestUser, request.targetObject) &&
     !request.targetObject.status.applied &&
     (
-      request.universeState.public.globalApplicationDeadline <= Date.now() ||
-      request.targetObject.personalApplicationDeadline <= Date.now()
+      request.universeState.public.globalApplicationDeadline >= new Date().getTime() ||
+      request.targetObject.personalApplicationDeadline >= new Date().getTime()
     )
   );
