@@ -44,13 +44,13 @@ export const fetchUser = async (requestUser: IUser) => {
  *
  * @param requestUser
  * @param submit
- * @param application
+ * @param hackerApplication
  */
-export const updateApplication = async (requestUser: IUser, submit: boolean, application: IApplication) => {
+export const updateApplication = async (requestUser: IUser, submit: boolean, hackerApplication: IApplication) => {
 
-  const hackerApplication = getModels()['user'].rawFields.FIELDS.hackerApplication;
+  const hackerApplicationFields = getModels()['user'].rawFields.FIELDS.hackerApplication;
 
-  if (!application) {
+  if (!hackerApplication) {
     throw new BadRequestError('Application must be truthy!');
   }
 
@@ -81,7 +81,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    const invalidFields: string[] = validateSubmission(application, hackerApplication, writeRequest, '');
+    const invalidFields: string[][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
 
     if (invalidFields.length > 0) {
       throw new SubmissionDeniedError(invalidFields);
@@ -97,7 +97,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
       _id: requestUser._id,
     },
     {
-      hackerApplication: application,
+      hackerApplication: hackerApplication,
     },
   );
 

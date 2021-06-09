@@ -148,7 +148,7 @@ export class WriteDeniedError extends ForbiddenError {
 }
 
 export class SubmissionDeniedError extends ForbiddenError {
-  constructor(errors: string[]) {
+  constructor(errors: any) {
     super('Submission Denied', errors, true);
     Object.setPrototypeOf(this, SubmissionDeniedError.prototype);
   }

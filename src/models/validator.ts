@@ -42,4 +42,4 @@ export const canSubmitApplication = () => (request: WriteCheckRequest<any, IUser
     isApplicationOpen(request)
   );
 
-export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);
+export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue?.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);

@@ -93,7 +93,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1)(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -113,7 +113,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1)(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -125,7 +125,7 @@ export const hackerApplication = {
       caption: 'Province',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? inEnum(['Banana']) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? inEnum(['Banana'])(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
       readCheck: true,
     },
 
@@ -135,7 +135,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(6),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? validatePostalCode() : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? validatePostalCode()(request) : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -235,7 +235,7 @@ export const hackerApplication = {
 
     projectEssay: {
       type: String,
-      caption: 'Proud project',
+      caption: 'Project Essay',
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
@@ -246,17 +246,16 @@ export const hackerApplication = {
     /* At HT6 */
     requestedWorkshops: {
       type: String,
-      caption: 'Requested workshop',
+      caption: 'Requested Workshops',
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
-      submitCheck: minWordLength(50),
       readCheck: true,
     },
 
-    attendingEssay: {
+    accomplishEssay: {
       type: String,
-      caption: 'Accomplishment',
+      caption: 'Accomplishment Essay',
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
@@ -675,7 +674,7 @@ export interface IApplication {
   linkedinLink: string,
   projectEssay: string,
   requestedWorkshops: string,
-  attendingEssay: string,
+  accomplishEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean

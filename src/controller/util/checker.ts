@@ -29,11 +29,16 @@ const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) =
  * Validates a submitted application against all the required fields in the application. This checker
  * will verify that ALL of the fields in submissionFields have their write condition and submit condition (if applicable) satisfied
  *
+ * @param submission - subset of submission object
+ * @param submissionFields - subset of submission fields
+ * @param request
+ * @param path - current path up to this point
+ * @param name - optionally specify the name of the current level (most useful for nested dictionaries)
  * @return array of errors
  */
-export const validateSubmission = (submission: any, submissionFields: any, request: WriteCheckRequest<any, any>, path: string): string[] => {
+export const validateSubmission = (submission: any, submissionFields: any, request: WriteCheckRequest<any, any>, path: string, name?: string): string[][] => {
 
-  let errors: string[] = [];
+  let errors: string[][] = [];
 
   if (submissionChecker(submissionFields, request)) {
 
@@ -49,20 +54,21 @@ export const validateSubmission = (submission: any, submissionFields: any, reque
             fieldMetadata,
             request,
             `${path}/${k}`,
+            k
           ),
         ];
 
       } else {
         // This is a normal field
         if (!submissionChecker(fieldMetadata, { ...request, fieldValue: submission[k] })) {
-          errors.push(`${path}/${k}`);
+          errors.push([`${path}/${k}`, fieldMetadata?.caption || k]);
         }
       }
     }
 
   } else {
     // Failed at a nest
-    errors.push(`${path}/`);
+    errors.push([`${path}/`, name]);
   }
 
   return errors;
