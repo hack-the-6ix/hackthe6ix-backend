@@ -21,7 +21,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
       message: data,
     });
   })
-  .catch((error) => {
+  .catch((error: HTTPError) => {
 
     const status = error.status || 500;
 
@@ -36,7 +36,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
       body.message = "An error occurred";
     }
 
-    if (req?.executor?.roles?.organizer) {
+    if (req?.executor?.roles?.organizer || error.errorIsPublic) {
       body.error = error.error;
     }
 

@@ -1,6 +1,11 @@
 import { hackerApplication, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { BadRequestError, InternalServerError, NotFoundError } from '../types/types';
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+  SubmissionDeniedError,
+} from '../types/types';
 import { editObject, getObject } from './ModelController';
 
 /**
@@ -33,7 +38,7 @@ export const fetchUser = async (requestUser: IUser) => {
 /**
  * Validates a submitted application against all the required fields in the application
  */
-const validateApplication = (application: IApplication, applicationFields: any) => {
+const validateApplication = (application: IApplication, applicationFields: any): string[] => {
 
   /**
    * TODO: Implement this
@@ -57,7 +62,7 @@ const validateApplication = (application: IApplication, applicationFields: any) 
    *
    */
 
-  return { success: true, errors: [] as string[] };
+  return [];
 };
 
 /**
@@ -75,7 +80,11 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    validateApplication(application, hackerApplication);
+    const invalidFields: string[] = validateApplication(application, hackerApplication);
+
+    if (invalidFields.length > 0) {
+      throw new SubmissionDeniedError(invalidFields);
+    }
   }
 
   // We will update the fields as requested

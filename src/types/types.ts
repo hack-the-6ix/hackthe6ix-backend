@@ -78,50 +78,52 @@ export type CreateCheckRequest<T, O> = {
  */
 export class HTTPError extends Error {
   status: number;
-  error: string;
+  error: any;
   publicMessage: string;
   name: string;
+  errorIsPublic: boolean;
 
-  constructor(name: string, status: number, message: string, error?: string | Error) {
+  constructor(name: string, status: number, message: string, error?: any, errorIsPublic?: boolean) {
     super(`${message || 'An error occurred'}\n${error}`);
     this.status = status;
-    this.error = (error || '').toString();
+    this.error = error || '';
     this.publicMessage = message;
     this.name = name;
+    this.errorIsPublic = errorIsPublic;
   }
 }
 
 export class InternalServerError extends HTTPError {
-  constructor(message?: string, error?: string | Error) {
-    super('InternalServerError', 500, message, error);
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super('InternalServerError', 500, message, error, errorIsPublic);
     Object.setPrototypeOf(this, InternalServerError.prototype);
   }
 }
 
 export class BadRequestError extends HTTPError {
-  constructor(message?: string, error?: string | Error) {
-    super('BadRequest', 400, message, error);
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super('BadRequest', 400, message, error, errorIsPublic);
     Object.setPrototypeOf(this, BadRequestError.prototype);
   }
 }
 
 export class UnauthorizedError extends HTTPError {
-  constructor(message?: string, error?: string | Error) {
-    super('Unauthorized', 401, message, error);
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super('Unauthorized', 401, message, error, errorIsPublic);
     Object.setPrototypeOf(this, UnauthorizedError.prototype);
   }
 }
 
 export class ForbiddenError extends HTTPError {
-  constructor(message?: string, error?: string | Error) {
-    super('Forbidden', 403, message, error);
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super('Forbidden', 403, message, error, errorIsPublic);
     Object.setPrototypeOf(this, ForbiddenError.prototype);
   }
 }
 
 export class NotFoundError extends HTTPError {
-  constructor(message?: string, error?: string | Error) {
-    super('Not Found', 404, message, error);
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super('Not Found', 404, message, error, errorIsPublic);
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 }
@@ -136,6 +138,12 @@ export class CreateDeniedError extends ForbiddenError {
 export class WriteDeniedError extends ForbiddenError {
   constructor(fieldMetadata: any, policy: any, request: WriteCheckRequest<any, any>) {
     super('Write Denied', `Write check failed at field: ${JSON.stringify(fieldMetadata)}\n    with policy ${policy}\n    and request:\n${JSON.stringify(request, null, 2)}`);
+    Object.setPrototypeOf(this, WriteDeniedError.prototype);
+  }
+}
+export class SubmissionDeniedError extends ForbiddenError {
+  constructor(errors: string[]) {
+    super('Submission Denied', errors, true);
     Object.setPrototypeOf(this, WriteDeniedError.prototype);
   }
 }

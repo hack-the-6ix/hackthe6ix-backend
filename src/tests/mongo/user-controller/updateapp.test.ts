@@ -7,7 +7,12 @@ import {
   isUserOrOrganizer,
   maxLength,
 } from '../../../models/validator';
-import { ReadCheckRequest, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
+import {
+  ReadCheckRequest,
+  SubmissionDeniedError,
+  WriteCheckRequest,
+  WriteDeniedError,
+} from '../../../types/types';
 import * as dbHandler from '../db-handler';
 import { generateMockUniverseState, generateTestModel, hackerUser } from '../test-utils';
 
@@ -408,7 +413,7 @@ describe('Submit Application', () => {
             requiredFieldImplicit: "this is not a foobar",
             requiredFieldExplicit: "foobar"
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(SubmissionDeniedError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -435,7 +440,7 @@ describe('Submit Application', () => {
             requiredFieldImplicit: "foobar",
             requiredFieldExplicit: "this is not a foobar"
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(SubmissionDeniedError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -464,7 +469,7 @@ describe('Submit Application', () => {
           requiredFieldExplicit: "foobar",
           conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
         } as any,
-      )).rejects.toThrow(WriteDeniedError);
+      )).rejects.toThrow(SubmissionDeniedError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,
@@ -489,7 +494,7 @@ describe('Submit Application', () => {
         {
           optionalField2: 'Test',
         } as any,
-      )).rejects.toThrow(WriteDeniedError);
+      )).rejects.toThrow(SubmissionDeniedError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,
@@ -515,7 +520,7 @@ describe('Submit Application', () => {
           {
             optionalField2: 'Test',
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(SubmissionDeniedError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -541,7 +546,7 @@ describe('Submit Application', () => {
           {
             optionalField2: 'Test',
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(SubmissionDeniedError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,

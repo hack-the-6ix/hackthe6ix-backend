@@ -200,6 +200,14 @@ Update the hacker application
 }
 ```
 
+On failure:
+```
+{
+  status: 403,
+  message: ["firstName", "lastName"] // Return an array of fields that failed validation
+}
+```
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata
