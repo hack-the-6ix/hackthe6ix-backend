@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import { ReadCheckRequest, WriteCheckRequest } from '../../types/types';
+import {
+  CreateCheckRequest, DeleteCheckRequest,
+  ReadCheckRequest,
+  WriteCheckRequest,
+} from '../../types/types';
 import { maskStatus } from './interceptors';
 import {
   canSubmitApplication,
@@ -7,9 +11,9 @@ import {
   isAdmin,
   isOrganizer, isUser,
   isUserOrOrganizer,
-  maxLength,
-  minLength,
-  multiInEnum,
+  maxLength, maxWordLength,
+  minLength, minWordLength,
+  multiInEnum, validatePostalCode,
 } from '../validator';
 
 /**
@@ -95,6 +99,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || minLength(1),
       readCheck: true,
     },
 
@@ -113,6 +118,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || minLength(1),
       readCheck: true,
     },
 
@@ -131,12 +137,13 @@ export const hackerApplication = {
     /**
      * TODO: Add postal code validator
      */
-    postalstatus: {
+    postalCode: {
       type: String,
       caption: 'Postal Code',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: maxLength(6),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || validatePostalCode(),
       readCheck: true,
     },
 
@@ -147,6 +154,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
+      submitCheck: minLength(1),
       readCheck: true,
     },
 
@@ -156,6 +164,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
+      submitCheck: minLength(1),
       readCheck: true,
     },
 
@@ -183,8 +192,10 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+
     /**
      * TODO: Update this? Idk what we're doing for resume this year
+     * TODO: Make this mandatory
      */
     resumeLink: {
       type: String,
@@ -192,6 +203,14 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
+      readCheck: true,
+    },
+
+    resumeSharePermission: {
+      type: Boolean,
+      caption: 'I allow Hack the 6ix to distribute my resume to its event sponsors',
+
+      writeCheck: true,
       readCheck: true,
     },
 
@@ -227,17 +246,19 @@ export const hackerApplication = {
       caption: 'Proud project',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: maxWordLength(2056),
+      submitCheck: minWordLength(50),
       readCheck: true,
     },
 
     /* At HT6 */
     requestedWorkshops: {
-      type: [String],
+      type: String,
       caption: 'Requested workshop',
+      inTextSearch: true,
 
-      // Cannot select anything other than 3 workshops
-      writeCheck: (request: WriteCheckRequest<string[], IUser>) => maxLength(3)(request) && multiInEnum(['banana'])(request),
+      writeCheck: maxWordLength(2056),
+      submitCheck: minWordLength(50),
       readCheck: true,
     },
 
@@ -246,7 +267,8 @@ export const hackerApplication = {
       caption: 'Accomplishment',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: maxWordLength(2056),
+      submitCheck:minWordLength(50),
       readCheck: true,
     },
 
@@ -255,6 +277,7 @@ export const hackerApplication = {
       caption: 'MLH COC',
 
       writeCheck: true,
+      submitCheck: (request: WriteCheckRequest<boolean, IUser>) => request.fieldValue,
       readCheck: true,
     },
 
@@ -516,8 +539,8 @@ export const fields = {
   writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
   readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
 
-  deleteCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
-  createCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
+  deleteCheck: (request: DeleteCheckRequest<IUser>) => isAdmin(request.requestUser),
+  createCheck: (request: CreateCheckRequest<any, IUser>) => isAdmin(request.requestUser),
 
   // Root FIELDS
   FIELDS: {
@@ -648,17 +671,18 @@ export interface IApplication {
   addressLine2: string,
   city: string,
   province: string,
-  postalstatus: string,
+  postalCode: string,
   school: string,
   program: string,
   yearsOfStudy: string,
   hackathonsAttended: string,
   resumeLink: string,
+  resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,
   linkedinLink: string,
   projectEssay: string,
-  requestedWorkshops: string[],
+  requestedWorkshops: string,
   attendingEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,

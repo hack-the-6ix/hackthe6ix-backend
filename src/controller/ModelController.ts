@@ -15,7 +15,7 @@ import { fetchUniverseState, getModels } from './util';
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
  */
-export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<any> | WriteCheckRequest<any, any> | CreateCheckRequest<any> | DeleteCheckRequest<any>) => {
+export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<any> | WriteCheckRequest<any, any> | CreateCheckRequest<any, any> | DeleteCheckRequest<any>) => {
   try {
     return checkerFunction(request);
   } catch (e) {
@@ -301,6 +301,7 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
     validateObjectEdit(objectModel.rawFields, changes, {
       requestUser: requestUser,
       targetObject: result,
+      submissionObject: changes,
       universeState: universeState,
       fieldValue: undefined,
     }),
@@ -384,7 +385,7 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
   return amendedIDs;
 };
 
-const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCheckRequest<any>) => {
+const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCheckRequest<any, any>) => {
   if (!rawFields || !parameters) {
     throw Error('Field or object is not truthy!');
   }
@@ -430,6 +431,7 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
     requestUser: requestUser,
     universeState: await fetchUniverseState(),
     fieldValue: undefined,
+    submissionObject: parameters
   });
 
   const newObject = await objectModel.mongoose.create(parameters);

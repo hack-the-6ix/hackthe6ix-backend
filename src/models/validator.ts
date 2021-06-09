@@ -12,8 +12,11 @@ export const isUser = (requestUser: IUser, targetUser: IUser) => requestUser._id
 export const isUserOrOrganizer = (requestUser: IUser, targetUser: IUser) => isOrganizer(requestUser) || isUser(requestUser, targetUser);
 
 /* Value properties */
-export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[], any>) => request.fieldValue && request?.fieldValue.length <= maxLength;
+export const maxLength = (maxLength: number) => (request: WriteCheckRequest<string | any[], any>) => !request.fieldValue || request?.fieldValue.length <= maxLength;
 export const minLength = (minLength: number) => (request: WriteCheckRequest<string | any[], any>) => request.fieldValue && request?.fieldValue.length >= minLength;
+
+export const maxWordLength = (maxLength: number) => (request: WriteCheckRequest<string, any>) => !request.fieldValue || request?.fieldValue?.split(' ').length <= maxLength;
+export const minWordLength = (minLength: number) => (request: WriteCheckRequest<string, any>) => request.fieldValue && request?.fieldValue?.split(' ').length >= minLength;
 
 // Validate that all selections are valid
 export const multiInEnum = (validStates: string[]) => (request: WriteCheckRequest<string[], any>) => {
@@ -38,3 +41,5 @@ export const canSubmitApplication = () => (request: WriteCheckRequest<any, IUser
       request.targetObject.personalApplicationDeadline >= new Date().getTime()
     )
   );
+
+export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);

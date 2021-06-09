@@ -52,6 +52,9 @@ const validateApplication = (application: IApplication, applicationFields: any) 
    *       Solutions:
    *       1. Add a separate checker for saving?
    *       2. Add some more metadata that can be passed into the checker to let it know we're trying to validate for submission
+   *
+   *       Return an array of field names that have failed (but do not actually send what the violation is).
+   *
    */
 
   return { success: true, errors: [] as string[] };

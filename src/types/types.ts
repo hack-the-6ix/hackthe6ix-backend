@@ -31,6 +31,7 @@ export type WriteCheckRequest<T, O> = {
   fieldValue: T,      // Field we're updating
   requestUser: IUser,   // User producing the request
   targetObject: O,   // State of the object we're modifying (the entire raw object)
+  submissionObject: O, // Object we are submitting
   universeState: UniverseState  // External variables that may be relevant to us
 }
 
@@ -65,9 +66,10 @@ export type DeleteCheckRequest<O> = {
 /**
  * When creating a model, this object is passed onto the verifier
  */
-export type CreateCheckRequest<T> = {
+export type CreateCheckRequest<T, O> = {
   fieldValue: T,      // Field we're updating
   requestUser: IUser,
+  submissionObject: O, // Object we are submitting
   universeState: UniverseState
 }
 
@@ -125,7 +127,7 @@ export class NotFoundError extends HTTPError {
 }
 
 export class CreateDeniedError extends ForbiddenError {
-  constructor(policy: any, request: CreateCheckRequest<any>) {
+  constructor(policy: any, request: CreateCheckRequest<any, any>) {
     super('Create Denied', `Create check failed with policy ${policy}\n    and request ${JSON.stringify(request, null, 2)}`);
     Object.setPrototypeOf(this, CreateDeniedError.prototype);
   }

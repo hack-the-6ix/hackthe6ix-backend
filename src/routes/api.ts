@@ -78,5 +78,8 @@ apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
   );
 });
 
+/**
+ * TODO: Add endpoint to fetch a list of fields and their caption from the schema
+ */
 
 export default apiRouter;

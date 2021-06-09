@@ -7,7 +7,7 @@ import {
   isUserOrOrganizer,
   maxLength,
 } from '../../../models/validator';
-import { ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
+import { ReadCheckRequest, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import * as dbHandler from '../db-handler';
 import { generateMockUniverseState, generateTestModel, hackerUser } from '../test-utils';
 
@@ -77,26 +77,32 @@ const [userTestModel, mockModels] = generateTestModel({
           type: String,
           readCheck: true,
           writeCheck: true,
+          caption: "Optional Field"
         },
         optionalField2: {
           type: String,
           readCheck: true,
           writeCheck: true,
+          caption: "Optional Field 2"
         },
-        requiredField: {
+        requiredFieldImplicit: {
           type: String,
           readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue.length > 0,
+          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+          caption: "Required Field"
         },
-        requiredField2: {
+        requiredFieldExplicit: {
           type: String,
           readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue.length > 0,
+          writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 100,
+          submitCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+          caption: "Optional Field 2"
         },
         conditionalField: {
           type: String,
           readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue.length < 10,
+          writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 10,
+          caption: "Conditional Field"
         },
       },
     },
@@ -173,28 +179,377 @@ describe('Update Application', () => {
     });
 
 
+    test('Missing Required Field', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        }
+      });
+
+      await updateApplication(
+        hackerUser,
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual({
+        optionalField2: 'Test',
+      });
+    });
   });
+
   describe('Fail', () => {
 
+    test('Write violation', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        }
+      });
+
+      expect(updateApplication(
+        hackerUser,
+        false,
+        {
+          conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
+        } as any,
+      )).rejects.toThrow(WriteDeniedError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+    });
+
     test('Already submitted', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: true
+        }
+      });
+
+      expect(updateApplication(
+        hackerUser,
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      )).rejects.toThrow(WriteDeniedError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
     });
 
-    test('Deadline passed', async () => {
+    describe('Deadline passed', () => {
+      test('Global Deadline passed', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          }
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          false,
+          {
+            optionalField2: 'Test',
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      });
+
+      test('Personal Deadline passed', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          },
+          personalApplicationDeadline: new Date().getTime() - 1000
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          false,
+          {
+            optionalField2: 'Test',
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      });
     });
-
   });
-
 });
 
 describe('Submit Application', () => {
+  describe('Success', () => {
+    test('Normal Deadline', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-  test('Success', async () => {
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        }
+      });
 
+      await updateApplication(
+        hackerUser,
+        true,
+        {
+          optionalField2: 'Test',
+          requiredFieldImplicit: "foobar",
+          requiredFieldExplicit: "foobar",
+        } as any,
+      );
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual({
+        optionalField2: 'Test',
+        requiredFieldImplicit: "foobar",
+        requiredFieldExplicit: "foobar",
+      });
+
+      expect(resultObject.status.applied).toBeTruthy();
+    });
+
+    test('Personal Deadline', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        },
+        personalApplicationDeadline: new Date().getTime() + 10000
+      });
+
+      await updateApplication(
+        hackerUser,
+        true,
+        {
+          optionalField2: 'Test',
+          requiredFieldImplicit: "foobar",
+          requiredFieldExplicit: "foobar",
+        } as any,
+      );
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual({
+        optionalField2: 'Test',
+        requiredFieldImplicit: "foobar",
+        requiredFieldExplicit: "foobar",
+      });
+
+      expect(resultObject.status.applied).toBeTruthy();
+    });
   });
-  test('Fail', async () => {
 
+  describe('Fail', () => {
+    describe('Submit condition', () => {
+
+      /**
+       * TODO: Verify the correct field is returned when submit violation occurs
+       */
+
+      test('Implicit submitCheck', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          }
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          false,
+          {
+            requiredFieldImplicit: "this is not a foobar",
+            requiredFieldExplicit: "foobar"
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+
+      });
+
+      test('Explicit submitCheck', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          }
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          false,
+          {
+            requiredFieldImplicit: "foobar",
+            requiredFieldExplicit: "this is not a foobar"
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      });
+
+    });
+
+    test('Write violation', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false
+        }
+      });
+
+      expect(updateApplication(
+        hackerUser,
+        false,
+        {
+          requiredFieldImplicit: "foobar",
+          requiredFieldExplicit: "foobar",
+          conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
+        } as any,
+      )).rejects.toThrow(WriteDeniedError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+    });
+
+    test('Already submitted', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: true
+        }
+      });
+
+      expect(updateApplication(
+        hackerUser,
+        true,
+        {
+          optionalField2: 'Test',
+        } as any,
+      )).rejects.toThrow(WriteDeniedError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+    });
+
+    describe('Deadline passed', () => {
+      test('Global Deadline passed', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          }
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          true,
+          {
+            optionalField2: 'Test',
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      });
+
+      test('Personal Deadline passed', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+
+        await userTestModel.create({
+          ...hackerUser,
+          status: {
+            applied: false
+          },
+          personalApplicationDeadline: new Date().getTime() - 1000
+        });
+
+        expect(updateApplication(
+          hackerUser,
+          true,
+          {
+            optionalField2: 'Test',
+          } as any,
+        )).rejects.toThrow(WriteDeniedError);
+
+        const resultObject = await userTestModel.findOne({
+          _id: hackerUser._id,
+        });
+
+        expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      });
+    });
   });
 
 });
