@@ -16,17 +16,8 @@ import {
   multiInEnum, validatePostalCode,
 } from '../validator';
 
-/**
- * TODO: Validate submission
- */
-
 // Main application
 export const hackerApplication = {
-
-  /**
-   * TODO: Add a dynamic way to check for whether or not this user can submit
-   */
-
   writeCheck: canSubmitApplication(),
   readCheck: true,
 
@@ -99,7 +90,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || minLength(1),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -109,6 +100,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? true: !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -118,7 +110,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || minLength(1),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -130,20 +122,17 @@ export const hackerApplication = {
       caption: 'Province',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Banana']),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? inEnum(['Banana']) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
       readCheck: true,
     },
 
-    /**
-     * TODO: Add postal code validator
-     */
     postalCode: {
       type: String,
       caption: 'Postal Code',
       inTextSearch: true,
 
       writeCheck: maxLength(6),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => !request.submissionObject.hackerApplication.wantSwag || validatePostalCode(),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>  request.submissionObject.hackerApplication.wantSwag ? validatePostalCode() : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
       readCheck: true,
     },
 

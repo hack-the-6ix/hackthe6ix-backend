@@ -44,6 +44,10 @@ const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = gene
               type: String,
               writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
             },
+            field2: {
+              type: String,
+              writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+            },
           },
         },
       },
@@ -86,6 +90,7 @@ describe('Model Write', () => {
         test: {
           huh: {
             field1: 'Banana',
+            field2: 'Llama'
           },
         },
         banana: "test"
@@ -97,11 +102,7 @@ describe('Model Write', () => {
         hackerUser,
         'RecursionWriteTest',
         {
-          test: {
-            huh: {
-              field1: 'Banana',
-            },
-          },
+          "test.huh.field1": 'Banana'
         },
         {
           test: {
@@ -126,7 +127,7 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         test: {
           huh: {
-            field1: 'foobar',
+            field1: 'foobar'
           },
         },
         banana: "test"
