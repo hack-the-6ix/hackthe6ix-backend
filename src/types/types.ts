@@ -52,7 +52,12 @@ export type ReadCheckRequest<O> = {
 /**
  * Passed into the read interceptor
  */
-export type ReadInterceptRequest<T, O> = WriteCheckRequest<T, O>;
+export type ReadInterceptRequest<T, O> = {
+  fieldValue: T,      // Field we're updating
+  requestUser: IUser,   // User producing the request
+  targetObject: O,   // State of the object we're modifying (the entire raw object)
+  universeState: UniverseState  // External variables that may be relevant to us
+};
 
 /**
  * When deleting a model, this object is passed onto the verifier
@@ -141,10 +146,11 @@ export class WriteDeniedError extends ForbiddenError {
     Object.setPrototypeOf(this, WriteDeniedError.prototype);
   }
 }
+
 export class SubmissionDeniedError extends ForbiddenError {
   constructor(errors: string[]) {
     super('Submission Denied', errors, true);
-    Object.setPrototypeOf(this, WriteDeniedError.prototype);
+    Object.setPrototypeOf(this, SubmissionDeniedError.prototype);
   }
 }
 

@@ -1,5 +1,5 @@
 import { fetchUser } from '../../../controller/UserController';
-import { getModels } from '../../../controller/util';
+import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
 import {
   canSubmitApplication,
@@ -26,10 +26,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -104,6 +104,6 @@ describe('Get profile', () => {
   });
 
   test('Fail', async () => {
-    expect(fetchUser({} as IUser)).rejects.toThrow(NotFoundError);
+    await expect(fetchUser({} as IUser)).rejects.toThrow(NotFoundError);
   });
 });

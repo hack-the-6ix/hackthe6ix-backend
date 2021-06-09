@@ -1,4 +1,4 @@
-import { hackerApplication, IApplication, IUser } from '../models/user/fields';
+import { IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import {
   BadRequestError,
@@ -7,6 +7,8 @@ import {
   SubmissionDeniedError,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
+import { validateSubmission } from './util/checker';
+import { fetchUniverseState, getModels } from './util/resources';
 
 /**
  * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
@@ -36,36 +38,6 @@ export const fetchUser = async (requestUser: IUser) => {
 };
 
 /**
- * Validates a submitted application against all the required fields in the application
- */
-const validateApplication = (application: IApplication, applicationFields: any): string[] => {
-
-  /**
-   * TODO: Implement this
-   *       Recursively go through all the fields to ensure the conditions are satisfied
-   *
-   *       Should also run this for saves (but less strict) to report user friendly write violations.
-   *       The checker for editObject is strict and will terminate immediately upon a failure. We don't
-   *       want the user to have to constantly resubmit.
-   *
-   *       Strict Mode - We will ensure ALL write checks succeed
-   *       Non-strict Mode - We will ensure all write checks for specified fields succeed
-   *
-   *       Problem arises when a user edits their submissions and puts themselves in an invalid submission state,
-   *       but not an invalid save state...
-   *
-   *       Solutions:
-   *       1. Add a separate checker for saving?
-   *       2. Add some more metadata that can be passed into the checker to let it know we're trying to validate for submission
-   *
-   *       Return an array of field names that have failed (but do not actually send what the violation is).
-   *
-   */
-
-  return [];
-};
-
-/**
  * Updates a user's hacker application and optionally marks it as submitted
  *
  * @param requestUser
@@ -74,13 +46,29 @@ const validateApplication = (application: IApplication, applicationFields: any):
  */
 export const updateApplication = async (requestUser: IUser, submit: boolean, application: IApplication) => {
 
+  const hackerApplication = getModels()['user'].rawFields.FIELDS.hackerApplication;
+
   if (!application) {
     throw new BadRequestError('Application must be truthy!');
   }
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    const invalidFields: string[] = validateApplication(application, hackerApplication);
+    const targetObject = await User.findOne({
+      _id: requestUser._id,
+    });
+
+    const universeState = await fetchUniverseState();
+
+    const invalidFields: string[] = validateSubmission(application, hackerApplication, {
+      requestUser: requestUser,
+      targetObject: targetObject,
+      submissionObject: {
+        hackerApplication: hackerApplication,
+      },
+      universeState: universeState,
+      fieldValue: undefined,
+    }, '');
 
     if (invalidFields.length > 0) {
       throw new SubmissionDeniedError(invalidFields);
@@ -101,20 +89,20 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
   );
 
   if (!result || result.length !== 1 || result[0] != requestUser._id.toString()) {
-    throw new InternalServerError("Unable to update application", JSON.stringify(result));
+    throw new InternalServerError('Unable to update application', JSON.stringify(result));
   }
 
   // Lastly, if the user intends to submit we will amend their user object with the new status
   if (submit) {
     // We will directly interface with the User model since this update will be done with "admin permissions"
     const statusUpdateResult = await User.findOneAndUpdate({
-      _id: requestUser._id
+      _id: requestUser._id,
     }, {
-      "status.applied": true
+      'status.applied': true,
     });
 
     if (!statusUpdateResult) {
-      throw new InternalServerError("Unable to update status");
+      throw new InternalServerError('Unable to update status');
     }
   }
 

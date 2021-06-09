@@ -1,4 +1,4 @@
-import { evaluateChecker } from '../../../controller/ModelController';
+import { evaluateChecker } from '../../../controller/util/checker';
 import { ReadCheckRequest, UniverseState } from '../../../types/types';
 import { adminUser, nopermUser } from '../test-utils';
 
@@ -47,7 +47,7 @@ describe('Evaluation Checker', () => {
           requestUser: nopermUser,
           targetObject: {},
           universeState: {
-            foo: true
+            foo: true,
           } as any,
         });
 
@@ -59,7 +59,7 @@ describe('Evaluation Checker', () => {
           requestUser: nopermUser,
           targetObject: {},
           universeState: {
-            foo: false
+            foo: false,
           } as any,
         });
 
@@ -72,7 +72,7 @@ describe('Evaluation Checker', () => {
         const result = evaluateChecker((request: ReadCheckRequest) => request.targetObject.moo == true, {
           requestUser: nopermUser,
           targetObject: {
-            moo: true
+            moo: true,
           },
           universeState: {} as any,
         });
@@ -84,7 +84,7 @@ describe('Evaluation Checker', () => {
         const result = evaluateChecker((request: ReadCheckRequest) => request.targetObject.moo == true, {
           requestUser: nopermUser,
           targetObject: {
-            moo: false
+            moo: false,
           },
           universeState: {} as any,
         });

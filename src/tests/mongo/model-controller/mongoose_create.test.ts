@@ -1,5 +1,5 @@
 import { createObject } from '../../../controller/ModelController';
-import { getModels } from '../../../controller/util';
+import { getModels } from '../../../controller/util/resources';
 import { CreateDeniedError, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 
 import * as dbHandler from '../db-handler';
@@ -20,10 +20,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -97,7 +97,7 @@ describe('Model Create', () => {
       getModels.mockReturnValue(mockModels);
 
       // Ensure error is sent
-      expect(createObject(
+      await expect(createObject(
         hackerUser,
         'FailCreateTest',
         {},
@@ -169,7 +169,7 @@ describe('Model Create', () => {
 
       getModels.mockReturnValue(mockModels);
 
-      expect(createObject(
+      await expect(createObject(
         hackerUser,
         'FailCreateWriteTest',
         {

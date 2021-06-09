@@ -1,5 +1,5 @@
 import { updateApplication } from '../../../controller/UserController';
-import { fetchUniverseState, getModels } from '../../../controller/util';
+import { fetchUniverseState, getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
 import {
   canSubmitApplication,
@@ -31,10 +31,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -71,7 +71,7 @@ const [userTestModel, mockModels] = generateTestModel({
       },
     },
     status: {
-      applied: false
+      applied: false,
     },
     hackerApplication: {
       readCheck: true,
@@ -82,32 +82,32 @@ const [userTestModel, mockModels] = generateTestModel({
           type: String,
           readCheck: true,
           writeCheck: true,
-          caption: "Optional Field"
+          caption: 'Optional Field',
         },
         optionalField2: {
           type: String,
           readCheck: true,
           writeCheck: true,
-          caption: "Optional Field 2"
+          caption: 'Optional Field 2',
         },
         requiredFieldImplicit: {
           type: String,
           readCheck: true,
           writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-          caption: "Required Field"
+          caption: 'Required Field',
         },
         requiredFieldExplicit: {
           type: String,
           readCheck: true,
           writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 100,
           submitCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-          caption: "Optional Field 2"
+          caption: 'Optional Field 2',
         },
         conditionalField: {
           type: String,
           readCheck: true,
           writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 10,
-          caption: "Conditional Field"
+          caption: 'Conditional Field',
         },
       },
     },
@@ -134,8 +134,8 @@ describe('Update Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
-        }
+          applied: false,
+        },
       });
 
       await updateApplication(
@@ -161,9 +161,9 @@ describe('Update Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
+          applied: false,
         },
-        personalApplicationDeadline: new Date().getTime() + 10000
+        personalApplicationDeadline: new Date().getTime() + 10000,
       });
 
       await updateApplication(
@@ -190,8 +190,8 @@ describe('Update Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
-        }
+          applied: false,
+        },
       });
 
       await updateApplication(
@@ -220,11 +220,11 @@ describe('Update Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
-        }
+          applied: false,
+        },
       });
 
-      expect(updateApplication(
+      await expect(updateApplication(
         hackerUser,
         false,
         {
@@ -245,11 +245,11 @@ describe('Update Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: true
-        }
+          applied: true,
+        },
       });
 
-      expect(updateApplication(
+      await expect(updateApplication(
         hackerUser,
         false,
         {
@@ -271,11 +271,11 @@ describe('Update Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
-          }
+            applied: false,
+          },
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
           false,
           {
@@ -296,12 +296,12 @@ describe('Update Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
+            applied: false,
           },
-          personalApplicationDeadline: new Date().getTime() - 1000
+          personalApplicationDeadline: new Date().getTime() - 1000,
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
           false,
           {
@@ -327,8 +327,8 @@ describe('Submit Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
-        }
+          applied: false,
+        },
       });
 
       await updateApplication(
@@ -336,8 +336,8 @@ describe('Submit Application', () => {
         true,
         {
           optionalField2: 'Test',
-          requiredFieldImplicit: "foobar",
-          requiredFieldExplicit: "foobar",
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
         } as any,
       );
 
@@ -347,8 +347,8 @@ describe('Submit Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         optionalField2: 'Test',
-        requiredFieldImplicit: "foobar",
-        requiredFieldExplicit: "foobar",
+        requiredFieldImplicit: 'foobar',
+        requiredFieldExplicit: 'foobar',
       });
 
       expect(resultObject.status.applied).toBeTruthy();
@@ -360,9 +360,9 @@ describe('Submit Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
+          applied: false,
         },
-        personalApplicationDeadline: new Date().getTime() + 10000
+        personalApplicationDeadline: new Date().getTime() + 10000,
       });
 
       await updateApplication(
@@ -370,8 +370,8 @@ describe('Submit Application', () => {
         true,
         {
           optionalField2: 'Test',
-          requiredFieldImplicit: "foobar",
-          requiredFieldExplicit: "foobar",
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
         } as any,
       );
 
@@ -381,8 +381,8 @@ describe('Submit Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         optionalField2: 'Test',
-        requiredFieldImplicit: "foobar",
-        requiredFieldExplicit: "foobar",
+        requiredFieldImplicit: 'foobar',
+        requiredFieldExplicit: 'foobar',
       });
 
       expect(resultObject.status.applied).toBeTruthy();
@@ -402,16 +402,16 @@ describe('Submit Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
-          }
+            applied: false,
+          },
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
-          false,
+          true,
           {
-            requiredFieldImplicit: "this is not a foobar",
-            requiredFieldExplicit: "foobar"
+            requiredFieldImplicit: 'this is not a foobar',
+            requiredFieldExplicit: 'foobar',
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
@@ -420,6 +420,7 @@ describe('Submit Application', () => {
         });
 
         expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+        expect(resultObject.toJSON().status.applied).toBeFalsy();
 
       });
 
@@ -429,16 +430,16 @@ describe('Submit Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
-          }
+            applied: false,
+          },
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
-          false,
+          true,
           {
-            requiredFieldImplicit: "foobar",
-            requiredFieldExplicit: "this is not a foobar"
+            requiredFieldImplicit: 'foobar',
+            requiredFieldExplicit: 'this is not a foobar',
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
@@ -447,6 +448,7 @@ describe('Submit Application', () => {
         });
 
         expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+        expect(resultObject.toJSON().status.applied).toBeFalsy();
       });
 
     });
@@ -457,16 +459,16 @@ describe('Submit Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: false
-        }
+          applied: false,
+        },
       });
 
-      expect(updateApplication(
+      await expect(updateApplication(
         hackerUser,
-        false,
+        true,
         {
-          requiredFieldImplicit: "foobar",
-          requiredFieldExplicit: "foobar",
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
           conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
         } as any,
       )).rejects.toThrow(SubmissionDeniedError);
@@ -476,6 +478,7 @@ describe('Submit Application', () => {
       });
 
       expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+      expect(resultObject.toJSON().status.applied).toBeFalsy();
     });
 
     test('Already submitted', async () => {
@@ -484,15 +487,16 @@ describe('Submit Application', () => {
       await userTestModel.create({
         ...hackerUser,
         status: {
-          applied: true
-        }
+          applied: true,
+        },
       });
 
-      expect(updateApplication(
+      await expect(updateApplication(
         hackerUser,
         true,
         {
-          optionalField2: 'Test',
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
         } as any,
       )).rejects.toThrow(SubmissionDeniedError);
 
@@ -510,15 +514,16 @@ describe('Submit Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
-          }
+            applied: false,
+          },
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
           true,
           {
-            optionalField2: 'Test',
+            requiredFieldImplicit: 'foobar',
+            requiredFieldExplicit: 'foobar',
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
@@ -535,16 +540,17 @@ describe('Submit Application', () => {
         await userTestModel.create({
           ...hackerUser,
           status: {
-            applied: false
+            applied: false,
           },
-          personalApplicationDeadline: new Date().getTime() - 1000
+          personalApplicationDeadline: new Date().getTime() - 1000,
         });
 
-        expect(updateApplication(
+        await expect(updateApplication(
           hackerUser,
           true,
           {
-            optionalField2: 'Test',
+            requiredFieldImplicit: 'foobar',
+            requiredFieldExplicit: 'foobar',
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
@@ -553,6 +559,7 @@ describe('Submit Application', () => {
         });
 
         expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+        expect(resultObject.toJSON().status.applied).toBeFalsy();
       });
     });
   });

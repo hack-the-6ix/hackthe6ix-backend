@@ -1,6 +1,5 @@
 import { ObjectID } from 'bson';
 import mongoose from 'mongoose';
-import { getModels } from '../../controller/util';
 import { IUser } from '../../models/user/fields';
 import { extractFields } from '../../models/util';
 import { UniverseState } from '../../types/types';
@@ -105,6 +104,6 @@ export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 
         maxAccepted: 100,
         maxWaitlist: 100,
       },
-    } as UniverseState
+    } as UniverseState,
   ),
 );

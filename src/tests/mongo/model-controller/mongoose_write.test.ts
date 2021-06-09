@@ -1,8 +1,8 @@
 import { editObject } from '../../../controller/ModelController';
-import { getModels } from '../../../controller/util';
+import { getModels } from '../../../controller/util/resources';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
-import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from '../db-handler';
+import { generateTestModel, hackerUser } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -19,10 +19,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -53,8 +53,8 @@ const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = gene
       },
     },
     banana: {
-      type: String
-    }
+      type: String,
+    },
   },
 }, 'RecursionWriteTest');
 
@@ -76,7 +76,7 @@ const [writeTestModel, mockWriteTestModels] = generateTestModel({
 
 const mockModels = {
   ...mockRecrusionCreateWriteTestModels,
-  ...mockWriteTestModels
+  ...mockWriteTestModels,
 };
 
 getModels.mockReturnValue(mockModels);
@@ -90,10 +90,10 @@ describe('Model Write', () => {
         test: {
           huh: {
             field1: 'Banana',
-            field2: 'Llama'
+            field2: 'Llama',
           },
         },
-        banana: "test"
+        banana: 'test',
       });
 
       expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
@@ -102,15 +102,15 @@ describe('Model Write', () => {
         hackerUser,
         'RecursionWriteTest',
         {
-          "test.huh.field1": 'Banana'
+          'test.huh.field1': 'Banana',
         },
         {
           test: {
             huh: {
               field1: 'foobar',
             },
-          }
-        },);
+          },
+        });
 
       // Ensure only amended object is modified
       expect(data.length).toEqual(1);
@@ -127,10 +127,10 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         test: {
           huh: {
-            field1: 'foobar'
+            field1: 'foobar',
           },
         },
-        banana: "test"
+        banana: 'test',
       });
 
 
@@ -145,12 +145,12 @@ describe('Model Write', () => {
             field1: 'Banana',
           },
         },
-        banana: "test"
+        banana: 'test',
       });
 
       expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
 
-      expect(editObject(
+      await expect(editObject(
         hackerUser,
         'RecursionWriteTest',
         {
@@ -165,8 +165,8 @@ describe('Model Write', () => {
             huh: {
               field1: 'ASdasdasd',
             },
-          }
-        }
+          },
+        },
       )).rejects.toThrow(WriteDeniedError);
 
       // Ensure no amendments were made
@@ -184,7 +184,7 @@ describe('Model Write', () => {
             field1: 'Banana',
           },
         },
-        banana: "test"
+        banana: 'test',
       });
     });
   });
@@ -209,7 +209,7 @@ describe('Model Write', () => {
         },
         {
           field2: 'Orange',
-        }
+        },
       );
 
       // Ensure only amended object is modified
@@ -240,7 +240,7 @@ describe('Model Write', () => {
 
       expect((await writeTestModel.find({})).length).toEqual(2);
 
-      expect(editObject(
+      await expect(editObject(
         hackerUser,
         'WriteTest',
         {
@@ -248,7 +248,7 @@ describe('Model Write', () => {
         },
         {
           field1: 'Orange',
-        }
+        },
       )).rejects.toThrow(WriteDeniedError);
 
       // Ensure no changes made

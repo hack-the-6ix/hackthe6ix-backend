@@ -10,22 +10,8 @@ import {
   WriteCheckRequest,
   WriteDeniedError,
 } from '../types/types';
-import { fetchUniverseState, getModels } from './util';
-
-/**
- * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
- */
-export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<any> | WriteCheckRequest<any, any> | CreateCheckRequest<any, any> | DeleteCheckRequest<any>) => {
-  try {
-    return checkerFunction(request);
-  } catch (e) {
-    if (e.toString().includes('is not a function')) {
-      return checkerFunction === true;
-    }
-
-    throw e;
-  }
-};
+import { escapeStringRegexp, evaluateChecker } from './util/checker';
+import { fetchUniverseState, getModels } from './util/resources';
 
 /**
  * Recursively traverses the schema fields + permission checker and the object in parallel
@@ -79,12 +65,6 @@ const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>
   }
 
   return out;
-};
-
-export const escapeStringRegexp = (x: string) => {
-  return x
-  .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
-  .replace(/-/g, '\\x2d');
 };
 
 /**
@@ -431,7 +411,7 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
     requestUser: requestUser,
     universeState: await fetchUniverseState(),
     fieldValue: undefined,
-    submissionObject: parameters
+    submissionObject: parameters,
   });
 
   const newObject = await objectModel.mongoose.create(parameters);

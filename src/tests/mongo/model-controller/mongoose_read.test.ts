@@ -1,9 +1,9 @@
 import { getObject } from '../../../controller/ModelController';
-import { getModels } from '../../../controller/util';
+import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../readCheckModelTests/user/fields';
 import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
-import { adminUser, generateTestModel } from '../test-utils';
 import * as dbHandler from '../db-handler';
+import { adminUser, generateTestModel } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -20,10 +20,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -127,7 +127,7 @@ describe('Model Read', () => {
         filter: {
           field1: 'Test',
         },
-      }
+      },
     );
 
     // Expect to get object 1 and 2 filtered
@@ -157,7 +157,7 @@ describe('Model Read', () => {
             firstName: 'Foo',
           } as IUser,
           'ReadCheckModel',
-          {}
+          {},
         );
 
         // Expect to get the field
@@ -175,7 +175,7 @@ describe('Model Read', () => {
             firstName: 'Not Foo',
           } as IUser,
           'ReadCheckModel',
-          {}
+          {},
         );
 
         // Expect to have field hidden
@@ -197,7 +197,7 @@ describe('Model Read', () => {
             firstName: 'Bar',
           } as IUser,
           'ReadCheckModel',
-          {}
+          {},
         );
 
         // Expect to get the field
@@ -219,7 +219,7 @@ describe('Model Read', () => {
             firstName: 'Not the right person lol',
           } as IUser,
           'ReadCheckModel',
-          {}
+          {},
         );
 
         // Expect to have nest be empty
@@ -241,7 +241,7 @@ describe('Model Read', () => {
           firstName: 'Banana',
         } as IUser,
         'ReadCheckModel',
-        {}
+        {},
       );
 
       // Expect to get the field
@@ -258,7 +258,7 @@ describe('Model Read', () => {
           firstName: 'Not Banana',
         } as IUser,
         'ReadCheckModel',
-        {}
+        {},
       );
 
       // Expect to get the field

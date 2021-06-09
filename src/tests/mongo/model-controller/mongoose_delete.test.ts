@@ -1,8 +1,8 @@
 import { deleteObject } from '../../../controller/ModelController';
-import { getModels } from '../../../controller/util';
+import { getModels } from '../../../controller/util/resources';
 import { DeleteDeniedError } from '../../../types/types';
-import { generateTestModel, hackerUser } from '../test-utils';
 import * as dbHandler from '../db-handler';
+import { generateTestModel, hackerUser } from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -19,10 +19,10 @@ afterEach(async () => await dbHandler.clearDatabase());
  */
 afterAll(async () => await dbHandler.closeDatabase());
 
-jest.mock('../../../controller/util', () => (
+jest.mock('../../../controller/util/resources', () => (
   {
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn()
+    getModels: jest.fn(),
   }
 ));
 
@@ -33,15 +33,15 @@ describe('Model Delete', () => {
       deleteCheck: true,
       FIELDS: {
         field1: {
-          type: String
-        }
+          type: String,
+        },
       },
     }, 'DeleteTest');
 
     getModels.mockReturnValue(mockModels);
 
     // Create some objects to fill the DB
-    await successDeleteTestModel.create({ field1: "Banana" });
+    await successDeleteTestModel.create({ field1: 'Banana' });
     const fail1 = await successDeleteTestModel.create({});
     const fail2 = await successDeleteTestModel.create({});
     const resultObject1 = await successDeleteTestModel.find({});
@@ -52,8 +52,8 @@ describe('Model Delete', () => {
       'DeleteTest',
       {
         field1: {
-          $ne: "Banana" // We should only be deleting non-bananas
-        }
+          $ne: 'Banana', // We should only be deleting non-bananas
+        },
       });
 
     // Non-bananas deleted
@@ -83,7 +83,7 @@ describe('Model Delete', () => {
       const data = await deleteObject(
         hackerUser,
         'SuccessDeleteTest',
-        {}
+        {},
       );
 
       // Object deleted
@@ -108,10 +108,10 @@ describe('Model Delete', () => {
       const resultObject1 = await successDeleteTestModel.find({});
       expect(resultObject1.length).toEqual(1);
 
-      expect(deleteObject(
+      await expect(deleteObject(
         hackerUser,
         'FailDeleteTest',
-        {}
+        {},
       )).rejects.toThrow(DeleteDeniedError);
 
       // Database is still intact
