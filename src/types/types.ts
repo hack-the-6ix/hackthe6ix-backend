@@ -160,3 +160,17 @@ export class DeleteDeniedError extends ForbiddenError {
     Object.setPrototypeOf(this, DeleteDeniedError.prototype);
   }
 }
+
+export class DeadlineExpiredError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'Deadline Expired', error, errorIsPublic);
+    Object.setPrototypeOf(this, DeadlineExpiredError.prototype);
+  }
+}
+
+export class AlreadySubmittedError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'Form already submitted', error, errorIsPublic);
+    Object.setPrototypeOf(this, AlreadySubmittedError.prototype);
+  }
+}

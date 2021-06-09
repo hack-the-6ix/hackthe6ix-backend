@@ -31,15 +31,15 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
 
 export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string, any>) => validStates.indexOf(request?.fieldValue) != -1;
 
+export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.targetObject.status.applied;
+export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => request.universeState.public.globalApplicationDeadline >= new Date().getTime() || request.targetObject.personalApplicationDeadline >= new Date().getTime();
+
 export const canSubmitApplication = () => (request: WriteCheckRequest<any, IUser>) =>
   isOrganizer(request.requestUser) ||
   (
     isUser(request.requestUser, request.targetObject) &&
-    !request.targetObject.status.applied &&
-    (
-      request.universeState.public.globalApplicationDeadline >= new Date().getTime() ||
-      request.targetObject.personalApplicationDeadline >= new Date().getTime()
-    )
+    !isApplied(request) &&
+    isApplicationOpen(request)
   );
 
 export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);

@@ -1,7 +1,9 @@
 import { IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
+import { canSubmitApplication, isApplicationOpen, isApplied } from '../models/validator';
 import {
-  BadRequestError,
+  AlreadySubmittedError,
+  BadRequestError, DeadlineExpiredError, ForbiddenError,
   InternalServerError,
   NotFoundError,
   SubmissionDeniedError,
@@ -52,23 +54,34 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, app
     throw new BadRequestError('Application must be truthy!');
   }
 
+  const universeState = await fetchUniverseState();
+  const targetObject = await User.findOne({
+    _id: requestUser._id,
+  });
+
+  const writeRequest: any = {
+    requestUser: requestUser,
+    targetObject: targetObject,
+    submissionObject: {
+      hackerApplication: hackerApplication,
+    },
+    universeState: universeState,
+    fieldValue: undefined
+  };
+
+  if (!canSubmitApplication()(writeRequest)) {
+    if (isApplied(writeRequest)) {
+      throw new AlreadySubmittedError('You have already applied!');
+    } else if (!isApplicationOpen(writeRequest)) {
+      throw new DeadlineExpiredError('The submission deadline has passed!');
+    } {
+      throw new ForbiddenError('User is not eligible to submit');
+    }
+  }
+
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    const targetObject = await User.findOne({
-      _id: requestUser._id,
-    });
-
-    const universeState = await fetchUniverseState();
-
-    const invalidFields: string[] = validateSubmission(application, hackerApplication, {
-      requestUser: requestUser,
-      targetObject: targetObject,
-      submissionObject: {
-        hackerApplication: hackerApplication,
-      },
-      universeState: universeState,
-      fieldValue: undefined,
-    }, '');
+    const invalidFields: string[] = validateSubmission(application, hackerApplication, writeRequest, '');
 
     if (invalidFields.length > 0) {
       throw new SubmissionDeniedError(invalidFields);

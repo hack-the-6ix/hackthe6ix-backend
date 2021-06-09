@@ -55,14 +55,14 @@ export const validateSubmission = (submission: any, submissionFields: any, reque
       } else {
         // This is a normal field
         if (!submissionChecker(fieldMetadata, { ...request, fieldValue: submission[k] })) {
-          errors.push(`Submission condition failed on level: ${path}/${k}`);
+          errors.push(`${path}/${k}`);
         }
       }
     }
 
   } else {
     // Failed at a nest
-    errors.push(`Submission condition failed on level: ${path}/`);
+    errors.push(`${path}/`);
   }
 
   return errors;

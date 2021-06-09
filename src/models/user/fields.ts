@@ -1,20 +1,23 @@
 import mongoose from 'mongoose';
 import {
-  CreateCheckRequest, DeleteCheckRequest,
+  CreateCheckRequest,
+  DeleteCheckRequest,
   ReadCheckRequest,
   WriteCheckRequest,
 } from '../../types/types';
-import { maskStatus } from './interceptors';
 import {
   canSubmitApplication,
   inEnum,
   isAdmin,
-  isOrganizer, isUser,
+  isOrganizer,
   isUserOrOrganizer,
-  maxLength, maxWordLength,
-  minLength, minWordLength,
-  multiInEnum, validatePostalCode,
+  maxLength,
+  maxWordLength,
+  minLength,
+  minWordLength,
+  validatePostalCode,
 } from '../validator';
+import { maskStatus } from './interceptors';
 
 // Main application
 export const hackerApplication = {
@@ -100,7 +103,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? true: !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? true : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -132,7 +135,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(6),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) =>  request.submissionObject.hackerApplication.wantSwag ? validatePostalCode() : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? validatePostalCode() : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -257,7 +260,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
-      submitCheck:minWordLength(50),
+      submitCheck: minWordLength(50),
       readCheck: true,
     },
 
@@ -487,28 +490,28 @@ const groups = {
       type: Boolean,
       required: true,
       default: false,
-      caption: 'Hacker'
+      caption: 'Hacker',
     },
 
     admin: {
       type: Boolean,
       required: true,
       default: false,
-      caption: 'Admin'
+      caption: 'Admin',
     },
 
     organizer: {
       type: Boolean,
       required: true,
       default: false,
-      caption: 'Organizer'
+      caption: 'Organizer',
     },
 
     volunteer: {
       type: Boolean,
       required: true,
       default: false,
-      caption: 'Volunteer'
+      caption: 'Volunteer',
     },
   },
 };

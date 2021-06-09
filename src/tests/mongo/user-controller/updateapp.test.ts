@@ -8,6 +8,9 @@ import {
   maxLength,
 } from '../../../models/validator';
 import {
+  AlreadySubmittedError,
+  DeadlineExpiredError,
+  ForbiddenError,
   ReadCheckRequest,
   SubmissionDeniedError,
   WriteCheckRequest,
@@ -255,7 +258,7 @@ describe('Update Application', () => {
         {
           optionalField2: 'Test',
         } as any,
-      )).rejects.toThrow(WriteDeniedError);
+      )).rejects.toThrow(ForbiddenError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,
@@ -281,7 +284,7 @@ describe('Update Application', () => {
           {
             optionalField2: 'Test',
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(DeadlineExpiredError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -307,7 +310,7 @@ describe('Update Application', () => {
           {
             optionalField2: 'Test',
           } as any,
-        )).rejects.toThrow(WriteDeniedError);
+        )).rejects.toThrow(DeadlineExpiredError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -498,7 +501,7 @@ describe('Submit Application', () => {
           requiredFieldImplicit: 'foobar',
           requiredFieldExplicit: 'foobar',
         } as any,
-      )).rejects.toThrow(SubmissionDeniedError);
+      )).rejects.toThrow(AlreadySubmittedError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,
@@ -525,7 +528,7 @@ describe('Submit Application', () => {
             requiredFieldImplicit: 'foobar',
             requiredFieldExplicit: 'foobar',
           } as any,
-        )).rejects.toThrow(SubmissionDeniedError);
+        )).rejects.toThrow(DeadlineExpiredError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
@@ -552,7 +555,7 @@ describe('Submit Application', () => {
             requiredFieldImplicit: 'foobar',
             requiredFieldExplicit: 'foobar',
           } as any,
-        )).rejects.toThrow(SubmissionDeniedError);
+        )).rejects.toThrow(DeadlineExpiredError);
 
         const resultObject = await userTestModel.findOne({
           _id: hackerUser._id,
