@@ -180,18 +180,13 @@ export const getObject = async (
   const universeState = await fetchUniverseState();
 
   // Perform all the traversals async
-  const cleanedResults = await Promise.all(results.map(async (result: any) =>
-    /**
-     * TODO: Check if this acc runs async
-     * @param result
-     */
-
+  const cleanedResults = results.map((result: any) =>
     cleanObject(objectModel.rawFields, result, {
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
-    }),
-  ));
+    })
+  );
 
   for (const cleanedResult of cleanedResults) {
     // Only push it into the output if there is any data left
@@ -277,7 +272,7 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
 
   const universeState = await fetchUniverseState();
 
-  await Promise.all(results.map(async (result: any) =>
+  results.map((result: any) =>
     validateObjectEdit(objectModel.rawFields, changes, {
       requestUser: requestUser,
       targetObject: result,
@@ -285,7 +280,7 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
       universeState: universeState,
       fieldValue: undefined,
     }),
-  ));
+  );
 
   // Keep track of IDs that were affected
   for (const o of Object.keys(results)) {
@@ -344,13 +339,13 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
 
   const universeState = await fetchUniverseState();
 
-  await Promise.all(results.map(async (result: any) =>
+  results.map((result: any) =>
     validateObjectDelete(objectModel.rawFields, {
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
     }),
-  ));
+  );
 
   // Keep track of IDs that were affected
   for (const o of Object.keys(results)) {
