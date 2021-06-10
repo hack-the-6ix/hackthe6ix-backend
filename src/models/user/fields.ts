@@ -194,7 +194,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       readCheck: true,
-      submitCheck: minLength(1),
+      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
       virtual: true,
     },
 
