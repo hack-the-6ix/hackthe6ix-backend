@@ -81,6 +81,12 @@ const [userTestModel, mockModels] = generateTestModel({
       writeCheck: canSubmitApplication(),
 
       FIELDS: {
+        virtualBoi: {
+          type: String,
+          writeCheck: false,
+          submitCheck: (request: WriteCheckRequest<any, any>) => !(request.universeState as any).virtualFail,
+          virtual: true
+        },
         optionalField: {
           type: String,
           readCheck: true,
@@ -502,6 +508,36 @@ describe('Submit Application', () => {
           requiredFieldExplicit: 'foobar',
         } as any,
       )).rejects.toThrow(AlreadySubmittedError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+    });
+
+    test('Virtual field submit check violation', async () => {
+      const mockUniverseState = await generateMockUniverseState();
+      fetchUniverseState.mockReturnValue({
+        ...mockUniverseState,
+        virtualFail: true // we manually trigger the virtual field submitCheck to fail
+      });
+
+      await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await expect(updateApplication(
+        hackerUser,
+        true,
+        {
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
+        } as any,
+      )).rejects.toThrow(SubmissionDeniedError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,

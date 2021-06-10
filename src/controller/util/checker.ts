@@ -23,7 +23,9 @@ export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<
 /**
  * Runs a writeCheck and submitCheck (if available) against some field/dictionary/thing
  */
-const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) => evaluateChecker(context.writeCheck, request) && (context.submitCheck === undefined || evaluateChecker(context.submitCheck, request));
+const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) =>
+  (context.virtual || evaluateChecker(context.writeCheck, request)) && // We will skip the write check if a field is virtual
+  (context.submitCheck === undefined || evaluateChecker(context.submitCheck, request));
 
 /**
  * Validates a submitted application against all the required fields in the application. This checker
@@ -45,6 +47,7 @@ export const validateSubmission = (submission: any, submissionFields: any, reque
     for (const k of Object.keys(submissionFields.FIELDS)) {
       const fieldMetadata = submissionFields.FIELDS[k];
 
+      // Virtual fields cannot be overwritten, so we do not check them
       if (fieldMetadata.FIELDS !== undefined) {
         // More recursion
         errors = [
@@ -64,6 +67,7 @@ export const validateSubmission = (submission: any, submissionFields: any, reque
           errors.push([`${path}/${k}`, fieldMetadata?.caption || k]);
         }
       }
+
     }
 
   } else {

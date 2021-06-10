@@ -42,6 +42,14 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
 });
 
 /**
+ * TODO: Add gridFS file upload endpoint
+ *       Be sure to delete any existing files
+ *
+ *       We will tie the user ID to the file as a unique identifier
+ *       asdPOASKDasopkdasok.pdf
+ */
+
+/**
  * TODO: Add endpoint to RSVP
  *
  *       /rsvp -> triggers sequence of events to reserve spot and invite to discord

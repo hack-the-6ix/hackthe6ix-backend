@@ -217,7 +217,7 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
         } else {
           // Top level field
 
-          if (!evaluateChecker(fieldMetadata.writeCheck, { ...request, fieldValue: changes[k] })) {
+          if (!evaluateChecker(fieldMetadata.writeCheck, { ...request, fieldValue: changes[k] }) || fieldMetadata.virtual) {
             // Validation failed for this field
             throw new WriteDeniedError(fieldMetadata, fieldMetadata.writeCheck, request);
           }

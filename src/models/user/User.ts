@@ -57,4 +57,14 @@ schema.virtual('roles').get(function() {
   return out;
 });
 
+/**
+ * Populate the resume file name (if available) using data in gridfs
+ */
+schema.virtual('hackerApplication.resumeFileName').get(function() {
+
+  // TODO: Query gridfs for this user's resume?
+
+  return "";
+});
+
 export default mongoose.model<IUser>('User', schema);

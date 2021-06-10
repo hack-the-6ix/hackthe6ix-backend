@@ -82,4 +82,12 @@ apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
  * TODO: Add endpoint to fetch a list of fields and their caption from the schema
  */
 
+/**
+ * TODO: Add API to read from gridFS (Organizers)
+ */
+
+/**
+ * TODO: Add API to write to GridFS (Organizers)
+ */
+
 export default apiRouter;

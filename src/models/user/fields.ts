@@ -184,18 +184,18 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-
-    /**
-     * TODO: Update this? Idk what we're doing for resume this year
-     * TODO: Make this mandatory
+    /*
+     The main purpose of this field is to fill in the indicator on the frontend
+     to let the user know they already submitted a resume.
      */
-    resumeLink: {
+    resumeFileName: {
       type: String,
       caption: 'Resume',
       inTextSearch: true,
 
-      writeCheck: maxLength(256),
       readCheck: true,
+      submitCheck: minLength(1),
+      virtual: true,
     },
 
     resumeSharePermission: {
@@ -667,7 +667,7 @@ export interface IApplication {
   program: string,
   yearsOfStudy: string,
   hackathonsAttended: string,
-  resumeLink: string,
+  resumeFileName: string,
   resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,

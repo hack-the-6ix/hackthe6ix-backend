@@ -1,8 +1,10 @@
 import { editObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
+import { extractFields } from '../../../models/util';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import * as dbHandler from '../db-handler';
 import { generateTestModel, hackerUser } from '../test-utils';
+import mongoose from 'mongoose';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -58,7 +60,9 @@ const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = gene
   },
 }, 'RecursionWriteTest');
 
-const [writeTestModel, mockWriteTestModels] = generateTestModel({
+// NOTE: This one is a bit special since we have a virtual field
+
+const writeTestFields = {
   createCheck: true,
   writeCheck: true,
 
@@ -71,12 +75,33 @@ const [writeTestModel, mockWriteTestModels] = generateTestModel({
       type: String,
       writeCheck: true,
     },
+    virtual: {
+      type: String,
+      virtual: true,
+      writeCheck: true
+    }
   },
-}, 'WriteTest');
+};
+
+const testSchema = new mongoose.Schema(extractFields(writeTestFields), {
+  toObject: {
+    virtuals: true,
+  },
+  toJSON: {
+    virtuals: true,
+  },
+});
+
+testSchema.virtual('virtual').get(() => "virtualboi!");
+
+const writeTestModel = mongoose.model('WriteTest', testSchema);
 
 const mockModels = {
   ...mockRecrusionCreateWriteTestModels,
-  ...mockWriteTestModels,
+  "WriteTest": {
+    mongoose: writeTestModel,
+    rawFields: writeTestFields,
+  }
 };
 
 getModels.mockReturnValue(mockModels);
@@ -227,6 +252,7 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         field1: 'Banana',
         field2: 'Orange',
+        virtual: 'virtualboi!'
       });
     });
 
@@ -263,6 +289,44 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         field1: 'Banana',
         field2: 'Apple',
+        virtual: 'virtualboi!'
+      });
+    });
+
+    test('Virtual', async () => {
+
+      await writeTestModel.create({});
+      const originalObject = await writeTestModel.create({
+        field1: 'Banana',
+        field2: 'Apple'
+      });
+
+      expect((await writeTestModel.find({})).length).toEqual(2);
+
+      await expect(editObject(
+        hackerUser,
+        'WriteTest',
+        {
+          field1: 'Banana',
+        },
+        {
+          virtual: "lol this shouldn't change"
+        },
+      )).rejects.toThrow(WriteDeniedError);
+
+      // Ensure no changes made
+      const resultObject = await writeTestModel.find({ _id: originalObject._id });
+      expect(resultObject.length).toEqual(1);
+
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
+
+      expect(resultJSON).toEqual({
+        field1: 'Banana',
+        field2: 'Apple',
+        virtual: 'virtualboi!'
       });
     });
   });

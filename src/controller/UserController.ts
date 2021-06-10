@@ -11,6 +11,8 @@ import {
 import { editObject, getObject } from './ModelController';
 import { validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
+import fs from 'fs';
+import FileType from 'file-type';
 
 /**
  * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
@@ -118,6 +120,57 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
   }
+
+  return 'Success';
+};
+
+/**
+ * Update resume on file. Only pdf files under 5MB will be allowed.
+ *
+ * @param requestUser
+ * @param tempPath - temp path to file
+ */
+export const updateResume = async (requestUser: IUser, tempPath: string) => {
+
+  const universeState = await fetchUniverseState();
+  const targetObject = await User.findOne({
+    _id: requestUser._id,
+  });
+
+  const writeRequest: any = {
+    requestUser: requestUser,
+    targetObject: targetObject,
+    submissionObject: {},
+    universeState: universeState,
+    fieldValue: undefined
+  };
+
+  if (!canSubmitApplication()(writeRequest)) {
+    if (isApplied(writeRequest)) {
+      throw new AlreadySubmittedError('You have already applied!');
+    } else if (!isApplicationOpen(writeRequest)) {
+      throw new DeadlineExpiredError('The submission deadline has passed!');
+    } {
+      throw new ForbiddenError('User is not eligible to submit');
+    }
+  }
+
+  if (fs.statSync(tempPath).size > 5000000) {
+    throw new ForbiddenError('File exceeds 5MB');
+  }
+
+  const fileType = await FileType.fromStream(fs.createReadStream(tempPath));
+  if (fileType.mime !== 'application/pdf') {
+    throw new ForbiddenError('Invalid file type! Must be PDF');
+  }
+
+  /**
+   * TODO: Delete any existing resumes
+   */
+
+  /**
+   * TODO: Upload new resume
+   */
 
   return 'Success';
 };

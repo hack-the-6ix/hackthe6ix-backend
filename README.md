@@ -122,6 +122,8 @@ it will be used IN ADDITION to the write check (at least for the `updateApplicat
 to present to the user. `editObject` will normally terminate as soon as an invalid field is found since all `writeCheck` conditions must be true 
 for an edit to succeed.
 
+NOTE: Virtual fields will NOT have their `writeCheck` evaluated for the purposes of validating a form submission; however, the `submitCheck` condition WILL be checked (if available).
+
 ```typescript
 {
   writeCheck: true,
