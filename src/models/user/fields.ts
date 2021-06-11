@@ -6,7 +6,7 @@ import {
   WriteCheckRequest,
 } from '../../types/types';
 import {
-  canSubmitApplication,
+  canUpdateApplication,
   inEnum,
   isAdmin,
   isOrganizer,
@@ -21,7 +21,7 @@ import { maskStatus } from './interceptors';
 
 // Main application
 export const hackerApplication = {
-  writeCheck: canSubmitApplication(),
+  writeCheck: canUpdateApplication(),
   readCheck: true,
 
   FIELDS: {
@@ -93,7 +93,9 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1)(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+                                                                    ? minLength(1)(request) && maxLength(64)(request)
+                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -103,7 +105,9 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? true : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+                                                                    ? maxLength(64)(request)
+                                                                    : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -113,7 +117,9 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? minLength(1)(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+                                                                    ? minLength(1)(request) && maxLength(64)(request)
+                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -125,7 +131,9 @@ export const hackerApplication = {
       caption: 'Province',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? inEnum(['Banana'])(request) : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+                                                                    ? inEnum(['Banana'])(request)
+                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
       readCheck: true,
     },
 
@@ -135,7 +143,9 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(6),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag ? validatePostalCode()(request) : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+                                                                    ? validatePostalCode()(request)
+                                                                    : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -146,7 +156,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: minLength(1),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -156,7 +166,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(64),
-      submitCheck: minLength(1),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -184,18 +194,16 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    /*
-     The main purpose of this field is to fill in the indicator on the frontend
-     to let the user know they already submitted a resume.
-     */
-    resumeFileName: {
+    // The user cannot directly edit this field, but they can view it
+    // We will set this when the user updates their application
+    resumeObjectID: {
       type: String,
       caption: 'Resume',
       inTextSearch: true,
 
       readCheck: true,
-      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
-      virtual: true,
+      writeCheck: false,
+      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeObjectID?.length > 0
     },
 
     resumeSharePermission: {
@@ -239,7 +247,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
-      submitCheck: minWordLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -259,7 +267,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxWordLength(2056),
-      submitCheck: minWordLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -667,7 +675,7 @@ export interface IApplication {
   program: string,
   yearsOfStudy: string,
   hackathonsAttended: string,
-  resumeFileName: string,
+  resumeObjectID: string,
   resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,

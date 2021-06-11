@@ -2,7 +2,7 @@ import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState, getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
 import {
-  canSubmitApplication,
+  canUpdateApplication,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -78,25 +78,26 @@ const [userTestModel, mockModels] = generateTestModel({
     },
     hackerApplication: {
       readCheck: true,
-      writeCheck: canSubmitApplication(),
+      writeCheck: canUpdateApplication(),
 
       FIELDS: {
-        virtualBoi: {
+        submitCheckFallback: { // this should pass because submitCheck > writeCheck
           type: String,
           writeCheck: false,
-          submitCheck: (request: WriteCheckRequest<any, any>) => !(request.universeState as any).virtualFail,
-          virtual: true
+          submitCheck: true,
         },
         optionalField: {
           type: String,
           readCheck: true,
           writeCheck: true,
+          submitCheck: true,
           caption: 'Optional Field',
         },
         optionalField2: {
           type: String,
           readCheck: true,
           writeCheck: true,
+          submitCheck: true,
           caption: 'Optional Field 2',
         },
         requiredFieldImplicit: {
@@ -110,7 +111,7 @@ const [userTestModel, mockModels] = generateTestModel({
           readCheck: true,
           writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 100,
           submitCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-          caption: 'Optional Field 2',
+          caption: 'Required Field 2',
         },
         conditionalField: {
           type: String,
@@ -508,36 +509,6 @@ describe('Submit Application', () => {
           requiredFieldExplicit: 'foobar',
         } as any,
       )).rejects.toThrow(AlreadySubmittedError);
-
-      const resultObject = await userTestModel.findOne({
-        _id: hackerUser._id,
-      });
-
-      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
-    });
-
-    test('Virtual field submit check violation', async () => {
-      const mockUniverseState = await generateMockUniverseState();
-      fetchUniverseState.mockReturnValue({
-        ...mockUniverseState,
-        virtualFail: true // we manually trigger the virtual field submitCheck to fail
-      });
-
-      await userTestModel.create({
-        ...hackerUser,
-        status: {
-          applied: false,
-        },
-      });
-
-      await expect(updateApplication(
-        hackerUser,
-        true,
-        {
-          requiredFieldImplicit: 'foobar',
-          requiredFieldExplicit: 'foobar',
-        } as any,
-      )).rejects.toThrow(SubmissionDeniedError);
 
       const resultObject = await userTestModel.findOne({
         _id: hackerUser._id,

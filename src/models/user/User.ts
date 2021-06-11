@@ -2,13 +2,15 @@ import mongoose from 'mongoose';
 import { extractFields } from '../util';
 import { fields, IUser } from './fields';
 
+const createGridFSModel = require('mongoose-gridfs').createModel; // For some reason the @types for this library wouldn't install :/
+
 const schema = new mongoose.Schema(extractFields(fields), {
   toObject: {
-    virtuals: true
+    virtuals: true,
   },
   toJSON: {
-    virtuals: true
-  }
+    virtuals: true,
+  },
 });
 
 /**
@@ -28,7 +30,6 @@ const roleAliases: any = {
   admin: ['organizer', 'volunteer', 'hacker'],
   organizer: ['volunteer'],
 };
-
 
 /**
  * Roles such as Admin are a superset of other roles like Organizer
@@ -58,13 +59,15 @@ schema.virtual('roles').get(function() {
 });
 
 /**
- * Populate the resume file name (if available) using data in gridfs
+ * Since the mongo connection needs to be established before the GridFS model
+ * can be made, we will have the user call getResumeBucket when they need it
+ * (as opposed to constructing it on boot)
+ *
+ * @param connection
  */
-schema.virtual('hackerApplication.resumeFileName').get(function() {
-
-  // TODO: Query gridfs for this user's resume?
-
-  return "";
+export const getResumeBucket = () => createGridFSModel({
+  modelName: 'Resume',
+  connection: mongoose.connection,
 });
 
 export default mongoose.model<IUser>('User', schema);

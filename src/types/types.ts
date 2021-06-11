@@ -4,13 +4,6 @@ import { IUser } from '../models/user/fields';
 export type ErrorMessage = { status: number, message: string, error?: string };
 
 /**
- * We will inject the executor user's object into the request
- */
-export interface UserRequest extends Request {
-  executor: any
-}
-
-/**
  * Status of the universe
  */
 export type UniverseState = {

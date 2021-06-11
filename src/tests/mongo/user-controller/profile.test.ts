@@ -2,7 +2,7 @@ import { fetchUser } from '../../../controller/UserController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
 import {
-  canSubmitApplication,
+  canUpdateApplication,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -67,7 +67,7 @@ const [userTestModel, mockModels] = generateTestModel({
     },
     application: {
       readCheck: true,
-      writeCheck: canSubmitApplication(),
+      writeCheck: canUpdateApplication(),
 
       FIELDS: {
         applicationField: {

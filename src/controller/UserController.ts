@@ -1,18 +1,20 @@
+import FileType from 'file-type';
+import fs from 'fs';
 import { IApplication, IUser } from '../models/user/fields';
-import User from '../models/user/User';
-import { canSubmitApplication, isApplicationOpen, isApplied } from '../models/validator';
+import User, { getResumeBucket } from '../models/user/User';
+import { canUpdateApplication, isApplicationOpen, isApplied } from '../models/validator';
 import {
   AlreadySubmittedError,
-  BadRequestError, DeadlineExpiredError, ForbiddenError,
+  BadRequestError,
+  DeadlineExpiredError,
+  ForbiddenError,
   InternalServerError,
   NotFoundError,
-  SubmissionDeniedError,
+  SubmissionDeniedError, WriteCheckRequest,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
 import { validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
-import fs from 'fs';
-import FileType from 'file-type';
 
 /**
  * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
@@ -42,6 +44,23 @@ export const fetchUser = async (requestUser: IUser) => {
 };
 
 /**
+ * Throws an error if the user cannot update their application.
+ */
+const testCanUpdateApplication = async (writeRequest: WriteCheckRequest<any, any>) => {
+
+  if (!canUpdateApplication()(writeRequest)) {
+    if (isApplied(writeRequest)) {
+      throw new AlreadySubmittedError('You have already applied!');
+    } else if (!isApplicationOpen(writeRequest)) {
+      throw new DeadlineExpiredError('The submission deadline has passed!');
+    }
+    {
+      throw new ForbiddenError('User is not eligible to submit');
+    }
+  }
+};
+
+/**
  * Updates a user's hacker application and optionally marks it as submitted
  *
  * @param requestUser
@@ -68,18 +87,10 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       hackerApplication: hackerApplication,
     },
     universeState: universeState,
-    fieldValue: undefined
+    fieldValue: undefined,
   };
 
-  if (!canSubmitApplication()(writeRequest)) {
-    if (isApplied(writeRequest)) {
-      throw new AlreadySubmittedError('You have already applied!');
-    } else if (!isApplicationOpen(writeRequest)) {
-      throw new DeadlineExpiredError('The submission deadline has passed!');
-    } {
-      throw new ForbiddenError('User is not eligible to submit');
-    }
-  }
+  await testCanUpdateApplication(writeRequest);
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
@@ -127,10 +138,16 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
 /**
  * Update resume on file. Only pdf files under 5MB will be allowed.
  *
+ * Reference: https://stackoverflow.com/questions/16482233/store-file-in-mongos-gridfs-with-expressjs-after-upload
+ *
  * @param requestUser
  * @param tempPath - temp path to file
  */
 export const updateResume = async (requestUser: IUser, tempPath: string) => {
+
+  if (!tempPath) {
+    throw new BadRequestError("Invalid file");
+  }
 
   const universeState = await fetchUniverseState();
   const targetObject = await User.findOne({
@@ -142,35 +159,43 @@ export const updateResume = async (requestUser: IUser, tempPath: string) => {
     targetObject: targetObject,
     submissionObject: {},
     universeState: universeState,
-    fieldValue: undefined
+    fieldValue: undefined,
   };
 
-  if (!canSubmitApplication()(writeRequest)) {
-    if (isApplied(writeRequest)) {
-      throw new AlreadySubmittedError('You have already applied!');
-    } else if (!isApplicationOpen(writeRequest)) {
-      throw new DeadlineExpiredError('The submission deadline has passed!');
-    } {
-      throw new ForbiddenError('User is not eligible to submit');
-    }
-  }
+  // Make sure user is allowed to edit their app
+  await testCanUpdateApplication(writeRequest);
 
+  // Read file from request
+  const fsReadStream = fs.createReadStream(tempPath);
+
+  // Ensure file is within limit
   if (fs.statSync(tempPath).size > 5000000) {
     throw new ForbiddenError('File exceeds 5MB');
   }
 
-  const fileType = await FileType.fromStream(fs.createReadStream(tempPath));
+  // Ensure file type is correct
+  const fileType = await FileType.fromStream(fsReadStream);
   if (fileType.mime !== 'application/pdf') {
     throw new ForbiddenError('Invalid file type! Must be PDF');
   }
 
+  const ResumeBucket = getResumeBucket();
+
+  const deleteResult = await new Promise((resolve, reject) => {
+    ResumeBucket.deleteFile()
+  });
   /**
    * TODO: Delete any existing resumes
    */
 
-  /**
-   * TODO: Upload new resume
-   */
+  const bucketWriteStream = ResumeBucket.createWriteStream({
+    metadata: {
+      owner: requestUser._id
+    },
+    filename: `${requestUser._id}-resume.pdf`
+  });
+
+  await fsReadStream.pipe(bucketWriteStream);
 
   return 'Success';
 };

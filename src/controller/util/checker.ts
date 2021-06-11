@@ -24,8 +24,9 @@ export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<
  * Runs a writeCheck and submitCheck (if available) against some field/dictionary/thing
  */
 const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) =>
-  (context.virtual || evaluateChecker(context.writeCheck, request)) && // We will skip the write check if a field is virtual
-  (context.submitCheck === undefined || evaluateChecker(context.submitCheck, request));
+  context.submitCheck
+    ? evaluateChecker(context.submitCheck, request)
+    : evaluateChecker(context.writeCheck, request)
 
 /**
  * Validates a submitted application against all the required fields in the application. This checker

@@ -115,14 +115,11 @@ A special `submitCheck` can be added to fields where the condition to submit may
 save. An instance where this could be useful is when there is a minimum character requirement for a field, but a user may not
 necessarily satisfy that condition if they submit early. Therefore, we must provide a second set of checkers for this situation.
 
-By default, `writeCheck` will be used to evaluate both submission and write attempts, but if `submitCheck` is explicitly provided, 
-it will be used IN ADDITION to the write check (at least for the `updateApplication` implementation in `UserController`).
+If `submitCheck` is left blank, the validator will evaluate `writeCheck` in place.
 
 `submitCheck` will be tested separately from the standard `writeCheck` since we want to accumulate all the errors across the entire
 to present to the user. `editObject` will normally terminate as soon as an invalid field is found since all `writeCheck` conditions must be true 
 for an edit to succeed.
-
-NOTE: Virtual fields will NOT have their `writeCheck` evaluated for the purposes of validating a form submission; however, the `submitCheck` condition WILL be checked (if available).
 
 ```typescript
 {
@@ -133,7 +130,7 @@ NOTE: Virtual fields will NOT have their `writeCheck` evaluated for the purposes
       type: String,
       
       writeCheck: (request: WriteCheckRequest<string, string>) => request.fieldValue.length < 100,
-      submitCheck: (request: WriteCheckRequest<string, string>) => request.fieldValue.length >= 10,
+      submitCheck: (request: WriteCheckRequest<string, string>) => request.fieldValue.length >= 10 && request.fieldValue.length < 100,
       
       // The user can save myCoolField as much as they want as long as the length is less than 100,
       // however, when they submit the form we will ensure it is also at least length 10
