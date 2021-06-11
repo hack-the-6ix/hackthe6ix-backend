@@ -3,7 +3,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import { fetchUser, updateApplication } from '../controller/UserController';
+import { fetchUser, updateApplication, updateResume } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
 
@@ -41,13 +41,17 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
   );
 });
 
-/**
- * TODO: Add gridFS file upload endpoint
- *       Be sure to delete any existing files
- *
- *       We will tie the user ID to the file as a unique identifier
- *       asdPOASKDasopkdasok.pdf
- */
+
+actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    updateResume(
+      req.executor,
+      (req as any)?.files?.resume?.tempFilePath,
+    ),
+  );
+});
 
 /**
  * TODO: Add endpoint to RSVP

@@ -2,18 +2,17 @@ import bodyParser from 'body-parser';
 import 'dotenv/config';
 import express, { ErrorRequestHandler } from 'express';
 import 'express-async-errors';
+import fileUpload from 'express-fileupload';
 import mongoSanitize from 'express-mongo-sanitize';
 import mongoose from 'mongoose';
 // Bootstrap scripts
 import './bootstrap/settings';
+import { database, port } from './consts';
 import actionRouter from './routes/action';
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
 import { InternalServerError } from './types/types';
-
-const port = process.env.PORT || 6972;
-const database = process.env.DATABASE || 'mongodb://localhost:27017/ht6backend';
 
 const app = express();
 
@@ -22,6 +21,12 @@ app.use(bodyParser.json());
 
 // Sanitize requests with mongoDB ops
 app.use(mongoSanitize());
+app.use(fileUpload({
+  limits: { fileSize: 5000000 },
+  useTempFiles : true,
+  tempFileDir : '/tmp/',
+  abortOnLimit: true
+}));
 
 app.use('/api', apiRouter);
 app.use('/api/action', actionRouter);

@@ -1,7 +1,10 @@
 import FileType from 'file-type';
 import fs from 'fs';
+import Grid from 'gridfs-stream';
+import mongoose from 'mongoose';
+import { database } from '../consts';
 import { IApplication, IUser } from '../models/user/fields';
-import User, { getResumeBucket } from '../models/user/User';
+import User from '../models/user/User';
 import { canUpdateApplication, isApplicationOpen, isApplied } from '../models/validator';
 import {
   AlreadySubmittedError,
@@ -10,11 +13,19 @@ import {
   ForbiddenError,
   InternalServerError,
   NotFoundError,
-  SubmissionDeniedError, WriteCheckRequest,
+  SubmissionDeniedError,
+  WriteCheckRequest,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
 import { validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
+
+// We have to make another mongoose connection for gridFS to work
+mongoose.connect(database, {
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+});
 
 /**
  * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
@@ -47,7 +58,6 @@ export const fetchUser = async (requestUser: IUser) => {
  * Throws an error if the user cannot update their application.
  */
 const testCanUpdateApplication = async (writeRequest: WriteCheckRequest<any, any>) => {
-
   if (!canUpdateApplication()(writeRequest)) {
     if (isApplied(writeRequest)) {
       throw new AlreadySubmittedError('You have already applied!');
@@ -76,13 +86,10 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
   }
 
   const universeState = await fetchUniverseState();
-  const targetObject = await User.findOne({
-    _id: requestUser._id,
-  });
 
   const writeRequest: any = {
     requestUser: requestUser,
-    targetObject: targetObject,
+    targetObject: requestUser,
     submissionObject: {
       hackerApplication: hackerApplication,
     },
@@ -146,17 +153,14 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
 export const updateResume = async (requestUser: IUser, tempPath: string) => {
 
   if (!tempPath) {
-    throw new BadRequestError("Invalid file");
+    throw new BadRequestError('Invalid file');
   }
 
   const universeState = await fetchUniverseState();
-  const targetObject = await User.findOne({
-    _id: requestUser._id,
-  });
 
   const writeRequest: any = {
     requestUser: requestUser,
-    targetObject: targetObject,
+    targetObject: requestUser,
     submissionObject: {},
     universeState: universeState,
     fieldValue: undefined,
@@ -179,23 +183,38 @@ export const updateResume = async (requestUser: IUser, tempPath: string) => {
     throw new ForbiddenError('Invalid file type! Must be PDF');
   }
 
-  const ResumeBucket = getResumeBucket();
+  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
+  const filename = `${requestUser._id}-resume.pdf`;
 
-  const deleteResult = await new Promise((resolve, reject) => {
-    ResumeBucket.deleteFile()
+  // Delete existing resume
+  await new Promise((resolve, reject) => {
+    gfs.exist({ filename: filename }, (err: any, found: any) => {
+      if (err) {
+        return reject(err);
+      }
+
+      gfs.remove({ filename: filename }, (err: any) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve('Success!');
+      });
+    });
   });
-  /**
-   * TODO: Delete any existing resumes
-   */
 
-  const bucketWriteStream = ResumeBucket.createWriteStream({
-    metadata: {
-      owner: requestUser._id
-    },
-    filename: `${requestUser._id}-resume.pdf`
+  // Save new resume
+  const gridWriteStream = gfs.createWriteStream({
+    filename: filename,
   });
+  fsReadStream.pipe(gridWriteStream);
 
-  await fsReadStream.pipe(bucketWriteStream);
+  // Save new resume id to DB
+  await User.findOneAndUpdate({
+    _id: requestUser._id,
+  }, {
+    'hackerApplication.resumeFileName': filename,
+  });
 
   return 'Success';
 };

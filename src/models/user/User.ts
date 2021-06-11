@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import { extractFields } from '../util';
 import { fields, IUser } from './fields';
 
-const createGridFSModel = require('mongoose-gridfs').createModel; // For some reason the @types for this library wouldn't install :/
-
 const schema = new mongoose.Schema(extractFields(fields), {
   toObject: {
     virtuals: true,
@@ -56,18 +54,6 @@ schema.virtual('roles').get(function() {
   }
 
   return out;
-});
-
-/**
- * Since the mongo connection needs to be established before the GridFS model
- * can be made, we will have the user call getResumeBucket when they need it
- * (as opposed to constructing it on boot)
- *
- * @param connection
- */
-export const getResumeBucket = () => createGridFSModel({
-  modelName: 'Resume',
-  connection: mongoose.connection,
 });
 
 export default mongoose.model<IUser>('User', schema);
