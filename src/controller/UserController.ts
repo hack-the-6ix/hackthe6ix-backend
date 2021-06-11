@@ -1,7 +1,6 @@
-import FileType from 'file-type';
-import fs from 'fs';
 import Grid from 'gridfs-stream';
 import mongoose from 'mongoose';
+import stream from 'stream';
 import { database } from '../consts';
 import { IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
@@ -148,11 +147,11 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
  * Reference: https://stackoverflow.com/questions/16482233/store-file-in-mongos-gridfs-with-expressjs-after-upload
  *
  * @param requestUser
- * @param tempPath - temp path to file
+ * @param expressFile - express fileupload file object
  */
-export const updateResume = async (requestUser: IUser, tempPath: string) => {
+export const updateResume = async (requestUser: IUser, expressFile: any) => {
 
-  if (!tempPath) {
+  if (!expressFile) {
     throw new BadRequestError('Invalid file');
   }
 
@@ -169,17 +168,14 @@ export const updateResume = async (requestUser: IUser, tempPath: string) => {
   // Make sure user is allowed to edit their app
   await testCanUpdateApplication(writeRequest);
 
-  // Read file from request
-  const fsReadStream = fs.createReadStream(tempPath);
-
   // Ensure file is within limit
-  if (fs.statSync(tempPath).size > 5000000) {
+  // NOTE: There is another limit set when express-fileupload is initialized in index.ts
+  if (expressFile.size > 5000000) {
     throw new ForbiddenError('File exceeds 5MB');
   }
 
   // Ensure file type is correct
-  const fileType = await FileType.fromStream(fsReadStream);
-  if (fileType.mime !== 'application/pdf') {
+  if (expressFile.mimetype !== 'application/pdf') {
     throw new ForbiddenError('Invalid file type! Must be PDF');
   }
 
@@ -203,11 +199,14 @@ export const updateResume = async (requestUser: IUser, tempPath: string) => {
     });
   });
 
+  const fileReadStream = new stream.PassThrough();
+  fileReadStream.end(Buffer.from(expressFile.data));
+
   // Save new resume
   const gridWriteStream = gfs.createWriteStream({
     filename: filename,
   });
-  fsReadStream.pipe(gridWriteStream);
+  fileReadStream.pipe(gridWriteStream);
 
   // Save new resume id to DB
   await User.findOneAndUpdate({

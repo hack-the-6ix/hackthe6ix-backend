@@ -41,14 +41,18 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
   );
 });
 
-
+/**
+ * (Hacker)
+ *
+ * Submit resume
+ */
 actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
     updateResume(
       req.executor,
-      (req as any)?.files?.resume?.tempFilePath,
+      (req as any)?.files?.resume,
     ),
   );
 });

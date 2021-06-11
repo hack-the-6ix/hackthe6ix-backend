@@ -208,6 +208,12 @@ On failure:
 }
 ```
 
+### PUT - Update Resume (Hacker)
+`/api/action/updateresume`
+
+#### Input Specification
+Send the resume file with the name field `resume` and magic will happen!
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata

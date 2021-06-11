@@ -22,10 +22,8 @@ app.use(bodyParser.json());
 // Sanitize requests with mongoDB ops
 app.use(mongoSanitize());
 app.use(fileUpload({
-  limits: { fileSize: 5000000 },
-  useTempFiles : true,
-  tempFileDir : '/tmp/',
-  abortOnLimit: true
+  // We add one byte here so that all the excess data get truncated, but we can still trigger the filesize error in our code
+  limits: { fileSize: 5000001 },
 }));
 
 app.use('/api', apiRouter);
