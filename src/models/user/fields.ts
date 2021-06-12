@@ -12,8 +12,8 @@ import {
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
-  maxWordLength,
   minLength,
+  minWordLength,
   validatePostalCode,
 } from '../validator';
 import { maskStatus } from './interceptors';
@@ -213,7 +213,7 @@ export const hackerApplication = {
       caption: 'Postal Code',
       inTextSearch: true,
 
-      writeCheck: maxLength(6),
+      writeCheck: maxLength(7),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? validatePostalCode()(request)
         : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
@@ -311,8 +311,8 @@ export const hackerApplication = {
       caption: 'Project Essay',
       inTextSearch: true,
 
-      writeCheck: maxWordLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -322,7 +322,7 @@ export const hackerApplication = {
       caption: 'Requested Workshops',
       inTextSearch: true,
 
-      writeCheck: maxWordLength(2056),
+      writeCheck: maxLength(2056),
       readCheck: true,
     },
 
@@ -331,8 +331,8 @@ export const hackerApplication = {
       caption: 'Accomplishment Essay',
       inTextSearch: true,
 
-      writeCheck: maxWordLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(50)(request) && maxLength(2056)(request),
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
