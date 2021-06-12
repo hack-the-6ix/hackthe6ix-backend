@@ -214,6 +214,13 @@ On failure:
 #### Input Specification
 Send the resume file with the name field `resume` and magic will happen!
 
+
+### GET - Get application enums (Hacker)
+`/api/action/applicationEnums`
+
+#### Output Specification
+Dictionary of fields with enums and an array of valid values.
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata

@@ -3,7 +3,13 @@
  */
 
 import express, { Request, Response } from 'express';
-import { fetchUser, updateApplication, updateResume } from '../controller/UserController';
+import {
+  fetchUser,
+  getEnumOptions,
+  updateApplication,
+  updateResume,
+} from '../controller/UserController';
+import { enumOptions } from '../models/user/fields';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
 import mongoose from '../services/mongoose_service'
@@ -57,6 +63,19 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
       mongoose
     ),
   );
+});
+
+/**
+ * (Hacker)
+ *
+ * Fetch hacker application enum options
+ */
+actionRouter.get('/applicationEnums', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getEnumOptions()
+  )
 });
 
 /**

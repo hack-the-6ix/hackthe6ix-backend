@@ -1,7 +1,7 @@
 import Grid from 'gridfs-stream';
 import { Mongoose } from 'mongoose';
 import stream from 'stream';
-import { IApplication, IUser } from '../models/user/fields';
+import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { canUpdateApplication, isApplicationOpen, isApplied } from '../models/validator';
 import {
@@ -209,3 +209,5 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
 
   return 'Success';
 };
+
+export const getEnumOptions = async () => enumOptions;

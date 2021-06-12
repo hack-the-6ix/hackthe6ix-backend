@@ -1,6 +1,6 @@
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
-import { IApplication, IUser } from '../../../models/user/fields';
+import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/types';
 import * as dbHandler from '../db-handler';
@@ -41,14 +41,14 @@ describe('Update Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: 'Male',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      gender: enumOptions["gender"][0],
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true
@@ -80,13 +80,13 @@ describe('Update Real Application', () => {
 
     const hackerApplication = {
       gender: 'AdasdasasdasMale',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true
@@ -117,14 +117,14 @@ describe('Update Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: 'Male',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      gender: enumOptions["gender"][0],
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X'.repeat(3000),
       mlhCOC: true
@@ -157,14 +157,14 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: 'Male',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      gender: enumOptions["gender"][0],
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true
@@ -201,14 +201,14 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: 'Male',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      gender: enumOptions["gender"][0],
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: false
@@ -244,14 +244,14 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: 'Male',
-      pronouns: 'He/Him',
-      ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-      timezone: 'EST - Eastern Standard Time	GMT-5:00',
+      gender: enumOptions["gender"][0],
+      pronouns: enumOptions["pronouns"][0],
+      ethnicity: enumOptions["ethnicity"][0],
+      timezone: enumOptions["timezone"][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: 'Undergraduate Year 3',
-      hackathonsAttended: '6+',
+      yearsOfStudy: enumOptions["yearsOfStudy"][0],
+      hackathonsAttended: enumOptions["hackathonsAttended"][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true
@@ -284,10 +284,10 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: 'Male',
-        pronouns: 'He/Him',
-        ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-        timezone: 'EST - Eastern Standard Time	GMT-5:00',
+        gender: enumOptions["gender"][0],
+        pronouns: enumOptions["pronouns"][0],
+        ethnicity: enumOptions["ethnicity"][0],
+        timezone: enumOptions["timezone"][0],
         wantSwag: false,
         addressLine1: '',
         addressLine2: '',
@@ -296,8 +296,8 @@ describe('Submit Real Application', () => {
         postalCode: '',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: 'Undergraduate Year 3',
-        hackathonsAttended: '6+',
+        yearsOfStudy: enumOptions["yearsOfStudy"][0],
+        hackathonsAttended: enumOptions["hackathonsAttended"][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -342,20 +342,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: 'Male',
-        pronouns: 'He/Him',
-        ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-        timezone: 'EST - Eastern Standard Time	GMT-5:00',
+        gender: enumOptions["gender"][0],
+        pronouns: enumOptions["pronouns"][0],
+        ethnicity: enumOptions["ethnicity"][0],
+        timezone: enumOptions["timezone"][0],
         wantSwag: true,
         addressLine1: 'asdasdsdasdsa',
         addressLine2: '',
         city: 'asdasdas',
-        province: 'Ontario',
+        province: enumOptions["province"][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: 'Undergraduate Year 3',
-        hackathonsAttended: '6+',
+        yearsOfStudy: enumOptions["yearsOfStudy"][0],
+        hackathonsAttended: enumOptions["hackathonsAttended"][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -400,20 +400,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: 'Male',
-        pronouns: 'He/Him',
-        ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-        timezone: 'EST - Eastern Standard Time	GMT-5:00',
+        gender: enumOptions["gender"][0],
+        pronouns: enumOptions["pronouns"][0],
+        ethnicity: enumOptions["ethnicity"][0],
+        timezone: enumOptions["timezone"][0],
         wantSwag: true,
         addressLine1: '',
         addressLine2: '',
         city: 'asdasdas',
-        province: 'Ontario',
+        province: enumOptions["province"][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: 'Undergraduate Year 3',
-        hackathonsAttended: '6+',
+        yearsOfStudy: enumOptions["yearsOfStudy"][0],
+        hackathonsAttended: enumOptions["hackathonsAttended"][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -457,20 +457,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: 'Male',
-        pronouns: 'He/Him',
-        ethnicity: 'East Asian (e.g. China, Japan, Korea)',
-        timezone: 'EST - Eastern Standard Time	GMT-5:00',
+        gender: enumOptions["gender"][0],
+        pronouns: enumOptions["pronouns"][0],
+        ethnicity: enumOptions["ethnicity"][0],
+        timezone: enumOptions["timezone"][0],
         wantSwag: false,
         addressLine1: 'ASDASSADAS',
         addressLine2: '',
         city: 'asdasdas',
-        province: 'Ontario',
+        province: enumOptions["province"][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: 'Undergraduate Year 3',
-        hackathonsAttended: '6+',
+        yearsOfStudy: enumOptions["yearsOfStudy"][0],
+        hackathonsAttended: enumOptions["hackathonsAttended"][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
