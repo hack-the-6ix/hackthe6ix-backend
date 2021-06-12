@@ -14,10 +14,90 @@ import {
   maxLength,
   maxWordLength,
   minLength,
-  minWordLength,
   validatePostalCode,
 } from '../validator';
 import { maskStatus } from './interceptors';
+
+export const enumOptions = {
+  gender: ['Male', 'Female', 'Non-Binary', 'Other', 'Prefer not to say'],
+  pronouns: ['He/Him', 'She/Her', 'They/Them', 'Other', 'Prefer not to say'],
+  ethnicity: [
+    'Black/People of African Descent',
+    'Arab / Middle Eastern',
+    'East Asian (e.g. China, Japan, Korea)',
+    'Indigenous Person of Canada',
+    'Latinx',
+    'Southeast Asian (e.g. India, Pakistan, Sri Lanka)',
+    'West Asian (e.g. Afghanistan, Iran)',
+    'White / People of European Descent, other, prefer not to answer"',
+    'Other',
+  ],
+  timezone: [
+    'MIT - Midway Islands Time	GMT-11:00',
+    'HST - Hawaii Standard Time	GMT-10:00',
+    'AST - Alaska Standard Time	GMT-9:00',
+    'PST - Pacific Standard Time	GMT-8:00',
+    'PNT - Phoenix Standard Time	GMT-7:00',
+    'MST - Mountain Standard Time	GMT-7:00',
+    'CST - Central Standard Time	GMT-6:00',
+    'EST - Eastern Standard Time	GMT-5:00',
+    'IET - Indiana Eastern Standard Time	GMT-5:00',
+    'PRT - Puerto Rico and US Virgin Islands Time	GMT-4:00',
+    'CNT - Canada Newfoundland Time	GMT-3:30',
+    'AGT - Argentina Standard Time	GMT-3:00',
+    'BET - Brazil Eastern Time	GMT-3:00',
+    'CAT - Central African Time	GMT-1:00',
+    'GMT - Greenwich Mean Time	GMT',
+    'UTC - Universal Coordinated Time	GMT',
+    'ECT - European Central Time	GMT+1:00',
+    'EET - Eastern European Time	GMT+2:00',
+    'ART - (Arabic) Egypt Standard Time	GMT+2:00',
+    'EAT - Eastern African Time	GMT+3:00',
+    'MET - Middle East Time	GMT+3:30',
+    'NET - Near East Time	GMT+4:00',
+    'PLT - Pakistan Lahore Time	GMT+5:00',
+    'IST - India Standard Time	GMT+5:30',
+    'BST - Bangladesh Standard Time	GMT+6:00',
+    'VST - Vietnam Standard Time	GMT+7:00',
+    'CTT - China Taiwan Time	GMT+8:00',
+    'JST - Japan Standard Time	GMT+9:00',
+    'ACT - Australia Central Time	GMT+9:30',
+    'AET - Australia Eastern Time	GMT+10:00',
+    'SST - Solomon Standard Time	GMT+11:00',
+    'NST - New Zealand Standard Time	GMT+12:00',
+  ],
+  province: [
+    'Alberta',
+    'British Columbia',
+    'Manitoba',
+    'New Brunswick',
+    'Newfoundland and Labrador',
+    'Nova Scotia',
+    'Ontario',
+    'Prince Edward Island',
+    'Quebec',
+    'Saskatchewan',
+    'Northwest Territories',
+    'Nunavut',
+    'Yukon',
+  ],
+  yearsOfStudy: [
+    'High School',
+    'Undergraduate Year 1',
+    'Undergraduate Year 2',
+    'Undergraduate Year 3',
+    'Undergraduate Year 4+',
+    'Graduate School',
+    'Recent Graduate',
+  ],
+  hackathonsAttended: [
+    'This is my first one',
+    '1',
+    '2-3',
+    '4-5',
+    '6+',
+  ],
+};
 
 // Main application
 export const hackerApplication = {
@@ -40,7 +120,7 @@ export const hackerApplication = {
       caption: 'Gender',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Male', 'Female', 'Other', 'Prefer not to say']),
+      writeCheck: inEnum(enumOptions.gender),
       readCheck: true,
     },
 
@@ -49,31 +129,25 @@ export const hackerApplication = {
       caption: 'Pronouns',
       inTextSearch: true,
 
-      writeCheck: inEnum(['He/Him', 'She/Her', 'They/Them', 'Other', 'Prefer not to say']),
+      writeCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
-    /**
-     * TODO: Update list of ethnicities
-     */
     ethnicity: {
       type: String,
       caption: 'Ethnicity',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Banana']),
+      writeCheck: inEnum(enumOptions.ethnicity),
       readCheck: true,
     },
 
-    /**
-     * TODO: Update list of timezones
-     */
     timezone: {
       type: String,
       caption: 'Timezone',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Banana']),
+      writeCheck: inEnum(enumOptions.timezone),
       readCheck: true,
     },
 
@@ -94,8 +168,8 @@ export const hackerApplication = {
 
       writeCheck: maxLength(64),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-                                                                    ? minLength(1)(request) && maxLength(64)(request)
-                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+        ? minLength(1)(request) && maxLength(64)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -106,8 +180,8 @@ export const hackerApplication = {
 
       writeCheck: maxLength(64),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-                                                                    ? maxLength(64)(request)
-                                                                    : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
+        ? maxLength(64)(request)
+        : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -118,22 +192,19 @@ export const hackerApplication = {
 
       writeCheck: maxLength(64),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-                                                                    ? minLength(1)(request) && maxLength(64)(request)
-                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+        ? minLength(1)(request) && maxLength(64)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
-    /**
-     * TODO: Upload list of provinces
-     */
     province: {
       type: String,
       caption: 'Province',
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-                                                                    ? inEnum(['Banana'])(request)
-                                                                    : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
+        ? inEnum(enumOptions.province)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
       readCheck: true,
     },
 
@@ -144,8 +215,8 @@ export const hackerApplication = {
 
       writeCheck: maxLength(6),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-                                                                    ? validatePostalCode()(request)
-                                                                    : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
+        ? validatePostalCode()(request)
+        : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -170,27 +241,21 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    /**
-     * TODO: Update years of study enum
-     */
     yearsOfStudy: {
       type: String,
       caption: 'Years of study',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Banana']),
+      writeCheck: inEnum(enumOptions.yearsOfStudy),
       readCheck: true,
     },
 
-    /**
-     * TODO: Update this
-     */
     hackathonsAttended: {
       type: String,
       caption: 'Hackathons attended',
       inTextSearch: true,
 
-      writeCheck: inEnum(['Banana']),
+      writeCheck: inEnum(enumOptions.hackathonsAttended),
       readCheck: true,
     },
 
@@ -203,7 +268,7 @@ export const hackerApplication = {
 
       readCheck: true,
       writeCheck: false,
-      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0
+      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
     },
 
     resumeSharePermission: {

@@ -60,6 +60,10 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
 });
 
 /**
+ * TODO: Add endpoint to fetch enum values
+ */
+
+/**
  * TODO: Add endpoint to RSVP
  *
  *       /rsvp -> triggers sequence of events to reserve spot and invite to discord
