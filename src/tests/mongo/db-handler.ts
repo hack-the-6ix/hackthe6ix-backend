@@ -17,7 +17,7 @@ export const connect = async () => {
     reconnectInterval: 1000
   };
 
-  await mongoose.connect(uri, mongooseOpts);
+  return await mongoose.connect(uri, mongooseOpts);
 };
 
 /**

@@ -4,10 +4,10 @@ import express, { ErrorRequestHandler } from 'express';
 import 'express-async-errors';
 import fileUpload from 'express-fileupload';
 import mongoSanitize from 'express-mongo-sanitize';
-import mongoose from 'mongoose';
 // Bootstrap scripts
 import './bootstrap/settings';
-import { database, port } from './consts';
+import './services/mongoose_service';
+import { port } from './consts';
 import actionRouter from './routes/action';
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
@@ -38,16 +38,7 @@ app.use(function(err: any, req: express.Request, res: express.Response, next: ex
   )());
 } as ErrorRequestHandler);
 
-mongoose.connect(database, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-}).then(() => {
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}).catch((err) => {
-  console.log(err);
-  console.log('Error connecting to mongodb. Exiting.');
-  process.exit(1);
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

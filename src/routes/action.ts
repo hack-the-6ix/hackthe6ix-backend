@@ -6,7 +6,8 @@ import express, { Request, Response } from 'express';
 import { fetchUser, updateApplication, updateResume } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import { isHacker } from '../services/permissions';
-
+import mongoose from '../services/mongoose_service'
+  ;
 const actionRouter = express.Router();
 
 // Application endpoints
@@ -53,6 +54,7 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
     updateResume(
       req.executor,
       (req as any)?.files?.resume,
+      mongoose
     ),
   );
 });

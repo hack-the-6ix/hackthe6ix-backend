@@ -1,4 +1,4 @@
-import { editObject } from '../../../controller/ModelController';
+import { editObject, flattenFields } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { extractFields } from '../../../models/util';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
@@ -108,57 +108,110 @@ getModels.mockReturnValue(mockModels);
 
 describe('Model Write', () => {
   describe('Recursion', () => {
-    test('Success', async () => {
+    describe('Success', () => {
 
-      await recursionCreateWriteTestModel.create({});
-      const originalObject = await recursionCreateWriteTestModel.create({
-        test: {
-          huh: {
-            field1: 'Banana',
-            field2: 'Llama',
+      test('Flatten changes', async () => {
+
+        await recursionCreateWriteTestModel.create({});
+        const originalObject = await recursionCreateWriteTestModel.create({
+          test: {
+            huh: {
+              field1: 'Banana',
+              field2: 'Llama',
+            },
           },
-        },
-        banana: 'test',
-      });
+          banana: 'test',
+        });
 
-      expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
+        expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
 
-      const data = await editObject(
-        hackerUser,
-        'RecursionWriteTest',
-        {
-          'test.huh.field1': 'Banana',
-        },
-        {
+        const data = await editObject(
+          hackerUser,
+          'RecursionWriteTest',
+          {
+            'test.huh.field1': 'Banana',
+          },
+          {
+            test: {
+              huh: {
+                field1: 'foobar',
+              },
+            },
+          });
+
+        // Ensure only amended object is modified
+        expect(data.length).toEqual(1);
+        expect(data).toContainEqual(originalObject._id);
+
+        const resultObject = await recursionCreateWriteTestModel.find({ _id: data[0] });
+        expect(resultObject.length).toEqual(1);
+
+        const resultJSON = resultObject[0].toJSON();
+        delete resultJSON['_id'];
+        delete resultJSON['id'];
+        delete resultJSON['__v'];
+
+        expect(resultJSON).toEqual({
           test: {
             huh: {
               field1: 'foobar',
+              field2: 'Llama',
             },
           },
+          banana: 'test',
         });
-
-      // Ensure only amended object is modified
-      expect(data.length).toEqual(1);
-      expect(data).toContainEqual(originalObject._id);
-
-      const resultObject = await recursionCreateWriteTestModel.find({ _id: data[0] });
-      expect(resultObject.length).toEqual(1);
-
-      const resultJSON = resultObject[0].toJSON();
-      delete resultJSON['_id'];
-      delete resultJSON['id'];
-      delete resultJSON['__v'];
-
-      expect(resultJSON).toEqual({
-        test: {
-          huh: {
-            field1: 'foobar',
-          },
-        },
-        banana: 'test',
       });
 
+      test('Do not flatten changes', async () => {
 
+        await recursionCreateWriteTestModel.create({});
+        const originalObject = await recursionCreateWriteTestModel.create({
+          test: {
+            huh: {
+              field1: 'Banana',
+              field2: 'Llama',
+            },
+          },
+          banana: 'test',
+        });
+
+        expect((await recursionCreateWriteTestModel.find({})).length).toEqual(2);
+
+        const data = await editObject(
+          hackerUser,
+          'RecursionWriteTest',
+          {
+            'test.huh.field1': 'Banana',
+          },
+          {
+            test: {
+              huh: {
+                field1: 'foobar',
+              },
+            },
+          }, true);
+
+        // Ensure only amended object is modified
+        expect(data.length).toEqual(1);
+        expect(data).toContainEqual(originalObject._id);
+
+        const resultObject = await recursionCreateWriteTestModel.find({ _id: data[0] });
+        expect(resultObject.length).toEqual(1);
+
+        const resultJSON = resultObject[0].toJSON();
+        delete resultJSON['_id'];
+        delete resultJSON['id'];
+        delete resultJSON['__v'];
+
+        expect(resultJSON).toEqual({
+          test: {
+            huh: {
+              field1: 'foobar'
+            },
+          },
+          banana: 'test',
+        });
+      });
     });
 
     test('Fail', async () => {
@@ -329,5 +382,27 @@ describe('Model Write', () => {
         virtual: 'virtualboi!'
       });
     });
+  });
+});
+
+test('Flatten fields', () => {
+  const result = flattenFields({
+    foo: 123,
+    bar: {
+      beep: {
+        bang: 456
+      },
+      barf: 3563
+    },
+    eek: [
+      233
+    ]
+  });
+
+  expect(result).toEqual({
+    foo: 123,
+    "bar.beep.bang": 456,
+    "bar.barf": 3563,
+    "eek": [233]
   });
 });

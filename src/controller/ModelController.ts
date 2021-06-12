@@ -237,6 +237,33 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
 };
 
 /**
+ * Flattens a multi-depth dictionary to one of depth 1, with all field names concatenated together,
+ * delimited by periods.
+ *
+ * @param fields
+ */
+export const flattenFields = (fields: any, prefix='') => {
+  let out: any = {};
+
+  for (const k of Object.keys(fields)) {
+
+    const value = fields[k];
+    const name = `${prefix}${prefix.length > 0 ? '.' : ''}${k}`;
+
+    if (value.constructor === Object) {
+      out = {
+        ...out,
+        ...flattenFields(value, name)
+      }
+    } else {
+      out[name] = value
+    }
+  }
+
+  return out;
+};
+
+/**
  * Fetch an object with mongo query
  *
  * WARNING: Only allow admins/trusted users to have unfiltered access this function. It may be possible to have
@@ -246,8 +273,14 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
  * @param changes - map of fields to update
+ * @param noFlatten - when enabled, each field in changes is not flattened. WARNING! This may present a security risk
+ *                                                                          as it may be possible to write to fields
+ *                                                                          without going through its write check if this
+ *                                                                          is enabled!
+*                     The default behaviour (when this is disabled) is to merge all fields, so only fields that are
+ *                    explicitly mentioned in changes will be touched.
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, noFlatten?: boolean) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
@@ -287,10 +320,14 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
     amendedIDs.push(results[o]._id);
   }
 
+  // Flatten changes so it merges instead of replacing
+
   // Changes accepted and are made
   await objectModel.mongoose.updateMany(
     filter,
-    changes,
+    noFlatten // If true, then changes will not be flattened, which MAY cause changes to OVERRITE other fields!
+      ? changes
+      : flattenFields(changes),
   );
 
   return amendedIDs;

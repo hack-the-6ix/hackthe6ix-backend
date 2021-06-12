@@ -76,6 +76,48 @@ const [userTestModel, mockModels] = generateTestModel({
     status: {
       applied: false,
     },
+    roles: {
+      FIELDS: {
+        hacker: {
+          type: Boolean,
+          required: true,
+          default: false,
+          caption: 'Hacker',
+          virtual: true,
+          readCheck: true,
+        },
+
+        admin: {
+          type: Boolean,
+          required: true,
+          default: false,
+          virtual: true,
+          caption: 'Admin',
+
+          readCheck: true,
+        },
+
+        organizer: {
+          type: Boolean,
+          required: true,
+          default: false,
+          virtual: true,
+          caption: 'Organizer',
+
+          readCheck: true,
+        },
+
+        volunteer: {
+          type: Boolean,
+          required: true,
+          default: false,
+          virtual: true,
+          caption: 'Volunteer',
+
+          readCheck: true,
+        },
+      }
+    },
     hackerApplication: {
       readCheck: true,
       writeCheck: canUpdateApplication(),
@@ -136,12 +178,11 @@ const [userTestModel, mockModels] = generateTestModel({
 getModels.mockReturnValue(mockModels);
 
 describe('Update Application', () => {
-
   describe('Success', () => {
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -149,7 +190,7 @@ describe('Update Application', () => {
       });
 
       await updateApplication(
-        hackerUser,
+        user.toJSON(),
         false,
         {
           optionalField2: 'Test',
@@ -168,7 +209,7 @@ describe('Update Application', () => {
     test('Personal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -177,7 +218,7 @@ describe('Update Application', () => {
       });
 
       await updateApplication(
-        hackerUser,
+        user.toJSON(),
         false,
         {
           optionalField2: 'Test',
@@ -197,7 +238,7 @@ describe('Update Application', () => {
     test('Missing Required Field', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -205,7 +246,7 @@ describe('Update Application', () => {
       });
 
       await updateApplication(
-        hackerUser,
+        user.toJSON(),
         false,
         {
           optionalField2: 'Test',
@@ -227,7 +268,7 @@ describe('Update Application', () => {
     test('Write violation', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -235,7 +276,7 @@ describe('Update Application', () => {
       });
 
       await expect(updateApplication(
-        hackerUser,
+        user.toJSON(),
         false,
         {
           conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
@@ -252,7 +293,7 @@ describe('Update Application', () => {
     test('Already submitted', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: true,
@@ -260,7 +301,7 @@ describe('Update Application', () => {
       });
 
       await expect(updateApplication(
-        hackerUser,
+        user.toJSON(),
         false,
         {
           optionalField2: 'Test',
@@ -278,7 +319,7 @@ describe('Update Application', () => {
       test('Global Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -286,7 +327,7 @@ describe('Update Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           false,
           {
             optionalField2: 'Test',
@@ -303,7 +344,7 @@ describe('Update Application', () => {
       test('Personal Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -312,7 +353,7 @@ describe('Update Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           false,
           {
             optionalField2: 'Test',
@@ -334,7 +375,7 @@ describe('Submit Application', () => {
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -342,7 +383,7 @@ describe('Submit Application', () => {
       });
 
       await updateApplication(
-        hackerUser,
+        user.toJSON(),
         true,
         {
           optionalField2: 'Test',
@@ -367,7 +408,7 @@ describe('Submit Application', () => {
     test('Personal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -376,7 +417,7 @@ describe('Submit Application', () => {
       });
 
       await updateApplication(
-        hackerUser,
+        user.toJSON(),
         true,
         {
           optionalField2: 'Test',
@@ -409,7 +450,7 @@ describe('Submit Application', () => {
       test('Implicit submitCheck', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -417,7 +458,7 @@ describe('Submit Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           true,
           {
             requiredFieldImplicit: 'this is not a foobar',
@@ -437,7 +478,7 @@ describe('Submit Application', () => {
       test('Explicit submitCheck', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -445,7 +486,7 @@ describe('Submit Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           true,
           {
             requiredFieldImplicit: 'foobar',
@@ -466,7 +507,7 @@ describe('Submit Application', () => {
     test('Write violation', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -474,7 +515,7 @@ describe('Submit Application', () => {
       });
 
       await expect(updateApplication(
-        hackerUser,
+        user.toJSON(),
         true,
         {
           requiredFieldImplicit: 'foobar',
@@ -494,7 +535,7 @@ describe('Submit Application', () => {
     test('Already submitted', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      await userTestModel.create({
+      const user = await userTestModel.create({
         ...hackerUser,
         status: {
           applied: true,
@@ -502,7 +543,7 @@ describe('Submit Application', () => {
       });
 
       await expect(updateApplication(
-        hackerUser,
+        user.toJSON(),
         true,
         {
           requiredFieldImplicit: 'foobar',
@@ -521,7 +562,7 @@ describe('Submit Application', () => {
       test('Global Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -529,7 +570,7 @@ describe('Submit Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           true,
           {
             requiredFieldImplicit: 'foobar',
@@ -547,7 +588,7 @@ describe('Submit Application', () => {
       test('Personal Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        await userTestModel.create({
+        const user = await userTestModel.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -556,7 +597,7 @@ describe('Submit Application', () => {
         });
 
         await expect(updateApplication(
-          hackerUser,
+          user.toJSON(),
           true,
           {
             requiredFieldImplicit: 'foobar',
@@ -573,5 +614,4 @@ describe('Submit Application', () => {
       });
     });
   });
-
 });

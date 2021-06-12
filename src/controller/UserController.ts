@@ -1,7 +1,6 @@
 import Grid from 'gridfs-stream';
-import mongoose from 'mongoose';
+import { Mongoose } from 'mongoose';
 import stream from 'stream';
-import { database } from '../consts';
 import { IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { canUpdateApplication, isApplicationOpen, isApplied } from '../models/validator';
@@ -19,12 +18,6 @@ import { editObject, getObject } from './ModelController';
 import { validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
-// We have to make another mongoose connection for gridFS to work
-mongoose.connect(database, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-});
 
 /**
  * TODO: When a user changes states (e.g. goes from not applied -> applied, we need to update their mailing list status)
@@ -62,8 +55,7 @@ const testCanUpdateApplication = async (writeRequest: WriteCheckRequest<any, any
       throw new AlreadySubmittedError('You have already applied!');
     } else if (!isApplicationOpen(writeRequest)) {
       throw new DeadlineExpiredError('The submission deadline has passed!');
-    }
-    {
+    } else {
       throw new ForbiddenError('User is not eligible to submit');
     }
   }
@@ -148,8 +140,9 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
  *
  * @param requestUser
  * @param expressFile - express fileupload file object
+ * @param mongoose - instance of mongoose to extract connection from
  */
-export const updateResume = async (requestUser: IUser, expressFile: any) => {
+export const updateResume = async (requestUser: IUser, expressFile: any, mongoose: Mongoose) => {
 
   if (!expressFile) {
     throw new BadRequestError('Invalid file');
