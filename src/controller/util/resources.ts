@@ -5,6 +5,8 @@
 
 import { fields as settingsFields } from '../../models/settings/fields';
 import Settings from '../../models/settings/Settings';
+import { fields as teamFields } from '../../models/team/fields';
+import Team from '../../models/team/Team';
 import { fields as userFields } from '../../models/user/fields';
 import User from '../../models/user/User';
 import { UniverseState } from '../../types/types';
@@ -17,6 +19,10 @@ const models = {
   settings: {
     mongoose: Settings,
     rawFields: settingsFields,
+  },
+  team: {
+    mongoose: Team,
+    rawFields: teamFields,
   },
 };
 

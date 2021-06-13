@@ -56,4 +56,8 @@ schema.virtual('roles').get(function() {
   return out;
 });
 
+schema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
 export default mongoose.model<IUser>('User', schema);

@@ -106,6 +106,18 @@ export const hackerApplication = {
 
   FIELDS: {
 
+    // We will set the team code internally
+    teamCode: {
+      type: String,
+      caption: 'Team Code',
+      inTextSearch: true,
+
+      readCheck: true,
+      writeCheck: false,
+      submitCheck: true,
+    },
+
+
     /* About You */
     emailConsent: {
       type: Boolean,
@@ -628,6 +640,16 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },
 
+    fullName: {
+      type: String,
+      required: true,
+      virtual: true,
+      caption: 'Full Name',
+      inTextSearch: true,
+
+      readCheck: true,
+    },
+
     firstName: {
       type: String,
       required: true,
@@ -690,11 +712,12 @@ export const fields = {
 export interface IUser extends mongoose.Document {
   lastLogout: number,
   samlNameID: string,
+  fullName: string,
   firstName: string,
   lastName: string,
   email: string,
-  rsvpDeadline: number,
-  personalApplicationDeadline: number,
+  rsvpDeadline?: number,
+  personalApplicationDeadline?: number,
   roles: { // Virtual field with all "lesser" roles populated
     hacker: boolean,
     admin: boolean,
@@ -702,29 +725,30 @@ export interface IUser extends mongoose.Document {
     volunteer: boolean
   },
   groups: { // Raw group from KEYCLOAK
-    hacker: boolean,
-    admin: boolean,
-    organizer: boolean,
-    volunteer: boolean
+    hacker?: boolean,
+    admin?: boolean,
+    organizer?: boolean,
+    volunteer?: boolean
   },
   status: {
-    statusReleased: boolean,
-    applied: boolean,
-    accepted: boolean,
-    rejected: boolean,
-    waitlisted: boolean,
-    confirmed: boolean,
-    checkedIn: boolean,
+    statusReleased?: boolean,
+    applied?: boolean,
+    accepted?: boolean,
+    rejected?: boolean,
+    waitlisted?: boolean,
+    confirmed?: boolean,
+    checkedIn?: boolean,
   },
   hackerApplication: IApplication,
   internal: {
-    notes: string,
-    applicationScore: number,
-    reviewer: string
+    notes?: string,
+    applicationScore?: number,
+    reviewer?: string // TODO: Keep track of all reviewers if there are multiple??
   }
 }
 
 export interface IApplication {
+  teamCode: string,
   emailConsent: boolean,
   gender: string,
   pronouns: string,
