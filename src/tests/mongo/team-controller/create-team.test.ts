@@ -2,7 +2,11 @@ import { createTeam } from '../../../controller/TeamController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
-import { AlreadyInTeamError, DeadlineExpiredError } from '../../../types/types';
+import {
+  AlreadyInTeamError,
+  AlreadySubmittedError,
+  DeadlineExpiredError,
+} from '../../../types/types';
 import * as dbHandler from '../db-handler';
 import { generateMockUniverseState, hackerUser } from '../test-utils';
 
@@ -89,6 +93,25 @@ describe('Create Team', () => {
 
     const user = await User.create(hackerUser);
     await expect(createTeam(user)).rejects.toThrow(DeadlineExpiredError);
+
+    // No team created
+    expect(await Team.find({})).toEqual([]);
+
+    // User is not amended
+    expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication).toEqual(undefined);
+  });
+
+  test('User already applied', async () => {
+    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+    const user = await User.create({
+      ...hackerUser,
+      status: {
+        applied: true
+      }
+    });
+
+    await expect(createTeam(user)).rejects.toThrow(AlreadySubmittedError);
 
     // No team created
     expect(await Team.find({})).toEqual([]);

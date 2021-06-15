@@ -181,3 +181,10 @@ export class UnknownTeamError extends ForbiddenError {
     Object.setPrototypeOf(this, UnknownTeamError.prototype);
   }
 }
+
+export class TeamFullError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'Unable to join - team is full!', error, errorIsPublic);
+    Object.setPrototypeOf(this, TeamFullError.prototype);
+  }
+}

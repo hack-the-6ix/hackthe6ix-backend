@@ -2,10 +2,30 @@ import { ITeam } from '../models/team/fields';
 import Team from '../models/team/Team';
 import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { AlreadyInTeamError, InternalServerError, UnknownTeamError } from '../types/types';
+import {
+  AlreadyInTeamError,
+  BadRequestError,
+  InternalServerError, TeamFullError,
+  UnknownTeamError,
+} from '../types/types';
 import { getObject } from './ModelController';
 import { testCanUpdateApplication } from './util/checker';
 import { v4 as uuidv4 } from 'uuid';
+
+const getSanitizedTeam = async (requestUser: IUser, teamCode: string) => {
+  // We must use getObject to ensure the user fields are correctly intercepted
+  const sanitizedTeam = await getObject(requestUser, 'team', {
+    filter: {
+      code: teamCode
+    }
+  });
+
+  if (!sanitizedTeam || sanitizedTeam.length !== 1) {
+    throw new InternalServerError("Unable to fetch new team");
+  }
+
+  return sanitizedTeam[0] as ITeam;
+};
 
 /**
  * Creates a new team + add the request user to it.
@@ -37,18 +57,7 @@ export const createTeam = async (requestUser: IUser) => {
     'hackerApplication.teamCode': newTeam.code
   });
 
-  // We must use getObject to ensure the user fields are correctly intercepted
-  const sanitizedTeam = await getObject(requestUser, 'team', {
-    filter: {
-      _id: newTeam._id
-    }
-  });
-
-  if (!sanitizedTeam || sanitizedTeam.length !== 1) {
-    throw new InternalServerError("Unable to fetch new team");
-  }
-
-  return sanitizedTeam[0] as ITeam;
+  return await getSanitizedTeam(requestUser, code);
 };
 
 /**
@@ -58,12 +67,45 @@ export const createTeam = async (requestUser: IUser) => {
  * @param teamCode
  */
 export const joinTeam = async (requestUser: IUser, teamCode: string) => {
+  if (!teamCode) {
+    throw new BadRequestError("Invalid team code!");
+  }
+
   await testCanUpdateApplication(requestUser);
 
   if (requestUser.hackerApplication.teamCode?.length > 0) {
     throw new AlreadyInTeamError();
   }
 
+  const team = await Team.findOne({
+    code: teamCode
+  });
+
+  if (!team) {
+    throw new UnknownTeamError("Invalid team code!");
+  }
+
+  if (team.memberIDs.length >= 4) {
+    throw new TeamFullError();
+  }
+
+  // Update team object
+  await Team.findOneAndUpdate({
+    code: teamCode
+  }, {
+    $push: {
+      memberIDs: requestUser._id
+    }
+  });
+
+  // Update user object
+  await User.findOneAndUpdate({
+    _id: requestUser._id
+  }, {
+    'hackerApplication.teamCode': teamCode
+  });
+
+  return await getSanitizedTeam(requestUser, teamCode);
 };
 
 /**
