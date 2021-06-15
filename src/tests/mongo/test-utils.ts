@@ -52,7 +52,7 @@ export const hackerUser = {
   },
   internal: {
     notes: 'This is a bad person',
-  },
+  }
 } as IUser;
 
 export const nopermUser = {

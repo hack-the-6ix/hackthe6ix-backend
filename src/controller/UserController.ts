@@ -3,19 +3,15 @@ import { Mongoose } from 'mongoose';
 import stream from 'stream';
 import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { canUpdateApplication, isApplicationOpen, isApplied } from '../models/validator';
 import {
-  AlreadySubmittedError,
   BadRequestError,
-  DeadlineExpiredError,
   ForbiddenError,
   InternalServerError,
   NotFoundError,
-  SubmissionDeniedError,
-  WriteCheckRequest,
+  SubmissionDeniedError, WriteCheckRequest,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
-import { validateSubmission } from './util/checker';
+import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
 /**
@@ -46,21 +42,6 @@ export const fetchUser = async (requestUser: IUser) => {
 };
 
 /**
- * Throws an error if the user cannot update their application.
- */
-const testCanUpdateApplication = async (writeRequest: WriteCheckRequest<any, any>) => {
-  if (!canUpdateApplication()(writeRequest)) {
-    if (isApplied(writeRequest)) {
-      throw new AlreadySubmittedError('You have already applied!');
-    } else if (!isApplicationOpen(writeRequest)) {
-      throw new DeadlineExpiredError('The submission deadline has passed!');
-    } else {
-      throw new ForbiddenError('User is not eligible to submit');
-    }
-  }
-};
-
-/**
  * Updates a user's hacker application and optionally marks it as submitted
  *
  * @param requestUser
@@ -77,17 +58,17 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
 
   const universeState = await fetchUniverseState();
 
-  const writeRequest: any = {
+  const writeRequest: WriteCheckRequest<any, IUser> = {
     requestUser: requestUser,
     targetObject: requestUser,
     submissionObject: {
       hackerApplication: hackerApplication,
-    },
+    } as IUser,
     universeState: universeState,
     fieldValue: undefined,
   };
 
-  await testCanUpdateApplication(writeRequest);
+  await testCanUpdateApplication(null, writeRequest);
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
@@ -147,18 +128,8 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
     throw new BadRequestError('Invalid file');
   }
 
-  const universeState = await fetchUniverseState();
-
-  const writeRequest: any = {
-    requestUser: requestUser,
-    targetObject: requestUser,
-    submissionObject: {},
-    universeState: universeState,
-    fieldValue: undefined,
-  };
-
   // Make sure user is allowed to edit their app
-  await testCanUpdateApplication(writeRequest);
+  await testCanUpdateApplication(requestUser);
 
   // Ensure file is within limit
   // NOTE: There is another limit set when express-fileupload is initialized in index.ts

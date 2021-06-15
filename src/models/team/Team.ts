@@ -14,8 +14,17 @@ const schema = new mongoose.Schema(extractFields(fields), {
 schema.virtual('memberNames', {
   ref: 'User',
   localField: 'code',
-  foreignField: 'teamCode',
+  foreignField: 'hackerApplication.teamCode',
   justOne: false
 });
+
+// Hook to auto populate memberNames
+const autoPopulateMemberNames = function(next) {
+  this.populate('memberNames');
+  next();
+};
+
+schema.pre('findOne', autoPopulateMemberNames)
+      .pre('find', autoPopulateMemberNames);
 
 export default mongoose.model<ITeam>('Team', schema);

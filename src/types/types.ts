@@ -167,3 +167,17 @@ export class AlreadySubmittedError extends ForbiddenError {
     Object.setPrototypeOf(this, AlreadySubmittedError.prototype);
   }
 }
+
+export class AlreadyInTeamError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'You are already in a team!', error, errorIsPublic);
+    Object.setPrototypeOf(this, AlreadyInTeamError.prototype);
+  }
+}
+
+export class UnknownTeamError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'You are not in a team!', error, errorIsPublic);
+    Object.setPrototypeOf(this, UnknownTeamError.prototype);
+  }
+}

@@ -1,9 +1,15 @@
+import { IUser } from '../../models/user/fields';
+import { canUpdateApplication, isApplicationOpen, isApplied } from '../../models/validator';
 import {
+  AlreadySubmittedError,
   CreateCheckRequest,
+  DeadlineExpiredError,
   DeleteCheckRequest,
+  ForbiddenError,
   ReadCheckRequest,
   WriteCheckRequest,
 } from '../../types/types';
+import { fetchUniverseState } from './resources';
 
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
@@ -83,4 +89,33 @@ export const escapeStringRegexp = (x: string) => {
   return x
   .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
   .replace(/-/g, '\\x2d');
+};
+
+/**
+ * Throws an error if the user cannot update their application.
+ *
+ * If requestUser is provided, we will handle fetching the universe state and generating the writeRequest automatically
+ */
+export const testCanUpdateApplication = async (requestUser: IUser, writeRequest?: WriteCheckRequest<any, any>) => {
+  if (!writeRequest) {
+    const universeState = await fetchUniverseState();
+
+    writeRequest = {
+      requestUser: requestUser,
+      targetObject: requestUser,
+      submissionObject: {},
+      universeState: universeState,
+      fieldValue: undefined,
+    };
+  }
+
+  if (!canUpdateApplication()(writeRequest)) {
+    if (isApplied(writeRequest)) {
+      throw new AlreadySubmittedError('You have already applied!');
+    } else if (!isApplicationOpen(writeRequest)) {
+      throw new DeadlineExpiredError('The submission deadline has passed!');
+    } else {
+      throw new ForbiddenError('User is not eligible to submit');
+    }
+  }
 };
