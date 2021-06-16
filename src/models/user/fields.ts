@@ -392,19 +392,28 @@ const internal = {
       readCheck: true,
     },
 
-    applicationScore: {
-      type: Number,
+    computedApplicationScore: {
+      type: [Number],
       default: -1,
-      caption: 'Application score',
+      caption: 'Computed Application score',
+
+      virtual: true,
+      readCheck: true,
+    },
+
+    applicationScores: {
+      type: [Number],
+      default: -1,
+      caption: 'Application scores',
 
       writeCheck: true,
       readCheck: true,
     },
 
-    reviewer: {
-      type: String,
+    reviewers: {
+      type: [String],
       default: '',
-      caption: 'Application Reviewer Email',
+      caption: 'Application Reviewer Emails',
 
       writeCheck: true,
       readCheck: true,
@@ -742,8 +751,9 @@ export interface IUser extends mongoose.Document {
   hackerApplication: IApplication,
   internal: {
     notes?: string,
-    applicationScore?: number,
-    reviewer?: string // TODO: Keep track of all reviewers if there are multiple??
+    computedApplicationScore?: number,
+    applicationScores?: number[],
+    reviewers?: string[]
   }
 }
 

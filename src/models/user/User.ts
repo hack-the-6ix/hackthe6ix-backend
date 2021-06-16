@@ -12,10 +12,6 @@ const schema = new mongoose.Schema(extractFields(fields), {
 });
 
 /**
- * TODO: Add computed value to inject team information + add it to the list of fields
- */
-
-/**
  * { A: [B, C] }
  * If you have role A, then you also have roles B and C
  *
@@ -58,6 +54,17 @@ schema.virtual('roles').get(function() {
 
 schema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
+});
+
+schema.virtual('internal.computedApplicationScore').get(function() {
+  const numReviews = this.internal?.applicationScores?.length;
+  let total = 0;
+
+  for (let i = 0; i < numReviews; i++) {
+    total += this.internal.applicationScores[i];
+  }
+
+  return numReviews ? total / numReviews : 0;
 });
 
 export default mongoose.model<IUser>('User', schema);
