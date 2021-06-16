@@ -19,7 +19,7 @@ schema.virtual('memberNames', {
 });
 
 // Hook to auto populate memberNames
-const autoPopulateMemberNames = function(next) {
+const autoPopulateMemberNames = function(next: any) {
   this.populate('memberNames');
   next();
 };

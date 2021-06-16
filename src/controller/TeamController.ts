@@ -156,7 +156,6 @@ export const leaveTeam = async (requestUser: IUser) => {
  * @param requestUser
  */
 export const getTeam = async (requestUser: IUser) => {
-
   if (!requestUser.hackerApplication.teamCode || requestUser.hackerApplication.teamCode.length === 0) {
     throw new UnknownTeamError();
   }

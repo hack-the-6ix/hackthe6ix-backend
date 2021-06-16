@@ -221,6 +221,80 @@ Send the resume file with the name field `resume` and magic will happen!
 #### Output Specification
 Dictionary of fields with enums and an array of valid values.
 
+### POST - Create Team
+`/api/action/createTeam`
+
+Create a new team and add the user to it.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    code: "teamcode goes here",
+    memberNames: [
+      "Bill Gates"
+    ]
+  }
+}
+```
+
+### POST - Join Team
+`/api/action/joinTeam`
+
+Join an existing team if there is room.
+
+#### Input Specification
+```
+{
+  teamCode: "teamcodegoeshere"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    code: "teamcodegoeshere",
+    memberNames: [
+      "Bill Gates"
+    ]
+  }
+}
+```
+
+### POST - Leave Team
+`/api/action/leaveTeam`
+
+Remove the user from their team, and delete it if they were the last user.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "Success"
+}
+```
+
+### GET - Get Team
+`/api/action/getTeam`
+
+Get the user's current team
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    code: "teamcodegoeshere",
+    memberNames: [
+      "Bill Gates"
+    ]
+  }
+}
+```
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata

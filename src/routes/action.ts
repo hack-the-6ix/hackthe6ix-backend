@@ -3,17 +3,17 @@
  */
 
 import express, { Request, Response } from 'express';
+import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
   getEnumOptions,
   updateApplication,
   updateResume,
 } from '../controller/UserController';
-import { enumOptions } from '../models/user/fields';
 import { logResponse } from '../services/logger';
+import mongoose from '../services/mongoose_service';
 import { isHacker } from '../services/permissions';
-import mongoose from '../services/mongoose_service'
-  ;
+
 const actionRouter = express.Router();
 
 // Application endpoints
@@ -60,7 +60,7 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
     updateResume(
       req.executor,
       (req as any)?.files?.resume,
-      mongoose
+      mongoose,
     ),
   );
 });
@@ -74,23 +74,70 @@ actionRouter.get('/applicationEnums', isHacker, (req: Request, res: Response) =>
   logResponse(
     req,
     res,
-    getEnumOptions()
-  )
+    getEnumOptions(),
+  );
 });
 
 /**
- * TODO: Add team apis
+ * (Hacker)
  *
- *       /create -> create a new team and join it
- *       /join -> join an existing team
- *       /leave -> leave team
- *       /getTeam -> get team
- *
- *       TeamObj
- *       |-team code
- *       |-team member IDs
- *       |-inject team member names (virtual field?)
+ * Create team
  */
+actionRouter.post('/createTeam', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    createTeam(
+      req.executor,
+    ),
+  );
+});
+
+/**
+ * (Hacker)
+ *
+ * Join team
+ */
+actionRouter.post('/joinTeam', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    joinTeam(
+      req.executor,
+      req.body.teamCode,
+    ),
+  );
+});
+
+/**
+ * (Hacker)
+ *
+ * Leave team
+ */
+actionRouter.post('/leaveTeam', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    leaveTeam(
+      req.executor,
+    ),
+  );
+});
+
+/**
+ * (Hacker)
+ *
+ * Get team
+ */
+actionRouter.get('/getTeam', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getTeam(
+      req.executor,
+    ),
+  );
+});
 
 /**
  * TODO: Add endpoint to RSVP
