@@ -84,6 +84,7 @@ actionRouter.get('/applicationEnums', isHacker, (req: Request, res: Response) =>
  *       /create -> create a new team and join it
  *       /join -> join an existing team
  *       /leave -> leave team
+ *       /getTeam -> get team
  *
  *       TeamObj
  *       |-team code

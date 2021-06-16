@@ -35,7 +35,6 @@ jest.mock('../../../controller/util/resources', () => {
 });
 
 describe('Join Team', () => {
-
   test('Invalid team (Blank)', async () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
