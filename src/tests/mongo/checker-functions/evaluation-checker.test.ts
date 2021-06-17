@@ -1,6 +1,6 @@
 import { evaluateChecker } from '../../../controller/util/checker';
 import { ReadCheckRequest, UniverseState } from '../../../types/types';
-import { adminUser, nopermUser } from '../test-utils';
+import { adminUser, nopermUser } from '../../test-utils';
 
 
 describe('Evaluation Checker', () => {

@@ -3,8 +3,8 @@ import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { generateMockUniverseState, hackerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { generateMockUniverseState, hackerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

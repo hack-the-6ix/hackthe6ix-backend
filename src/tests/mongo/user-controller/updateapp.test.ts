@@ -16,8 +16,8 @@ import {
   WriteCheckRequest,
   WriteDeniedError,
 } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { generateMockUniverseState, generateTestModel, hackerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { generateMockUniverseState, generateTestModel, hackerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

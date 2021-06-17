@@ -2,8 +2,8 @@ import { editObject, flattenFields } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { extractFields } from '../../../models/util';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { generateTestModel, hackerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { generateTestModel, hackerUser } from '../../test-utils';
 import mongoose from 'mongoose';
 
 /**

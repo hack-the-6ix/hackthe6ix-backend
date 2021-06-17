@@ -64,7 +64,7 @@ schema.virtual('internal.computedApplicationScore').get(function() {
     total += this.internal.applicationScores[i];
   }
 
-  return numReviews ? total / numReviews : 0;
+  return numReviews ? total / numReviews : -1;
 });
 
 export default mongoose.model<IUser>('User', schema);

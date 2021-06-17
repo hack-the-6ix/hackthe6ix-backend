@@ -500,6 +500,30 @@ const status = {
       readInterceptor: maskStatus<boolean>(false),
     },
 
+    declined: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Declined',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false),
+    },
+
+    expired: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Expired',
+
+      writeCheck: true,
+      readCheck: true,
+
+      readInterceptor: maskStatus<boolean>(false),
+    },
+
     checkedIn: {
       type: Boolean,
       required: true,
@@ -718,6 +742,25 @@ export const fields = {
   },
 };
 
+export interface IRoles { // Virtual field with all "lesser" roles populated
+  hacker: boolean,
+  admin: boolean,
+  organizer: boolean,
+  volunteer: boolean
+};
+
+export interface IStatus {
+  statusReleased?: boolean,
+  applied?: boolean,
+  accepted?: boolean,
+  rejected?: boolean,
+  waitlisted?: boolean,
+  confirmed?: boolean,
+  declined?: boolean,
+  expired?: boolean,
+  checkedIn?: boolean,
+}
+
 export interface IUser extends mongoose.Document {
   lastLogout: number,
   samlNameID: string,
@@ -727,27 +770,9 @@ export interface IUser extends mongoose.Document {
   email: string,
   rsvpDeadline?: number,
   personalApplicationDeadline?: number,
-  roles: { // Virtual field with all "lesser" roles populated
-    hacker: boolean,
-    admin: boolean,
-    organizer: boolean,
-    volunteer: boolean
-  },
-  groups: { // Raw group from KEYCLOAK
-    hacker?: boolean,
-    admin?: boolean,
-    organizer?: boolean,
-    volunteer?: boolean
-  },
-  status: {
-    statusReleased?: boolean,
-    applied?: boolean,
-    accepted?: boolean,
-    rejected?: boolean,
-    waitlisted?: boolean,
-    confirmed?: boolean,
-    checkedIn?: boolean,
-  },
+  roles: IRoles,
+  groups: IRoles, // Raw group from KEYCLOAK
+  status: IStatus,
   hackerApplication: IApplication,
   internal: {
     notes?: string,

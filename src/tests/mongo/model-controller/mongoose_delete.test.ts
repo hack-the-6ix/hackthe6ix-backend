@@ -1,8 +1,8 @@
 import { deleteObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { DeleteDeniedError } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { generateTestModel, hackerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { generateTestModel, hackerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

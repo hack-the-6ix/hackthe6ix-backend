@@ -2,8 +2,8 @@ import { getObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../readCheckModelTests/user/fields';
 import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { adminUser, generateTestModel } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { adminUser, generateTestModel } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

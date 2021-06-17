@@ -8,8 +8,8 @@ import {
   maxLength,
 } from '../../../models/validator';
 import { NotFoundError, ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { adminUser, generateTestModel, hackerUser, organizerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { adminUser, generateTestModel, hackerUser, organizerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

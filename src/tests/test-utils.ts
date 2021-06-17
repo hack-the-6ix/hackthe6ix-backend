@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import mongoose from 'mongoose';
-import { IUser } from '../../models/user/fields';
-import { extractFields } from '../../models/util';
-import { UniverseState } from '../../types/types';
+import { IUser } from '../models/user/fields';
+import { extractFields } from '../models/util';
+import { UniverseState } from '../types/types';
 
 export const adminUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd50'),
@@ -52,7 +52,7 @@ export const hackerUser = {
   },
   internal: {
     notes: 'This is a bad person',
-  }
+  },
 } as IUser;
 
 export const nopermUser = {
@@ -107,3 +107,10 @@ export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 
     } as UniverseState,
   ),
 );
+
+export const mockDate = (timestamp: number) => {
+  const mockDate = new Date(timestamp);
+  const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+
+  return () => spy.mockRestore();
+};

@@ -8,8 +8,8 @@ import {
   DeadlineExpiredError, TeamFullError,
   UnknownTeamError,
 } from '../../../types/types';
-import * as dbHandler from '../db-handler';
-import { generateMockUniverseState, hackerUser } from '../test-utils';
+import * as dbHandler from '../../db-handler';
+import { generateMockUniverseState, hackerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.

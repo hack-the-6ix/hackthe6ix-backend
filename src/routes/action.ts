@@ -12,7 +12,8 @@ import {
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import mongoose from '../services/mongoose_service';
-import { isHacker } from '../services/permissions';
+import { isHacker, isOrganizer } from '../services/permissions';
+import { getStatistics } from '../services/statistics';
 
 const actionRouter = express.Router();
 
@@ -156,9 +157,17 @@ actionRouter.get('/getTeam', isHacker, (req: Request, res: Response) => {
 // Admin endpoints
 
 /**
- * TODO: Add endpoint for application statistics that is cached
+ * (Organizer)
+ *
+ * Statistics
  */
-
+actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getStatistics(req?.query?.update.toString().toLowerCase() === 'true')
+  )
+});
 
 /**
  * TODO: Add endpoint to sync mailing lists
