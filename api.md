@@ -295,6 +295,25 @@ Get the user's current team
 }
 ```
 
+### GET - Get statistics
+`/api/action/getStatistics?update=false`
+
+#### Input Specification
+Change `update` in the query string to `true` if the most up to date statistics are required immediately.
+This will also update the cache, which by default has a lifetime of 5 minutes.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    ...stats go here, look at src/services/statistics.ts for the full typedef
+  }
+}
+```
+
+
+
 ## Auth - Authentication related operations
 
 ### GET - Get metadata
