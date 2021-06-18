@@ -165,7 +165,7 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
   logResponse(
     req,
     res,
-    getStatistics(req?.query?.update.toString().toLowerCase() === 'true')
+    getStatistics(req?.query?.update?.toString()?.toLowerCase() === 'true')
   )
 });
 
@@ -187,6 +187,12 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
  *       Actually, just keep an array of scores and compute the average at the end.
  *       If two people coincidentally get the same user, then let multiple people evaluate
  *       and take the average.
+ *
+ *       Query -> Get a user that doesn't have any reviews
+ */
+
+/**
+ * TODO: Endpoint to submit application review score
  */
 
 /**

@@ -11,6 +11,8 @@ export const getStatistics = async (update?: boolean) => {
     statistics = {
       timestamp: new Date().getTime(),
 
+      total: 0,
+
       hacker: {
         status: {
           applied: 0,
@@ -27,29 +29,34 @@ export const getStatistics = async (update?: boolean) => {
             male: 0,
             female: 0,
             other: 0,
+            nonBinary: 0,
             chooseNotToSay: 0
           },
           swag: {
             wantSwag: 0,
             noSwag: 0
+          },
+          review: {
+            reviewed: 0,
+            notReviewed: 0
           }
         }
       },
-      roles: {
+      groups: {
         hacker: 0,
         admin: 0,
         organizer: 0,
         volunteer: 0
-      },
-      review: {
-        reviewed: 0,
-        notReviewed: 0
       }
     };
 
     const users = await User.find({});
 
-    for (const user of users) {
+    for (const rawUser of users) {
+      const user = rawUser.toJSON();
+
+      statistics.total++;
+
       // Update status
       for (const s of Object.keys(user.status)) {
         if ((user.status as any)[s]) {
@@ -57,43 +64,46 @@ export const getStatistics = async (update?: boolean) => {
         }
       }
 
-      if (user.status.applied) {
+      if (user?.status?.applied) {
         // Gender
-        switch (user.hackerApplication.gender) {
+        switch (user?.hackerApplication?.gender) {
           case "Male":
             statistics.hacker.submittedApplicationStats.gender.male++;
             break;
           case "Female":
             statistics.hacker.submittedApplicationStats.gender.female++;
             break;
-          case "Other":
-            statistics.hacker.submittedApplicationStats.gender.other++;
+          case "Non-Binary":
+            statistics.hacker.submittedApplicationStats.gender.nonBinary++;
             break;
           case "Prefer not to say":
             statistics.hacker.submittedApplicationStats.gender.chooseNotToSay++;
             break;
+          default:
+            statistics.hacker.submittedApplicationStats.gender.other++;
+            break;
         }
 
         // Swag
-        if (user.hackerApplication.wantSwag) {
+        if (user?.hackerApplication?.wantSwag) {
           statistics.hacker.submittedApplicationStats.swag.wantSwag++;
         } else {
           statistics.hacker.submittedApplicationStats.swag.noSwag++;
         }
-      }
 
-      // Roles
-      for (const r of Object.keys(user.roles)) {
-        if ((user.roles as any)[r]) {
-          (statistics.roles as any)[r]++;
+        // Review state
+        if (user?.internal?.computedApplicationScore >= 0) {
+          statistics.hacker.submittedApplicationStats.review.reviewed++;
+        } else {
+          statistics.hacker.submittedApplicationStats.review.notReviewed++;
         }
       }
 
-      // Review state
-      if (user.internal.computedApplicationScore >= 0) {
-        statistics.review.reviewed++;
-      } else {
-        statistics.review.notReviewed++;
+      // Roles
+      for (const r of Object.keys(user.groups)) {
+        if ((user.groups as any)[r]) {
+          (statistics.groups as any)[r]++;
+        }
       }
     }
   }
@@ -103,6 +113,7 @@ export const getStatistics = async (update?: boolean) => {
 
 export type IStatistics = {
   timestamp: number,
+  total: number,
   hacker: {
     status: {
       applied: number,
@@ -118,23 +129,24 @@ export type IStatistics = {
       gender: {
         male: number,
         female: number,
+        nonBinary: number,
         other: number,
         chooseNotToSay: number
       },
       swag: {
         wantSwag: number,
         noSwag: number
+      },
+      review: {
+        reviewed: number,
+        notReviewed: number
       }
     }
   },
-  roles: {
+  groups: {
     hacker: number,
     admin: number,
     organizer: number,
     volunteer: number
-  },
-  review: {
-    reviewed: number,
-    notReviewed: number
   }
 }
