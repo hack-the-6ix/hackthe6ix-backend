@@ -6,7 +6,8 @@ import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
-  getEnumOptions, rsvp,
+  getEnumOptions,
+  rsvp,
   updateApplication,
   updateResume,
 } from '../controller/UserController';
@@ -151,9 +152,9 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
     res,
     rsvp(
       req.executor,
-      req.body.rsvp
-    )
-  )
+      req.body.rsvp,
+    ),
+  );
 });
 
 
@@ -175,8 +176,8 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
   logResponse(
     req,
     res,
-    getStatistics(req?.query?.update?.toString()?.toLowerCase() === 'true')
-  )
+    getStatistics(req?.query?.update?.toString()?.toLowerCase() === 'true'),
+  );
 });
 
 /**

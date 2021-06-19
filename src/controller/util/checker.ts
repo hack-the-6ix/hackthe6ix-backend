@@ -32,7 +32,7 @@ export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<
 const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) =>
   context.submitCheck
     ? evaluateChecker(context.submitCheck, request)
-    : evaluateChecker(context.writeCheck, request)
+    : evaluateChecker(context.writeCheck, request);
 
 /**
  * Validates a submitted application against all the required fields in the application. This checker
@@ -64,7 +64,7 @@ export const validateSubmission = (submission: any, submissionFields: any, reque
             fieldMetadata,
             request,
             `${path}/${k}`,
-            k
+            k,
           ),
         ];
 

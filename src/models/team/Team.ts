@@ -15,7 +15,7 @@ schema.virtual('memberNames', {
   ref: 'User',
   localField: 'code',
   foreignField: 'hackerApplication.teamCode',
-  justOne: false
+  justOne: false,
 });
 
 // Hook to auto populate memberNames
@@ -25,6 +25,6 @@ const autoPopulateMemberNames = function(next: any) {
 };
 
 schema.pre('findOne', autoPopulateMemberNames)
-      .pre('find', autoPopulateMemberNames);
+.pre('find', autoPopulateMemberNames);
 
 export default mongoose.model<ITeam>('Team', schema);

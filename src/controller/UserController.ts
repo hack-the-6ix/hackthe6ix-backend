@@ -5,11 +5,15 @@ import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import {
-  BadRequestError, DeadlineExpiredError,
+  BadRequestError,
+  DeadlineExpiredError,
   ForbiddenError,
-  InternalServerError, IRSVP,
-  NotFoundError, RSVPRejectedError,
-  SubmissionDeniedError, WriteCheckRequest,
+  InternalServerError,
+  IRSVP,
+  NotFoundError,
+  RSVPRejectedError,
+  SubmissionDeniedError,
+  WriteCheckRequest,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
@@ -209,7 +213,7 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
   };
 
   if (!isConfirmationOpen(writeRequest)) {
-    throw new DeadlineExpiredError("The RSVP deadline has passed!")
+    throw new DeadlineExpiredError('The RSVP deadline has passed!');
   }
 
   if (requestUser.status.accepted && !requestUser.status.declined) {
@@ -224,10 +228,10 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     const isAttending = !!rsvp.attending;
 
     await User.findOneAndUpdate({
-      _id: requestUser._id
+      _id: requestUser._id,
     }, {
-      "status.confirmed": isAttending,
-      "status.declined": !isAttending
+      'status.confirmed': isAttending,
+      'status.declined': !isAttending,
     });
 
     return 'Success';

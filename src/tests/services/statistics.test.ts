@@ -199,7 +199,7 @@ describe('Get statistics', () => {
             gender: x,
           },
           status: {
-            applied: true
+            applied: true,
           },
         }
       ));
@@ -207,10 +207,10 @@ describe('Get statistics', () => {
       // Make sure we only consider applied users
       cases.push({
         hackerApplication: {
-          gender: "Male",
+          gender: 'Male',
         },
         status: {
-          applied: false
+          applied: false,
         },
       });
 
@@ -262,7 +262,7 @@ describe('Get statistics', () => {
     });
 
     test('Groups', async () => {
-      const cases = ["hacker", "admin", "organizer", "volunteer"].map((x) => {
+      const cases = ['hacker', 'admin', 'organizer', 'volunteer'].map((x) => {
         const c: any = {
           groups: {},
         };
@@ -286,15 +286,15 @@ describe('Get statistics', () => {
       const cases = [
         {
           status: { applied: false },
-          internal: { applicationScores: [1, 2, 3] }
+          internal: { applicationScores: [1, 2, 3] },
         },
         {
           status: { applied: true },
-          internal: { applicationScores: [1, 2, 3] }
+          internal: { applicationScores: [1, 2, 3] },
         },
         {
           status: { applied: true },
-          internal: { applicationScores: [] }
+          internal: { applicationScores: [] },
         },
       ];
 
@@ -302,7 +302,7 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
       expect(statistics.hacker.submittedApplicationStats.review).toEqual({
         reviewed: 2,
-        notReviewed: 3
+        notReviewed: 3,
       });
     });
   });

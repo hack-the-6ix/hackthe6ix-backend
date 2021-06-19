@@ -185,7 +185,7 @@ export const getObject = async (
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
-    })
+    }),
   );
 
   for (const cleanedResult of cleanedResults) {
@@ -217,7 +217,10 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
         } else {
           // Top level field
 
-          if (!evaluateChecker(fieldMetadata.writeCheck, { ...request, fieldValue: changes[k] }) || fieldMetadata.virtual) {
+          if (!evaluateChecker(fieldMetadata.writeCheck, {
+            ...request,
+            fieldValue: changes[k],
+          }) || fieldMetadata.virtual) {
             // Validation failed for this field
             throw new WriteDeniedError(fieldMetadata, fieldMetadata.writeCheck, request);
           }
@@ -242,7 +245,7 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
  *
  * @param fields
  */
-export const flattenFields = (fields: any, prefix='') => {
+export const flattenFields = (fields: any, prefix = '') => {
   let out: any = {};
 
   for (const k of Object.keys(fields)) {
@@ -253,10 +256,10 @@ export const flattenFields = (fields: any, prefix='') => {
     if (value.constructor === Object) {
       out = {
         ...out,
-        ...flattenFields(value, name)
-      }
+        ...flattenFields(value, name),
+      };
     } else {
-      out[name] = value
+      out[name] = value;
     }
   }
 
@@ -277,7 +280,7 @@ export const flattenFields = (fields: any, prefix='') => {
  *                                                                          as it may be possible to write to fields
  *                                                                          without going through its write check if this
  *                                                                          is enabled!
-*                     The default behaviour (when this is disabled) is to merge all fields, so only fields that are
+ *                     The default behaviour (when this is disabled) is to merge all fields, so only fields that are
  *                    explicitly mentioned in changes will be touched.
  */
 export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, noFlatten?: boolean) => {

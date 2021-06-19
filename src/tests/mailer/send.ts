@@ -8,7 +8,7 @@ dotenv.config();
     'tester@henrytu.me',
     '2',
     'This is a test',
-    {}
+    {},
   ));
 
 })();

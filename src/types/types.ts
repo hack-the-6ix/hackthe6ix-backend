@@ -1,4 +1,3 @@
-import Request from 'express';
 import { IUser } from '../models/user/fields';
 
 export type ErrorMessage = { status: number, message: string, error?: string };

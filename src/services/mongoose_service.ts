@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import { database } from '../consts';
 
 // We put the DB connection in a separate file so that we can access the driver from multiple files if needed

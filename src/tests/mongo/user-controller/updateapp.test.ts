@@ -116,7 +116,7 @@ const [userTestModel, mockModels] = generateTestModel({
 
           readCheck: true,
         },
-      }
+      },
     },
     hackerApplication: {
       readCheck: true,

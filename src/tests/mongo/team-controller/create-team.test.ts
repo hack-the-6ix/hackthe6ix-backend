@@ -107,8 +107,8 @@ describe('Create Team', () => {
     const user = await User.create({
       ...hackerUser,
       status: {
-        applied: true
-      }
+        applied: true,
+      },
     });
 
     await expect(createTeam(user)).rejects.toThrow(AlreadySubmittedError);

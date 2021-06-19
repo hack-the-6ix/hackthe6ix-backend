@@ -1,6 +1,6 @@
 // Source: https://dev.to/paulasantamaria/testing-node-js-mongoose-with-an-in-memory-database-32np
-import mongoose from 'mongoose'
-import { MongoMemoryServer } from 'mongodb-memory-server'
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose from 'mongoose';
 
 const mongod = new MongoMemoryServer();
 
@@ -14,7 +14,7 @@ export const connect = async () => {
     useNewUrlParser: true,
     autoReconnect: true,
     reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 1000
+    reconnectInterval: 1000,
   };
 
   return await mongoose.connect(uri, mongooseOpts);

@@ -26,7 +26,7 @@ jest.mock('../../../controller/util/resources', () => {
   return {
     fetchUniverseState: jest.fn(),
     getModels: getModels,
-  }
+  };
 });
 
 /**
@@ -41,24 +41,24 @@ describe('Update Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: enumOptions["gender"][0],
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
-      mlhCOC: true
+      mlhCOC: true,
     } as IApplication;
 
     const user = await User.create({
       ...hackerUser,
       status: {
         applied: false,
-      }
+      },
     });
 
     await updateApplication(
@@ -80,23 +80,23 @@ describe('Update Real Application', () => {
 
     const hackerApplication = {
       gender: 'AdasdasasdasMale',
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
-      mlhCOC: true
+      mlhCOC: true,
     } as IApplication;
 
     const user = await User.create({
       ...hackerUser,
       status: {
         applied: false,
-      }
+      },
     });
 
     await expect(updateApplication(
@@ -117,24 +117,24 @@ describe('Update Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: enumOptions["gender"][0],
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X'.repeat(3000),
-      mlhCOC: true
+      mlhCOC: true,
     } as IApplication;
 
     const user = await User.create({
       ...hackerUser,
       status: {
         applied: false,
-      }
+      },
     });
 
     await expect(updateApplication(
@@ -157,17 +157,17 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: enumOptions["gender"][0],
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
-      mlhCOC: true
+      mlhCOC: true,
     } as IApplication;
 
     const user = await User.create({
@@ -176,8 +176,8 @@ describe('Submit Real Application', () => {
         applied: false,
       },
       hackerApplication: {
-        resumeFileName: 'wtf.exe'
-      }
+        resumeFileName: 'wtf.exe',
+      },
     });
 
     await updateApplication(
@@ -192,7 +192,7 @@ describe('Submit Real Application', () => {
 
     expect(resultObject.toJSON().hackerApplication).toEqual({
       ...hackerApplication,
-      resumeFileName: 'wtf.exe'
+      resumeFileName: 'wtf.exe',
     });
     expect(resultObject.status.applied).toBeTruthy();
   });
@@ -201,17 +201,17 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: enumOptions["gender"][0],
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
-      mlhCOC: false
+      mlhCOC: false,
     } as IApplication;
 
     const user = await User.create({
@@ -220,8 +220,8 @@ describe('Submit Real Application', () => {
         applied: false,
       },
       hackerApplication: {
-        resumeFileName: 'wtf.exe'
-      }
+        resumeFileName: 'wtf.exe',
+      },
     });
 
     await expect(updateApplication(
@@ -235,7 +235,7 @@ describe('Submit Real Application', () => {
     });
 
     expect(resultObject.toJSON().hackerApplication).toEqual({
-      resumeFileName: 'wtf.exe'
+      resumeFileName: 'wtf.exe',
     });
     expect(resultObject.status.applied).toBeFalsy();
   });
@@ -244,24 +244,24 @@ describe('Submit Real Application', () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
     const hackerApplication = {
-      gender: enumOptions["gender"][0],
-      pronouns: enumOptions["pronouns"][0],
-      ethnicity: enumOptions["ethnicity"][0],
-      timezone: enumOptions["timezone"][0],
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions["yearsOfStudy"][0],
-      hackathonsAttended: enumOptions["hackathonsAttended"][0],
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
-      mlhCOC: true
+      mlhCOC: true,
     } as IApplication;
 
     const user = await User.create({
       ...hackerUser,
       status: {
         applied: false,
-      }
+      },
     });
 
     await expect(updateApplication(
@@ -284,10 +284,10 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: enumOptions["gender"][0],
-        pronouns: enumOptions["pronouns"][0],
-        ethnicity: enumOptions["ethnicity"][0],
-        timezone: enumOptions["timezone"][0],
+        gender: enumOptions['gender'][0],
+        pronouns: enumOptions['pronouns'][0],
+        ethnicity: enumOptions['ethnicity'][0],
+        timezone: enumOptions['timezone'][0],
         wantSwag: false,
         addressLine1: '',
         addressLine2: '',
@@ -296,8 +296,8 @@ describe('Submit Real Application', () => {
         postalCode: '',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: enumOptions["yearsOfStudy"][0],
-        hackathonsAttended: enumOptions["hackathonsAttended"][0],
+        yearsOfStudy: enumOptions['yearsOfStudy'][0],
+        hackathonsAttended: enumOptions['hackathonsAttended'][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -307,7 +307,7 @@ describe('Submit Real Application', () => {
         accomplishEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
-        mlhData: true
+        mlhData: true,
       } as IApplication;
 
       const user = await User.create({
@@ -316,8 +316,8 @@ describe('Submit Real Application', () => {
           applied: false,
         },
         hackerApplication: {
-          resumeFileName: 'wtf.exe'
-        }
+          resumeFileName: 'wtf.exe',
+        },
       });
 
       await updateApplication(
@@ -332,7 +332,7 @@ describe('Submit Real Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         ...hackerApplication,
-        resumeFileName: 'wtf.exe'
+        resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeTruthy();
     });
@@ -342,20 +342,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: enumOptions["gender"][0],
-        pronouns: enumOptions["pronouns"][0],
-        ethnicity: enumOptions["ethnicity"][0],
-        timezone: enumOptions["timezone"][0],
+        gender: enumOptions['gender'][0],
+        pronouns: enumOptions['pronouns'][0],
+        ethnicity: enumOptions['ethnicity'][0],
+        timezone: enumOptions['timezone'][0],
         wantSwag: true,
         addressLine1: 'asdasdsdasdsa',
         addressLine2: '',
         city: 'asdasdas',
-        province: enumOptions["province"][0],
+        province: enumOptions['province'][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: enumOptions["yearsOfStudy"][0],
-        hackathonsAttended: enumOptions["hackathonsAttended"][0],
+        yearsOfStudy: enumOptions['yearsOfStudy'][0],
+        hackathonsAttended: enumOptions['hackathonsAttended'][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -365,7 +365,7 @@ describe('Submit Real Application', () => {
         accomplishEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
-        mlhData: true
+        mlhData: true,
       } as IApplication;
 
       const user = await User.create({
@@ -374,8 +374,8 @@ describe('Submit Real Application', () => {
           applied: false,
         },
         hackerApplication: {
-          resumeFileName: 'wtf.exe'
-        }
+          resumeFileName: 'wtf.exe',
+        },
       });
 
       await updateApplication(
@@ -390,7 +390,7 @@ describe('Submit Real Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         ...hackerApplication,
-        resumeFileName: 'wtf.exe'
+        resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeTruthy();
     });
@@ -400,20 +400,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: enumOptions["gender"][0],
-        pronouns: enumOptions["pronouns"][0],
-        ethnicity: enumOptions["ethnicity"][0],
-        timezone: enumOptions["timezone"][0],
+        gender: enumOptions['gender'][0],
+        pronouns: enumOptions['pronouns'][0],
+        ethnicity: enumOptions['ethnicity'][0],
+        timezone: enumOptions['timezone'][0],
         wantSwag: true,
         addressLine1: '',
         addressLine2: '',
         city: 'asdasdas',
-        province: enumOptions["province"][0],
+        province: enumOptions['province'][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: enumOptions["yearsOfStudy"][0],
-        hackathonsAttended: enumOptions["hackathonsAttended"][0],
+        yearsOfStudy: enumOptions['yearsOfStudy'][0],
+        hackathonsAttended: enumOptions['hackathonsAttended'][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -423,7 +423,7 @@ describe('Submit Real Application', () => {
         accomplishEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
-        mlhData: true
+        mlhData: true,
       } as IApplication;
 
       const user = await User.create({
@@ -432,8 +432,8 @@ describe('Submit Real Application', () => {
           applied: false,
         },
         hackerApplication: {
-          resumeFileName: 'wtf.exe'
-        }
+          resumeFileName: 'wtf.exe',
+        },
       });
 
       await expect(updateApplication(
@@ -447,7 +447,7 @@ describe('Submit Real Application', () => {
       });
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
-        resumeFileName: 'wtf.exe'
+        resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeFalsy();
     });
@@ -457,20 +457,20 @@ describe('Submit Real Application', () => {
 
       const hackerApplication = {
         emailConsent: true,
-        gender: enumOptions["gender"][0],
-        pronouns: enumOptions["pronouns"][0],
-        ethnicity: enumOptions["ethnicity"][0],
-        timezone: enumOptions["timezone"][0],
+        gender: enumOptions['gender'][0],
+        pronouns: enumOptions['pronouns'][0],
+        ethnicity: enumOptions['ethnicity'][0],
+        timezone: enumOptions['timezone'][0],
         wantSwag: false,
         addressLine1: 'ASDASSADAS',
         addressLine2: '',
         city: 'asdasdas',
-        province: enumOptions["province"][0],
+        province: enumOptions['province'][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',
         program: 'Computer Science',
-        yearsOfStudy: enumOptions["yearsOfStudy"][0],
-        hackathonsAttended: enumOptions["hackathonsAttended"][0],
+        yearsOfStudy: enumOptions['yearsOfStudy'][0],
+        hackathonsAttended: enumOptions['hackathonsAttended'][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
         portfolioLink: 'Portfolio',
@@ -480,7 +480,7 @@ describe('Submit Real Application', () => {
         accomplishEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
-        mlhData: true
+        mlhData: true,
       } as IApplication;
 
       const user = await User.create({
@@ -489,8 +489,8 @@ describe('Submit Real Application', () => {
           applied: false,
         },
         hackerApplication: {
-          resumeFileName: 'wtf.exe'
-        }
+          resumeFileName: 'wtf.exe',
+        },
       });
 
       await expect(updateApplication(
@@ -504,7 +504,7 @@ describe('Submit Real Application', () => {
       });
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
-        resumeFileName: 'wtf.exe'
+        resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeFalsy();
     });
