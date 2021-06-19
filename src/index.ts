@@ -13,11 +13,16 @@ import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
 import { InternalServerError } from './types/types';
+import cors from 'cors';
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(cors({
+  origin: process.env.NODE_ENV === "development" ? "*" : "*hackthe6ix.com"
+}));
 
 // Sanitize requests with mongoDB ops
 app.use(mongoSanitize());
