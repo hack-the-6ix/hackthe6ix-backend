@@ -19,7 +19,10 @@ router.get("/:provider/login", async (req:Request, res:Response) => {
     const {sp, idp} = await fetchSAMLBundle(req.params.provider.toLowerCase());
     sp.create_login_request_url(idp, {}, (err:Error | null, login_url:string) => {
         if (err != null)
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
 
         return res.json({
             loginUrl: login_url
@@ -34,7 +37,10 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
     sp.post_assert(idp, options, async (err, saml_response) => {
         if (err != null){
             console.log(err);
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
         }
 
         console.log(saml_response);
@@ -89,23 +95,34 @@ router.post("/:provider/acs", async (req:Request, res:Response) => {
             }
 
             try {
+                const groups: any = {};
+
+                // Update the groups this user is in in the database
+                for (const group of assertAttributes.groups || []) {
+                    // Remove the leading /
+                    groups[group.substring(1)] = true;
+                }
+
                 const userInfo = await User.findOneAndUpdate({
                     samlNameID: name_id,
                 }, {
                     email: assertAttributes.email[0],
                     firstName: assertAttributes.firstName[0],
-                    lastName: assertAttributes.lastName[0]
+                    lastName: assertAttributes.lastName[0],
+                    groups: groups
                 }, {
                     upsert: true,
                     new: true
                 });
 
+                console.log(assertAttributes);
+
                 const token = permissions.createJwt({
                     id: userInfo._id,
                     samlNameID: name_id,
                     samlSessionIndex: saml_response.user.session_index,
-                    groups: assertAttributes.groups
-                })
+                    roles: userInfo.roles
+                });
 
                 return res.json({
                     token: token
@@ -125,7 +142,7 @@ router.post("/:provider/logout", async (req:Request, res:Response) => {
     if(!req.body.token){
         return res.status(400).json({
             status: 400,
-            error: "Bad request"
+            message: "Bad request"
         })
     }
 
@@ -138,7 +155,10 @@ router.post("/:provider/logout", async (req:Request, res:Response) => {
         session_index: tokenInfo.samlSessionIndex
     }, (err:Error | null, logout_url:string) => {
         if (err != null)
-            return res.send(500);
+            return res.send(500).json({
+                status: 500,
+                message: "Internal Server Error"
+            });
 
         return res.json({
             logoutUrl: logout_url

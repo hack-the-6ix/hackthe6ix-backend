@@ -1,18 +1,16 @@
 import axios from 'axios';
 import querystring from 'querystring';
-import { Callback } from '../types/types';
+import { InternalServerError } from '../types/types';
 
 /**
  * Sends a singular email using the mailtrain transcation API
  *
  * @param recipientEmail
  * @param templateID
- * @param callback
  */
-export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }, callback: Callback) => {
+export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
 
   try {
-
     const parsedTags: any = {};
 
     for (const t of Object.keys(tags)) {
@@ -26,15 +24,14 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
     }));
 
     if (result.status != 200 || !result.data) {
-      return callback({ code: 500, message: 'Unable to send email' });
+      throw new InternalServerError('Unable to send email');
     }
 
-    return callback(null, { message: 'Success' });
+    return { message: 'Success' };
 
   } catch (e) {
-    return callback({ code: 500, message: 'Unable to send email', stacktrace: e });
+    throw new InternalServerError('Unable to send email', e);
   }
-
 };
 
 /**
@@ -45,9 +42,8 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
  *
  * @param mailingListName
  * @param emails - array of emails that should be in the mailing list. All other emails are removed.
- * @param callback
  */
-export const syncMailingLists = async (mailingListID: string, emails: string[], callback: Callback) => {
+export const syncMailingLists = async (mailingListID: string, emails: string[]) => {
 
   /**
    * TODO: Inject custom field for the subscriber's name and other metadata
@@ -60,7 +56,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
     const currentEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 
     if (currentEmailsResult.status != 200 || !currentEmailsResult?.data?.data?.subscriptions) {
-      return callback({ code: 500, message: 'Unable to fetch existing subscribers' });
+      throw new InternalServerError('Unable to fetch existing subscribers');
     }
 
     const beforeSubscribers = new Set<string>(
@@ -84,7 +80,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     for (const result of subscribeNewResults) {
       if (result.status != 200 || !result.data) {
-        return callback({ code: 500, message: 'Unable to update subscriber' });
+        throw new InternalServerError('Unable to update subscriber');
       }
     }
 
@@ -99,7 +95,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     for (const result of deleteOldResults) {
       if (result.status != 200 || !result.data) {
-        return callback({ code: 500, message: 'Unable to delete subscriber' });
+        throw new InternalServerError('Unable to delete subscriber');
       }
     }
 
@@ -107,7 +103,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
     const updatedEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 
     if (updatedEmailsResult.status != 200 || !updatedEmailsResult?.data?.data?.subscriptions) {
-      return callback({ code: 500, message: 'Unable to verify subscribers' });
+      throw new InternalServerError('Unable to verify subscribers');
     }
 
     const updatedSubscribers = new Set<string>(
@@ -118,20 +114,19 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
 
     // Verify length of mailing list
     if (updatedSubscribers.size != emails.length) {
-      return callback({ code: 500, message: 'Mismatch length between updated and target emails!' });
+      throw new InternalServerError('Mismatch length between updated and target emails!');
     }
 
     // Verify all emails in list are valid
     for (const email of emails) {
       if (!updatedSubscribers.has(email)) {
-        return callback({ code: 500, message: 'Mismatch between updated and target emails!' });
+        throw new InternalServerError('Mismatch between updated and target emails!');
       }
     }
 
 
-
-    return callback(null, { message: 'Success', added: toBeAdded, deleted: toBeDeleted });
+    return { message: 'Success', added: toBeAdded, deleted: toBeDeleted };
   } catch (e) {
-    return callback({ code: 500, message: 'Unable to sync mailing list', stacktrace: e });
+    throw new InternalServerError('Unable to sync mailing list', e);
   }
 };

@@ -40,7 +40,7 @@ export const loadProvider = async (name: string, all=false):Promise<void> => {
     if(!found){
         throw Error(`Unable to load SAML provider '${name}': Provider not found.`);
     }
-}
+};
 
 export const fetchSP = async (provider:string): Promise<saml2.ServiceProvider> => {
     provider = provider.toLowerCase();
@@ -49,7 +49,7 @@ export const fetchSP = async (provider:string): Promise<saml2.ServiceProvider> =
         await loadProvider(provider);
     }
     return spCache[provider];
-}
+};
 
 export const fetchIDP = async (provider:string): Promise<saml2.IdentityProvider> => {
     provider = provider.toLowerCase();
@@ -58,7 +58,7 @@ export const fetchIDP = async (provider:string): Promise<saml2.IdentityProvider>
         await loadProvider(provider);
     }
     return idpCache[provider];
-}
+};
 
 export const fetchSAMLBundle = async(provider: string): Promise<{
     sp: saml2.ServiceProvider,
@@ -68,4 +68,4 @@ export const fetchSAMLBundle = async(provider: string): Promise<{
         sp: await fetchSP(provider),
         idp: await fetchIDP(provider)
     }
-}
+};

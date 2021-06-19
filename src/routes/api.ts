@@ -1,30 +1,93 @@
-import express from 'express';
-import { getObject } from '../controller/ModelController';
+/**
+ * Primary APIs (basically model independent)
+ *
+ * For more model dependent endpoints, see actions.ts
+ */
+
+import express, { Request, Response } from 'express';
+import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
+import { logResponse } from '../services/logger';
+import { isAdmin, isOrganizer } from '../services/permissions';
 
 const apiRouter = express.Router();
 
 apiRouter.use(express.json());
 
 /**
- * TODO: Figure out if we need to check for permission here before processing fetch request
+ * (Organizer)
+ *
+ * Get the result of a search query for any object type.
  */
-
-// Get a single object
-apiRouter.get('/getOne/:objectType/:objectID', (req: express.Request, res: express.Response) => {
-  console.log(req.params);
-
-  getObject('', //req.token, // TODO: Inject JWT token in here using middleware. Will need a modified interface too
-    req.params.objectType,
-    {
-      _id: req.params.objectID,
-    },
-    null, // TODO: call logger here
+apiRouter.post('/get/:objectType', isOrganizer,(req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
   );
 });
 
-// Get many objects
-apiRouter.get('/getMany/:objectType', (req: express.Request, res: express.Response) => {
-  console.log(req.query);
+/**
+ * (Organizer)
+ *
+ * Edit object
+ */
+apiRouter.post('/edit/:objectType', isOrganizer,(req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    editObject(req.executor,
+      req.params.objectType,
+      req.body.filter,
+      req.body.changes
+    )
+  );
 });
+
+/**
+ * (Admin)
+ *
+ * Delete objects based on a query
+ */
+apiRouter.post('/delete/:objectType', isAdmin,(req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    deleteObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Create object
+ */
+apiRouter.post('/create/:objectType', isAdmin,(req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    createObject(req.executor,
+      req.params.objectType,
+      req.body
+    )
+  );
+});
+
+/**
+ * TODO: Add endpoint to fetch a list of fields and their caption from the schema
+ */
+
+/**
+ * TODO: Add API to read from gridFS (Organizers)
+ */
+
+/**
+ * TODO: Add API to write to GridFS (Organizers)
+ */
 
 export default apiRouter;
