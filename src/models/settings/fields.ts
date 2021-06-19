@@ -61,7 +61,7 @@ const universe = {
           required: true,
 
           readCheck: true,
-          writeCheck: true
+          writeCheck: true,
         },
         globalConfirmationDeadline: {
           type: Number,
@@ -69,9 +69,9 @@ const universe = {
           required: true,
 
           readCheck: true,
-          writeCheck: true
+          writeCheck: true,
         },
-      }
+      },
 
     },
 
@@ -88,7 +88,7 @@ const universe = {
           required: true,
 
           readCheck: true,
-          writeCheck: true
+          writeCheck: true,
         },
 
         maxWaitlist: {
@@ -97,11 +97,11 @@ const universe = {
           required: true,
 
           readCheck: true,
-          writeCheck: true
-        }
-      }
-    }
-  }
+          writeCheck: true,
+        },
+      },
+    },
+  },
 };
 
 export const fields = {
@@ -112,7 +112,7 @@ export const fields = {
   FIELDS: {
     saml: saml,
 
-    universe: universe
+    universe: universe,
   },
 };
 

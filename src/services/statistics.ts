@@ -29,24 +29,24 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             female: 0,
             other: 0,
             nonBinary: 0,
-            chooseNotToSay: 0
+            chooseNotToSay: 0,
           },
           swag: {
             wantSwag: 0,
-            noSwag: 0
+            noSwag: 0,
           },
           review: {
             reviewed: 0,
-            notReviewed: 0
-          }
-        }
+            notReviewed: 0,
+          },
+        },
       },
       groups: {
         hacker: 0,
         admin: 0,
         organizer: 0,
-        volunteer: 0
-      }
+        volunteer: 0,
+      },
     };
 
     const users = await User.find({});
@@ -66,16 +66,16 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
       if (user?.status?.applied) {
         // Gender
         switch (user?.hackerApplication?.gender) {
-          case "Male":
+          case 'Male':
             statistics.hacker.submittedApplicationStats.gender.male++;
             break;
-          case "Female":
+          case 'Female':
             statistics.hacker.submittedApplicationStats.gender.female++;
             break;
-          case "Non-Binary":
+          case 'Non-Binary':
             statistics.hacker.submittedApplicationStats.gender.nonBinary++;
             break;
-          case "Prefer not to say":
+          case 'Prefer not to say':
             statistics.hacker.submittedApplicationStats.gender.chooseNotToSay++;
             break;
           default:

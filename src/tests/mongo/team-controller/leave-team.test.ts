@@ -135,9 +135,9 @@ describe('Leave Team', () => {
       const mockTeam = {
         code: 'banana',
         memberIDs: [
-          "foo",
+          'foo',
           hackerUser._id,
-          "bar"
+          'bar',
         ],
       };
 
@@ -156,8 +156,8 @@ describe('Leave Team', () => {
 
       // Ensure team roster is updated
       expect((await Team.findOne({ code: team.code })).toJSON().memberIDs).toEqual([
-        "foo",
-        "bar"
+        'foo',
+        'bar',
       ]);
     });
   });

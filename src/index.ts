@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import 'dotenv/config';
 import express, { ErrorRequestHandler } from 'express';
 import 'express-async-errors';
@@ -6,14 +7,13 @@ import fileUpload from 'express-fileupload';
 import mongoSanitize from 'express-mongo-sanitize';
 // Bootstrap scripts
 import './bootstrap/settings';
-import './services/mongoose_service';
 import { port } from './consts';
 import actionRouter from './routes/action';
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
+import './services/mongoose_service';
 import { InternalServerError } from './types/types';
-import cors from 'cors';
 
 const app = express();
 
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(cors({
-  origin: process.env.NODE_ENV === "development" ? "*" : "*hackthe6ix.com"
+  origin: process.env.NODE_ENV === 'development' ? '*' : '*hackthe6ix.com',
 }));
 
 // Sanitize requests with mongoDB ops
@@ -48,4 +48,4 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-console.log(`Development Mode: ${ process.env.NODE_ENV }`);
+console.log(`Development Mode: ${process.env.NODE_ENV}`);

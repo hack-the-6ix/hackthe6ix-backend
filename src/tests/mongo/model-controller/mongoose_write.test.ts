@@ -1,10 +1,10 @@
+import mongoose from 'mongoose';
 import { editObject, flattenFields } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { extractFields } from '../../../models/util';
 import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
 import * as dbHandler from '../../db-handler';
 import { generateTestModel, hackerUser } from '../../test-utils';
-import mongoose from 'mongoose';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -78,8 +78,8 @@ const writeTestFields = {
     virtual: {
       type: String,
       virtual: true,
-      writeCheck: true
-    }
+      writeCheck: true,
+    },
   },
 };
 
@@ -92,16 +92,16 @@ const testSchema = new mongoose.Schema(extractFields(writeTestFields), {
   },
 });
 
-testSchema.virtual('virtual').get(() => "virtualboi!");
+testSchema.virtual('virtual').get(() => 'virtualboi!');
 
 const writeTestModel = mongoose.model('WriteTest', testSchema);
 
 const mockModels = {
   ...mockRecrusionCreateWriteTestModels,
-  "WriteTest": {
+  'WriteTest': {
     mongoose: writeTestModel,
     rawFields: writeTestFields,
-  }
+  },
 };
 
 getModels.mockReturnValue(mockModels);
@@ -206,7 +206,7 @@ describe('Model Write', () => {
         expect(resultJSON).toEqual({
           test: {
             huh: {
-              field1: 'foobar'
+              field1: 'foobar',
             },
           },
           banana: 'test',
@@ -305,7 +305,7 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         field1: 'Banana',
         field2: 'Orange',
-        virtual: 'virtualboi!'
+        virtual: 'virtualboi!',
       });
     });
 
@@ -342,7 +342,7 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         field1: 'Banana',
         field2: 'Apple',
-        virtual: 'virtualboi!'
+        virtual: 'virtualboi!',
       });
     });
 
@@ -351,7 +351,7 @@ describe('Model Write', () => {
       await writeTestModel.create({});
       const originalObject = await writeTestModel.create({
         field1: 'Banana',
-        field2: 'Apple'
+        field2: 'Apple',
       });
 
       expect((await writeTestModel.find({})).length).toEqual(2);
@@ -363,7 +363,7 @@ describe('Model Write', () => {
           field1: 'Banana',
         },
         {
-          virtual: "lol this shouldn't change"
+          virtual: 'lol this shouldn\'t change',
         },
       )).rejects.toThrow(WriteDeniedError);
 
@@ -379,7 +379,7 @@ describe('Model Write', () => {
       expect(resultJSON).toEqual({
         field1: 'Banana',
         field2: 'Apple',
-        virtual: 'virtualboi!'
+        virtual: 'virtualboi!',
       });
     });
   });
@@ -390,19 +390,19 @@ test('Flatten fields', () => {
     foo: 123,
     bar: {
       beep: {
-        bang: 456
+        bang: 456,
       },
-      barf: 3563
+      barf: 3563,
     },
     eek: [
-      233
-    ]
+      233,
+    ],
   });
 
   expect(result).toEqual({
     foo: 123,
-    "bar.beep.bang": 456,
-    "bar.barf": 3563,
-    "eek": [233]
+    'bar.beep.bang': 456,
+    'bar.barf': 3563,
+    'eek': [233],
   });
 });

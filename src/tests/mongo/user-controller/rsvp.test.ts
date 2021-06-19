@@ -39,7 +39,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
-          }
+          },
         });
 
         await rsvp(
@@ -64,7 +64,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
-          }
+          },
         });
 
         await expect(rsvp(
@@ -146,7 +146,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: false,
-        }
+        },
       });
 
       expect(rsvp(
@@ -171,8 +171,8 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: true,
-          declined: true
-        }
+          declined: true,
+        },
       });
 
       expect(rsvp(
@@ -199,7 +199,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: true,
-        }
+        },
       });
 
       await rsvp(
@@ -224,7 +224,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: true,
-        }
+        },
       });
 
       await rsvp(

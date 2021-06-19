@@ -1,11 +1,13 @@
-import { createTeam, joinTeam } from '../../../controller/TeamController';
+import { joinTeam } from '../../../controller/TeamController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import {
-  AlreadyInTeamError, AlreadySubmittedError,
+  AlreadyInTeamError,
+  AlreadySubmittedError,
   BadRequestError,
-  DeadlineExpiredError, TeamFullError,
+  DeadlineExpiredError,
+  TeamFullError,
   UnknownTeamError,
 } from '../../../types/types';
 import * as dbHandler from '../../db-handler';
@@ -61,8 +63,8 @@ describe('Join Team', () => {
     await Team.create({
       code: 'foo',
       memberIDs: [
-        'a', 'b', 'c', 'd'
-      ]
+        'a', 'b', 'c', 'd',
+      ],
     });
 
     const user = await User.create(hackerUser);
@@ -78,8 +80,8 @@ describe('Join Team', () => {
     const mockTeam = {
       code: 'foo',
       memberIDs: [
-        'a'
-      ]
+        'a',
+      ],
     };
 
     const team = await Team.create(mockTeam);
@@ -87,14 +89,14 @@ describe('Join Team', () => {
     const user = await User.create({
       ...hackerUser,
       hackerApplication: {
-        teamCode: "banana"
-      }
+        teamCode: 'banana',
+      },
     });
     await expect(joinTeam(user, mockTeam.code)).rejects.toThrow(AlreadyInTeamError);
 
     // User is not amended
     expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication).toEqual({
-      teamCode: "banana"
+      teamCode: 'banana',
     });
 
     // Team not amended
@@ -107,8 +109,8 @@ describe('Join Team', () => {
     const mockTeam = {
       code: 'foo',
       memberIDs: [
-        'a'
-      ]
+        'a',
+      ],
     };
 
     const team = await Team.create(mockTeam);
@@ -129,16 +131,16 @@ describe('Join Team', () => {
     const mockTeam = {
       code: 'foo',
       memberIDs: [
-        'a'
-      ]
+        'a',
+      ],
     };
 
     const team = await Team.create(mockTeam);
     const user = await User.create({
       ...hackerUser,
       status: {
-        applied: true
-      }
+        applied: true,
+      },
     });
 
     await expect(joinTeam(user, mockTeam.code)).rejects.toThrow(AlreadySubmittedError);

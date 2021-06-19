@@ -1,2 +1,3 @@
-test('foo', () => {});
+test('foo', () => {
+});
 // TODO: Read intercept tests

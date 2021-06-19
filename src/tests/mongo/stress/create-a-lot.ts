@@ -15,7 +15,7 @@ dotenv.config();
   console.log('Connected');
 
   for (let i = 0; i < 3000; i++) {
-    console.log('Creating', i)
+    console.log('Creating', i);
     User.create({
       firstName: 'Test ' + i.toString(),
       lastName: 'Testerson',

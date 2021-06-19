@@ -5,13 +5,13 @@ dotenv.config();
 
 
 (async () => {
-  console.log(await syncMailingLists(
-    'AtlPqHaQpw',
-    [
-      'tester@henrytu.me',
-      'tester4@henrytu.me',
-      'tester13@henrytu.me'
-    ]
-  ));
-
+  console.log(
+    await syncMailingLists(
+      'AtlPqHaQpw',
+      [
+        'tester@henrytu.me',
+        'tester4@henrytu.me',
+        'tester13@henrytu.me',
+      ],
+    ));
 })();

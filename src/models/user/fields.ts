@@ -8,7 +8,8 @@ import {
 import {
   canUpdateApplication,
   inEnum,
-  isAdmin, isConfirmationOpen,
+  isAdmin,
+  isConfirmationOpen,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -534,7 +535,11 @@ const status = {
       virtual: true,
       readCheck: true,
 
-      readInterceptor: (request: ReadCheckRequest<IUser>) => canUpdateApplication()({ ...request, fieldValue: undefined, submissionObject: undefined }),
+      readInterceptor: (request: ReadCheckRequest<IUser>) => canUpdateApplication()({
+        ...request,
+        fieldValue: undefined,
+        submissionObject: undefined,
+      }),
     },
     canConfirm: {
       type: Boolean,
@@ -545,7 +550,11 @@ const status = {
       virtual: true,
       readCheck: true,
 
-      readInterceptor: (request: ReadCheckRequest<IUser>) => isConfirmationOpen({ ...request, fieldValue: undefined, submissionObject: undefined }),
+      readInterceptor: (request: ReadCheckRequest<IUser>) => isConfirmationOpen({
+        ...request,
+        fieldValue: undefined,
+        submissionObject: undefined,
+      }),
     },
   },
 };
@@ -759,7 +768,7 @@ export interface IRoles { // Virtual field with all "lesser" roles populated
   admin: boolean,
   organizer: boolean,
   volunteer: boolean
-};
+}
 
 export interface IStatus {
   statusReleased?: boolean,
