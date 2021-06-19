@@ -8,7 +8,7 @@ import {
 import {
   canUpdateApplication,
   inEnum,
-  isAdmin,
+  isAdmin, isConfirmationOpen,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -512,18 +512,6 @@ const status = {
       readInterceptor: maskStatus<boolean>(false),
     },
 
-    expired: {
-      type: Boolean,
-      required: true,
-      default: false,
-      caption: 'Expired',
-
-      writeCheck: true,
-      readCheck: true,
-
-      readInterceptor: maskStatus<boolean>(false),
-    },
-
     checkedIn: {
       type: Boolean,
       required: true,
@@ -534,6 +522,30 @@ const status = {
       readCheck: true,
 
       readInterceptor: maskStatus<boolean>(false),
+    },
+
+    // Intercepted fields (virtual fields, but we populate them)
+    canApply: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Can Apply',
+
+      virtual: true,
+      readCheck: true,
+
+      readInterceptor: (request: ReadCheckRequest<IUser>) => canUpdateApplication()({ ...request, fieldValue: undefined, submissionObject: undefined }),
+    },
+    canConfirm: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Can Confirm',
+
+      virtual: true,
+      readCheck: true,
+
+      readInterceptor: (request: ReadCheckRequest<IUser>) => isConfirmationOpen({ ...request, fieldValue: undefined, submissionObject: undefined }),
     },
   },
 };
@@ -713,7 +725,7 @@ export const fields = {
       readCheck: true,
     },
 
-    rsvpDeadline: {
+    personalRSVPDeadline: {
       type: Number,
       required: true,
       caption: 'RSVP Deadline',
@@ -757,8 +769,11 @@ export interface IStatus {
   waitlisted?: boolean,
   confirmed?: boolean,
   declined?: boolean,
-  expired?: boolean,
   checkedIn?: boolean,
+
+  // Intercepted fields (since they require universe state)
+  canApply?: boolean,
+  canConfirm?: boolean
 }
 
 export interface IUser extends mongoose.Document {
@@ -768,7 +783,7 @@ export interface IUser extends mongoose.Document {
   firstName: string,
   lastName: string,
   email: string,
-  rsvpDeadline?: number,
+  personalRSVPDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
   groups: IRoles, // Raw group from KEYCLOAK

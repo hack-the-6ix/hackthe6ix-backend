@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
-  getEnumOptions,
+  getEnumOptions, rsvp,
   updateApplication,
   updateResume,
 } from '../controller/UserController';
@@ -141,10 +141,20 @@ actionRouter.get('/getTeam', isHacker, (req: Request, res: Response) => {
 });
 
 /**
- * TODO: Add endpoint to RSVP
+ * (Hacker)
  *
- *       /rsvp -> triggers sequence of events to reserve spot and invite to discord
+ * Confirm whether or not they will be attending.
  */
+actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    rsvp(
+      req.executor,
+      req.body.rsvp
+    )
+  )
+});
 
 
 // Post application endpoints

@@ -42,3 +42,5 @@ app.use(function(err: any, req: express.Request, res: express.Response, next: ex
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+console.log(`Development Mode: ${ process.env.NODE_ENV }`);

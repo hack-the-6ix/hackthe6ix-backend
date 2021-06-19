@@ -312,7 +312,26 @@ This will also update the cache, which by default has a lifetime of 5 minutes.
 }
 ```
 
+### POST - Update RSVP
+`/api/action/rsvp`
 
+This endpoint is used to update a user's RSVP status. A user may only RSVP if they are accepted, not previously declined, and are in the RSVP period (whether global or personal).
+Once a user has declined, they cannot retract this decision.
+
+#### Input Specification
+```
+{
+  "attending": true // false if they are not attending... duh
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "Success"
+}
+```
 
 ## Auth - Authentication related operations
 

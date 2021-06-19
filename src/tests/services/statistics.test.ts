@@ -165,7 +165,6 @@ describe('Get statistics', () => {
         'waitlisted',
         'confirmed',
         'declined',
-        'expired',
         'checkedIn',
       ];
 

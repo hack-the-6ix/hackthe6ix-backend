@@ -71,6 +71,10 @@ export type CreateCheckRequest<T, O> = {
   universeState: UniverseState
 }
 
+export interface IRSVP {
+  attending: boolean
+}
+
 /**
  * Corresponds to HTTP error codes
  */
@@ -186,5 +190,12 @@ export class TeamFullError extends ForbiddenError {
   constructor(message?: string, error?: any, errorIsPublic?: boolean) {
     super(message || 'Unable to join - team is full!', error, errorIsPublic);
     Object.setPrototypeOf(this, TeamFullError.prototype);
+  }
+}
+
+export class RSVPRejectedError extends ForbiddenError {
+  constructor(message?: string, error?: any, errorIsPublic?: boolean) {
+    super(message || 'You are not eligible to RSVP!', error, errorIsPublic);
+    Object.setPrototypeOf(this, RSVPRejectedError.prototype);
   }
 }

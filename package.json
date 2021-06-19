@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node ./dist/index.js",
-    "dev": "nodemon --ext ts --exec 'ts-node' src/index.ts",
+    "dev": "NODE_ENV=development nodemon --ext ts --exec 'ts-node' src/index.ts",
     "build": "tsc",
     "prettier": "prettier --check \"**/*.ts\"",
     "prettier:fix": "npm run prettier -- --write",

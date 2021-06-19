@@ -3,11 +3,12 @@ import { Mongoose } from 'mongoose';
 import stream from 'stream';
 import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
+import { isConfirmationOpen } from '../models/validator';
 import {
-  BadRequestError,
+  BadRequestError, DeadlineExpiredError,
   ForbiddenError,
-  InternalServerError,
-  NotFoundError,
+  InternalServerError, IRSVP,
+  NotFoundError, RSVPRejectedError,
   SubmissionDeniedError, WriteCheckRequest,
 } from '../types/types';
 import { editObject, getObject } from './ModelController';
@@ -108,6 +109,10 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
     if (!statusUpdateResult) {
       throw new InternalServerError('Unable to update status');
     }
+
+    /**
+     * TODO: Send confirmation email
+     */
   }
 
   return 'Success';
@@ -181,4 +186,52 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
   return 'Success';
 };
 
+/**
+ * Gets the valid enum values for the hacker application
+ */
 export const getEnumOptions = async () => enumOptions;
+
+/**
+ * Updates the user's RSVP state
+ *
+ * @param requestUser
+ * @param rsvp
+ */
+export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
+
+  const universeState = await fetchUniverseState();
+  const writeRequest = {
+    requestUser: requestUser,
+    targetObject: requestUser,
+    submissionObject: {} as any,
+    universeState: universeState,
+    fieldValue: undefined as any,
+  };
+
+  if (!isConfirmationOpen(writeRequest)) {
+    throw new DeadlineExpiredError("The RSVP deadline has passed!")
+  }
+
+  if (requestUser.status.accepted && !requestUser.status.declined) {
+    /**
+     * TODO: Check if we want to let people decline after the official deadline has passed
+     */
+
+    /**
+     * TODO: Invite them to discord
+     */
+
+    const isAttending = !!rsvp.attending;
+
+    await User.findOneAndUpdate({
+      _id: requestUser._id
+    }, {
+      "status.confirmed": isAttending,
+      "status.declined": !isAttending
+    });
+
+    return 'Success';
+  } else {
+    throw new RSVPRejectedError();
+  }
+};

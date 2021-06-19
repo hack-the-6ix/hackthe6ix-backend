@@ -33,6 +33,7 @@ export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<str
 
 export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.requestUser.status.applied;
 export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => request.universeState.public.globalApplicationDeadline >= new Date().getTime() || request.requestUser.personalApplicationDeadline >= new Date().getTime();
+export const isConfirmationOpen = (request: WriteCheckRequest<any, IUser>) => request.universeState.public.globalConfirmationDeadline >= new Date().getTime() || request.requestUser.personalRSVPDeadline >= new Date().getTime();
 
 export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) =>
   isOrganizer(request.requestUser) ||

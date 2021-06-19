@@ -4,7 +4,7 @@ let statistics: IStatistics;
 
 export const statisticsLifetime = 1000 * 60 * 5; // stats live for 5 minutes
 
-export const getStatistics = async (update?: boolean) => {
+export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
   if (!statistics || (new Date().getTime() - statistics.timestamp) > statisticsLifetime || update) {
     // The cache is too old, or the user explicitly asked for an update
 
@@ -21,7 +21,6 @@ export const getStatistics = async (update?: boolean) => {
           waitlisted: 0,
           confirmed: 0,
           declined: 0,
-          expired: 0,
           checkedIn: 0,
         },
         submittedApplicationStats: {
@@ -122,7 +121,6 @@ export type IStatistics = {
       waitlisted: number,
       confirmed: number,
       declined: number,
-      expired: number,
       checkedIn: number,
     },
     submittedApplicationStats: {

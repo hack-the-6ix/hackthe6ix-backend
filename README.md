@@ -139,3 +139,5 @@ for an edit to succeed.
   }
 }
 ```
+
+Developed by Henry Tu and David Hui
