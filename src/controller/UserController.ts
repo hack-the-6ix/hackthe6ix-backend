@@ -75,6 +75,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
     fieldValue: undefined,
   };
 
+  // We will pass in our own writeRequest, so user can be null
   await testCanUpdateApplication(null, writeRequest);
 
   // If the user intends to submit, we will verify that all required fields are correctly filled

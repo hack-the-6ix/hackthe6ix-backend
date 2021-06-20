@@ -15,7 +15,7 @@ export const okResponse = { status: 200, data: {} as any };
 export const mockSendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
   const message = `[${new Date()}] Template ${templateID} was sent to ${recipientEmail} with submit ${subject} and tags ${JSON.stringify(tags)}\n`;
 
-  fs.appendFile(path.resolve(__dirname, '../../dev_logs/mailer.log'), message, (err) => {
+  fs.appendFile(path.resolve(__dirname, '../../../dev_logs/mailer.log'), message, (err) => {
     if (err) {
       throw new InternalServerError('Unable to send mock email: ' + err.toString());
     }

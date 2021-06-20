@@ -1,0 +1,55 @@
+{
+  "templates": {
+    "applicationIncomplete": {
+      "subject": "Your Hack the 6ix application is incomplete",
+      "templateID": "XXXXXX"
+    },
+    "applied": {
+      "subject": "You have successfully applied to Hack the 6ix",
+      "templateID": "XXXXXX"
+    },
+    "confirmed": {
+      "subject": "You have successfully confirmed your spot at Hack the 6ix",
+      "templateID": "XXXXXX"
+    },
+    "declined": {
+      "subject": "You have declined your invitation to Hack the 6ix",
+      "templateID": "XXXXXX"
+    },
+    "accepted": {
+      "subject": "Welcome to Hack the 6ix",
+      "templateID": "XXXXXX"
+    },
+    "rejected": {
+      "subject": "Hack the 6ix Application Status Update",
+      "templateID": "XXXXXX"
+    },
+    "waitlisted": {
+      "subject": "Hack the 6ix Application Status Update",
+      "templateID": "XXXXXX"
+    }
+  },
+  "lists": {
+    "applicationIncomplete": {
+      "listID": "XXXXXX"
+    },
+    "applied": {
+      "listID": "XXXXXX"
+    },
+    "confirmed": {
+      "listID": "XXXXXX"
+    },
+    "declined": {
+      "listID": "XXXXXX"
+    },
+    "accepted": {
+      "listID": "XXXXXX"
+    },
+    "rejected": {
+      "listID": "XXXXXX"
+    },
+    "waitlisted": {
+      "listID": "XXXXXX"
+    }
+  }
+}

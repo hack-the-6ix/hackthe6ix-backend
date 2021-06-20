@@ -9,7 +9,6 @@ import {
   sendEmailRequest,
 } from './external';
 
-
 /**
  * Sends a singular email using the Mailtrain transaction API
  *
