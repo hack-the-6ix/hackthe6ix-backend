@@ -1,24 +1,33 @@
 import { rsvp } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
+import { sendEmailRequest } from '../../../services/mailer/external';
+import { Templates } from '../../../types/mailer';
 import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/types';
-import * as dbHandler from '../../db-handler';
-import { generateMockUniverseState, hackerUser } from '../../test-utils';
+import {
+  generateMockUniverseState,
+  hackerUser,
+  mockGetMailTemplate,
+  mockSuccessResponse,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => await dbHandler.connect());
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
-afterEach(async () => await dbHandler.clearDatabase());
+afterEach(runAfterEach);
 
 /**
  * Remove and close the db and server.
  */
-afterAll(async () => await dbHandler.closeDatabase());
+afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => {
   const { getModels } = jest.requireActual('../../../controller/util/resources');
@@ -28,8 +37,16 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
-describe('RSVP', () => {
+jest.mock('../../../services/mailer/external', () => {
+  const external = jest.requireActual('../../../services/mailer/external');
+  return {
+    ...external,
+    sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
+  };
+});
 
+describe('RSVP', () => {
   describe('Deadlines', () => {
     describe('Global Deadline', () => {
       test('Success', async () => {
@@ -192,7 +209,7 @@ describe('RSVP', () => {
   });
 
   describe('Confirmation State', () => {
-    test('Attending', async () => {
+    test('Confirm', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
       const user = await User.create({
@@ -215,9 +232,22 @@ describe('RSVP', () => {
 
       expect(resultObject.toJSON().status.confirmed).toEqual(true);
       expect(resultObject.toJSON().status.declined).toEqual(false);
+
+      // Verify confirmation email sent
+      const template = mockGetMailTemplate(Templates.confirmed);
+
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+        user.email,
+        template.templateID,
+        template.subject,
+        {
+          'TAGS[MERGE_FIRST_NAME]': user.firstName,
+          'TAGS[MERGE_LAST_NAME]': user.lastName,
+        },
+      );
     });
 
-    test('Not Attending', async () => {
+    test('Decline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
       const user = await User.create({
@@ -240,6 +270,19 @@ describe('RSVP', () => {
 
       expect(resultObject.toJSON().status.confirmed).toEqual(false);
       expect(resultObject.toJSON().status.declined).toEqual(true);
+
+      // Verify confirmation email sent
+      const template = mockGetMailTemplate(Templates.declined);
+
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+        user.email,
+        template.templateID,
+        template.subject,
+        {
+          'TAGS[MERGE_FIRST_NAME]': user.firstName,
+          'TAGS[MERGE_LAST_NAME]': user.lastName,
+        },
+      );
     });
   });
 });

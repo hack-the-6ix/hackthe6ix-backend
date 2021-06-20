@@ -35,12 +35,10 @@ export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.req
 export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => request.universeState.public.globalApplicationDeadline >= new Date().getTime() || request.requestUser.personalApplicationDeadline >= new Date().getTime();
 export const isConfirmationOpen = (request: WriteCheckRequest<any, IUser>) => request.universeState.public.globalConfirmationDeadline >= new Date().getTime() || request.requestUser.personalRSVPDeadline >= new Date().getTime();
 
-export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) =>
-  isOrganizer(request.requestUser) ||
-  (
-    isUser(request.requestUser, request.targetObject) &&
-    !isApplied(request) &&
-    isApplicationOpen(request)
-  );
+export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) => (
+  isUser(request.requestUser, request.targetObject) &&
+  !isApplied(request) &&
+  isApplicationOpen(request)
+);
 
 export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue?.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);

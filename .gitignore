@@ -1,4 +1,5 @@
 node_modules
 dist
 .env
-src/bootstrap/data/settings.json
+config/settings.json
+config/mailer.json

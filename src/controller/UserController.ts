@@ -4,6 +4,8 @@ import stream from 'stream';
 import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
+import { sendTemplateEmail } from '../services/mailer';
+import { Templates } from '../types/mailer';
 import {
   BadRequestError,
   DeadlineExpiredError,
@@ -73,6 +75,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
     fieldValue: undefined,
   };
 
+  // We will pass in our own writeRequest, so user can be null
   await testCanUpdateApplication(null, writeRequest);
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
@@ -114,9 +117,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    /**
-     * TODO: Send confirmation email
-     */
+    await sendTemplateEmail(requestUser, Templates.applied);
   }
 
   return 'Success';
@@ -218,10 +219,6 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
 
   if (requestUser.status.accepted && !requestUser.status.declined) {
     /**
-     * TODO: Check if we want to let people decline after the official deadline has passed
-     */
-
-    /**
      * TODO: Invite them to discord
      */
 
@@ -233,6 +230,12 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
     });
+
+    if (isAttending) {
+      await sendTemplateEmail(requestUser, Templates.confirmed);
+    } else {
+      await sendTemplateEmail(requestUser, Templates.declined);
+    }
 
     return 'Success';
   } else {

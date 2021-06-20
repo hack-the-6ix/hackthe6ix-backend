@@ -3,29 +3,45 @@ import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/types';
-import * as dbHandler from '../../db-handler';
-import { generateMockUniverseState, hackerUser } from '../../test-utils';
+import {
+  generateMockUniverseState,
+  hackerUser,
+  mockGetMailTemplate,
+  mockSuccessResponse,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => await dbHandler.connect());
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
-afterEach(async () => await dbHandler.clearDatabase());
+afterEach(runAfterEach);
 
 /**
  * Remove and close the db and server.
  */
-afterAll(async () => await dbHandler.closeDatabase());
+afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => {
   const { getModels } = jest.requireActual('../../../controller/util/resources');
   return {
     fetchUniverseState: jest.fn(),
     getModels: getModels,
+  };
+});
+
+jest.mock('../../../services/mailer/external', () => {
+  const external = jest.requireActual('../../../services/mailer/external');
+  return {
+    ...external,
+    sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
 
