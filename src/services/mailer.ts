@@ -1,6 +1,26 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import querystring from 'querystring';
 import { InternalServerError } from '../types/types';
+
+/**
+ * Sends a mock email, which just gets added to a log file
+ *
+ * @param recipientEmail
+ * @param templateID
+ * @param subject
+ * @param tags
+ */
+export const mockSendEmail = (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
+  const message = `[${new Date()}] Template ${templateID} was sent to ${recipientEmail} with submit ${subject} and tags ${JSON.stringify(tags)}\n`;
+
+  fs.appendFile(path.resolve(__dirname, '../../dev_logs/mailer.log'), message, (err) => {
+    if (err) {
+      throw new InternalServerError('Unable to send mock email: ' + err.toString());
+    }
+  });
+};
 
 /**
  * Sends a singular email using the mailtrain transcation API
@@ -9,6 +29,10 @@ import { InternalServerError } from '../types/types';
  * @param templateID
  */
 export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
+
+  if (process.env.NODE_ENV === 'development') {
+    return mockSendEmail(recipientEmail, templateID, subject, tags);
+  }
 
   try {
     const parsedTags: any = {};
@@ -35,6 +59,25 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
 };
 
 /**
+ * Writes mailing list config to file for dev
+ * @param mailingListID
+ * @param emails
+ */
+export const mockSyncMailingLists = (mailingListID: string, emails: string[]) => {
+  const message = JSON.stringify({
+    timestamp: new Date().toString(),
+    emails: emails,
+    id: mailingListID,
+  }, null, 2);
+
+  fs.writeFile(path.resolve(__dirname, `../../dev_logs/mailing_lists/${mailingListID}log`), message, (err) => {
+    if (err) {
+      throw new InternalServerError('Unable to mock sync mailing lists email: ' + err.toString());
+    }
+  });
+};
+
+/**
  * Syncs mailtrain mailing list with list of emails that should be enrolled at this instant
  *
  * NOTE: MAILTRAIN QUERIES ARE BY DEFAULT MAXED AT 10000! Things will probably break if we have
@@ -44,6 +87,10 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
  * @param emails - array of emails that should be in the mailing list. All other emails are removed.
  */
 export const syncMailingLists = async (mailingListID: string, emails: string[]) => {
+
+  if (process.env.NODE_ENV === 'development') {
+    return mockSyncMailingLists(mailingListID, emails);
+  }
 
   /**
    * TODO: Inject custom field for the subscriber's name and other metadata

@@ -3,7 +3,6 @@ import { syncMailingLists } from '../../services/mailer';
 
 dotenv.config();
 
-
 (async () => {
   console.log(
     await syncMailingLists(
