@@ -12,21 +12,12 @@ import {
   mockDeleteSubscription,
   mockGetSubscriptions,
   mockSendEmail,
-  okResponse,
 } from './dev';
 
-// Do not actually use the real config during unit tests
-const mailerConfig = process.env.NODE_ENV === 'test'
-  ? {}
-  : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
+const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
 export const getTemplate = (templateName: string) => {
-  const template = process.env.NODE_ENV === 'test'
-    ? {
-      templateID: 'foo',
-      subject: 'cool subject bro',
-    }
-    : mailerConfig.templates[templateName];
+  const template = mailerConfig.templates[templateName];
 
   if (template) {
     return template;
@@ -36,11 +27,8 @@ export const getTemplate = (templateName: string) => {
 };
 
 export const sendEmailRequest = async (recipientEmail: string, templateID: string, subject: string, parsedTags: any) => {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockSendEmail(recipientEmail, templateID, subject, parsedTags);
-    case 'test':
-      return okResponse;
+  if (process.env.NODE_ENV === 'development') {
+    return mockSendEmail(recipientEmail, templateID, subject, parsedTags);
   }
 
   return axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/templates/${templateID}/send?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
@@ -51,22 +39,16 @@ export const sendEmailRequest = async (recipientEmail: string, templateID: strin
 };
 
 export const getMailingListSubscriptionsRequest = async (mailingListID: string) => {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockGetSubscriptions(mailingListID);
-    case 'test':
-      return okResponse;
+  if (process.env.NODE_ENV === 'development') {
+    return mockGetSubscriptions(mailingListID);
   }
 
   return axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 };
 
 export const addSubscriptionRequest = async (mailingListID: string, userEmail: string) => {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockAddSubscription(mailingListID, userEmail);
-    case 'test':
-      return okResponse;
+  if (process.env.NODE_ENV === 'development') {
+    return mockAddSubscription(mailingListID, userEmail);
   }
 
   return axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
@@ -75,11 +57,8 @@ export const addSubscriptionRequest = async (mailingListID: string, userEmail: s
 };
 
 export const deleteSubscriptionRequest = async (mailingListID: string, userEmail: string) => {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockDeleteSubscription(mailingListID, userEmail);
-    case 'test':
-      return okResponse;
+  if (process.env.NODE_ENV === 'development') {
+    return mockDeleteSubscription(mailingListID, userEmail);
   }
 
   return axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/delete/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({

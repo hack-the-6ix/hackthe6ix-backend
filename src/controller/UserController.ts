@@ -116,7 +116,6 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    // TODO: Test email sent
     await sendTemplateEmail(requestUser, Templates.applied);
   }
 

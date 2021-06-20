@@ -4,7 +4,12 @@ import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/types';
 import * as dbHandler from '../../db-handler';
-import { generateMockUniverseState, hackerUser } from '../../test-utils';
+import {
+  generateMockUniverseState,
+  hackerUser,
+  mockGetMailTemplate,
+  mockSuccessResponse,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -26,6 +31,15 @@ jest.mock('../../../controller/util/resources', () => {
   return {
     fetchUniverseState: jest.fn(),
     getModels: getModels,
+  };
+});
+
+jest.mock('../../../services/mailer/external', () => {
+  const external = jest.requireActual('../../../services/mailer/external');
+  return {
+    ...external,
+    sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
 

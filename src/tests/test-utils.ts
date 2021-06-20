@@ -129,3 +129,10 @@ export const mockDate = (timestamp: number) => {
 
   return () => spy.mockRestore();
 };
+
+export const mockGetMailTemplate = (templateName: string) => ({
+  subject: `subject${templateName}`,
+  templateID: `ID${templateName}`,
+});
+
+export const mockSuccessResponse = () => ({ status: 200, data: {} as any });

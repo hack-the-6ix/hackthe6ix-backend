@@ -7,6 +7,8 @@ import {
   isUserOrOrganizer,
   maxLength,
 } from '../../../models/validator';
+import { sendEmailRequest } from '../../../services/mailer/external';
+import { Templates } from '../../../types/mailer';
 import {
   AlreadySubmittedError,
   BadRequestError,
@@ -18,7 +20,13 @@ import {
   WriteDeniedError,
 } from '../../../types/types';
 import * as dbHandler from '../../db-handler';
-import { generateMockUniverseState, generateTestModel, hackerUser } from '../../test-utils';
+import {
+  generateMockUniverseState,
+  generateTestModel,
+  hackerUser,
+  mockGetMailTemplate,
+  mockSuccessResponse,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -41,6 +49,15 @@ jest.mock('../../../controller/util/resources', () => (
     getModels: jest.fn(),
   }
 ));
+
+jest.mock('../../../services/mailer/external', () => {
+  const external = jest.requireActual('../../../services/mailer/external');
+  return {
+    ...external,
+    sendEmailRequest: jest.fn(),
+    getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
+  };
+});
 
 const [userTestModel, mockModels] = generateTestModel({
   writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
@@ -180,6 +197,27 @@ getModels.mockReturnValue(mockModels);
 
 describe('Update Application', () => {
   describe('Success', () => {
+    test('Verify no email sent', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await updateApplication(
+        user.toJSON(),
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      expect(sendEmailRequest).not.toHaveBeenCalled();
+    });
+
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
@@ -396,6 +434,40 @@ describe('Update Application', () => {
 
 describe('Submit Application', () => {
   describe('Success', () => {
+    test('Verify email sent', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      sendEmailRequest.mockReturnValue(mockSuccessResponse());
+
+      const user = await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await updateApplication(
+        user.toJSON(),
+        true,
+        {
+          optionalField2: 'Test',
+          requiredFieldImplicit: 'foobar',
+          requiredFieldExplicit: 'foobar',
+        } as any,
+      );
+
+      const template = mockGetMailTemplate(Templates.applied);
+
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+        user.email,
+        template.templateID,
+        template.subject,
+        {
+          'TAGS[MERGE_FIRST_NAME]': user.firstName,
+          'TAGS[MERGE_LAST_NAME]': user.lastName,
+        },
+      );
+    });
+
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
