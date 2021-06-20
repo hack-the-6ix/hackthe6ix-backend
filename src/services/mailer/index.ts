@@ -2,15 +2,19 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import querystring from 'querystring';
-import { InternalServerError } from '../types/types';
+import { IUser } from '../../models/user/fields';
+import { Templates } from '../../types/mailer';
+import { InternalServerError } from '../../types/types';
+
+const mailerConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
 /**
  * Sends a mock email, which just gets added to a log file
  *
- * @param recipientEmail
- * @param templateID
- * @param subject
- * @param tags
+ * @param recipientEmail - address to send the email to
+ * @param templateID - Mailtrain ID of email template
+ * @param subject - email subject
+ * @param tags - data to be substituted into the email
  */
 export const mockSendEmail = (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
   const message = `[${new Date()}] Template ${templateID} was sent to ${recipientEmail} with submit ${subject} and tags ${JSON.stringify(tags)}\n`;
@@ -23,13 +27,14 @@ export const mockSendEmail = (recipientEmail: string, templateID: string, subjec
 };
 
 /**
- * Sends a singular email using the mailtrain transcation API
+ * Sends a singular email using the Mailtrain transaction API
  *
- * @param recipientEmail
- * @param templateID
+ * @param recipientEmail - address to send the email to
+ * @param templateID - Mailtrain ID of email template
+ * @param subject - email subject
+ * @param tags - data to be substituted into the email
  */
-export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
-
+export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags?: { [key: string]: string }) => {
   switch (process.env.NODE_ENV) {
     case 'development':
       return mockSendEmail(recipientEmail, templateID, subject, tags);
@@ -40,7 +45,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
   try {
     const parsedTags: any = {};
 
-    for (const t of Object.keys(tags)) {
+    for (const t of Object.keys(tags || {})) {
       parsedTags[`TAGS[${t}]`] = tags[t];
     }
 
@@ -58,6 +63,31 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
 
   } catch (e) {
     throw new InternalServerError('Unable to send email', e);
+  }
+};
+
+/**
+ * Sends a singular email using the mailtrain transaction API. We use a user friendly template name to lookup the Mailtrain
+ * templateID and subject.
+ *
+ * @param recipientEmail - address to send the email to
+ * @param templateName - internal template name of the email (we use this to fetch the templateID and subject)
+ * @param tags - data to be substituted into the email
+ */
+export const sendTemplateEmail = async (recipient: IUser, templateName: Templates, tags?: { [key: string]: string }) => {
+  const template = mailerConfig.templates[templateName];
+
+  if (template) {
+    const templateID: string = template.templateID;
+    const subject: string = template.subject;
+
+    await sendEmail(recipient.email, templateID, subject, {
+      ...tags,
+      MERGE_FIRST_NAME: recipient.firstName,
+      MERGE_LAST_NAME: recipient.lastName,
+    });
+  } else {
+    throw new InternalServerError(`Unable to fetch template with name: ${templateName}`);
   }
 };
 

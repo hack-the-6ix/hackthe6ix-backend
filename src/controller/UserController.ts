@@ -1,9 +1,11 @@
 import Grid from 'gridfs-stream';
+import { sendTemplateEmail } from 'index.ts';
 import { Mongoose } from 'mongoose';
 import stream from 'stream';
 import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
+import { Templates } from '../types/mailer';
 import {
   BadRequestError,
   DeadlineExpiredError,
@@ -114,8 +116,8 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    // TODO: Add transactional email
-    //await sendEmail(requestUser.email, process.env.)
+    // TODO: Test email sent
+    await sendTemplateEmail(requestUser, Templates.applied);
   }
 
   return 'Success';
