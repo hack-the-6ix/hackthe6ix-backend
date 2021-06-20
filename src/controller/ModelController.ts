@@ -21,12 +21,12 @@ import { fetchUniverseState, getModels } from './util/resources';
  * @param object
  * @param request
  */
-const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>) => {
+export const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>) => {
 
   const out: any = {};
 
   if (!rawFields || !object) {
-    throw Error('Field or object is not truthy!');
+    throw new BadRequestError('Field or object is not truthy!');
   }
 
   // If the user cannot read fields at this level, we don't need to check any further
@@ -98,7 +98,7 @@ export const getObject = async (
 
   // Sanitize data before sending it out into the world
   if (!query) {
-    throw new BadRequestError('Must specify page and size in query!');
+    throw new BadRequestError('Must specify query!');
   }
 
   // Default to page 1

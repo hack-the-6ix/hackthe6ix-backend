@@ -37,6 +37,28 @@ jest.mock('../../../controller/util/resources', () => {
 });
 
 describe('Join Team', () => {
+  test('Success', async () => {
+    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+    await Team.create({
+      code: 'foo',
+      memberIDs: [
+        'a', 'b', 'c',
+      ],
+    });
+
+    const user = await User.create(hackerUser);
+    const response = await joinTeam(user, 'foo');
+
+    expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication).toEqual({
+      teamCode: response.code,
+    });
+
+    expect((await Team.findOne({ code: response.code })).toJSON().memberIDs).toEqual(
+      ['a', 'b', 'c', user._id.toString()],
+    );
+  });
+
   test('Invalid team (Blank)', async () => {
     fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
@@ -92,6 +114,7 @@ describe('Join Team', () => {
         teamCode: 'banana',
       },
     });
+
     await expect(joinTeam(user, mockTeam.code)).rejects.toThrow(AlreadyInTeamError);
 
     // User is not amended

@@ -9,6 +9,7 @@ import {
 } from '../../../models/validator';
 import {
   AlreadySubmittedError,
+  BadRequestError,
   DeadlineExpiredError,
   ForbiddenError,
   ReadCheckRequest,
@@ -264,6 +265,29 @@ describe('Update Application', () => {
   });
 
   describe('Fail', () => {
+
+    test('Bad Application', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await userTestModel.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await expect(updateApplication(
+        user.toJSON(),
+        false,
+        undefined,
+      )).rejects.toThrow(BadRequestError);
+
+      const resultObject = await userTestModel.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
+    });
 
     test('Write violation', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
