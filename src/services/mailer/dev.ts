@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { InternalServerError } from '../../types/types';
+import { InternalServerError } from '../../types/errors';
 
 export const okResponse = { status: 200, data: {} as any };
 

@@ -1,6 +1,7 @@
 import { createObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
-import { CreateDeniedError, WriteCheckRequest, WriteDeniedError } from '../../../types/types';
+import { WriteCheckRequest } from '../../../types/checker';
+import { CreateDeniedError, WriteDeniedError } from '../../../types/errors';
 import {
   generateTestModel,
   hackerUser,

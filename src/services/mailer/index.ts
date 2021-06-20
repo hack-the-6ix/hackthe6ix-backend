@@ -1,6 +1,6 @@
 import { IUser } from '../../models/user/fields';
+import { InternalServerError } from '../../types/errors';
 import { Templates } from '../../types/mailer';
-import { InternalServerError } from '../../types/types';
 import {
   addSubscriptionRequest,
   deleteSubscriptionRequest,

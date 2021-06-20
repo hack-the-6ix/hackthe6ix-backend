@@ -9,7 +9,7 @@ import {
   InternalServerError,
   TeamFullError,
   UnknownTeamError,
-} from '../types/types';
+} from '../types/errors';
 import { getObject } from './ModelController';
 import { testCanUpdateApplication } from './util/checker';
 

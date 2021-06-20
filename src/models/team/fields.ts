@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ReadCheckRequest, ReadInterceptRequest } from '../../types/types';
+import { ReadCheckRequest, ReadInterceptRequest } from '../../types/checker';
 import { IUser } from '../user/fields';
 import { isOrganizer } from '../validator';
 

@@ -1,6 +1,6 @@
 import { deleteObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
-import { DeleteDeniedError } from '../../../types/types';
+import { DeleteDeniedError } from '../../../types/errors';
 import {
   generateTestModel,
   hackerUser,

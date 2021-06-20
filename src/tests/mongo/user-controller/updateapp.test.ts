@@ -8,17 +8,16 @@ import {
   maxLength,
 } from '../../../models/validator';
 import { sendEmailRequest } from '../../../services/mailer/external';
-import { Templates } from '../../../types/mailer';
+import { ReadCheckRequest, WriteCheckRequest } from '../../../types/checker';
 import {
   AlreadySubmittedError,
   BadRequestError,
   DeadlineExpiredError,
   ForbiddenError,
-  ReadCheckRequest,
   SubmissionDeniedError,
-  WriteCheckRequest,
   WriteDeniedError,
-} from '../../../types/types';
+} from '../../../types/errors';
+import { Templates } from '../../../types/mailer';
 import {
   generateMockUniverseState,
   generateTestModel,

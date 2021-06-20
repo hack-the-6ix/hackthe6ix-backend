@@ -6,7 +6,7 @@ import {
   AlreadyInTeamError,
   AlreadySubmittedError,
   DeadlineExpiredError,
-} from '../../../types/types';
+} from '../../../types/errors';
 import {
   generateMockUniverseState,
   hackerUser,

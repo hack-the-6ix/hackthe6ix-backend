@@ -2,8 +2,8 @@ import { rsvp } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
 import { sendEmailRequest } from '../../../services/mailer/external';
+import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/errors';
 import { Templates } from '../../../types/mailer';
-import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/types';
 import {
   generateMockUniverseState,
   hackerUser,

@@ -1,5 +1,6 @@
 import { evaluateChecker } from '../../../controller/util/checker';
-import { ReadCheckRequest, UniverseState } from '../../../types/types';
+import { ReadCheckRequest } from '../../../types/checker';
+import { UniverseState } from '../../../types/types';
 import { adminUser, nopermUser } from '../../test-utils';
 
 

@@ -1,15 +1,17 @@
 import { IUser } from '../models/user/fields';
 import { getInTextSearchableFields } from '../models/util';
 import {
-  BadRequestError,
   CreateCheckRequest,
-  CreateDeniedError,
   DeleteCheckRequest,
-  DeleteDeniedError,
   ReadCheckRequest,
   WriteCheckRequest,
+} from '../types/checker';
+import {
+  BadRequestError,
+  CreateDeniedError,
+  DeleteDeniedError,
   WriteDeniedError,
-} from '../types/types';
+} from '../types/errors';
 import { escapeStringRegexp, evaluateChecker } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
