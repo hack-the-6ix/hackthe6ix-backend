@@ -1,9 +1,9 @@
-import { getObject } from '../../../controller/ModelController';
+import { cleanObject, getObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../readCheckModelTests/user/fields';
-import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
+import { BadRequestError, ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
 import * as dbHandler from '../../db-handler';
-import { adminUser, generateTestModel } from '../../test-utils';
+import { adminUser, generateTestModel, hackerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -101,6 +101,58 @@ describe('Model Read', () => {
    * TODO: Test the other parameters like size, page, etc.
    *       I don't really care about that right now :D
    */
+
+
+  describe('Bad Query', () => {
+    test('Falsy Query', async () => {
+      await expect((async () => {
+        await getObject(hackerUser, 'ReadCheckModel', undefined);
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+    test('Bad page number', async () => {
+      await expect((async () => {
+        await getObject(hackerUser, 'ReadCheckModel', {
+          page: '-1',
+        });
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+    test('Bad size', async () => {
+      await expect((async () => {
+        await getObject(hackerUser, 'ReadCheckModel', {
+          size: '-1',
+        });
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+    test('Bad sort criteria', async () => {
+      await expect((async () => {
+        await getObject(hackerUser, 'ReadCheckModel', {
+          sortCriteria: 'foo',
+        });
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+    test('Bad Object Type', async () => {
+      await expect((async () => {
+        await getObject(hackerUser, 'Foo', {});
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+  });
+
+  describe('Clean Object Fail', () => {
+    test('No fields', async () => {
+      await expect((async () => {
+        cleanObject(undefined, {}, null);
+      })()).rejects.toThrow(BadRequestError);
+    });
+
+    test('No object', async () => {
+      await expect((async () => cleanObject({}, undefined, null))()).rejects.toThrow(BadRequestError);
+    });
+  });
 
   test('Basic Query', async () => {
 
