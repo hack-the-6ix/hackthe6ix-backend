@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { IUser } from '../models/user/fields';
 import { extractFields } from '../models/util';
 import { UniverseState } from '../types/types';
+import * as dbHandler from './db-handler';
 
 export const adminUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd50'),
@@ -136,3 +137,14 @@ export const mockGetMailTemplate = (templateName: string) => ({
 });
 
 export const mockSuccessResponse = () => ({ status: 200, data: {} as any });
+
+export const runBeforeAll = async () => {
+  await dbHandler.connect();
+};
+
+export const runAfterEach = async () => {
+  await dbHandler.clearDatabase();
+  jest.clearAllMocks();
+};
+
+export const runAfterAll = async () => await dbHandler.closeDatabase();

@@ -218,10 +218,6 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
 
   if (requestUser.status.accepted && !requestUser.status.declined) {
     /**
-     * TODO: Check if we want to let people decline after the official deadline has passed
-     */
-
-    /**
      * TODO: Invite them to discord
      */
 
@@ -233,6 +229,12 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
     });
+
+    if (isAttending) {
+      await sendTemplateEmail(requestUser, Templates.confirmed);
+    } else {
+      await sendTemplateEmail(requestUser, Templates.declined);
+    }
 
     return 'Success';
   } else {

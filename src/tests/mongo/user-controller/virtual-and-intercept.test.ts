@@ -2,26 +2,32 @@ import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
 import { canUpdateApplication, isConfirmationOpen } from '../../../models/validator';
-import * as dbHandler from '../../db-handler';
-import { generateMockUniverseState, hackerUser, organizerUser } from '../../test-utils';
+import {
+  generateMockUniverseState,
+  hackerUser,
+  organizerUser,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
 beforeAll(async () => {
-  await dbHandler.connect();
+  await runBeforeAll();
   fetchUniverseState.mockReturnValue(generateMockUniverseState());
 });
 
 /**
  * Clear all test data after every test.
  */
-afterEach(async () => await dbHandler.clearDatabase());
+afterEach(runAfterEach);
 
 /**
  * Remove and close the db and server.
  */
-afterAll(async () => await dbHandler.closeDatabase());
+afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => {
   const { getModels } = jest.requireActual('../../../controller/util/resources');

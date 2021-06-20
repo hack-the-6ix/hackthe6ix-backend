@@ -8,23 +8,30 @@ import {
   maxLength,
 } from '../../../models/validator';
 import { NotFoundError, ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
-import * as dbHandler from '../../db-handler';
-import { adminUser, generateTestModel, hackerUser, organizerUser } from '../../test-utils';
+import {
+  adminUser,
+  generateTestModel,
+  hackerUser,
+  organizerUser,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => await dbHandler.connect());
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
-afterEach(async () => await dbHandler.clearDatabase());
+afterEach(runAfterEach);
 
 /**
  * Remove and close the db and server.
  */
-afterAll(async () => await dbHandler.closeDatabase());
+afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => (
   {

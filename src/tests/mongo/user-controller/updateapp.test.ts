@@ -19,29 +19,31 @@ import {
   WriteCheckRequest,
   WriteDeniedError,
 } from '../../../types/types';
-import * as dbHandler from '../../db-handler';
 import {
   generateMockUniverseState,
   generateTestModel,
   hackerUser,
   mockGetMailTemplate,
   mockSuccessResponse,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
 } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => await dbHandler.connect());
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
-afterEach(async () => await dbHandler.clearDatabase());
+afterEach(runAfterEach);
 
 /**
  * Remove and close the db and server.
  */
-afterAll(async () => await dbHandler.closeDatabase());
+afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => (
   {
@@ -54,7 +56,7 @@ jest.mock('../../../services/mailer/external', () => {
   const external = jest.requireActual('../../../services/mailer/external');
   return {
     ...external,
-    sendEmailRequest: jest.fn(),
+    sendEmailRequest: jest.fn(() => mockSuccessResponse()),
     getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
@@ -436,7 +438,6 @@ describe('Submit Application', () => {
   describe('Success', () => {
     test('Verify email sent', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
-      sendEmailRequest.mockReturnValue(mockSuccessResponse());
 
       const user = await userTestModel.create({
         ...hackerUser,
