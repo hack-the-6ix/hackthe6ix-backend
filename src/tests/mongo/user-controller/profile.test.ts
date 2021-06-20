@@ -7,7 +7,8 @@ import {
   isUserOrOrganizer,
   maxLength,
 } from '../../../models/validator';
-import { NotFoundError, ReadCheckRequest, WriteCheckRequest } from '../../../types/types';
+import { ReadCheckRequest, WriteCheckRequest } from '../../../types/checker';
+import { NotFoundError } from '../../../types/errors';
 import {
   adminUser,
   generateTestModel,

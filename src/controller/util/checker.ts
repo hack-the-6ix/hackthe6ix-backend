@@ -1,14 +1,12 @@
 import { IUser } from '../../models/user/fields';
 import { canUpdateApplication, isApplicationOpen, isApplied } from '../../models/validator';
 import {
-  AlreadySubmittedError,
   CreateCheckRequest,
-  DeadlineExpiredError,
   DeleteCheckRequest,
-  ForbiddenError,
   ReadCheckRequest,
   WriteCheckRequest,
-} from '../../types/types';
+} from '../../types/checker';
+import { AlreadySubmittedError, DeadlineExpiredError, ForbiddenError } from '../../types/errors';
 import { fetchUniverseState } from './resources';
 
 /**

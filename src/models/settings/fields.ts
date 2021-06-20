@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
-import { ReadCheckRequest, UniverseState, WriteCheckRequest } from '../../types/types';
+import { ReadCheckRequest, WriteCheckRequest } from '../../types/checker';
+import { UniverseState } from '../../types/types';
 import { isAdmin, isOrganizer } from '../validator';
 
 const SAMLProvider = {

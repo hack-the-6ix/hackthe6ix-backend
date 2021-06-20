@@ -2,7 +2,7 @@ import { getTeam } from '../../../controller/TeamController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
-import { InternalServerError, UnknownTeamError } from '../../../types/types';
+import { InternalServerError, UnknownTeamError } from '../../../types/errors';
 import {
   generateMockUniverseState,
   hackerUser,

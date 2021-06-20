@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { HTTPError } from '../types/types';
+import { HTTPError } from '../types/errors';
 
 /**
  * Handles the promise from APIs calls and handles errors, or forwards data for a successful req.

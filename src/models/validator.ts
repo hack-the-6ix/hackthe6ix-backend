@@ -1,7 +1,7 @@
 /* Permissions */
 
+import { WriteCheckRequest } from '../types/checker';
 // Admins can do anything and bypass validation
-import { WriteCheckRequest } from '../types/types';
 import { IUser } from './user/fields';
 
 export const isAdmin = (requestUser: IUser) => requestUser.roles.admin;

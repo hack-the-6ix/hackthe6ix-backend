@@ -14,7 +14,7 @@ import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
 import './services/mailer/verify_config';
 import './services/mongoose_service';
-import { InternalServerError } from './types/types';
+import { InternalServerError } from './types/errors';
 
 const app = express();
 

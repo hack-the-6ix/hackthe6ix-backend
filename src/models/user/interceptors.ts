@@ -1,4 +1,4 @@
-import { ReadInterceptRequest } from '../../types/types';
+import { ReadInterceptRequest } from '../../types/checker';
 import { isOrganizer } from '../validator';
 import { IUser } from './fields';
 

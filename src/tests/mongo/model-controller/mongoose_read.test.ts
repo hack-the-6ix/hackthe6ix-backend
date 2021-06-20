@@ -1,7 +1,8 @@
 import { cleanObject, getObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../readCheckModelTests/user/fields';
-import { BadRequestError, ReadCheckRequest, ReadInterceptRequest } from '../../../types/types';
+import { ReadCheckRequest, ReadInterceptRequest } from '../../../types/checker';
+import { BadRequestError } from '../../../types/errors';
 import {
   adminUser,
   generateTestModel,

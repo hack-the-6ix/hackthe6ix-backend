@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import { editObject, flattenFields } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { extractFields } from '../../../models/util';
-import { WriteCheckRequest, WriteDeniedError } from '../../../types/types';
+import { WriteCheckRequest } from '../../../types/checker';
+import { WriteDeniedError } from '../../../types/errors';
 import {
   generateTestModel,
   hackerUser,

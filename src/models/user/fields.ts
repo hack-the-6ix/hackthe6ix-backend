@@ -4,7 +4,7 @@ import {
   DeleteCheckRequest,
   ReadCheckRequest,
   WriteCheckRequest,
-} from '../../types/types';
+} from '../../types/checker';
 import {
   canUpdateApplication,
   inEnum,

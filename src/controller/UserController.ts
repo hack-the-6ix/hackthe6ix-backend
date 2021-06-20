@@ -5,18 +5,18 @@ import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import { sendTemplateEmail } from '../services/mailer';
-import { Templates } from '../types/mailer';
+import { WriteCheckRequest } from '../types/checker';
 import {
   BadRequestError,
   DeadlineExpiredError,
   ForbiddenError,
   InternalServerError,
-  IRSVP,
   NotFoundError,
   RSVPRejectedError,
   SubmissionDeniedError,
-  WriteCheckRequest,
-} from '../types/types';
+} from '../types/errors';
+import { Templates } from '../types/mailer';
+import { IRSVP } from '../types/types';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
