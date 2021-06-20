@@ -1,30 +1,14 @@
-import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
-import querystring from 'querystring';
 import { IUser } from '../../models/user/fields';
 import { Templates } from '../../types/mailer';
 import { InternalServerError } from '../../types/types';
+import {
+  addSubscriptionRequest,
+  deleteSubscriptionRequest,
+  getMailingListSubscriptionsRequest,
+  getTemplate,
+  sendEmailRequest,
+} from './external';
 
-const mailerConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
-
-/**
- * Sends a mock email, which just gets added to a log file
- *
- * @param recipientEmail - address to send the email to
- * @param templateID - Mailtrain ID of email template
- * @param subject - email subject
- * @param tags - data to be substituted into the email
- */
-export const mockSendEmail = (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
-  const message = `[${new Date()}] Template ${templateID} was sent to ${recipientEmail} with submit ${subject} and tags ${JSON.stringify(tags)}\n`;
-
-  fs.appendFile(path.resolve(__dirname, '../../dev_logs/mailer.log'), message, (err) => {
-    if (err) {
-      throw new InternalServerError('Unable to send mock email: ' + err.toString());
-    }
-  });
-};
 
 /**
  * Sends a singular email using the Mailtrain transaction API
@@ -35,13 +19,6 @@ export const mockSendEmail = (recipientEmail: string, templateID: string, subjec
  * @param tags - data to be substituted into the email
  */
 export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags?: { [key: string]: string }) => {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockSendEmail(recipientEmail, templateID, subject, tags);
-    case 'test':
-      return;
-  }
-
   try {
     const parsedTags: any = {};
 
@@ -49,11 +26,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
       parsedTags[`TAGS[${t}]`] = tags[t];
     }
 
-    const result = await axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/templates/${templateID}/send?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
-      EMAIL: recipientEmail,
-      SUBJECT: subject,
-      ...parsedTags,
-    }));
+    const result = await sendEmailRequest(recipientEmail, templateID, subject, parsedTags);
 
     if (result.status != 200 || !result.data) {
       throw new InternalServerError('Unable to send email');
@@ -70,43 +43,20 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
  * Sends a singular email using the mailtrain transaction API. We use a user friendly template name to lookup the Mailtrain
  * templateID and subject.
  *
- * @param recipientEmail - address to send the email to
+ * @param recipient - user object of recipient
  * @param templateName - internal template name of the email (we use this to fetch the templateID and subject)
  * @param tags - data to be substituted into the email
  */
 export const sendTemplateEmail = async (recipient: IUser, templateName: Templates, tags?: { [key: string]: string }) => {
-  const template = mailerConfig.templates[templateName];
+  const template = getTemplate(templateName);
 
-  if (template) {
-    const templateID: string = template.templateID;
-    const subject: string = template.subject;
+  const templateID: string = template.templateID;
+  const subject: string = template.subject;
 
-    await sendEmail(recipient.email, templateID, subject, {
-      ...tags,
-      MERGE_FIRST_NAME: recipient.firstName,
-      MERGE_LAST_NAME: recipient.lastName,
-    });
-  } else {
-    throw new InternalServerError(`Unable to fetch template with name: ${templateName}`);
-  }
-};
-
-/**
- * Writes mailing list config to file for dev
- * @param mailingListID
- * @param emails
- */
-export const mockSyncMailingLists = (mailingListID: string, emails: string[]) => {
-  const message = JSON.stringify({
-    timestamp: new Date().toString(),
-    emails: emails,
-    id: mailingListID,
-  }, null, 2);
-
-  fs.writeFile(path.resolve(__dirname, `../../dev_logs/mailing_lists/${mailingListID}log`), message, (err) => {
-    if (err) {
-      throw new InternalServerError('Unable to mock sync mailing lists email: ' + err.toString());
-    }
+  await sendEmail(recipient.email, templateID, subject, {
+    ...(tags || {}),
+    MERGE_FIRST_NAME: recipient.firstName,
+    MERGE_LAST_NAME: recipient.lastName,
   });
 };
 
@@ -121,13 +71,6 @@ export const mockSyncMailingLists = (mailingListID: string, emails: string[]) =>
  */
 export const syncMailingLists = async (mailingListID: string, emails: string[]) => {
 
-  switch (process.env.NODE_ENV) {
-    case 'development':
-      return mockSyncMailingLists(mailingListID, emails);
-    case 'test':
-      return;
-  }
-
   /**
    * TODO: Inject custom field for the subscriber's name and other metadata
    */
@@ -136,7 +79,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
     const afterSubscribers = new Set(emails);
 
     // Step 1: Fetch a list of the current emails from the relevant mailing list
-    const currentEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
+    const currentEmailsResult = await getMailingListSubscriptionsRequest(mailingListID);
 
     if (currentEmailsResult.status != 200 || !currentEmailsResult?.data?.data?.subscriptions) {
       throw new InternalServerError('Unable to fetch existing subscribers');
@@ -156,9 +99,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
      */
 
     const subscribeNewResults = await Promise.all(toBeAdded.map(
-      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
-        EMAIL: userEmail,
-      })),
+      (userEmail: string) => addSubscriptionRequest(mailingListID, userEmail),
     ));
 
     for (const result of subscribeNewResults) {
@@ -171,9 +112,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
     const toBeDeleted = [...beforeSubscribers].filter(x => !afterSubscribers.has(x));
 
     const deleteOldResults = await Promise.all(toBeDeleted.map(
-      (userEmail: string) => axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/delete/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
-        EMAIL: userEmail,
-      })),
+      (userEmail: string) => deleteSubscriptionRequest(mailingListID, userEmail),
     ));
 
     for (const result of deleteOldResults) {
@@ -183,7 +122,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
     }
 
     // Step 4: Verify sync was successful
-    const updatedEmailsResult = await axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
+    const updatedEmailsResult = await getMailingListSubscriptionsRequest(mailingListID);
 
     if (updatedEmailsResult.status != 200 || !updatedEmailsResult?.data?.data?.subscriptions) {
       throw new InternalServerError('Unable to verify subscribers');
@@ -206,7 +145,6 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
         throw new InternalServerError('Mismatch between updated and target emails!');
       }
     }
-
 
     return { message: 'Success', added: toBeAdded, deleted: toBeDeleted };
   } catch (e) {
