@@ -10,6 +10,12 @@ export const adminUser = {
   lastName: 'Admin',
   samlNameID: 'admin',
   email: 'admin@test.ca',
+  groups: {
+    admin: true,
+    organizer: true,
+    volunteer: true,
+    hacker: true,
+  },
   roles: {
     admin: true,
     organizer: true,
@@ -24,6 +30,9 @@ export const organizerUser = {
   lastName: 'Organizer',
   samlNameID: 'organizer',
   email: 'organizer@test.ca',
+  groups: {
+    organizer: true,
+  },
   roles: {
     organizer: true,
     volunteer: true,
@@ -36,6 +45,9 @@ export const voluteerUser = {
   lastName: 'Volunteer',
   samlNameID: 'volunteer',
   email: 'volunteer@test.ca',
+  groups: {
+    volunteer: true,
+  },
   roles: {
     volunteer: true,
   },
@@ -47,6 +59,9 @@ export const hackerUser = {
   lastName: 'Hacker',
   samlNameID: 'hacker',
   email: 'hacker@test.ca',
+  groups: {
+    hacker: true,
+  },
   roles: {
     hacker: true,
   },
@@ -61,7 +76,7 @@ export const nopermUser = {
   lastName: 'Noperm',
   samlNameID: 'noperm',
   email: 'ihavenoperms@test.ca',
-  roles: {},
+  groups: {},
 } as IUser;
 
 /**

@@ -1,11 +1,17 @@
+import { fetchUser } from '../../../controller/UserController';
+import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
+import { canUpdateApplication, isConfirmationOpen } from '../../../models/validator';
 import * as dbHandler from '../../db-handler';
-import { hackerUser } from '../../test-utils';
+import { generateMockUniverseState, hackerUser, organizerUser } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => await dbHandler.connect());
+beforeAll(async () => {
+  await dbHandler.connect();
+  fetchUniverseState.mockReturnValue(generateMockUniverseState());
+});
 
 /**
  * Clear all test data after every test.
@@ -25,7 +31,122 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
+jest.mock('../../../models/validator', () => {
+  const validators = jest.requireActual('../../../models/validator');
+  return {
+    ...validators,
+    canUpdateApplication: jest.fn(),
+    isConfirmationOpen: jest.fn(),
+  };
+});
+
 describe('Interceptor', () => {
+  describe('Can Apply', () => {
+    beforeEach(() => isConfirmationOpen.mockReturnValue(false));
+
+    test('Success', async () => {
+      canUpdateApplication.mockReturnValue(() => true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canApply).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      canUpdateApplication.mockReturnValue(() => false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canApply).toBeFalsy();
+    });
+  });
+
+  describe('Can Confirm', () => {
+    beforeEach(() => canUpdateApplication.mockReturnValue(() => false));
+
+    test('Success', async () => {
+      isConfirmationOpen.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canConfirm).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isConfirmationOpen.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canConfirm).toBeFalsy();
+    });
+  });
+
+  describe('Status', () => {
+
+    const baseStatus = {
+      applied: true,
+      accepted: true,
+      rejected: true,
+      waitlisted: true,
+      confirmed: true,
+      declined: true,
+      checkedIn: true,
+    };
+
+    describe('Hacker', () => {
+      test('Released', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          status: {
+            ...baseStatus,
+            statusReleased: true,
+          },
+        });
+
+        const fetchedUser = await fetchUser(user);
+
+        expect(fetchedUser.status).toMatchObject(baseStatus);
+      });
+
+      test('Not released', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          status: {
+            ...baseStatus,
+            statusReleased: false,
+          },
+        });
+
+        const fetchedUser = await fetchUser(user);
+
+        expect(fetchedUser.status).toMatchObject({
+          applied: true,
+          accepted: false,
+          rejected: false,
+          waitlisted: false,
+          confirmed: false,
+          declined: false,
+          checkedIn: false,
+        });
+      });
+    });
+
+    test('Organizer', async () => {
+      const status = {
+        ...baseStatus,
+        statusReleased: false,
+      };
+
+      const user = await User.create({
+        ...organizerUser,
+        status: status,
+      });
+
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status).toMatchObject(status);
+    });
+  });
 
 });
 

@@ -1,9 +1,10 @@
 import { ReadInterceptRequest } from '../../types/types';
+import { isOrganizer } from '../validator';
 import { IUser } from './fields';
 
 // When the user does not have statusReleased set to true, we intercept and mask the true fieldValue
 export const maskStatus = <T>(defaultValue: T) => (request: ReadInterceptRequest<T, IUser>) => {
-  if (!request.targetObject.status.statusReleased && (!request.requestUser._id || request.requestUser._id.equals(request.targetObject._id)) && !request.requestUser.roles.admin) {
+  if (!request.targetObject.status.statusReleased && !isOrganizer(request.requestUser)) {
     return defaultValue;
   }
 
