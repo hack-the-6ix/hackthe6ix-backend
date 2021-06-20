@@ -532,6 +532,7 @@ const status = {
       default: false,
       caption: 'Can Apply',
 
+      // Not really virtual
       virtual: true,
       readCheck: true,
 
@@ -547,6 +548,7 @@ const status = {
       default: false,
       caption: 'Can Confirm',
 
+      // Not really virtual
       virtual: true,
       readCheck: true,
 
