@@ -30,8 +30,11 @@ export const mockSendEmail = (recipientEmail: string, templateID: string, subjec
  */
 export const sendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
 
-  if (process.env.NODE_ENV === 'development') {
-    return mockSendEmail(recipientEmail, templateID, subject, tags);
+  switch (process.env.NODE_ENV) {
+    case 'development':
+      return mockSendEmail(recipientEmail, templateID, subject, tags);
+    case 'test':
+      return;
   }
 
   try {
@@ -88,8 +91,11 @@ export const mockSyncMailingLists = (mailingListID: string, emails: string[]) =>
  */
 export const syncMailingLists = async (mailingListID: string, emails: string[]) => {
 
-  if (process.env.NODE_ENV === 'development') {
-    return mockSyncMailingLists(mailingListID, emails);
+  switch (process.env.NODE_ENV) {
+    case 'development':
+      return mockSyncMailingLists(mailingListID, emails);
+    case 'test':
+      return;
   }
 
   /**

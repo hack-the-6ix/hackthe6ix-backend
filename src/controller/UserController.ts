@@ -114,9 +114,8 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    /**
-     * TODO: Send confirmation email
-     */
+    // TODO: Add transactional email
+    //await sendEmail(requestUser.email, process.env.)
   }
 
   return 'Success';
