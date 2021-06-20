@@ -11,7 +11,7 @@
     "prettier:fix": "npm run prettier -- --write",
     "lint": "eslint . --ext .ts",
     "lint:fix": "npm run lint -- --fix",
-    "test": "jest --runInBand ./test"
+    "test": "jest --runInBand --coverage ./test"
   },
   "repository": {
     "type": "git",
