@@ -152,7 +152,7 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
 
   const filename = `${requestUser._id}-resume.pdf`;
 
-  await writeGridFSFile(filename, mongoose, expressFile, true);
+  await writeGridFSFile(filename, mongoose, expressFile);
 
   // Save new resume id to DB
   await User.findOneAndUpdate({

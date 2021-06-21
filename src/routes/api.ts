@@ -110,7 +110,6 @@ apiRouter.put('/gridfs', isOrganizer, (req: Request, res: Response) => {
       req.query.filename as string,
       mongoose,
       (req as any)?.files?.file,
-      req.query.replace === undefined ? true : (req.query?.replace?.toString()?.toLowerCase() === 'true'),
     ),
   );
 });
@@ -118,7 +117,7 @@ apiRouter.put('/gridfs', isOrganizer, (req: Request, res: Response) => {
 /**
  * (Organizer)
  *
- * Delete file from GridFSS
+ * Delete file from GridFS
  */
 apiRouter.delete('/gridfs', isOrganizer, (req: Request, res: Response) => {
   logResponse(

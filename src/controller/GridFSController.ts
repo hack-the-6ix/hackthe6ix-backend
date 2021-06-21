@@ -2,7 +2,7 @@ import { Response } from 'express';
 import Grid from 'gridfs-stream';
 import { Mongoose } from 'mongoose';
 import stream from 'stream';
-import { NotFoundError } from '../types/errors';
+import { BadRequestError, NotFoundError } from '../types/errors';
 
 /**
  * Reads an arbitrary file from GridFS and pipes it to the express response
@@ -35,19 +35,20 @@ export const readGridFSFile = async (filename: string, mongoose: Mongoose, res: 
  * @param filename
  * @param mongoose
  * @param expressFile
- * @param replace - when enabled, any existing files of the same name will be deleted
  */
-export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expressFile: any, replace?: boolean) => {
+export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expressFile: any) => {
   const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 
+  if (!filename || filename.length === 0) {
+    throw new BadRequestError('Invalid file name!');
+  }
+
   // Delete existing file
-  if (replace) {
-    try {
-      await deleteGridFSFile(filename, mongoose);
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) {
-        throw e;
-      }
+  try {
+    await deleteGridFSFile(filename, mongoose);
+  } catch (e) {
+    if (!(e instanceof NotFoundError)) {
+      throw e;
     }
   }
 
