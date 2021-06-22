@@ -394,7 +394,7 @@ const internal = {
     },
 
     computedApplicationScore: {
-      type: [Number],
+      type: Number,
       default: -1,
       caption: 'Computed Application score',
 
@@ -404,7 +404,6 @@ const internal = {
 
     applicationScores: {
       type: [Number],
-      default: -1,
       caption: 'Application scores',
 
       writeCheck: true,
@@ -414,7 +413,7 @@ const internal = {
     reviewers: {
       type: [String],
       default: '',
-      caption: 'Application Reviewer Emails',
+      caption: 'Application Reviewer IDs',
 
       writeCheck: true,
       readCheck: true,
@@ -676,6 +675,11 @@ export const fields = {
 
   // Root FIELDS
   FIELDS: {
+    _id: {
+      virtual: true,
+      readCheck: true,
+    },
+
     lastLogout: {
       type: Number,
       required: true,

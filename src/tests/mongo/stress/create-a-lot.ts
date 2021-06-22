@@ -14,7 +14,7 @@ dotenv.config();
 
   console.log('Connected');
 
-  for (let i = 0; i < 3000; i++) {
+  for (let i = 0; i < 300; i++) {
     console.log('Creating', i);
     User.create({
       firstName: 'Test ' + i.toString(),
@@ -24,7 +24,9 @@ dotenv.config();
       roles: {
         hacker: true,
       },
+      status: {
+        applied: true,
+      },
     });
   }
-
 })();

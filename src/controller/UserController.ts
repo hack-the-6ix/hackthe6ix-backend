@@ -215,3 +215,85 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     throw new RSVPRejectedError();
   }
 };
+
+/**
+ * Fetch a random applicant that hasn't been graded yet. Note that it is possible
+ * for a candidate to be fetched by multiple reviewers simultaneously if the stars
+ * align. We handle this by averaging out the scores.
+ */
+export const getCandidate = async (requestUser: IUser) => {
+  const criteria = {
+    $or: [
+      {
+        'status.applied': true,
+        'internal.applicationScores': {
+          $size: 0,
+        },
+      },
+      {
+        'status.applied': true,
+        'internal.applicationScores': null as any,
+      },
+    ],
+  };
+
+  const userCount = await User.countDocuments(criteria);
+
+  if (userCount > 0) {
+    const offset = 1 + Math.floor(Math.random() * userCount);
+
+    return (await getObject(requestUser, 'user', {
+      filter: criteria,
+      size: '1',
+      page: offset.toString(),
+    }))[0];
+  } else {
+    throw new NotFoundError('No applications to review');
+  }
+};
+
+/**
+ * Adds the reviewer's assessment of this user's application to their profile.
+ *
+ * @param requestUser
+ * @param targetUserID
+ * @param grade
+ */
+export const gradeCandidate = async (requestUser: IUser, targetUserID: string, grade: any) => {
+
+  if (!targetUserID) {
+    throw new BadRequestError('Invalid candidate ID');
+  }
+
+  const parsedGrade = parseInt(grade);
+
+  if (grade === undefined || isNaN(parsedGrade)) {
+    throw new BadRequestError('Invalid grade');
+  }
+
+  const user: IUser = await User.findOne({
+    _id: targetUserID,
+  });
+
+  if (!user) {
+    throw new NotFoundError('Candidate not found');
+  }
+
+  if (!user.status.applied || user.status.accepted || user.status.waitlisted || user.status.rejected) {
+    throw new ForbiddenError('Candidate is not eligible to be graded');
+  }
+
+  if (user?.internal?.reviewers.indexOf(requestUser._id.toString()) !== -1) {
+    throw new ForbiddenError('You have already graded this candidate!');
+  }
+
+  await User.findOneAndUpdate({
+    _id: targetUserID,
+  }, {
+    $push: {
+      'internal.applicationScores': parsedGrade,
+      'internal.reviewers': requestUser._id.toString(),
+    },
+  });
+  return 'Success';
+};
