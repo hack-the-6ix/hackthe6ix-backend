@@ -1,7 +1,6 @@
-import { Response } from 'express';
 import Grid from 'gridfs-stream';
 import { Mongoose } from 'mongoose';
-import stream from 'stream';
+import stream, { Writable } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';
 
 /**
@@ -9,10 +8,14 @@ import { BadRequestError, NotFoundError } from '../types/errors';
  *
  * @param filename
  * @param mongoose
- * @param res
+ * @param outputStream
  */
-export const readGridFSFile = async (filename: string, mongoose: Mongoose, res: Response) => {
+export const readGridFSFile = async (filename: string, mongoose: Mongoose, outputStream: Writable) => {
   const gfs = Grid(mongoose.connection.db, mongoose.mongo);
+
+  if (!filename || filename.length === 0) {
+    throw new BadRequestError('Invalid file name!');
+  }
 
   return await new Promise((resolve, reject) => {
     gfs.exist({ filename: filename }, (err: any, found: any) => {
@@ -21,7 +24,7 @@ export const readGridFSFile = async (filename: string, mongoose: Mongoose, res: 
       }
 
       if (found) {
-        gfs.createReadStream({ filename: filename }).pipe(res);
+        return resolve(gfs.createReadStream({ filename: filename }).pipe(outputStream));
       } else {
         return reject(new NotFoundError(`File ${filename} not found`));
       }
@@ -59,7 +62,7 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
   const gridWriteStream = gfs.createWriteStream({
     filename: filename,
   });
-  fileReadStream.pipe(gridWriteStream);
+  await fileReadStream.pipe(gridWriteStream);
 
   return 'Success';
 };
@@ -72,6 +75,10 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
  */
 export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => {
   const gfs = Grid(mongoose.connection.db, mongoose.mongo);
+
+  if (!filename || filename.length === 0) {
+    throw new BadRequestError('Invalid file name!');
+  }
 
   return await new Promise((resolve, reject) => {
     gfs.exist({ filename: filename }, (err: any, found: any) => {

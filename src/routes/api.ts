@@ -85,16 +85,22 @@ apiRouter.post('/create/:objectType', isAdmin, (req: Request, res: Response) => 
  *
  * Get file from GridFSS
  */
-apiRouter.get('/gridfs', isOrganizer, (req: Request, res: Response) => {
-  logResponse(
-    req,
-    res,
-    readGridFSFile(
+apiRouter.get('/gridfs', isOrganizer, async (req: Request, res: Response) => {
+  try {
+    await readGridFSFile(
       req.query.filename as string,
       mongoose,
       res,
-    ),
-  );
+    );
+  } catch (e) {
+    logResponse(
+      req,
+      res,
+      (async () => {
+        throw e;
+      })(),
+    );
+  }
 });
 
 /**
