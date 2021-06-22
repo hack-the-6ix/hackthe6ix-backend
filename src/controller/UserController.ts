@@ -1,6 +1,4 @@
-import Grid from 'gridfs-stream';
 import { Mongoose } from 'mongoose';
-import stream from 'stream';
 import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
@@ -17,6 +15,7 @@ import {
 } from '../types/errors';
 import { Templates } from '../types/mailer';
 import { IRSVP } from '../types/types';
+import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
@@ -133,7 +132,6 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
  * @param mongoose - instance of mongoose to extract connection from
  */
 export const updateResume = async (requestUser: IUser, expressFile: any, mongoose: Mongoose) => {
-
   if (!expressFile) {
     throw new BadRequestError('Invalid file');
   }
@@ -152,34 +150,9 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
     throw new ForbiddenError('Invalid file type! Must be PDF');
   }
 
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
   const filename = `${requestUser._id}-resume.pdf`;
 
-  // Delete existing resume
-  await new Promise((resolve, reject) => {
-    gfs.exist({ filename: filename }, (err: any, found: any) => {
-      if (err) {
-        return reject(err);
-      }
-
-      gfs.remove({ filename: filename }, (err: any) => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve('Success!');
-      });
-    });
-  });
-
-  const fileReadStream = new stream.PassThrough();
-  fileReadStream.end(Buffer.from(expressFile.data));
-
-  // Save new resume
-  const gridWriteStream = gfs.createWriteStream({
-    filename: filename,
-  });
-  fileReadStream.pipe(gridWriteStream);
+  await writeGridFSFile(filename, mongoose, expressFile);
 
   // Save new resume id to DB
   await User.findOneAndUpdate({

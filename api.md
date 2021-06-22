@@ -160,6 +160,57 @@ Note that all inputs will be validated using `writeCheck`.
 }
 ```
 
+### GET - Get file from GridFS (Organizer)
+`/api/gridfs?filename=<filename goes here>`
+
+Fetch a file stored in GridFS given its name. Note that it isn't guaranteed for files to have 
+unique names if they are added to GridFS through methods other than `writeGridFSFile`.
+
+##### Input Specification
+Specify the name of the file to be fetched as a query parameter. 
+
+##### Output Specification
+The queried file will be returned if successful.
+
+### PUT - Write file to GridFS (Organizer)
+`/api/gridfs?filename=<filename goes here>`
+
+Upload a file to GridFS with a specific file name. If a file exists with that name, delete it first.
+
+##### Input Specification
+Specify the filename as a query parameter and submit the file to be uploaded with the name "file".
+
+For example, a file can be manually added by running:
+```bash
+http --form put localhost:3005/api/gridfs?filename=thisisthefilename.pdf file@file.pdf x-access-token:$TOKEN
+```
+
+##### Output Specification
+```
+{
+    "message": "Success",
+    "status": 200
+}
+```
+
+### DELETE - Delete file from GridFS (Organizer)
+`/api/gridfs?filename=<filename goes here>`
+
+Delete a file from GridFS given its name if it exists.
+
+##### Input Specification
+Specify the file to be deleted as a query parameter.
+
+##### Output Specification
+```
+{
+    "message": "Success",
+    "status": 200
+}
+```
+
+Error 404 will be returned if the file is not found.
+
 ## Action - Operations for specific object types
 
 ### GET - Get hacker profile (Hacker)

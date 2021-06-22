@@ -46,10 +46,6 @@ jest.mock('../../../services/mailer/external', () => {
 });
 
 /**
- * TODO: Mock resume submission
- */
-
-/**
  * We will be using the real User schema and submitting a simulated real application
  */
 describe('Update Real Application', () => {
