@@ -412,7 +412,6 @@ const internal = {
 
     reviewers: {
       type: [String],
-      default: '',
       caption: 'Application Reviewer IDs',
 
       writeCheck: true,
