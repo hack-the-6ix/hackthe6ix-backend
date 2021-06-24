@@ -6,7 +6,9 @@ import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
+  getCandidate,
   getEnumOptions,
+  gradeCandidate,
   rsvp,
   updateApplication,
   updateResume,
@@ -193,18 +195,35 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
  */
 
 /**
- * TODO: Endpoint to fetch a random application to review
+ * (Organizer)
  *
- *       Actually, just keep an array of scores and compute the average at the end.
- *       If two people coincidentally get the same user, then let multiple people evaluate
- *       and take the average.
- *
- *       Query -> Get a user that doesn't have any reviews
+ * Fetch a random applicant to review
  */
+actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getCandidate(req.executor),
+  );
+});
 
 /**
- * TODO: Endpoint to submit application review score
+ * (Organizer)
+ *
+ * Assign a grade to an applicant
  */
+actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    gradeCandidate(
+      req.executor,
+      req.body.candidateID,
+      req.body.grade,
+    ),
+  );
+});
+
 
 /**
  * TODO: Add endpoint for discord verification

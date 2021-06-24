@@ -126,6 +126,7 @@ export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 
 
 export const mockDate = (timestamp: number) => {
   const mockDate = new Date(timestamp);
+  // @ts-ignore
   const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
   return () => spy.mockRestore();
@@ -144,6 +145,7 @@ export const runBeforeAll = async () => {
 
 export const runAfterEach = async () => {
   await dbHandler.clearDatabase();
+  // @ts-ignore
   jest.clearAllMocks();
 };
 
