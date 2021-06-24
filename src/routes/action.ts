@@ -207,6 +207,11 @@ actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => 
   );
 });
 
+/**
+ * (Organizer)
+ *
+ * Assign a grade to an applicant
+ */
 actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
