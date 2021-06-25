@@ -363,6 +363,59 @@ This will also update the cache, which by default has a lifetime of 5 minutes.
 }
 ```
 
+### POST - Sync Mailing Lists
+`/api/action/syncMailingLists`
+
+Trigger a mailing list sync with Mailtrain. If `forceUpdate` is enabled, all users
+eligible for a mailing list will be sent to mailtrain, even if they are already synced, to ensure all tags
+are updated too.
+
+#### Input Specification
+```
+{
+  mailingList: <name of mailing list to sync (all if omitted),
+  forceUpdate: true | false
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    added: [
+      ... emails that were sent to mailtrain to be added/updated
+    ],
+    deleted: [
+      ... emails removed from mailing list
+    ]
+   }
+}
+```
+
+### POST - Send a singular email
+`/api/action/sendEmail`
+
+Send an email to a user using the Mailtrain transactional API. If `email` corresponds to a user registered
+in the system, tags will automatically be injected with information such as application deadline, confirmation deadline, etc.
+
+#### Input Specification
+```
+{
+  email: <email of the recipient>
+  templateName: <name of the template to send>
+  tags: <dictionary of tags to inject for mailmerge>
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "Success"
+}
+```
+
 ### POST - Update RSVP
 `/api/action/rsvp`
 

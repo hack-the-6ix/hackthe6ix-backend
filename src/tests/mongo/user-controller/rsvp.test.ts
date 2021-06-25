@@ -240,10 +240,10 @@ describe('RSVP', () => {
         user.email,
         template.templateID,
         template.subject,
-        {
+        expect.objectContaining({
           'TAGS[MERGE_FIRST_NAME]': user.firstName,
           'TAGS[MERGE_LAST_NAME]': user.lastName,
-        },
+        }),
       );
     });
 
@@ -278,10 +278,10 @@ describe('RSVP', () => {
         user.email,
         template.templateID,
         template.subject,
-        {
+        expect.objectContaining({
           'TAGS[MERGE_FIRST_NAME]': user.firstName,
           'TAGS[MERGE_LAST_NAME]': user.lastName,
-        },
+        }),
       );
     });
   });

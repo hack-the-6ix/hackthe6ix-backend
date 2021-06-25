@@ -13,4 +13,10 @@ export const systemUser = {
   groups: {
     admin: true,
   },
+  roles: {
+    admin: true,
+    organizer: true,
+    volunteer: true,
+    hacker: true,
+  },
 } as IUser;

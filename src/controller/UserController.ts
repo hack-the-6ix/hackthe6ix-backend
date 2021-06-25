@@ -116,7 +116,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    await sendTemplateEmail(requestUser, Templates.applied);
+    await sendTemplateEmail(requestUser.email, Templates.applied);
   }
 
   return 'Success';
@@ -205,9 +205,9 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     });
 
     if (isAttending) {
-      await sendTemplateEmail(requestUser, Templates.confirmed);
+      await sendTemplateEmail(requestUser.email, Templates.confirmed);
     } else {
-      await sendTemplateEmail(requestUser, Templates.declined);
+      await sendTemplateEmail(requestUser.email, Templates.declined);
     }
 
     return 'Success';

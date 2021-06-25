@@ -1,6 +1,5 @@
 import { systemUser } from '../../consts';
 import { getObject } from '../../controller/ModelController';
-import { IUser } from '../../models/user/fields';
 import { InternalServerError } from '../../types/errors';
 import { Templates } from '../../types/mailer';
 import {
@@ -33,7 +32,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
       throw new InternalServerError('Unable to send email');
     }
 
-    return { message: 'Success' };
+    return 'Success';
 
   } catch (e) {
     throw new InternalServerError('Unable to send email', e);
@@ -44,20 +43,28 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
  * Sends a singular email using the mailtrain transaction API. We use a user friendly template name to lookup the Mailtrain
  * templateID and subject.
  *
- * @param recipient - user object of recipient
+ * @param email - address to send the email to
  * @param templateName - internal template name of the email (we use this to fetch the templateID and subject)
- * @param tags - data to be substituted into the email
+ * @param tags - data to be substituted into the email (they take precedence over the automatically generated mailmerge fields)
  */
-export const sendTemplateEmail = async (recipient: IUser, templateName: Templates, tags?: { [key: string]: string }) => {
+export const sendTemplateEmail = async (email: string, templateName: Templates, tags?: { [key: string]: string }) => {
   const template = getTemplate(templateName);
 
   const templateID: string = template.templateID;
   const subject: string = template.subject;
 
-  await sendEmail(recipient.email, templateID, subject, {
+  // Go and fetch the user's email
+  const user = (await getObject(systemUser, 'user', {
+    filter: {
+      email: email,
+    },
+  }))[0];
+
+  await sendEmail(email, templateID, subject, {
+    MERGE_FIRST_NAME: user?.firstName || '',
+    MERGE_LAST_NAME: user?.lastName || '',
+    ...(user?.mailmerge || {}),
     ...(tags || {}),
-    MERGE_FIRST_NAME: recipient.firstName,
-    MERGE_LAST_NAME: recipient.lastName,
   });
 };
 
@@ -149,7 +156,7 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
       }
     }
 
-    return { message: 'Success', added: toBeAdded, deleted: toBeDeleted };
+    return { added: toBeAdded, deleted: toBeDeleted };
   } catch (e) {
     throw new InternalServerError('Unable to sync mailing list', e);
   }
