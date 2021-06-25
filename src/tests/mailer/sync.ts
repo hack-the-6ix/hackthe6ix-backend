@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
-import { syncMailingLists } from '../../services/mailer';
+import { syncMailingList } from '../../services/mailer';
 
 dotenv.config();
 
 (async () => {
   console.log(
-    await syncMailingLists(
+    await syncMailingList(
       'AtlPqHaQpw',
       [
         'tester@henrytu.me',

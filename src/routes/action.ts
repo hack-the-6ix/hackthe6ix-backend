@@ -14,7 +14,7 @@ import {
   updateResume,
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
-import { sendTemplateEmail } from '../services/mailer';
+import { sendTemplateEmail, syncMailingLists } from '../services/mailer';
 import mongoose from '../services/mongoose_service';
 import { isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
@@ -188,8 +188,15 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
  *
  * Sync mailing lists
  */
-actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response) => {
-
+actionRouter.post('/syncMailingList', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    syncMailingLists(
+      req.body.mailingList,
+      req.body.forceUpdate,
+    ),
+  );
 });
 
 /**

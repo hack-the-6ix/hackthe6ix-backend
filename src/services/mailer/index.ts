@@ -78,7 +78,7 @@ export const sendTemplateEmail = async (email: string, templateName: Templates, 
  * @param emails - array of emails that should be in the mailing list. All other emails are removed.
  * @param forceUpdate - if true, updates will be pushed out to ALL users in emails, not just the ones that haven't been synced
  */
-export const syncMailingLists = async (mailingListID: string, emails: string[], forceUpdate?: boolean) => {
+export const syncMailingList = async (mailingListID: string, emails: string[], forceUpdate?: boolean) => {
   try {
     const afterSubscribers = new Set(emails);
 
@@ -160,4 +160,22 @@ export const syncMailingLists = async (mailingListID: string, emails: string[], 
   } catch (e) {
     throw new InternalServerError('Unable to sync mailing list', e);
   }
+};
+
+/**
+ * Given a MailingList name, search for the relevant users that should be in the list and
+ * sync with Mailtrain.
+ *
+ * If mailingList is not provided, sync all lists in the system.
+ *
+ * If forceUpdate is enabled, all users who are on the list will be synced (rather than just users
+ * who are not yet on the Mailtrain list)
+ *
+ * @param mailingList
+ * @param forceUpdate
+ */
+export const syncMailingLists = async (mailingList?: string, forceUpdate?: boolean) => {
+
+  // TODO: Implement this
+
 };
