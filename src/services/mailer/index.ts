@@ -1,5 +1,6 @@
+import { systemUser } from '../../consts';
+import { getObject } from '../../controller/ModelController';
 import { IUser } from '../../models/user/fields';
-import User from '../../models/user/User';
 import { InternalServerError } from '../../types/errors';
 import { Templates } from '../../types/mailer';
 import {
@@ -68,8 +69,9 @@ export const sendTemplateEmail = async (recipient: IUser, templateName: Template
  *
  * @param mailingListName
  * @param emails - array of emails that should be in the mailing list. All other emails are removed.
+ * @param forceUpdate - if true, updates will be pushed out to ALL users in emails, not just the ones that haven't been synced
  */
-export const syncMailingLists = async (mailingListID: string, emails: string[]) => {
+export const syncMailingLists = async (mailingListID: string, emails: string[], forceUpdate?: boolean) => {
   try {
     const afterSubscribers = new Set(emails);
 
@@ -87,17 +89,19 @@ export const syncMailingLists = async (mailingListID: string, emails: string[]) 
     );
 
     // Step 2: Subscribe users that aren't on the list yet that should be
-    const toBeAdded = [...afterSubscribers].filter(x => !beforeSubscribers.has(x));
+    const toBeAdded = forceUpdate
+      ? [...afterSubscribers]
+      : [...afterSubscribers].filter(x => !beforeSubscribers.has(x));
 
     const subscribeNewResults = await Promise.all(toBeAdded.map(
       async (userEmail: string) => {
-        const user = await User.findOne({
-          email: userEmail,
-        });
+        const user = (await getObject(systemUser, 'user', {
+          filter: {
+            email: userEmail,
+          },
+        }));
 
-        // TODO: Use getUser instead to inject our mailmerge fields
-
-        return addSubscriptionRequest(mailingListID, userEmail, user.mailmerge || {});
+        return addSubscriptionRequest(mailingListID, userEmail, user[0]?.mailmerge || {});
       },
     ));
 
