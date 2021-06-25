@@ -1,12 +1,17 @@
+import moment from 'moment';
 import mongoose from 'mongoose';
+import { timestampFormat } from '../../consts';
 import {
   CreateCheckRequest,
   DeleteCheckRequest,
   ReadCheckRequest,
+  ReadInterceptRequest,
   WriteCheckRequest,
 } from '../../types/checker';
 import {
   canUpdateApplication,
+  getApplicationDeadline,
+  getConfirmationDeadline,
   inEnum,
   isAdmin,
   isConfirmationOpen,
@@ -378,7 +383,6 @@ export const hackerApplication = {
 
 // Internal FIELDS; Only organizers can access them
 const internal = {
-
   writeCheck: (request: WriteCheckRequest<any, IUser>) => isOrganizer(request.requestUser),
   readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
 
@@ -419,7 +423,6 @@ const internal = {
     },
 
   },
-
 };
 
 // User application state
@@ -530,11 +533,9 @@ const status = {
       default: false,
       caption: 'Can Apply',
 
-      // Not really virtual
-      virtual: true,
       readCheck: true,
 
-      readInterceptor: (request: ReadCheckRequest<IUser>) => canUpdateApplication()({
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canUpdateApplication()({
         ...request,
         fieldValue: undefined,
         submissionObject: undefined,
@@ -546,15 +547,58 @@ const status = {
       default: false,
       caption: 'Can Confirm',
 
-      // Not really virtual
-      virtual: true,
       readCheck: true,
 
-      readInterceptor: (request: ReadCheckRequest<IUser>) => isConfirmationOpen({
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isConfirmationOpen({
         ...request,
         fieldValue: undefined,
         submissionObject: undefined,
       }),
+    },
+  },
+};
+
+
+// Fields to inject into mailmerge
+const mailmerge = {
+  readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+
+  FIELDS: {
+    FIRST_NAME: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+    },
+    LAST_NAME: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+    },
+    APPLICATION_DEADLINE: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => moment(getApplicationDeadline({
+        ...request,
+        requestUser: request.targetObject,
+        submissionObject: {} as IUser,
+      })).format(timestampFormat),
+    },
+    CONFIRMATION_DEADLINE: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => moment(getConfirmationDeadline({
+        ...request,
+        requestUser: request.targetObject,
+        submissionObject: {} as IUser,
+      })).format(timestampFormat),
     },
   },
 };
@@ -741,9 +785,7 @@ export const fields = {
 
     personalRSVPDeadline: {
       type: Number,
-      required: true,
       caption: 'RSVP Deadline',
-      default: -1,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,
@@ -752,12 +794,34 @@ export const fields = {
     // Some hackers are special and want to apply after the global deadline
     personalApplicationDeadline: {
       type: Number,
-      required: true,
       caption: 'Personal Application Deadline',
-      default: -1,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,
+    },
+
+    // If the user has a personal deadline, it takes precedence over the global deadline
+    computedApplicationDeadline: {
+      type: Number,
+      default: 0,
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getApplicationDeadline({
+        ...request,
+        requestUser: request.targetObject,
+        submissionObject: {} as IUser,
+      }),
+    },
+    computedConfirmationDeadline: {
+      type: Number,
+      default: 0,
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getConfirmationDeadline({
+        ...request,
+        requestUser: request.targetObject,
+        submissionObject: {} as IUser,
+      }),
     },
 
     roles: roles,
@@ -765,6 +829,7 @@ export const fields = {
     status: status,
     hackerApplication: hackerApplication,
     internal: internal,
+    mailmerge: mailmerge,
   },
 };
 
@@ -808,7 +873,17 @@ export interface IUser extends mongoose.Document {
     computedApplicationScore?: number,
     applicationScores?: number[],
     reviewers?: string[]
-  }
+  },
+  mailmerge: IMailMerge,
+  computedApplicationDeadline: number,
+  computedConfirmationDeadline: number,
+}
+
+export interface IMailMerge {
+  FIRST_NAME: string,
+  LAST_NAME: string,
+  APPLICATION_DEADLINE: string,
+  CONFIRMATION_DEADLINE: string
 }
 
 export interface IApplication {

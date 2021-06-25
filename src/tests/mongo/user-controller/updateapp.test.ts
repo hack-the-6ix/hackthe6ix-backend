@@ -184,9 +184,7 @@ const [userTestModel, mockModels] = generateTestModel({
     },
     personalApplicationDeadline: {
       type: Number,
-      required: true,
       caption: 'Personal Application Deadline',
-      default: -1,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,

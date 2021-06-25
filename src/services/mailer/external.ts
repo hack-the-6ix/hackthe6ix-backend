@@ -46,13 +46,14 @@ export const getMailingListSubscriptionsRequest = async (mailingListID: string) 
   return axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 };
 
-export const addSubscriptionRequest = async (mailingListID: string, userEmail: string) => {
+export const addSubscriptionRequest = async (mailingListID: string, userEmail: string, mailmerge: any) => {
   if (process.env.NODE_ENV === 'development') {
     return mockAddSubscription(mailingListID, userEmail);
   }
 
   return axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
     EMAIL: userEmail,
+    ...mailmerge,
   }));
 };
 

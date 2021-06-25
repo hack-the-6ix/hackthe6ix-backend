@@ -104,7 +104,7 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
         const userInfo = await User.findOneAndUpdate({
           samlNameID: name_id,
         }, {
-          email: assertAttributes.email[0],
+          email: assertAttributes.email[0].toLowerCase(),
           firstName: assertAttributes.firstName[0],
           lastName: assertAttributes.lastName[0],
           groups: groups,
