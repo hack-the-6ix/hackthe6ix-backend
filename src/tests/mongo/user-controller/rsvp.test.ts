@@ -109,7 +109,7 @@ describe('RSVP', () => {
           status: {
             accepted: true,
           },
-          personalRSVPDeadline: new Date().getTime() + 10000,
+          personalConfirmationDeadline: new Date().getTime() + 10000,
         });
 
         await rsvp(
@@ -135,7 +135,7 @@ describe('RSVP', () => {
           status: {
             accepted: true,
           },
-          personalRSVPDeadline: new Date().getTime() - 10000,
+          personalConfirmationDeadline: new Date().getTime() - 10000,
         });
 
         await expect(rsvp(

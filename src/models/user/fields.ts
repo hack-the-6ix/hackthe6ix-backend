@@ -783,7 +783,7 @@ export const fields = {
       readCheck: true,
     },
 
-    personalRSVPDeadline: {
+    personalConfirmationDeadline: {
       type: Number,
       caption: 'RSVP Deadline',
 
@@ -862,7 +862,7 @@ export interface IUser extends mongoose.Document {
   firstName: string,
   lastName: string,
   email: string,
-  personalRSVPDeadline?: number,
+  personalConfirmationDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
   groups: IRoles, // Raw group from KEYCLOAK

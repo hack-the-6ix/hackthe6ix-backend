@@ -1,7 +1,14 @@
+import moment from 'moment';
+import { timestampFormat } from '../../../consts';
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
-import { canUpdateApplication, isConfirmationOpen } from '../../../models/validator';
+import {
+  canUpdateApplication,
+  getApplicationDeadline,
+  getConfirmationDeadline,
+  isConfirmationOpen,
+} from '../../../models/validator';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -43,12 +50,14 @@ jest.mock('../../../models/validator', () => {
     ...validators,
     canUpdateApplication: jest.fn(),
     isConfirmationOpen: jest.fn(),
+    getApplicationDeadline: jest.fn(),
+    getConfirmationDeadline: jest.fn(),
   };
 });
 
 describe('Interceptor', () => {
   describe('Can Apply', () => {
-    beforeEach(() => isConfirmationOpen.mockReturnValue(false));
+    beforeEach(() => isConfirmationOpen.mockImplementation(jest.requireActual('../../../models/validator').isConfirmationOpen));
 
     test('Success', async () => {
       canUpdateApplication.mockReturnValue(() => true);
@@ -68,7 +77,7 @@ describe('Interceptor', () => {
   });
 
   describe('Can Confirm', () => {
-    beforeEach(() => canUpdateApplication.mockReturnValue(() => false));
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
     test('Success', async () => {
       isConfirmationOpen.mockReturnValue(true);
@@ -87,8 +96,114 @@ describe('Interceptor', () => {
     });
   });
 
-  describe('Status', () => {
+  describe('Mail Merge', () => {
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
+    test('First Name', async () => {
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.FIRST_NAME).toEqual(user.firstName);
+    });
+    test('Last Name', async () => {
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.LAST_NAME).toEqual(user.lastName);
+    });
+    test('Application Deadline', async () => {
+      const mockDate = 12345;
+      getApplicationDeadline.mockReturnValue(mockDate);
+
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.APPLICATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+    });
+    test('Confirmation Deadline', async () => {
+      const mockDate = 54321;
+      getConfirmationDeadline.mockReturnValue(mockDate);
+
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.CONFIRMATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+    });
+  });
+
+  describe('Computed Deadlines', () => {
+    beforeEach(() => {
+      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      getApplicationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getApplicationDeadline);
+      getConfirmationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getConfirmationDeadline);
+    });
+
+    describe('Application', () => {
+      describe('Personal Deadline', () => {
+        test('Global in the future', async () => {
+          fetchUniverseState.mockReturnValue(generateMockUniverseState());
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalApplicationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
+        });
+        test('Global in the Past', async () => {
+          fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalApplicationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
+        });
+      });
+      test('No Personal Deadline', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+        const user = await User.create(hackerUser);
+        const fetchedUser = await fetchUser(user);
+        expect(fetchedUser.computedApplicationDeadline).toEqual((await fetchUniverseState()).public.globalApplicationDeadline);
+      });
+
+    });
+    describe('Confirmation', () => {
+      describe('Personal Deadline', () => {
+        test('Global in the future', async () => {
+          fetchUniverseState.mockReturnValue(generateMockUniverseState());
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalConfirmationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
+        });
+        test('Global in the Past', async () => {
+          fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalConfirmationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
+        });
+      });
+      test('No Personal Deadline', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+        const user = await User.create(hackerUser);
+        const fetchedUser = await fetchUser(user);
+        expect(fetchedUser.computedConfirmationDeadline).toEqual((await fetchUniverseState()).public.globalConfirmationDeadline);
+      });
+    });
+  });
+
+  describe('Status', () => {
     const baseStatus = {
       applied: true,
       accepted: true,

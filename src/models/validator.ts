@@ -35,7 +35,7 @@ export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.req
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
 export const getApplicationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalApplicationDeadline === undefined ? request.universeState.public.globalApplicationDeadline : request.requestUser.personalApplicationDeadline;
-export const getConfirmationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalRSVPDeadline === undefined ? request.universeState.public.globalConfirmationDeadline : request.requestUser.personalRSVPDeadline;
+export const getConfirmationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalConfirmationDeadline === undefined ? request.universeState.public.globalConfirmationDeadline : request.requestUser.personalConfirmationDeadline;
 
 export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => getApplicationDeadline(request) >= new Date().getTime();
 export const isConfirmationOpen = (request: WriteCheckRequest<any, IUser>) => getConfirmationDeadline(request) >= new Date().getTime();

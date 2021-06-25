@@ -44,7 +44,7 @@ export const fetchUser = async (requestUser: IUser) => {
     throw new NotFoundError('User not found');
   }
 
-  return data[0];
+  return data[0] as IUser;
 };
 
 /**
