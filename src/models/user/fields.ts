@@ -578,7 +578,8 @@ const mailmerge = {
       readCheck: true,
       readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
     },
-    APPLICATION_DEADLINE: {
+    // Custom fields should be prefixed with MERGE
+    MERGE_APPLICATION_DEADLINE: {
       type: String,
       default: '',
 
@@ -589,7 +590,7 @@ const mailmerge = {
         submissionObject: {} as IUser,
       })).format(timestampFormat),
     },
-    CONFIRMATION_DEADLINE: {
+    MERGE_CONFIRMATION_DEADLINE: {
       type: String,
       default: '',
 
@@ -882,8 +883,8 @@ export interface IUser extends mongoose.Document {
 export interface IMailMerge {
   FIRST_NAME: string,
   LAST_NAME: string,
-  APPLICATION_DEADLINE: string,
-  CONFIRMATION_DEADLINE: string
+  MERGE_APPLICATION_DEADLINE: string,
+  MERGE_CONFIRMATION_DEADLINE: string
 }
 
 export interface IApplication {

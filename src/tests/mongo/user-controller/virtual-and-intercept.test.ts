@@ -115,7 +115,7 @@ describe('Interceptor', () => {
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.APPLICATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
     });
     test('Confirmation Deadline', async () => {
       const mockDate = 54321;
@@ -123,7 +123,7 @@ describe('Interceptor', () => {
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.CONFIRMATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
     });
   });
 

@@ -61,8 +61,6 @@ export const sendTemplateEmail = async (email: string, templateName: Templates, 
   }))[0];
 
   await sendEmail(email, templateID, subject, {
-    MERGE_FIRST_NAME: user?.firstName || '',
-    MERGE_LAST_NAME: user?.lastName || '',
     ...(user?.mailmerge || {}),
     ...(tags || {}),
   });

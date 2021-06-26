@@ -241,8 +241,8 @@ describe('RSVP', () => {
         template.templateID,
         template.subject,
         expect.objectContaining({
-          'TAGS[MERGE_FIRST_NAME]': user.firstName,
-          'TAGS[MERGE_LAST_NAME]': user.lastName,
+          'TAGS[FIRST_NAME]': user.firstName,
+          'TAGS[LAST_NAME]': user.lastName,
         }),
       );
     });
@@ -279,8 +279,8 @@ describe('RSVP', () => {
         template.templateID,
         template.subject,
         expect.objectContaining({
-          'TAGS[MERGE_FIRST_NAME]': user.firstName,
-          'TAGS[MERGE_LAST_NAME]': user.lastName,
+          'TAGS[FIRST_NAME]': user.firstName,
+          'TAGS[LAST_NAME]': user.lastName,
         }),
       );
     });
