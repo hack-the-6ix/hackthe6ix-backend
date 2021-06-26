@@ -31,25 +31,60 @@
   },
   "lists": {
     "applicationIncomplete": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.applied": false
+      }
     },
     "applied": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.applied": true
+      }
     },
     "confirmed": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.confirmed": true
+      }
     },
     "declined": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.declined": true
+      }
     },
     "accepted": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.accepted": true
+      }
     },
     "rejected": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.rejected": true
+      }
     },
     "waitlisted": {
-      "listID": "XXXXXX"
+      "listID": "XXXXXX",
+      "query": {
+        "roles.hacker": true,
+        "roles.organizer": false,
+        "status.waitlisted": true
+      }
     }
   }
 }

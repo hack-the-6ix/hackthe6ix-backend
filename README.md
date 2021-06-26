@@ -9,10 +9,10 @@ general email sending. As such, you should have an instance running prior to sta
 otherwise emails won't work.
 
 Setup `.env` with the Mailtrain root path (in our case `https://mailtrain.hackthe6ix.com`) and API key.
-The mailing list ID and template IDs will also need to be populated (this might be in `.env`, on the 
-admin dashboard, or somewhere else; it hasn't been decided yet).
+You must also configure email templates and mailing lists before the server can be started. Copy `config/settings.json.example` to `config/settings.json` and populate the placeholder fields with the relevant 
+data.
 
-You will also need to configure SAML authentication. Copy `settings.json.example` to `settings.json` in `config` and configure the settings as desired.
+You will also need to configure SAML authentication. Copy `config/settings.json.example` to `confing/settings.json`and configure the settings as desired.
 For certificates, you must encode the PEM certificate (with headers) to base64. Note that you can add as many providers as desired, the given ones are there as examples.
 
 
