@@ -14,7 +14,7 @@ import {
   updateResume,
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
-import { sendTemplateEmail, syncMailingLists } from '../services/mailer';
+import { sendAllTemplates, sendTemplateEmail, syncMailingLists } from '../services/mailer';
 import mongoose from '../services/mongoose_service';
 import { isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
@@ -212,6 +212,21 @@ actionRouter.post('/sendEmail', isOrganizer, (req: Request, res: Response) => {
       req.body.email,
       req.body.templateName,
       req.body.tags,
+    ),
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Send an email using every available template to the requesting user
+ */
+actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    sendAllTemplates(
+      req.executor,
     ),
   );
 });

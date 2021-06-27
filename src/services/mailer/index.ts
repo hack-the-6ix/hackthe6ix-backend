@@ -1,5 +1,6 @@
 import { systemUser } from '../../consts';
 import { getObject } from '../../controller/ModelController';
+import { IUser } from '../../models/user/fields';
 import { InternalServerError } from '../../types/errors';
 import { Templates } from '../../types/mailer';
 import {
@@ -64,6 +65,23 @@ export const sendTemplateEmail = async (email: string, templateName: Templates, 
     ...(user?.mailmerge || {}),
     ...(tags || {}),
   });
+};
+
+/**
+ * Send all available email templates to the requesting Admin user to verify
+ * the integrity of the templates.
+ *
+ * @param requestUser
+ */
+export const sendAllTemplates = async (requestUser: IUser) => {
+  const templateNames: string[] = [];
+
+  for (const template in Templates) {
+    templateNames.push(template);
+    await sendTemplateEmail(requestUser.email, (Templates as any)[template]);
+  }
+
+  return templateNames;
 };
 
 /**
