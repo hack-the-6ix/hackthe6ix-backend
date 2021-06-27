@@ -46,19 +46,23 @@ export const mockGetSubscriptions = async (mailingListID: string) => {
  * Adds subscription from dev mailing list
  * @param mailingListID
  * @param email
+ * @param mailmerge
  */
-export const mockAddSubscription = async (mailingListID: string, email: string) => {
+export const mockAddSubscription = async (mailingListID: string, email: string, mailmerge: any) => {
   const existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8') || '{"emails": []}';
 
   const emails = JSON.parse(existingFile).emails;
+  const mailmerges = JSON.parse(existingFile).mailmerges;
 
   if (emails.indexOf(email) === -1) {
     emails.push(email);
+    mailmerges.push(mailmerge || {});
   }
 
   const message = JSON.stringify({
     timestamp: new Date().toString(),
     emails: emails,
+    mailmerges: mailmerges,
     id: mailingListID,
   }, null, 2);
 
@@ -80,14 +84,18 @@ export const mockDeleteSubscription = async (mailingListID: string, email: strin
   const existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8') || '{"emails": []}';
 
   const emails = JSON.parse(existingFile).emails;
+  const mailmerges = JSON.parse(existingFile).mailmerges;
 
   if (emails.indexOf(email) !== -1) {
-    emails.splice(emails.indexOf(email), 1);
+    const index = emails.indexOf(email);
+    emails.splice(index, 1);
+    mailmerges.splice(index, 1);
   }
 
   const message = JSON.stringify({
     timestamp: new Date().toString(),
     emails: emails,
+    mailmerges: mailmerges,
     id: mailingListID,
   }, null, 2);
 
