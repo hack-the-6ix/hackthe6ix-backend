@@ -416,6 +416,27 @@ in the system, tags will automatically be injected with information such as appl
 }
 ```
 
+### POST - Send email template tests
+`/api/action/templateTest`
+
+Send the requester an instance of every available email template to ensure everything looks correct.
+This endpoint should be called after configuring the server to ensure that the correct template IDs
+were used, and that all the mail merges were successful.
+
+In the email, each mail merge field should be replaced by something that looks like `<<<FIELD goes here>>>`,
+where `FIELD` is the name of the field it is replacing. Ensure that `FIELD` matches what you expect should be filled
+in that spot.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: [
+    // List of template names that were sent
+  ]
+}
+```
+
 ### POST - Update RSVP
 `/api/action/rsvp`
 

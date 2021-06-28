@@ -76,9 +76,19 @@ export const sendTemplateEmail = async (email: string, templateName: Templates, 
 export const sendAllTemplates = async (requestUser: IUser) => {
   const templateNames: string[] = [];
 
+  const tags: any = {};
+
+  for (const k of Object.keys(requestUser.mailmerge)) {
+    tags[k] = `<<<${k} goes here>>>`;
+  }
+
   for (const template in Templates) {
     templateNames.push(template);
-    await sendTemplateEmail(requestUser.email, (Templates as any)[template]);
+    await sendTemplateEmail(
+      requestUser.email,
+      (Templates as any)[template],
+      tags,
+    );
   }
 
   return templateNames;
