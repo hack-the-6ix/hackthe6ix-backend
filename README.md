@@ -15,6 +15,8 @@ data.
 
 **NOTE: When creating the mailing lists, it is important to include fields for mail merge, such as `MERGE_CONFIRMATION_DEADLINE` and `MERGE_APPLICATION_DEADLINE` for all lists!**
 
+**NOTE: In development mode, ALL EMAILS will land in `dev_logs` instead of being actually sent**
+
 #### Authentication
 You will also need to configure SAML authentication. Copy `config/settings.json.example` to `confing/settings.json`and configure the settings as desired.
 For certificates, you must encode the PEM certificate (with headers) to base64. Note that you can add as many providers as desired, the given ones are there as examples.

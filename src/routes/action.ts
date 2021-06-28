@@ -188,12 +188,12 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
  *
  * Sync mailing lists
  */
-actionRouter.post('/syncMailingList', isOrganizer, (req: Request, res: Response) => {
+actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
     syncMailingLists(
-      req.body.mailingList,
+      req.body.mailingLists,
       req.body.forceUpdate,
     ),
   );

@@ -31,7 +31,13 @@ const getMailingListLogFileName = (mailingListID: string) => path.resolve(__dirn
  * @param mailingListID
  */
 export const mockGetSubscriptions = async (mailingListID: string) => {
-  const existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8') || '{"emails": []}';
+  let existingFile;
+
+  try {
+    existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8');
+  } catch (e) {
+    existingFile = '{"emails": []}';
+  }
 
   return {
     status: 200, data: {

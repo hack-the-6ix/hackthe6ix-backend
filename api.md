@@ -373,7 +373,7 @@ are updated too.
 #### Input Specification
 ```
 {
-  mailingList: <name of mailing list to sync (all if omitted),
+  mailingList: <array of name of mailing list to sync> (all if omitted),
   forceUpdate: true | false
 }
 ```

@@ -1,13 +1,15 @@
 import { systemUser } from '../../consts';
 import { getObject } from '../../controller/ModelController';
 import { IUser } from '../../models/user/fields';
-import { InternalServerError } from '../../types/errors';
-import { Templates } from '../../types/mailer';
+import User from '../../models/user/User';
+import { InternalServerError, NotFoundError } from '../../types/errors';
+import { Lists, Templates } from '../../types/mailer';
 import {
   addSubscriptionRequest,
   deleteSubscriptionRequest,
   getMailingListSubscriptionsRequest,
   getTemplate,
+  mailerConfig,
   sendEmailRequest,
 } from './external';
 
@@ -197,11 +199,41 @@ export const syncMailingList = async (mailingListID: string, emails: string[], f
  * If forceUpdate is enabled, all users who are on the list will be synced (rather than just users
  * who are not yet on the Mailtrain list)
  *
- * @param mailingList
+ * @param inputMailingLists
  * @param forceUpdate
  */
-export const syncMailingLists = async (mailingList?: string, forceUpdate?: boolean) => {
+export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate?: boolean) => {
+  let mailingLists: string[] = [];
 
-  // TODO: Implement this
+  if (inputMailingLists) {
+    mailingLists = [...inputMailingLists];
+  } else {
+    for (const list in Lists) {
+      mailingLists.push(list);
+    }
+  }
 
+  for (const list of mailingLists) {
+    const listConfig = mailerConfig?.lists[list];
+
+    if (!listConfig) {
+      throw new NotFoundError(`List "${list}" is invalid!`);
+    }
+
+    const query = listConfig.query;
+
+    if (!query) {
+      throw new InternalServerError(`Query for "${list}" is falsy`);
+    }
+
+    const emails = (await User.find(query)).map((u: IUser) => u.email);
+
+    await syncMailingList(
+      list,
+      emails,
+      forceUpdate,
+    );
+  }
+
+  return mailingLists;
 };
