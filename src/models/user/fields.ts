@@ -578,7 +578,23 @@ const mailmerge = {
       readCheck: true,
       readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
     },
-    // Custom fields should be prefixed with MERGE
+    // All fields for transactional emails should be prefixed by MERGE
+    // For mailing list enrollment, first and last name do not have the prefix, but we'll store a version
+    // with it for the template emails
+    MERGE_FIRST_NAME: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+    },
+    MERGE_LAST_NAME: {
+      type: String,
+      default: '',
+
+      readCheck: true,
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+    },
     MERGE_APPLICATION_DEADLINE: {
       type: String,
       default: '',
@@ -883,6 +899,8 @@ export interface IUser extends mongoose.Document {
 export interface IMailMerge {
   FIRST_NAME: string,
   LAST_NAME: string,
+  MERGE_FIRST_NAME: string,
+  MERGE_LAST_NAME: string,
   MERGE_APPLICATION_DEADLINE: string,
   MERGE_CONFIRMATION_DEADLINE: string
 }

@@ -79,7 +79,7 @@ export const sendAllTemplates = async (requestUser: IUser) => {
   const tags: any = {};
 
   for (const k of Object.keys(requestUser.mailmerge)) {
-    tags[k] = `<<<${k} goes here>>>`;
+    tags[k] = `~${k} goes here~`;
   }
 
   for (const template in Templates) {
