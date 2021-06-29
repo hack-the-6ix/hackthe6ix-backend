@@ -6,7 +6,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import querystring from 'querystring';
-import { InternalServerError } from '../../types/errors';
+import { NotFoundError } from '../../types/errors';
 import {
   mockAddSubscription,
   mockDeleteSubscription,
@@ -22,7 +22,7 @@ export const getTemplate = (templateName: string) => {
   if (template) {
     return template;
   } else {
-    throw new InternalServerError(`Unable to fetch template with name: ${templateName}`);
+    throw new NotFoundError(`Unable to fetch template with name: ${templateName}`);
   }
 };
 
@@ -32,7 +32,7 @@ export const getList = (listName: string) => {
   if (list) {
     return list;
   } else {
-    throw new InternalServerError(`Unable to fetch list with name: ${list}`);
+    throw new NotFoundError(`Unable to fetch list with name: ${list}`);
   }
 };
 

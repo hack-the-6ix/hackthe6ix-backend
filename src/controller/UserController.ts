@@ -13,7 +13,7 @@ import {
   RSVPRejectedError,
   SubmissionDeniedError,
 } from '../types/errors';
-import { Templates } from '../types/mailer';
+import { MailTemplate } from '../types/mailer';
 import { IRSVP } from '../types/types';
 import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
@@ -116,7 +116,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
-    await sendTemplateEmail(requestUser.email, Templates.applied);
+    await sendTemplateEmail(requestUser.email, MailTemplate.applied);
   }
 
   return 'Success';
@@ -205,9 +205,9 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     });
 
     if (isAttending) {
-      await sendTemplateEmail(requestUser.email, Templates.confirmed);
+      await sendTemplateEmail(requestUser.email, MailTemplate.confirmed);
     } else {
-      await sendTemplateEmail(requestUser.email, Templates.declined);
+      await sendTemplateEmail(requestUser.email, MailTemplate.declined);
     }
 
     return 'Success';

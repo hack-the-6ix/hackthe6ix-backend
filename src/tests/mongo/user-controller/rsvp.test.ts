@@ -3,7 +3,7 @@ import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
 import { sendEmailRequest } from '../../../services/mailer/external';
 import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/errors';
-import { Templates } from '../../../types/mailer';
+import { MailTemplate } from '../../../types/mailer';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -234,7 +234,7 @@ describe('RSVP', () => {
       expect(resultObject.toJSON().status.declined).toEqual(false);
 
       // Verify confirmation email sent
-      const template = mockGetMailTemplate(Templates.confirmed);
+      const template = mockGetMailTemplate(MailTemplate.confirmed);
 
       expect(sendEmailRequest).toHaveBeenCalledWith(
         user.email,
@@ -272,7 +272,7 @@ describe('RSVP', () => {
       expect(resultObject.toJSON().status.declined).toEqual(true);
 
       // Verify confirmation email sent
-      const template = mockGetMailTemplate(Templates.declined);
+      const template = mockGetMailTemplate(MailTemplate.declined);
 
       expect(sendEmailRequest).toHaveBeenCalledWith(
         user.email,

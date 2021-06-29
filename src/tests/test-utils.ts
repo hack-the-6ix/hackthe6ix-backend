@@ -138,6 +138,7 @@ export const mockGetMailTemplate = (templateName: string) => ({
 });
 
 export const mockSuccessResponse = () => ({ status: 200, data: {} as any });
+export const mockErrorResponse = () => ({ status: 500, data: {} as any });
 
 export const runBeforeAll = async () => {
   await dbHandler.connect();

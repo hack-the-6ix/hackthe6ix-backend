@@ -3,7 +3,7 @@
  */
 
 import { InternalServerError } from '../../types/errors';
-import { Lists, Templates } from '../../types/mailer';
+import { MailingList, MailTemplate } from '../../types/mailer';
 import { mailerConfig } from './external';
 
 const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: string, expectedFields: string[]) => {
@@ -20,17 +20,17 @@ const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: stri
       }
     }
   } else {
-    throw new InternalServerError('Templates is falsy!\nPlease check README.md for information about setting up config');
+    throw new InternalServerError('MailTemplate is falsy!\nPlease check README.md for information about setting up config');
   }
 };
 
 if (mailerConfig) {
 
   // Verify templates
-  verifyConfigEntity(mailerConfig, Templates, 'templates', ['subject', 'templateID']);
+  verifyConfigEntity(mailerConfig, MailTemplate, 'templates', ['subject', 'templateID']);
 
   // Verify mailing lists
-  verifyConfigEntity(mailerConfig, Lists, 'lists', ['listID', 'query']);
+  verifyConfigEntity(mailerConfig, MailingList, 'lists', ['listID', 'query']);
 
 } else {
   throw new InternalServerError('Mailer Config is falsy!');

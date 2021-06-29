@@ -3,7 +3,7 @@ import { getObject } from '../../controller/ModelController';
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
 import { InternalServerError } from '../../types/errors';
-import { Lists, Templates } from '../../types/mailer';
+import { MailingList, MailTemplate } from '../../types/mailer';
 import {
   addSubscriptionRequest,
   deleteSubscriptionRequest,
@@ -50,7 +50,7 @@ export const sendEmail = async (recipientEmail: string, templateID: string, subj
  * @param templateName - internal template name of the email (we use this to fetch the templateID and subject)
  * @param tags - data to be substituted into the email (they take precedence over the automatically generated mailmerge fields)
  */
-export const sendTemplateEmail = async (email: string, templateName: Templates, tags?: { [key: string]: string }) => {
+export const sendTemplateEmail = async (email: string, templateName: MailTemplate, tags?: { [key: string]: string }) => {
   const template = getTemplate(templateName);
 
   const templateID: string = template.templateID;
@@ -67,6 +67,8 @@ export const sendTemplateEmail = async (email: string, templateName: Templates, 
     ...(user?.mailmerge || {}),
     ...(tags || {}),
   });
+
+  return 'Success';
 };
 
 /**
@@ -84,11 +86,11 @@ export const sendAllTemplates = async (requestUser: IUser) => {
     tags[k] = `~${k} goes here~`;
   }
 
-  for (const template in Templates) {
+  for (const template in MailTemplate) {
     templateNames.push(template);
     await sendTemplateEmail(
       requestUser.email,
-      (Templates as any)[template],
+      (MailTemplate as any)[template],
       tags,
     );
   }
@@ -216,7 +218,7 @@ export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate
   if (inputMailingLists) {
     mailingLists = [...inputMailingLists];
   } else {
-    for (const list in Lists) {
+    for (const list in MailingList) {
       mailingLists.push(list);
     }
   }

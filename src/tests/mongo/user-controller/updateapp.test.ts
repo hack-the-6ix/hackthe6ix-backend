@@ -13,7 +13,7 @@ import {
   SubmissionDeniedError,
   WriteDeniedError,
 } from '../../../types/errors';
-import { Templates } from '../../../types/mailer';
+import { MailTemplate } from '../../../types/mailer';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -373,7 +373,7 @@ describe('Submit Application', () => {
         } as any,
       );
 
-      const template = mockGetMailTemplate(Templates.applied);
+      const template = mockGetMailTemplate(MailTemplate.applied);
       const universeState = await fetchUniverseState();
 
       expect(sendEmailRequest).toHaveBeenCalledWith(

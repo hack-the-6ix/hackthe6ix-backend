@@ -1,4 +1,4 @@
-export enum Templates {
+export enum MailTemplate {
   applicationIncomplete = 'applicationIncomplete',
   applied = 'applied',
   confirmed = 'confirmed',
@@ -8,7 +8,7 @@ export enum Templates {
   waitlisted = 'waitlisted'
 }
 
-export enum Lists {
+export enum MailingList {
   applicationIncomplete = 'applicationIncomplete',
   applied = 'applied',
   confirmed = 'confirmed',
