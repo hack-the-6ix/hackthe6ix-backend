@@ -26,6 +26,16 @@ export const getTemplate = (templateName: string) => {
   }
 };
 
+export const getList = (listName: string) => {
+  const list = mailerConfig.list[listName];
+
+  if (list) {
+    return list;
+  } else {
+    throw new InternalServerError(`Unable to fetch list with name: ${list}`);
+  }
+};
+
 export const sendEmailRequest = async (recipientEmail: string, templateID: string, subject: string, parsedTags: any) => {
   if (process.env.NODE_ENV === 'development') {
     return mockSendEmail(recipientEmail, templateID, subject, parsedTags);

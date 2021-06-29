@@ -2,14 +2,14 @@ import { systemUser } from '../../consts';
 import { getObject } from '../../controller/ModelController';
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
-import { InternalServerError, NotFoundError } from '../../types/errors';
+import { InternalServerError } from '../../types/errors';
 import { Lists, Templates } from '../../types/mailer';
 import {
   addSubscriptionRequest,
   deleteSubscriptionRequest,
+  getList,
   getMailingListSubscriptionsRequest,
   getTemplate,
-  mailerConfig,
   sendEmailRequest,
 } from './external';
 
@@ -102,11 +102,13 @@ export const sendAllTemplates = async (requestUser: IUser) => {
  * NOTE: MAILTRAIN QUERIES ARE BY DEFAULT MAXED AT 10000! Things will probably break if we have
  *       more than this many subscribers.
  *
- * @param mailingListName
+ * @param mailingListID
  * @param emails - array of emails that should be in the mailing list. All other emails are removed.
  * @param forceUpdate - if true, updates will be pushed out to ALL users in emails, not just the ones that haven't been synced
+ * @param email - If truthy, this email will correspond to the only one that is operated on
+ *                We can use this to sync mailing lists for a single user without having to update thousands of other users
  */
-export const syncMailingList = async (mailingListID: string, emails: string[], forceUpdate?: boolean) => {
+export const syncMailingList = async (mailingListID: string, emails: string[], forceUpdate?: boolean, email?: string) => {
   try {
     const afterSubscribers = new Set(emails);
 
@@ -120,6 +122,8 @@ export const syncMailingList = async (mailingListID: string, emails: string[], f
     const beforeSubscribers = new Set<string>(
       currentEmailsResult?.data?.data?.subscriptions.map(
         (x: any) => x.email,
+      ).filter(
+        (e: string) => !email || e === email, // If email is specified then we will only operate on it
       ),
     );
 
@@ -169,6 +173,8 @@ export const syncMailingList = async (mailingListID: string, emails: string[], f
     const updatedSubscribers = new Set<string>(
       updatedEmailsResult?.data?.data?.subscriptions.map(
         (x: any) => x.email,
+      ).filter(
+        (e: string) => !email || e === email, // If email is specified then we will only operate on it
       ),
     );
 
@@ -199,10 +205,12 @@ export const syncMailingList = async (mailingListID: string, emails: string[], f
  * If forceUpdate is enabled, all users who are on the list will be synced (rather than just users
  * who are not yet on the Mailtrain list)
  *
- * @param inputMailingLists
- * @param forceUpdate
+ * @param inputMailingLists - list of mailing list names
+ * @param forceUpdate - fully sync mailing lists, instead of just taking the delta
+ * @param email - when specified, only changes involving this user will be performed (i.e. all other users
+ *                will be untouched during the sync)
  */
-export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate?: boolean) => {
+export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate?: boolean, email?: string) => {
   let mailingLists: string[] = [];
 
   if (inputMailingLists) {
@@ -214,13 +222,16 @@ export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate
   }
 
   for (const list of mailingLists) {
-    const listConfig = mailerConfig?.lists[list];
+    const listConfig = getList(list);
 
-    if (!listConfig) {
-      throw new NotFoundError(`List "${list}" is invalid!`);
+    const query = {
+      ...listConfig.query,
+    };
+
+    // We'll only make queries about this user
+    if (email && !forceUpdate) {
+      query.email = email;
     }
-
-    const query = listConfig.query;
 
     if (!query) {
       throw new InternalServerError(`Query for "${list}" is falsy`);
@@ -232,6 +243,7 @@ export const syncMailingLists = async (inputMailingLists?: string[], forceUpdate
       list,
       emails,
       forceUpdate,
+      email,
     );
   }
 
