@@ -8,10 +8,12 @@ import {
   deleteSubscriptionRequest,
   getMailingListSubscriptionsRequest,
 } from '../../services/mailer/util/external';
+import { InternalServerError } from '../../types/errors';
 import {
   adminUser,
   generateMockUniverseState,
   hackerUser,
+  mockErrorResponse,
   mockSuccessResponse,
   runAfterAll,
   runAfterEach,
@@ -401,23 +403,143 @@ describe('Sync Mailing List', () => {
 
   describe('Error', () => {
     test('Unable to fetch current subscriptions', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValue(mockErrorResponse());
+      deleteSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
 
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
     });
 
     test('Unable to update subscription', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      }).mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsB),
+          },
+        },
+      });
 
+      deleteSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+      addSubscriptionRequest.mockReturnValue(mockErrorResponse());
+
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
     });
 
     test('Unable to delete subscription', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      }).mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsB),
+          },
+        },
+      });
 
+      deleteSubscriptionRequest.mockReturnValue(mockErrorResponse());
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
     });
 
     test('Unable to verify subscription', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      }).mockReturnValueOnce(mockErrorResponse());
 
+      deleteSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
+    });
+
+    test('Mailing list verification length mismatch', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValue({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      }).mockReturnValue({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsEmpty),
+          },
+        },
+      });
+
+      deleteSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
     });
 
     test('Mailing list verification mismatch', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValue({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      }).mockReturnValue({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsA),
+          },
+        },
+      });
 
+      deleteSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+
+      await expect(syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+      )).rejects.toThrow(InternalServerError);
     });
   });
 });
