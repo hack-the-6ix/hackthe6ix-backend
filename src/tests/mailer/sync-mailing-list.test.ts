@@ -399,6 +399,49 @@ describe('Sync Mailing List', () => {
       expect(deleted).toEqual(toBeRemoved);
       expect(added).toEqual(mockEmailsB);
     });
+
+    test('Force update specific user', async () => {
+      getMailingListSubscriptionsRequest.mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsB),
+          },
+        },
+      }).mockReturnValueOnce({
+        ...mockSuccessResponse(),
+        data: {
+          data: {
+            subscriptions: generateGetSubscriptionsResponse(mockEmailsB),
+          },
+        },
+      });
+
+      const email = mockEmailsB[2];
+
+      addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
+
+      const { added, deleted } = await syncMailingList(
+        mockMailingListID,
+        mockEmailsB,
+        true,
+        email,
+      );
+
+      expect(getMailingListSubscriptionsRequest.mock.calls).toEqual([
+        [mockMailingListID],
+        [mockMailingListID],
+      ]);
+
+      expect(addSubscriptionRequest.mock.calls).toEqual([
+        [mockMailingListID, email, {}],
+      ]);
+
+      expect(deleteSubscriptionRequest).not.toBeCalled();
+
+      expect(deleted).toEqual([]);
+      expect(added).toEqual([email]);
+    });
   });
 
   describe('Error', () => {

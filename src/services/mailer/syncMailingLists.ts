@@ -1,6 +1,5 @@
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
-import { InternalServerError } from '../../types/errors';
 import { MailingList } from '../../types/mailer';
 import syncMailingList from './syncMailingList';
 import { getList } from './util/external';
@@ -34,7 +33,7 @@ export default async (inputMailingLists?: string[], forceUpdate?: boolean, email
     const listConfig = getList(list);
 
     const query = {
-      ...listConfig.query,
+      ...listConfig.query || {},
     };
 
     // We'll only make queries about this user
@@ -42,14 +41,10 @@ export default async (inputMailingLists?: string[], forceUpdate?: boolean, email
       query.email = email;
     }
 
-    if (!query) {
-      throw new InternalServerError(`Query for "${list}" is falsy`);
-    }
-
     const emails = (await User.find(query)).map((u: IUser) => u.email);
 
     await syncMailingList(
-      list,
+      listConfig.listID || '',
       emails,
       forceUpdate,
       email,
