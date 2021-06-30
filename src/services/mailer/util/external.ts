@@ -6,7 +6,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import querystring from 'querystring';
-import { NotFoundError } from '../../types/errors';
+import { NotFoundError } from '../../../types/errors';
 import {
   mockAddSubscription,
   mockDeleteSubscription,

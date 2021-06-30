@@ -2,8 +2,8 @@
  * Verified the mailer.json file is configured properly for boot
  */
 
-import { InternalServerError } from '../../types/errors';
-import { MailingList, MailTemplate } from '../../types/mailer';
+import { InternalServerError } from '../../../types/errors';
+import { MailingList, MailTemplate } from '../../../types/mailer';
 import { mailerConfig } from './external';
 
 const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: string, expectedFields: string[]) => {

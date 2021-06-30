@@ -1,21 +1,21 @@
 import { getObject } from '../../controller/ModelController';
 import { fetchUniverseState } from '../../controller/util/resources';
 import User from '../../models/user/User';
-import { sendEmail, sendTemplateEmail } from '../../services/mailer';
-import { okResponse } from '../../services/mailer/dev';
-import { getTemplate, sendEmailRequest } from '../../services/mailer/external';
-import { InternalServerError } from '../../types/errors';
+import sendEmail from '../../services/mailer/sendEmail';
+import sendTemplateEmail from '../../services/mailer/sendTemplateEmail';
+import { okResponse } from '../../services/mailer/util/dev';
+import { getTemplate, sendEmailRequest } from '../../services/mailer/util/external';
 import { MailTemplate } from '../../types/mailer';
 import {
   adminUser,
   generateMockUniverseState,
   hackerUser,
-  mockErrorResponse,
   mockSuccessResponse,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
 } from '../test-utils';
+import { mockSubject, mockTags, mockTemplateID, mockTemplateName } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -43,7 +43,7 @@ jest.mock('../../controller/util/resources', () => {
   };
 });
 
-jest.mock('../../services/mailer/external', () => ({
+jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),
   deleteSubscriptionRequest: jest.fn(),
   getList: jest.fn(),
@@ -52,50 +52,7 @@ jest.mock('../../services/mailer/external', () => ({
   sendEmailRequest: jest.fn(),
 }));
 
-const mockTags = {
-  foo: 'bar',
-  baz: 'boop',
-};
-
-const mockTagsParsed = {
-  'TAGS[foo]': 'bar',
-  'TAGS[baz]': 'boop',
-};
-
-const mockTemplateName = 'cool template bro';
-const mockTemplateID = 'mock template';
-const mockSubject = 'this is the subject';
-
-describe('Send raw email', () => {
-  test('Success', async () => {
-    sendEmailRequest.mockReturnValue(mockSuccessResponse());
-
-    await sendEmail(
-      hackerUser.email,
-      mockTemplateID,
-      mockSubject,
-      mockTags,
-    );
-
-    expect(sendEmailRequest).toHaveBeenCalledWith(
-      hackerUser.email,
-      mockTemplateID,
-      mockSubject,
-      mockTagsParsed,
-    );
-  });
-
-  test('Fail', async () => {
-    sendEmailRequest.mockReturnValue(mockErrorResponse());
-
-    await expect(sendEmail(
-      hackerUser.email,
-      mockTemplateID,
-      mockSubject,
-      mockTags,
-    )).rejects.toThrow(InternalServerError);
-  });
-});
+jest.mock('../../services/mailer/sendEmail', () => jest.fn((): any => undefined));
 
 describe('Send template email', () => {
   test('Email corresponds to registered user', async () => {
@@ -119,19 +76,15 @@ describe('Send template email', () => {
         _id: hacker._id,
       },
     }) as any[])[0].mailmerge;
-    const profileMergeFieldsParsed: any = {};
-    for (const k of Object.keys(profileMergeFields)) {
-      profileMergeFieldsParsed[`TAGS[${k}]`] = profileMergeFields[k];
-    }
 
     expect(getTemplate).toHaveBeenCalledWith(mockTemplateName);
-    expect(sendEmailRequest).toHaveBeenCalledWith(
+    expect(sendEmail).toHaveBeenCalledWith(
       hackerUser.email,
       mockTemplateID,
       mockSubject,
       {
-        ...mockTagsParsed,
-        ...profileMergeFieldsParsed,
+        ...mockTags,
+        ...profileMergeFields,
       },
     );
   });
@@ -151,15 +104,11 @@ describe('Send template email', () => {
     );
 
     expect(getTemplate).toHaveBeenCalledWith(mockTemplateName);
-    expect(sendEmailRequest).toHaveBeenCalledWith(
+    expect(sendEmail).toHaveBeenCalledWith(
       'Banana smoothie',
       mockTemplateID,
       mockSubject,
-      mockTagsParsed,
+      mockTags,
     );
   });
-});
-
-describe('Send all templates', () => {
-
 });

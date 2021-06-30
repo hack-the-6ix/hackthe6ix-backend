@@ -14,7 +14,9 @@ import {
   updateResume,
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
-import { sendAllTemplates, sendTemplateEmail, syncMailingLists } from '../services/mailer';
+import sendAllTemplates from '../services/mailer/sendAllTemplates';
+import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
+import syncMailingLists from '../services/mailer/syncMailingLists';
 import mongoose from '../services/mongoose_service';
 import { isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';

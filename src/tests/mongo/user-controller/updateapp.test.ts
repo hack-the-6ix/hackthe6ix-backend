@@ -3,7 +3,7 @@ import { timestampFormat } from '../../../consts';
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
-import { sendEmailRequest } from '../../../services/mailer/external';
+import { sendEmailRequest } from '../../../services/mailer/util/external';
 import { WriteCheckRequest } from '../../../types/checker';
 import {
   AlreadySubmittedError,
@@ -47,8 +47,8 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
-jest.mock('../../../services/mailer/external', () => {
-  const external = jest.requireActual('../../../services/mailer/external');
+jest.mock('../../../services/mailer/util/external', () => {
+  const external = jest.requireActual('../../../services/mailer/util/external');
   return {
     ...external,
     sendEmailRequest: jest.fn(() => mockSuccessResponse()),

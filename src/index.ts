@@ -12,7 +12,7 @@ import actionRouter from './routes/action';
 import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import { logResponse } from './services/logger';
-import './services/mailer/verify_config';
+import './services/mailer/util/verify_config';
 import './services/mongoose_service';
 import { InternalServerError } from './types/errors';
 
