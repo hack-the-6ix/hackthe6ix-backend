@@ -10,22 +10,17 @@ import { sendEmailRequest } from './util/external';
  * @param tags - data to be substituted into the email
  */
 export default async (recipientEmail: string, templateID: string, subject: string, tags?: { [key: string]: string }) => {
-  try {
-    const parsedTags: any = {};
+  const parsedTags: any = {};
 
-    for (const t of Object.keys(tags || {})) {
-      parsedTags[`TAGS[${t}]`] = tags[t];
-    }
-
-    const result = await sendEmailRequest(recipientEmail, templateID, subject, parsedTags);
-
-    if (result.status != 200 || !result.data) {
-      throw new InternalServerError('Unable to send email');
-    }
-
-    return 'Success';
-
-  } catch (e) {
-    throw new InternalServerError('Unable to send email', e);
+  for (const t of Object.keys(tags || {})) {
+    parsedTags[`TAGS[${t}]`] = tags[t];
   }
+
+  const result = await sendEmailRequest(recipientEmail, templateID, subject, parsedTags);
+
+  if (result.status != 200 || !result.data) {
+    throw new InternalServerError('Unable to send email');
+  }
+
+  return 'Success';
 };

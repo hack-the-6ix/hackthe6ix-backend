@@ -49,22 +49,41 @@ jest.mock('../../services/mailer/util/external', () => ({
 }));
 
 describe('Send raw email', () => {
-  test('Success', async () => {
-    sendEmailRequest.mockReturnValue(mockSuccessResponse());
+  describe('Success', () => {
+    test('Tags', async () => {
+      sendEmailRequest.mockReturnValue(mockSuccessResponse());
 
-    await sendEmail(
-      hackerUser.email,
-      mockTemplateID,
-      mockSubject,
-      mockTags,
-    );
+      await sendEmail(
+        hackerUser.email,
+        mockTemplateID,
+        mockSubject,
+        mockTags,
+      );
 
-    expect(sendEmailRequest).toHaveBeenCalledWith(
-      hackerUser.email,
-      mockTemplateID,
-      mockSubject,
-      mockTagsParsed,
-    );
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+        hackerUser.email,
+        mockTemplateID,
+        mockSubject,
+        mockTagsParsed,
+      );
+    });
+
+    test('No Tags', async () => {
+      sendEmailRequest.mockReturnValue(mockSuccessResponse());
+
+      await sendEmail(
+        hackerUser.email,
+        mockTemplateID,
+        mockSubject,
+      );
+
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+        hackerUser.email,
+        mockTemplateID,
+        mockSubject,
+        {},
+      );
+    });
   });
 
   test('Fail', async () => {

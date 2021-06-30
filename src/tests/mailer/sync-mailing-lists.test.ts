@@ -36,14 +36,7 @@ jest.mock('../../services/mailer/util/external', () => ({
   sendEmailRequest: jest.fn(),
 }));
 
-/**
- * TODO: Split mailer into multiple modules
- */
-
-describe('Sync Mailing List', () => {
-
-});
-
 describe('Sync Mailing Lists', () => {
-
+  test('foo', () => {
+  });
 });
