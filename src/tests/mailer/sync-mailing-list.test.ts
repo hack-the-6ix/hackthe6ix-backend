@@ -91,9 +91,9 @@ describe('Sync Mailing List', () => {
         [mockMailingListID],
       ]);
 
-      expect(addSubscriptionRequest.mock.calls).toEqual(mockEmailsA.map((email: string) => [
+      expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set(mockEmailsA.map((email: string) => [
         mockMailingListID, email, {},
-      ]));
+      ])));
 
       expect(deleteSubscriptionRequest).not.toBeCalled();
 
@@ -130,9 +130,9 @@ describe('Sync Mailing List', () => {
         [mockMailingListID],
       ]);
 
-      expect(deleteSubscriptionRequest.mock.calls).toEqual(mockEmailsA.map((email: string) => [
+      expect(new Set(deleteSubscriptionRequest.mock.calls)).toEqual(new Set(mockEmailsA.map((email: string) => [
         mockMailingListID, email,
-      ]));
+      ])));
 
       expect(addSubscriptionRequest).not.toBeCalled();
 
@@ -173,13 +173,13 @@ describe('Sync Mailing List', () => {
       const toBeRemoved = mockEmailsA.filter((email: string) => mockEmailsB.indexOf(email) === -1);
       const toBeAdded = mockEmailsB.filter((email: string) => mockEmailsA.indexOf(email) === -1);
 
-      expect(addSubscriptionRequest.mock.calls).toEqual(toBeAdded.map((email: string) => [
+      expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set(toBeAdded.map((email: string) => [
         mockMailingListID, email, {},
-      ]));
+      ])));
 
-      expect(deleteSubscriptionRequest.mock.calls).toEqual(toBeRemoved.map((email: string) => [
+      expect(new Set(deleteSubscriptionRequest.mock.calls)).toEqual(new Set(toBeRemoved.map((email: string) => [
         mockMailingListID, email,
-      ]));
+      ])));
 
       expect(deleted).toEqual(toBeRemoved);
       expect(added).toEqual(toBeAdded);
@@ -253,9 +253,9 @@ describe('Sync Mailing List', () => {
           [mockMailingListID],
         ]);
 
-        expect(addSubscriptionRequest.mock.calls).toEqual([[
+        expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set([[
           mockMailingListID, email, {},
-        ]]);
+        ]]));
 
         expect(deleteSubscriptionRequest).not.toHaveBeenCalled();
 
@@ -296,9 +296,9 @@ describe('Sync Mailing List', () => {
           [mockMailingListID],
         ]);
 
-        expect(deleteSubscriptionRequest.mock.calls).toEqual([[
+        expect(new Set(deleteSubscriptionRequest.mock.calls)).toEqual(new Set([[
           mockMailingListID, email,
-        ]]);
+        ]]));
 
         expect(addSubscriptionRequest).not.toHaveBeenCalled();
 
@@ -343,9 +343,9 @@ describe('Sync Mailing List', () => {
         [mockMailingListID],
       ]);
 
-      expect(addSubscriptionRequest.mock.calls).toEqual([[
+      expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set([[
         mockMailingListID, hackerUser.email, user.mailmerge,
-      ]]);
+      ]]));
 
       expect(deleteSubscriptionRequest).not.toHaveBeenCalled();
 
@@ -386,13 +386,13 @@ describe('Sync Mailing List', () => {
 
       const toBeRemoved = mockEmailsA.filter((email: string) => mockEmailsB.indexOf(email) === -1);
 
-      expect(addSubscriptionRequest.mock.calls).toEqual(mockEmailsB.map((email: string) => [
+      expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set(mockEmailsB.map((email: string) => [
         mockMailingListID, email, {},
-      ]));
+      ])));
 
-      expect(deleteSubscriptionRequest.mock.calls).toEqual(toBeRemoved.map((email: string) => [
+      expect(new Set(deleteSubscriptionRequest.mock.calls)).toEqual(new Set(toBeRemoved.map((email: string) => [
         mockMailingListID, email,
-      ]));
+      ])));
 
       expect(deleted).toEqual(toBeRemoved);
       expect(added).toEqual(mockEmailsB);
