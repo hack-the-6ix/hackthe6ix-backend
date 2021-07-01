@@ -3,6 +3,7 @@ import { enumOptions, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
+import syncMailingLists from '../services/mailer/syncMailingLists';
 import { WriteCheckRequest } from '../types/checker';
 import {
   BadRequestError,
@@ -116,6 +117,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
       throw new InternalServerError('Unable to update status');
     }
 
+    await syncMailingLists(undefined, true, requestUser.email);
     await sendTemplateEmail(requestUser.email, MailTemplate.applied);
   }
 
@@ -191,9 +193,6 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
   }
 
   if (requestUser.status.accepted && !requestUser.status.declined) {
-    /**
-     * TODO: Invite them to discord
-     */
 
     const isAttending = !!rsvp.attending;
 
@@ -203,6 +202,12 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
     });
+
+    /**
+     * TODO: Invite them to discord
+     */
+
+    await syncMailingLists(undefined, true, requestUser.email);
 
     if (isAttending) {
       await sendTemplateEmail(requestUser.email, MailTemplate.confirmed);
@@ -297,3 +302,9 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
   });
   return 'Success';
 };
+
+/**
+ * TODO: Determine application status based on grade
+ *
+ *       Remember to sync mailing lists after the decision is made + released
+ */

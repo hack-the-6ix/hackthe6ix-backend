@@ -3,6 +3,7 @@ import { timestampFormat } from '../../../consts';
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
+import syncMailingLists from '../../../services/mailer/syncMailingLists';
 import { sendEmailRequest } from '../../../services/mailer/util/external';
 import { WriteCheckRequest } from '../../../types/checker';
 import {
@@ -56,6 +57,7 @@ jest.mock('../../../services/mailer/util/external', () => {
   };
 });
 
+jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => undefined));
 
 jest.mock('../../../models/user/fields', () => {
   const actualFields = jest.requireActual('../../../models/user/fields');
@@ -116,6 +118,27 @@ jest.mock('../../../models/user/fields', () => {
 
 describe('Update Application', () => {
   describe('Success', () => {
+    test('Verify mailing list not synced', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await updateApplication(
+        user.toJSON(),
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      expect(syncMailingLists).not.toHaveBeenCalled();
+    });
+
     test('Verify no email sent', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
@@ -386,6 +409,10 @@ describe('Submit Application', () => {
           'TAGS[MERGE_APPLICATION_DEADLINE]': moment(universeState.public.globalApplicationDeadline).format(timestampFormat),
           'TAGS[MERGE_CONFIRMATION_DEADLINE]': moment(universeState.public.globalConfirmationDeadline).format(timestampFormat),
         }),
+      );
+
+      expect(syncMailingLists).toHaveBeenCalledWith(
+        undefined, true, user.email,
       );
     });
 

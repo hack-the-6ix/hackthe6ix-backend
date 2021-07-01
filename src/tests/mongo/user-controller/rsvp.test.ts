@@ -42,9 +42,12 @@ jest.mock('../../../services/mailer/util/external', () => {
   return {
     ...external,
     sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getList: jest.fn(() => mockSuccessResponse()),
     getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
+
+jest.mock('../../../services/mailer/syncMailingList', () => jest.fn((): any => undefined));
 
 describe('RSVP', () => {
   describe('Deadlines', () => {
