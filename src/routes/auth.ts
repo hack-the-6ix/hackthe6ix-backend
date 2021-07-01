@@ -124,7 +124,7 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
           roles: userInfo.roles,
         });
 
-        // Trigger a mailing list sync
+        // Trigger a mailing list sync on login
         syncMailingLists(undefined, true, userInfo.email)
         .then(() => {
           console.log(`Synced mailing list for ${userInfo.email}`);

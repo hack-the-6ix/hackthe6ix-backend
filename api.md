@@ -374,7 +374,8 @@ are updated too.
 ```
 {
   mailingList: <array of name of mailing list to sync> (all if omitted),
-  forceUpdate: true | false
+  forceUpdate: true | false,
+  email: <if specified, only changes will be made to this address>
 }
 ```
 

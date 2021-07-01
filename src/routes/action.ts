@@ -197,6 +197,7 @@ actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response
     syncMailingLists(
       req.body.mailingLists,
       req.body.forceUpdate,
+      req.body.email,
     ),
   );
 });
