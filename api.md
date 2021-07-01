@@ -394,6 +394,27 @@ are updated too.
 }
 ```
 
+### POST - Verify Mailing List
+`/api/action/verifyMailingList`
+
+This will add a user to every registered mailing list with the (expected)
+name of the mailing list in their email.
+
+This can be used to verify that the correct list ID was used; however,
+it does NOT verify that the query is correct.
+
+The request user's mail merge will be used for all of the test users.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: [
+    // list of the names of mailing lists that were verified
+  ]
+}
+```
+
 ### POST - Send a singular email
 `/api/action/sendEmail`
 

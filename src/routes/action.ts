@@ -17,6 +17,7 @@ import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
+import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
 import { isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
@@ -198,6 +199,21 @@ actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response
       req.body.mailingLists,
       req.body.forceUpdate,
       req.body.email,
+    ),
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Verify mailing lists
+ */
+actionRouter.post('/verifyMailingList', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    verifyMailingList(
+      req.executor,
     ),
   );
 });

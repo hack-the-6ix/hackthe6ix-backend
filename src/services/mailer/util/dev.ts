@@ -72,9 +72,13 @@ export const mockAddSubscription = async (mailingListID: string, email: string, 
   const emails = JSON.parse(existingFile).emails || [];
   const mailmerges = JSON.parse(existingFile).mailmerges || [];
 
-  if (emails.indexOf(email) === -1) {
+  const index = emails.indexOf(email);
+
+  if (index === -1) {
     emails.push(email);
     mailmerges.push(mailmerge || {});
+  } else {
+    mailmerges[index] = mailmerge || {};
   }
 
   const message = JSON.stringify({
