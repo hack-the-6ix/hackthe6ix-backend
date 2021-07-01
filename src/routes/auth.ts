@@ -18,7 +18,14 @@ router.get('/:provider/metadata.xml', async (req: Request, res: Response) => {
 // Starting point for login
 router.get('/:provider/login', async (req: Request, res: Response) => {
   const { sp, idp } = await fetchSAMLBundle(req.params.provider.toLowerCase());
-  sp.create_login_request_url(idp, {}, (err: Error | null, login_url: string) => {
+  const relayState = {} as Record<string, string>;
+
+  if(req.query.redirectTo){
+    relayState["redirect"] = req.query.redirectTo as string;
+  }
+  sp.create_login_request_url(idp, {
+    relay_state: JSON.stringify(relayState)
+  }, (err: Error | null, login_url: string) => {
     if (err != null)
       return res.send(500).json({
         status: 500,
@@ -45,6 +52,17 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
     }
 
     console.log(saml_response);
+
+    let relayState = {} as Record<string, string>;
+
+    if(req.body.RelayState){
+      try {
+        relayState = JSON.parse(req.body.RelayState);
+      }
+      catch (e) {
+        // do nothing, invalid relay state
+      }
+    }
 
     if (saml_response.type == 'logout_request') {
       /*
@@ -134,12 +152,25 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
           console.log(`Unable to sync mailing list for ${userInfo.email}`, e);
         });
 
-        return res.json({
-          token: token,
-        });
+
+        if(relayState.redirect) {
+          const redirectURL = new URL(process.env.FRONTEND_HOST + relayState.redirect);
+          redirectURL.searchParams.set("token", token);
+          return res.redirect(redirectURL.toString());
+        }
+        else {
+          return res.json({
+            token: token,
+          });
+        }
+
       } catch (e) {
         console.log('Error logging user in.');
         console.log(e);
+        return res.json({
+          status: 500,
+          error: "Error logging user in."
+        })
       }
 
     }
