@@ -8,7 +8,7 @@ import * as dbHandler from './db-handler';
 export const adminUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd50'),
   firstName: 'Admin',
-  lastName: 'Admin',
+  lastName: 'Last Admin',
   samlNameID: 'admin',
   email: 'admin@test.ca',
   groups: {
@@ -28,7 +28,7 @@ export const adminUser = {
 export const organizerUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd59'),
   firstName: 'Organizer',
-  lastName: 'Organizer',
+  lastName: 'Last Organizer',
   samlNameID: 'organizer',
   email: 'organizer@test.ca',
   groups: {
@@ -43,7 +43,7 @@ export const organizerUser = {
 export const voluteerUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd58'),
   firstName: 'Volunteer',
-  lastName: 'Volunteer',
+  lastName: 'Last Volunteer',
   samlNameID: 'volunteer',
   email: 'volunteer@test.ca',
   groups: {
@@ -57,7 +57,7 @@ export const voluteerUser = {
 export const hackerUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd57'),
   firstName: 'Hacker',
-  lastName: 'Hacker',
+  lastName: 'Last Hacker',
   samlNameID: 'hacker',
   email: 'hacker@test.ca',
   groups: {
@@ -74,7 +74,7 @@ export const hackerUser = {
 export const nopermUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd17'),
   firstName: 'Noperm',
-  lastName: 'Noperm',
+  lastName: 'Last Noperm',
   samlNameID: 'noperm',
   email: 'ihavenoperms@test.ca',
   groups: {},
@@ -138,6 +138,7 @@ export const mockGetMailTemplate = (templateName: string) => ({
 });
 
 export const mockSuccessResponse = () => ({ status: 200, data: {} as any });
+export const mockErrorResponse = () => ({ status: 500, data: {} as any });
 
 export const runBeforeAll = async () => {
   await dbHandler.connect();

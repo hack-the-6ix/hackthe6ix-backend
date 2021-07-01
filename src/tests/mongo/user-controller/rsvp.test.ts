@@ -1,9 +1,9 @@
 import { rsvp } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
-import { sendEmailRequest } from '../../../services/mailer/external';
+import { sendEmailRequest } from '../../../services/mailer/util/external';
 import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/errors';
-import { Templates } from '../../../types/mailer';
+import { MailTemplate } from '../../../types/mailer';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -37,14 +37,17 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
-jest.mock('../../../services/mailer/external', () => {
-  const external = jest.requireActual('../../../services/mailer/external');
+jest.mock('../../../services/mailer/util/external', () => {
+  const external = jest.requireActual('../../../services/mailer/util/external');
   return {
     ...external,
     sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getList: jest.fn(() => mockSuccessResponse()),
     getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
+
+jest.mock('../../../services/mailer/syncMailingList', () => jest.fn((): any => undefined));
 
 describe('RSVP', () => {
   describe('Deadlines', () => {
@@ -109,7 +112,7 @@ describe('RSVP', () => {
           status: {
             accepted: true,
           },
-          personalRSVPDeadline: new Date().getTime() + 10000,
+          personalConfirmationDeadline: new Date().getTime() + 10000,
         });
 
         await rsvp(
@@ -135,7 +138,7 @@ describe('RSVP', () => {
           status: {
             accepted: true,
           },
-          personalRSVPDeadline: new Date().getTime() - 10000,
+          personalConfirmationDeadline: new Date().getTime() - 10000,
         });
 
         await expect(rsvp(
@@ -234,16 +237,16 @@ describe('RSVP', () => {
       expect(resultObject.toJSON().status.declined).toEqual(false);
 
       // Verify confirmation email sent
-      const template = mockGetMailTemplate(Templates.confirmed);
+      const template = mockGetMailTemplate(MailTemplate.confirmed);
 
       expect(sendEmailRequest).toHaveBeenCalledWith(
         user.email,
         template.templateID,
         template.subject,
-        {
-          'TAGS[MERGE_FIRST_NAME]': user.firstName,
-          'TAGS[MERGE_LAST_NAME]': user.lastName,
-        },
+        expect.objectContaining({
+          'TAGS[FIRST_NAME]': user.firstName,
+          'TAGS[LAST_NAME]': user.lastName,
+        }),
       );
     });
 
@@ -272,16 +275,16 @@ describe('RSVP', () => {
       expect(resultObject.toJSON().status.declined).toEqual(true);
 
       // Verify confirmation email sent
-      const template = mockGetMailTemplate(Templates.declined);
+      const template = mockGetMailTemplate(MailTemplate.declined);
 
       expect(sendEmailRequest).toHaveBeenCalledWith(
         user.email,
         template.templateID,
         template.subject,
-        {
-          'TAGS[MERGE_FIRST_NAME]': user.firstName,
-          'TAGS[MERGE_LAST_NAME]': user.lastName,
-        },
+        expect.objectContaining({
+          'TAGS[FIRST_NAME]': user.firstName,
+          'TAGS[LAST_NAME]': user.lastName,
+        }),
       );
     });
   });

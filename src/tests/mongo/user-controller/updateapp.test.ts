@@ -1,14 +1,11 @@
+import moment from 'moment';
+import { timestampFormat } from '../../../consts';
 import { updateApplication } from '../../../controller/UserController';
-import { fetchUniverseState, getModels } from '../../../controller/util/resources';
-import { IUser } from '../../../models/user/fields';
-import {
-  canUpdateApplication,
-  isOrganizer,
-  isUserOrOrganizer,
-  maxLength,
-} from '../../../models/validator';
-import { sendEmailRequest } from '../../../services/mailer/external';
-import { ReadCheckRequest, WriteCheckRequest } from '../../../types/checker';
+import { fetchUniverseState } from '../../../controller/util/resources';
+import User from '../../../models/user/User';
+import syncMailingLists from '../../../services/mailer/syncMailingLists';
+import { sendEmailRequest } from '../../../services/mailer/util/external';
+import { WriteCheckRequest } from '../../../types/checker';
 import {
   AlreadySubmittedError,
   BadRequestError,
@@ -17,10 +14,9 @@ import {
   SubmissionDeniedError,
   WriteDeniedError,
 } from '../../../types/errors';
-import { Templates } from '../../../types/mailer';
+import { MailTemplate } from '../../../types/mailer';
 import {
   generateMockUniverseState,
-  generateTestModel,
   hackerUser,
   mockGetMailTemplate,
   mockSuccessResponse,
@@ -44,15 +40,16 @@ afterEach(runAfterEach);
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => (
-  {
+jest.mock('../../../controller/util/resources', () => {
+  const resources = jest.requireActual('../../../controller/util/resources');
+  return {
+    ...resources,
     fetchUniverseState: jest.fn(),
-    getModels: jest.fn(),
-  }
-));
+  };
+});
 
-jest.mock('../../../services/mailer/external', () => {
-  const external = jest.requireActual('../../../services/mailer/external');
+jest.mock('../../../services/mailer/util/external', () => {
+  const external = jest.requireActual('../../../services/mailer/util/external');
   return {
     ...external,
     sendEmailRequest: jest.fn(() => mockSuccessResponse()),
@@ -60,148 +57,92 @@ jest.mock('../../../services/mailer/external', () => {
   };
 });
 
-const [userTestModel, mockModels] = generateTestModel({
-  writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
-  readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => undefined));
 
-  FIELDS: {
-    firstName: {
-      type: String,
-      readCheck: true,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-    },
-    lastName: {
-      type: String,
-      readCheck: true,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-    },
-    email: {
-      type: String,
-      readCheck: true,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
-    },
-    internal: {
-      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-      writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+jest.mock('../../../models/user/fields', () => {
+  const actualFields = jest.requireActual('../../../models/user/fields');
+  const canUpdateApplication = jest.requireActual('../../../models/validator').canUpdateApplication;
 
-      FIELDS: {
-        secretNode: {
-          type: String,
-          readCheck: true,
-          writeCheck: true,
-        },
+  const updatedFields = { ...actualFields.fields };
+  updatedFields.FIELDS.hackerApplication = {
+    readCheck: true,
+    writeCheck: canUpdateApplication(),
+
+    FIELDS: {
+      submitCheckFallback: { // this should pass because submitCheck > writeCheck
+        type: String,
+        writeCheck: false,
+        submitCheck: true,
+      },
+      optionalField: {
+        type: String,
+        readCheck: true,
+        writeCheck: true,
+        submitCheck: true,
+        caption: 'Optional Field',
+      },
+      optionalField2: {
+        type: String,
+        readCheck: true,
+        writeCheck: true,
+        submitCheck: true,
+        caption: 'Optional Field 2',
+      },
+      requiredFieldImplicit: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+        caption: 'Required Field',
+      },
+      requiredFieldExplicit: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 100,
+        submitCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
+        caption: 'Required Field 2',
+      },
+      conditionalField: {
+        type: String,
+        readCheck: true,
+        writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 10,
+        caption: 'Conditional Field',
       },
     },
-    status: {
-      applied: false,
-    },
-    roles: {
-      FIELDS: {
-        hacker: {
-          type: Boolean,
-          required: true,
-          default: false,
-          caption: 'Hacker',
-          virtual: true,
-          readCheck: true,
-        },
+  };
 
-        admin: {
-          type: Boolean,
-          required: true,
-          default: false,
-          virtual: true,
-          caption: 'Admin',
-
-          readCheck: true,
-        },
-
-        organizer: {
-          type: Boolean,
-          required: true,
-          default: false,
-          virtual: true,
-          caption: 'Organizer',
-
-          readCheck: true,
-        },
-
-        volunteer: {
-          type: Boolean,
-          required: true,
-          default: false,
-          virtual: true,
-          caption: 'Volunteer',
-
-          readCheck: true,
-        },
-      },
-    },
-    hackerApplication: {
-      readCheck: true,
-      writeCheck: canUpdateApplication(),
-
-      FIELDS: {
-        submitCheckFallback: { // this should pass because submitCheck > writeCheck
-          type: String,
-          writeCheck: false,
-          submitCheck: true,
-        },
-        optionalField: {
-          type: String,
-          readCheck: true,
-          writeCheck: true,
-          submitCheck: true,
-          caption: 'Optional Field',
-        },
-        optionalField2: {
-          type: String,
-          readCheck: true,
-          writeCheck: true,
-          submitCheck: true,
-          caption: 'Optional Field 2',
-        },
-        requiredFieldImplicit: {
-          type: String,
-          readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-          caption: 'Required Field',
-        },
-        requiredFieldExplicit: {
-          type: String,
-          readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 100,
-          submitCheck: (request: WriteCheckRequest<string, any>) => request.fieldValue === 'foobar',
-          caption: 'Required Field 2',
-        },
-        conditionalField: {
-          type: String,
-          readCheck: true,
-          writeCheck: (request: WriteCheckRequest<string, any>) => !request.fieldValue || request.fieldValue.length < 10,
-          caption: 'Conditional Field',
-        },
-      },
-    },
-    personalApplicationDeadline: {
-      type: Number,
-      required: true,
-      caption: 'Personal Application Deadline',
-      default: -1,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
-      readCheck: true,
-    },
-
-  },
-}, 'user');
-getModels.mockReturnValue(mockModels);
+  return {
+    ...actualFields,
+    fields: updatedFields,
+  };
+});
 
 describe('Update Application', () => {
   describe('Success', () => {
+    test('Verify mailing list not synced', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+      });
+
+      await updateApplication(
+        user.toJSON(),
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      expect(syncMailingLists).not.toHaveBeenCalled();
+    });
+
     test('Verify no email sent', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -222,7 +163,7 @@ describe('Update Application', () => {
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -237,7 +178,7 @@ describe('Update Application', () => {
         } as any,
       );
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -249,7 +190,7 @@ describe('Update Application', () => {
     test('Personal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -265,7 +206,7 @@ describe('Update Application', () => {
         } as any,
       );
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -278,7 +219,7 @@ describe('Update Application', () => {
     test('Missing Required Field', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -293,7 +234,7 @@ describe('Update Application', () => {
         } as any,
       );
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -308,7 +249,7 @@ describe('Update Application', () => {
     test('Bad Application', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -321,7 +262,7 @@ describe('Update Application', () => {
         undefined,
       )).rejects.toThrow(BadRequestError);
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -331,7 +272,7 @@ describe('Update Application', () => {
     test('Write violation', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -346,7 +287,7 @@ describe('Update Application', () => {
         } as any,
       )).rejects.toThrow(WriteDeniedError);
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -356,7 +297,7 @@ describe('Update Application', () => {
     test('Already submitted', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: true,
@@ -371,7 +312,7 @@ describe('Update Application', () => {
         } as any,
       )).rejects.toThrow(ForbiddenError);
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -382,7 +323,7 @@ describe('Update Application', () => {
       test('Global Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -397,7 +338,7 @@ describe('Update Application', () => {
           } as any,
         )).rejects.toThrow(DeadlineExpiredError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 
@@ -407,7 +348,7 @@ describe('Update Application', () => {
       test('Personal Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -423,7 +364,7 @@ describe('Update Application', () => {
           } as any,
         )).rejects.toThrow(DeadlineExpiredError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 
@@ -438,7 +379,7 @@ describe('Submit Application', () => {
     test('Verify email sent', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -455,23 +396,30 @@ describe('Submit Application', () => {
         } as any,
       );
 
-      const template = mockGetMailTemplate(Templates.applied);
+      const template = mockGetMailTemplate(MailTemplate.applied);
+      const universeState = await fetchUniverseState();
 
       expect(sendEmailRequest).toHaveBeenCalledWith(
         user.email,
         template.templateID,
         template.subject,
-        {
-          'TAGS[MERGE_FIRST_NAME]': user.firstName,
-          'TAGS[MERGE_LAST_NAME]': user.lastName,
-        },
+        expect.objectContaining({
+          'TAGS[FIRST_NAME]': user.firstName,
+          'TAGS[LAST_NAME]': user.lastName,
+          'TAGS[MERGE_APPLICATION_DEADLINE]': moment(universeState.public.globalApplicationDeadline).format(timestampFormat),
+          'TAGS[MERGE_CONFIRMATION_DEADLINE]': moment(universeState.public.globalConfirmationDeadline).format(timestampFormat),
+        }),
+      );
+
+      expect(syncMailingLists).toHaveBeenCalledWith(
+        undefined, true, user.email,
       );
     });
 
     test('Normal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -488,7 +436,7 @@ describe('Submit Application', () => {
         } as any,
       );
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -504,7 +452,7 @@ describe('Submit Application', () => {
     test('Personal Deadline', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -522,7 +470,7 @@ describe('Submit Application', () => {
         } as any,
       );
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -546,7 +494,7 @@ describe('Submit Application', () => {
       test('Implicit submitCheck', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -562,7 +510,7 @@ describe('Submit Application', () => {
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 
@@ -574,7 +522,7 @@ describe('Submit Application', () => {
       test('Explicit submitCheck', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -590,7 +538,7 @@ describe('Submit Application', () => {
           } as any,
         )).rejects.toThrow(SubmissionDeniedError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 
@@ -603,7 +551,7 @@ describe('Submit Application', () => {
     test('Write violation', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: false,
@@ -620,7 +568,7 @@ describe('Submit Application', () => {
         } as any,
       )).rejects.toThrow(SubmissionDeniedError);
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -631,7 +579,7 @@ describe('Submit Application', () => {
     test('Already submitted', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState());
 
-      const user = await userTestModel.create({
+      const user = await User.create({
         ...hackerUser,
         status: {
           applied: true,
@@ -647,7 +595,7 @@ describe('Submit Application', () => {
         } as any,
       )).rejects.toThrow(AlreadySubmittedError);
 
-      const resultObject = await userTestModel.findOne({
+      const resultObject = await User.findOne({
         _id: hackerUser._id,
       });
 
@@ -658,7 +606,7 @@ describe('Submit Application', () => {
       test('Global Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -674,7 +622,7 @@ describe('Submit Application', () => {
           } as any,
         )).rejects.toThrow(DeadlineExpiredError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 
@@ -684,7 +632,7 @@ describe('Submit Application', () => {
       test('Personal Deadline passed', async () => {
         fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
 
-        const user = await userTestModel.create({
+        const user = await User.create({
           ...hackerUser,
           status: {
             applied: false,
@@ -701,7 +649,7 @@ describe('Submit Application', () => {
           } as any,
         )).rejects.toThrow(DeadlineExpiredError);
 
-        const resultObject = await userTestModel.findOne({
+        const resultObject = await User.findOne({
           _id: hackerUser._id,
         });
 

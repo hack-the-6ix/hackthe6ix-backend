@@ -6,7 +6,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import querystring from 'querystring';
-import { InternalServerError } from '../../types/errors';
+import { NotFoundError } from '../../../types/errors';
 import {
   mockAddSubscription,
   mockDeleteSubscription,
@@ -14,7 +14,7 @@ import {
   mockSendEmail,
 } from './dev';
 
-export const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', 'config', 'mailer.json')).toString('utf8'));
+export const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
 export const getTemplate = (templateName: string) => {
   const template = mailerConfig.templates[templateName];
@@ -22,7 +22,17 @@ export const getTemplate = (templateName: string) => {
   if (template) {
     return template;
   } else {
-    throw new InternalServerError(`Unable to fetch template with name: ${templateName}`);
+    throw new NotFoundError(`Unable to fetch template with name: ${templateName}`);
+  }
+};
+
+export const getList = (listName: string) => {
+  const list = mailerConfig.lists[listName];
+
+  if (list) {
+    return list;
+  } else {
+    throw new NotFoundError(`Unable to fetch list with name: ${list}`);
   }
 };
 
@@ -46,13 +56,14 @@ export const getMailingListSubscriptionsRequest = async (mailingListID: string) 
   return axios.get(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscriptions/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`);
 };
 
-export const addSubscriptionRequest = async (mailingListID: string, userEmail: string) => {
+export const addSubscriptionRequest = async (mailingListID: string, userEmail: string, mailmerge: any) => {
   if (process.env.NODE_ENV === 'development') {
-    return mockAddSubscription(mailingListID, userEmail);
+    return mockAddSubscription(mailingListID, userEmail, mailmerge);
   }
 
   return axios.post(`${process.env.MAILTRAIN_PUBLIC_ROOT_PATH}/api/subscribe/${mailingListID}?access_token=${process.env.MAILTRAIN_API_KEY}`, querystring.stringify({
     EMAIL: userEmail,
+    ...mailmerge,
   }));
 };
 

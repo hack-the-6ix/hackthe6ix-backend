@@ -36,14 +36,17 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
-jest.mock('../../../services/mailer/external', () => {
-  const external = jest.requireActual('../../../services/mailer/external');
+jest.mock('../../../services/mailer/util/external', () => {
+  const external = jest.requireActual('../../../services/mailer/util/external');
   return {
     ...external,
     sendEmailRequest: jest.fn(() => mockSuccessResponse()),
+    getList: jest.fn(() => mockSuccessResponse()),
     getTemplate: (templateName: string) => mockGetMailTemplate(templateName),
   };
 });
+
+jest.mock('../../../services/mailer/syncMailingList', () => jest.fn((): any => undefined));
 
 /**
  * We will be using the real User schema and submitting a simulated real application

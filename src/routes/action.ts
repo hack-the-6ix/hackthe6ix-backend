@@ -14,6 +14,10 @@ import {
   updateResume,
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
+import sendAllTemplates from '../services/mailer/sendAllTemplates';
+import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
+import syncMailingLists from '../services/mailer/syncMailingLists';
+import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
 import { isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
@@ -183,8 +187,68 @@ actionRouter.get('/getStatistics', isOrganizer, (req: Request, res: Response) =>
 });
 
 /**
- * TODO: Add endpoint to sync mailing lists
+ * (Admin)
+ *
+ * Sync mailing lists
  */
+actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    syncMailingLists(
+      req.body.mailingLists,
+      req.body.forceUpdate,
+      req.body.email,
+    ),
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Verify mailing lists
+ */
+actionRouter.post('/verifyMailingList', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    verifyMailingList(
+      req.executor,
+    ),
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Send singular email
+ */
+actionRouter.post('/sendEmail', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    sendTemplateEmail(
+      req.body.email,
+      req.body.templateName,
+      req.body.tags,
+    ),
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Send an email using every available template to the requesting user
+ */
+actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    sendAllTemplates(
+      req.executor,
+    ),
+  );
+});
 
 /**
  * TODO: Add endpoint to release admission statuses

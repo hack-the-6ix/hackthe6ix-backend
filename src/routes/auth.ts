@@ -1,6 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 
 import User from '../models/user/User';
+import syncMailingLists from '../services/mailer/syncMailingLists';
 import { fetchSAMLBundle, fetchSP } from '../services/multisaml';
 
 import * as permissions from '../services/permissions';
@@ -104,13 +105,14 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
         const userInfo = await User.findOneAndUpdate({
           samlNameID: name_id,
         }, {
-          email: assertAttributes.email[0],
+          email: assertAttributes.email[0].toLowerCase(),
           firstName: assertAttributes.firstName[0],
           lastName: assertAttributes.lastName[0],
           groups: groups,
         }, {
           upsert: true,
           new: true,
+          setDefaultsOnInsert: true,
         });
 
         console.log(assertAttributes);
@@ -120,6 +122,16 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
           samlNameID: name_id,
           samlSessionIndex: saml_response.user.session_index,
           roles: userInfo.roles,
+        });
+
+        // Trigger a mailing list sync on login
+        // We don't really need to wait for this, so we'll run it async
+        syncMailingLists(undefined, true, userInfo.email)
+        .then(() => {
+          console.log(`Synced mailing list for ${userInfo.email}`);
+        })
+        .catch((e) => {
+          console.log(`Unable to sync mailing list for ${userInfo.email}`, e);
         });
 
         return res.json({

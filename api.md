@@ -363,6 +363,102 @@ This will also update the cache, which by default has a lifetime of 5 minutes.
 }
 ```
 
+### POST - Sync Mailing Lists
+`/api/action/syncMailingLists`
+
+Trigger a mailing list sync with Mailtrain. If `forceUpdate` is enabled, all users
+eligible for a mailing list will be sent to mailtrain, even if they are already synced, to ensure all tags
+are updated too.
+
+#### Input Specification
+```
+{
+  mailingList: <array of name of mailing list to sync> (all if omitted),
+  forceUpdate: true | false,
+  email: <if specified, only changes will be made to this address>
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    added: [
+      ... emails that were sent to mailtrain to be added/updated
+    ],
+    deleted: [
+      ... emails removed from mailing list
+    ]
+   }
+}
+```
+
+### POST - Verify Mailing List
+`/api/action/verifyMailingList`
+
+This will add a user to every registered mailing list with the (expected)
+name of the mailing list in their email.
+
+This can be used to verify that the correct list ID was used; however,
+it does NOT verify that the query is correct.
+
+The request user's mail merge will be used for all of the test users.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: [
+    // list of the names of mailing lists that were verified
+  ]
+}
+```
+
+### POST - Send a singular email
+`/api/action/sendEmail`
+
+Send an email to a user using the Mailtrain transactional API. If `email` corresponds to a user registered
+in the system, tags will automatically be injected with information such as application deadline, confirmation deadline, etc.
+
+#### Input Specification
+```
+{
+  email: <email of the recipient>
+  templateName: <name of the template to send>
+  tags: <dictionary of tags to inject for mailmerge>
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "Success"
+}
+```
+
+### POST - Send email template tests
+`/api/action/templateTest`
+
+Send the requester an instance of every available email template to ensure everything looks correct.
+This endpoint should be called after configuring the server to ensure that the correct template IDs
+were used, and that all the mail merges were successful.
+
+In the email, each mail merge field should be replaced by something that looks like `<<<FIELD goes here>>>`,
+where `FIELD` is the name of the field it is replacing. Ensure that `FIELD` matches what you expect should be filled
+in that spot.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: [
+    // List of template names that were sent
+  ]
+}
+```
+
 ### POST - Update RSVP
 `/api/action/rsvp`
 
