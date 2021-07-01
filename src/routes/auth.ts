@@ -1,6 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 
 import User from '../models/user/User';
+import syncMailingLists from '../services/mailer/syncMailingLists';
 import { fetchSAMLBundle, fetchSP } from '../services/multisaml';
 
 import * as permissions from '../services/permissions';
@@ -111,6 +112,7 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
         }, {
           upsert: true,
           new: true,
+          setDefaultsOnInsert: true,
         });
 
         console.log(assertAttributes);
@@ -120,6 +122,15 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
           samlNameID: name_id,
           samlSessionIndex: saml_response.user.session_index,
           roles: userInfo.roles,
+        });
+
+        // Trigger a mailing list sync
+        syncMailingLists(undefined, true, userInfo.email)
+        .then(() => {
+          console.log(`Synced mailing list for ${userInfo.email}`);
+        })
+        .catch((e) => {
+          console.log(`Unable to sync mailing list for ${userInfo.email}`, e);
         });
 
         return res.json({

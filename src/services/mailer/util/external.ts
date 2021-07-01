@@ -14,7 +14,7 @@ import {
   mockSendEmail,
 } from './dev';
 
-export const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', 'config', 'mailer.json')).toString('utf8'));
+export const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
 export const getTemplate = (templateName: string) => {
   const template = mailerConfig.templates[templateName];
@@ -27,7 +27,7 @@ export const getTemplate = (templateName: string) => {
 };
 
 export const getList = (listName: string) => {
-  const list = mailerConfig.list[listName];
+  const list = mailerConfig.lists[listName];
 
   if (list) {
     return list;

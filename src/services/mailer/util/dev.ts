@@ -3,6 +3,11 @@ import path from 'path';
 import { InternalServerError } from '../../../types/errors';
 
 export const okResponse = { status: 200, data: {} as any };
+const devLogPath = '../../../../dev_logs';
+const defaultSubscriptions = {
+  emails: [] as string[],
+  mailmerges: [] as string[],
+};
 
 /**
  * Sends a mock email, which just gets added to a log file
@@ -15,7 +20,7 @@ export const okResponse = { status: 200, data: {} as any };
 export const mockSendEmail = async (recipientEmail: string, templateID: string, subject: string, tags: { [key: string]: string }) => {
   const message = `[${new Date()}] Template ${templateID} was sent to ${recipientEmail} with submit ${subject} and tags ${JSON.stringify(tags)}\n`;
 
-  fs.appendFile(path.resolve(__dirname, '../../../dev_logs/mailer.log'), message, (err) => {
+  fs.appendFile(path.resolve(__dirname, devLogPath + '/mailer.log'), message, (err) => {
     if (err) {
       throw new InternalServerError('Unable to send mock email: ' + err.toString());
     }
@@ -24,25 +29,32 @@ export const mockSendEmail = async (recipientEmail: string, templateID: string, 
   return okResponse;
 };
 
-const getMailingListLogFileName = (mailingListID: string) => path.resolve(__dirname, `../../dev_logs/mailing_lists/${mailingListID}log`);
+const getMailingListLogFileName = (mailingListID: string) => path.resolve(__dirname, devLogPath + `/mailing_lists/${mailingListID}.log`);
+
+const readLog = (mailingListID: string) => {
+  const path = getMailingListLogFileName(mailingListID);
+  const existingFile = fs.existsSync(path)
+    ? fs.readFileSync(path, 'utf8')
+    : JSON.stringify(defaultSubscriptions);
+
+  return existingFile;
+};
 
 /**
  * Get subscriptions from dev mailing list
  * @param mailingListID
  */
 export const mockGetSubscriptions = async (mailingListID: string) => {
-  let existingFile;
-
-  try {
-    existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8');
-  } catch (e) {
-    existingFile = '{"emails": []}';
-  }
+  const existingFile = readLog(mailingListID);
 
   return {
     status: 200, data: {
       data: {
-        subscriptions: JSON.parse(existingFile).emails,
+        subscriptions: JSON.parse(existingFile).emails.map((email: string) => (
+          {
+            email: email,
+          }
+        )),
       },
     },
   };
@@ -55,10 +67,10 @@ export const mockGetSubscriptions = async (mailingListID: string) => {
  * @param mailmerge
  */
 export const mockAddSubscription = async (mailingListID: string, email: string, mailmerge: any) => {
-  const existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8') || '{"emails": []}';
+  const existingFile = readLog(mailingListID);
 
-  const emails = JSON.parse(existingFile).emails;
-  const mailmerges = JSON.parse(existingFile).mailmerges;
+  const emails = JSON.parse(existingFile).emails || [];
+  const mailmerges = JSON.parse(existingFile).mailmerges || [];
 
   if (emails.indexOf(email) === -1) {
     emails.push(email);
@@ -87,7 +99,7 @@ export const mockAddSubscription = async (mailingListID: string, email: string, 
  * @param email
  */
 export const mockDeleteSubscription = async (mailingListID: string, email: string) => {
-  const existingFile = fs.readFileSync(getMailingListLogFileName(mailingListID), 'utf8') || '{"emails": []}';
+  const existingFile = readLog(mailingListID);
 
   const emails = JSON.parse(existingFile).emails;
   const mailmerges = JSON.parse(existingFile).mailmerges;
