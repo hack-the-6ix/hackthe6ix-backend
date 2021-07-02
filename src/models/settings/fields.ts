@@ -36,6 +36,10 @@ const saml = {
       type: String,
       required: true,
     },
+    permittedRedirectHosts: {
+      type: [String],
+      required: true
+    },
     providers: {
       type: [SAMLProvider],
     },
@@ -121,6 +125,7 @@ export interface ISettings extends mongoose.Document {
   saml: {
     private_key: string,
     certificate: string,
+    permittedRedirectHosts: string[],
     providers: {
       name: string,
       idpCertificate: string,

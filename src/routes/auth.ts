@@ -5,6 +5,8 @@ import syncMailingLists from '../services/mailer/syncMailingLists';
 import { fetchSAMLBundle, fetchSP } from '../services/multisaml';
 
 import * as permissions from '../services/permissions';
+import Settings from "../models/settings/Settings";
+import {BadRequestError, InternalServerError} from "../types/errors";
 
 const router: Router = express.Router();
 
@@ -108,8 +110,10 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
 
       // IDP did not send enough data, probably forgot to set up mappers.
       if (!assertAttributes.email || !assertAttributes.firstName || !assertAttributes.lastName) {
-        throw Error('Missing SAML fields.');
+        throw new BadRequestError('Missing SAML fields.');
       }
+
+      let token:string;
 
       try {
         const groups: any = {};
@@ -135,7 +139,7 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
 
         console.log(assertAttributes);
 
-        const token = permissions.createJwt({
+        token = permissions.createJwt({
           id: userInfo._id,
           samlNameID: name_id,
           samlSessionIndex: saml_response.user.session_index,
@@ -152,25 +156,24 @@ router.post('/:provider/acs', async (req: Request, res: Response) => {
           console.log(`Unable to sync mailing list for ${userInfo.email}`, e);
         });
 
+      } catch (e) {
+        console.log(e);
+        throw new InternalServerError('Error logging user in.');
+      }
 
-        if(relayState.redirect) {
-          const redirectURL = new URL(process.env.FRONTEND_HOST + relayState.redirect);
+      if(relayState.redirect) {
+        const samlInfo = await Settings.findOne({}, 'saml');
+        const redirectURL = new URL(relayState.redirect);
+        if(samlInfo.saml.permittedRedirectHosts.indexOf(redirectURL.host) !== -1){
           redirectURL.searchParams.set("token", token);
           return res.redirect(redirectURL.toString());
         }
-        else {
-          return res.json({
-            token: token,
-          });
-        }
-
-      } catch (e) {
-        console.log('Error logging user in.');
-        console.log(e);
+        throw new BadRequestError('Redirect URL host not permitted.');
+      }
+      else {
         return res.json({
-          status: 500,
-          error: "Error logging user in."
-        })
+          token: token,
+        });
       }
 
     }
