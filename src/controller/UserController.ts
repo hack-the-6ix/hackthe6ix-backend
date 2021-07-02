@@ -1,5 +1,5 @@
 import { Mongoose } from 'mongoose';
-import { enumOptions, IApplication, IUser } from '../models/user/fields';
+import { enumOptions, fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -225,22 +225,35 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
  * Fetch a random applicant that hasn't been graded yet. Note that it is possible
  * for a candidate to be fetched by multiple reviewers simultaneously if the stars
  * align. We handle this by averaging out the scores.
+ *
+ * @param requestUser
+ * @param category - application score category to filter by (only results matching this category
+ *                   will be available). If omitted, all categories are considered.
  */
-export const getCandidate = async (requestUser: IUser) => {
-  const criteria = {
-    $or: [
-      {
+export const getCandidate = async (requestUser: IUser, category?: string) => {
+  const criteria: any = { $or: [] };
+
+  // It is possible for the
+  if (category) {
+    const query: any = {
+      'status.applied': true,
+    };
+
+    query[`internal.applicationScores.${category}.score`] = -1;
+
+    criteria['$or'].push(query);
+  } else {
+
+    // We'll review this user as long as one of their category is ungraded
+    for (const c in fields.FIELDS.internal.FIELDS.applicationScores.FIELDS) {
+      const query: any = {
         'status.applied': true,
-        'internal.applicationScores': {
-          $size: 0,
-        },
-      },
-      {
-        'status.applied': true,
-        'internal.applicationScores': null as any,
-      },
-    ],
-  };
+      };
+
+      query[`internal.applicationScores.${c}.score`] = -1;
+      criteria['$or'].push(query);
+    }
+  }
 
   const userCount = await User.countDocuments(criteria);
 
@@ -272,7 +285,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
 
   const parsedGrade = parseInt(grade);
 
-  if (grade === undefined || isNaN(parsedGrade)) {
+  if (grade === undefined || isNaN(parsedGrade) || grade < 0) {
     throw new BadRequestError('Invalid grade');
   }
 

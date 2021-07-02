@@ -64,6 +64,8 @@ schema.virtual('internal.computedApplicationScore').get(function() {
     total += this.internal.applicationScores[i];
   }
 
+  // TODO: Do not assign a score until all the necessary scores are in
+
   return numReviews ? total / numReviews : -1;
 });
 

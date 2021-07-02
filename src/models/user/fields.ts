@@ -387,7 +387,6 @@ const internal = {
   readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
 
   FIELDS: {
-
     notes: {
       type: String,
       default: '',
@@ -407,21 +406,59 @@ const internal = {
     },
 
     applicationScores: {
-      type: [Number],
-      caption: 'Application scores',
-
       writeCheck: true,
       readCheck: true,
+
+      FIELDS: {
+        accomplish: {
+          writeCheck: true,
+          readCheck: true,
+
+          FIELDS: {
+            score: {
+              type: Number,
+              default: -1,
+            },
+
+            reviewer: {
+              type: String,
+            },
+          },
+        },
+
+        project: {
+          writeCheck: true,
+          readCheck: true,
+
+          FIELDS: {
+            score: {
+              type: Number,
+              default: -1,
+            },
+
+            reviewer: {
+              type: String,
+            },
+          },
+        },
+
+        portfolio: {
+          writeCheck: true,
+          readCheck: true,
+
+          FIELDS: {
+            score: {
+              type: Number,
+              default: -1,
+            },
+
+            reviewer: {
+              type: String,
+            },
+          },
+        },
+      },
     },
-
-    reviewers: {
-      type: [String],
-      caption: 'Application Reviewer IDs',
-
-      writeCheck: true,
-      readCheck: true,
-    },
-
   },
 };
 
@@ -888,8 +925,20 @@ export interface IUser extends mongoose.Document {
   internal: {
     notes?: string,
     computedApplicationScore?: number,
-    applicationScores?: number[],
-    reviewers?: string[]
+    applicationScores?: {
+      accomplish: {
+        score: number
+        reviewer: string
+      },
+      project: {
+        score: number
+        reviewer: string
+      },
+      portfolio: {
+        score: number
+        reviewer: string
+      },
+    }
   },
   mailmerge: IMailMerge,
   computedApplicationDeadline: number,

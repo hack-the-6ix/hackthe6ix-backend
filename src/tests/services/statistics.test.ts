@@ -26,6 +26,56 @@ jest.mock('../../controller/util/resources', () => (
   }
 ));
 
+jest.mock('../../models/user/fields', () => {
+  const actualFields = jest.requireActual('../../models/user/fields');
+  const deepcopy = jest.requireActual('deepcopy');
+
+  const updatedFields = deepcopy(actualFields.fields);
+  updatedFields.FIELDS.internal.FIELDS.applicationScores = {
+    writeCheck: true,
+    readCheck: true,
+
+    FIELDS: {
+      category1: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+
+      category2: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+    },
+  };
+
+  return {
+    ...actualFields,
+    fields: updatedFields,
+  };
+});
+
 const generateMockusersA = async () => {
   await User.create({
     ...hackerUser,
@@ -286,15 +336,45 @@ describe('Get statistics', () => {
       const cases = [
         {
           status: { applied: false },
-          internal: { applicationScores: [1, 2, 3] },
+          internal: {
+            applicationScores: {
+              category1: {
+                score: 100,
+                reviewer: 'foobar',
+              },
+              category2: {
+                score: 101,
+              },
+            },
+          },
         },
         {
           status: { applied: true },
-          internal: { applicationScores: [1, 2, 3] },
+          internal: {
+            applicationScores: {
+              category1: {
+                score: 100,
+                reviewer: 'foobar',
+              },
+              category2: {
+                score: 101,
+              },
+            },
+          },
         },
         {
           status: { applied: true },
-          internal: { applicationScores: [] },
+          internal: {
+            applicationScores: {
+              category1: {
+                score: -1,
+                reviewer: 'foobar',
+              },
+              category2: {
+                score: -1,
+              },
+            },
+          },
         },
       ];
 

@@ -33,13 +33,63 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
+jest.mock('../../../models/user/fields', () => {
+  const actualFields = jest.requireActual('../../../models/user/fields');
+  const deepcopy = jest.requireActual('deepcopy');
+
+  const updatedFields = deepcopy(actualFields.fields);
+  updatedFields.FIELDS.internal.FIELDS.applicationScores = {
+    writeCheck: true,
+    readCheck: true,
+
+    FIELDS: {
+      category1: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+
+      category2: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+    },
+  };
+
+  return {
+    ...actualFields,
+    fields: updatedFields,
+  };
+});
+
 describe('Grade candidate', () => {
   describe('Validation Error', () => {
     test('No target ID', async () => {
-      await expect(gradeCandidate(organizerUser, null, 0)).rejects.toThrow(BadRequestError);
+      await expect(gradeCandidate(organizerUser, null, {})).rejects.toThrow(BadRequestError);
     });
     test('Invalid target ID', async () => {
-      await expect(gradeCandidate(organizerUser, mongoose.Types.ObjectId(), 0)).rejects.toThrow(NotFoundError);
+      await expect(gradeCandidate(organizerUser, mongoose.Types.ObjectId(), {})).rejects.toThrow(NotFoundError);
     });
 
     test('No grade', async () => {
@@ -67,7 +117,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 'this is a bad grade')).rejects.toThrow(BadRequestError);
+      await expect(gradeCandidate(organizerUser, hacker._id, { category1: 'this is a bad grade' })).rejects.toThrow(BadRequestError);
     });
   });
 
@@ -83,7 +133,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 0)).rejects.toThrow(ForbiddenError);
+      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
     });
 
     test('Accept', async () => {
@@ -98,7 +148,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 0)).rejects.toThrow(ForbiddenError);
+      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
     });
 
     test('Waitlisted', async () => {
@@ -113,7 +163,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 0)).rejects.toThrow(ForbiddenError);
+      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
     });
 
     test('Rejected', async () => {
@@ -128,7 +178,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 0)).rejects.toThrow(ForbiddenError);
+      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
     });
 
     test('Already graded', async () => {
@@ -143,7 +193,7 @@ describe('Grade candidate', () => {
         },
       });
 
-      await expect(gradeCandidate(organizerUser, hacker._id, 0)).rejects.toThrow(ForbiddenError);
+      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -156,36 +206,104 @@ describe('Grade candidate', () => {
           applied: true,
         },
         internal: {
-          applicationScores: [1],
-          reviewers: [otherGrader],
+          applicationScores: {
+            category1: {
+              score: 69,
+              reviewer: otherGrader,
+            },
+          },
         },
       });
 
-      await gradeCandidate(organizerUser, hacker._id, 0);
+      await gradeCandidate(organizerUser, hacker._id, {
+        category1: 100,
+        category2: 10,
+      });
 
       const updatedUser = await User.findOne({
         _id: hacker._id,
       });
 
-      expect(updatedUser.toJSON().internal.applicationScores).toEqual([1, 0]);
-      expect(updatedUser.toJSON().internal.reviewers).toEqual([otherGrader, organizerUser._id.toString()]);
+      expect(updatedUser.toJSON().internal.applicationScores).toEqual({
+        category1: {
+          score: 100,
+          reviewer: organizerUser._id.toString(),
+        },
+        category2: {
+          score: 10,
+          reviewer: organizerUser._id.toString(),
+        },
+      });
     });
+
     test('First grade', async () => {
       const hacker = await User.create({
         ...hackerUser,
         status: {
           applied: true,
-        },
+        }
       });
 
-      await gradeCandidate(organizerUser, hacker._id, 0);
+      await gradeCandidate(organizerUser, hacker._id, {
+        category1: 100,
+        category2: 10,
+      });
 
       const updatedUser = await User.findOne({
         _id: hacker._id,
       });
 
-      expect(updatedUser.toJSON().internal.applicationScores).toEqual([0]);
-      expect(updatedUser.toJSON().internal.reviewers).toEqual([organizerUser._id.toString()]);
+      expect(updatedUser.toJSON().internal.applicationScores).toEqual({
+        category1: {
+          score: 100,
+          reviewer: organizerUser._id.toString(),
+        },
+        category2: {
+          score: 10,
+          reviewer: organizerUser._id.toString(),
+        },
+      });
+    });
+
+    test('Edit partial scores', async () => {
+      const otherGrader = mongoose.Types.ObjectId().toString();
+      const hacker = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        internal: {
+          applicationScores: {
+            category1: {
+              score: 69,
+              reviewer: otherGrader,
+            },
+            category2: {
+              score: 1234,
+              reviewer: otherGrader,
+            },
+          },
+        },
+      });
+
+      await gradeCandidate(organizerUser, hacker._id, {
+        category1: 100,
+      });
+
+      const updatedUser = await User.findOne({
+        _id: hacker._id,
+      });
+
+      expect(updatedUser.toJSON().internal.applicationScores).toEqual({
+        category1: {
+          score: 100,
+          reviewer: organizerUser._id.toString(),
+        },
+        category2: {
+          score: 1234,
+          reviewer: otherGrader,
+        },
+      });
     });
   });
 });

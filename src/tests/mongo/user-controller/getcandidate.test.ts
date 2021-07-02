@@ -39,6 +39,56 @@ jest.mock('../../../controller/util/resources', () => {
   };
 });
 
+jest.mock('../../../models/user/fields', () => {
+  const actualFields = jest.requireActual('../../../models/user/fields');
+  const deepcopy = jest.requireActual('deepcopy');
+
+  const updatedFields = deepcopy(actualFields.fields);
+  updatedFields.FIELDS.internal.FIELDS.applicationScores = {
+    writeCheck: true,
+    readCheck: true,
+
+    FIELDS: {
+      category1: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+
+      category2: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
+    },
+  };
+
+  return {
+    ...actualFields,
+    fields: updatedFields,
+  };
+});
+
 describe('Get candidate', () => {
   describe('Failure', () => {
     test('No candidates', async () => {
@@ -60,10 +110,39 @@ describe('Get candidate', () => {
           applied: true,
         },
         internal: {
-          applicationScores: [1],
+          applicationScores: {
+            category1: {
+              score: 100,
+              reviewer: 'foobar',
+            },
+            category2: {
+              score: 101,
+            },
+          },
         },
       });
       await expect(getCandidate((organizer))).rejects.toThrow(NotFoundError);
+    });
+
+    test('No results for category', async () => {
+      const organizer = await User.create(organizerUser);
+      const hacker1 = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: { applied: true },
+        internal: {
+          applicationScores: {
+            category1: {
+              score: 101,
+            },
+            category2: {
+              score: -1,
+            },
+          },
+        },
+      });
+
+      await expect(getCandidate((organizer), 'accomplish')).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -92,7 +171,14 @@ describe('Get candidate', () => {
           applied: true,
         },
         internal: {
-          applicationScores: [],
+          applicationScores: {
+            category1: {
+              score: -1,
+            },
+            category2: {
+              score: -1,
+            },
+          },
         },
       });
 
@@ -101,7 +187,6 @@ describe('Get candidate', () => {
     });
 
     test('Random selection', async () => {
-
       const organizer = await User.create(organizerUser);
       const hacker1 = await User.create({
         ...hackerUser,
@@ -129,6 +214,27 @@ describe('Get candidate', () => {
       expect((await getCandidate((organizer)))._id).toEqual(hacker3._id);
       expect((await getCandidate((organizer)))._id).toEqual(hacker2._id);
       expect((await getCandidate((organizer)))._id).toEqual(hacker1._id);
+    });
+
+    test('Filter by category', async () => {
+      const organizer = await User.create(organizerUser);
+      const hacker1 = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: { applied: true },
+        internal: {
+          applicationScores: {
+            category1: {
+              score: -1,
+            },
+            category2: {
+              score: -1,
+            },
+          },
+        },
+      });
+
+      expect((await getCandidate(organizer, 'category1'))._id).toEqual(hacker1._id);
     });
   });
 });
