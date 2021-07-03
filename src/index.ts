@@ -21,8 +21,10 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const corsFilter = process.env.PRODUCTION?.toLowerCase() === 'true' ? /hackthe6ix\.com$/ : '*';
 app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? '*' : '*hackthe6ix.com',
+  origin: corsFilter,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 }));
 
 // Sanitize requests with mongoDB ops
