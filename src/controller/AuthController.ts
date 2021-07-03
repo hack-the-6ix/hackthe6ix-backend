@@ -130,7 +130,7 @@ export const getProviderByName = (settings: ISettings, providerName: string): Ar
     }
   }
   return;
-}
+};
 //
 // export const handleACS = (providerName: string, requestBody: Record<string, unknown>): Promise<ActionSpec> => {
 //   return new Promise<ActionSpec>((resolve, reject) => {

@@ -10,27 +10,27 @@ const OpenIDProvider = {
   },
   authorization_url: {
     type: String,
-    required: true
+    required: true,
   },
   token_url: {
     type: String,
-    required: true
+    required: true,
   },
   client_id: {
     type: String,
-    required: true
+    required: true,
   },
   client_secret: {
     type: String,
-    required: true
+    required: true,
   },
   callback_url: {
     type: String,
-    required: true
+    required: true,
   },
   userinfo_url: {
     type: String,
-    required: true
+    required: true,
   },
   logout_redirect_url: {
     type: String,

@@ -11,9 +11,9 @@ export const verifyToken = (token: string): Record<string, any> => {
   }) as Record<string, any>;
 };
 
-export const decodeToken = (token:string): Record<string, any> => {
+export const decodeToken = (token: string): Record<string, any> => {
   return jwt.decode(token) as Record<string, any>;
-}
+};
 
 export const createJwt = (data: Record<string, unknown>): string => {
   return jwt.sign(data, process.env.JWT_SECRET, {
