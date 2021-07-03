@@ -8,13 +8,15 @@
         "name": "organizer",
         "idpCertificate": "<IDP Certificate>",
         "sso_login_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/organizer/protocol/saml"
+        "sso_logout_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
+        "logout_redirect": "https://example.com"
       },
       {
         "name": "public",
         "idpCertificate": "<IDP Certificate>",
         "sso_login_url": "https://auth.example.com/auth/realms/public/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/public/protocol/saml"
+        "sso_logout_url": "https://auth.example.com/auth/realms/public/protocol/saml",
+        "logout_redirect": "https://example.com"
       }
     ]
   }

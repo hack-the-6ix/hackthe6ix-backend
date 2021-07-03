@@ -20,6 +20,10 @@ const SAMLProvider = {
     type: String,
     required: true,
   },
+  logout_redirect_url: {
+    type: String,
+    required: true
+  }
 };
 
 const saml = {
@@ -130,7 +134,8 @@ export interface ISettings extends mongoose.Document {
       name: string,
       idpCertificate: string,
       sso_login_url: string,
-      sso_logout_url: string
+      sso_logout_url: string,
+      logout_redirect_url: string
     }[]
   },
 
