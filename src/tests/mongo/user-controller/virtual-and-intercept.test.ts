@@ -327,6 +327,33 @@ describe('Virtual', () => {
         expect(user.internal.computedApplicationScore).toEqual(7 / 11 * 100);
       });
 
+      test('Perfect score', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          hackerApplication: {
+            requestedWorkshops: 'i want free swag thanks',
+          },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 4,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 4,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 2,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        });
+
+        expect(user.internal.computedApplicationScore).toEqual(100);
+      });
+
       test('Pro haxxor', async () => {
         const user = await User.create({
           ...hackerUser,
