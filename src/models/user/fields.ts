@@ -750,7 +750,7 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },
 
-    samlNameID: {
+    idpLinkID: {
       type: String,
       required: true,
       caption: 'SAML Name ID',
@@ -874,7 +874,7 @@ export interface IStatus {
 
 export interface IUser extends mongoose.Document {
   lastLogout: number,
-  samlNameID: string,
+  idpLinkID: string,
   fullName: string,
   firstName: string,
   lastName: string,

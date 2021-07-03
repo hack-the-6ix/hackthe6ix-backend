@@ -19,7 +19,7 @@ dotenv.config();
     User.create({
       firstName: 'Test ' + i.toString(),
       lastName: 'Testerson',
-      samlNameID: 'wtf',
+      idpLinkID: 'wtf',
       email: 'test' + i.toString() + '@test.ca',
       roles: {
         hacker: true,
