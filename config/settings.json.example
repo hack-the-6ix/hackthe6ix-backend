@@ -2,18 +2,21 @@
   "saml": {
     "private_key": "<SP Private Key>",
     "certificate": "<SP Certificate>",
+    "permittedRedirectHosts": [],
     "providers": [
       {
         "name": "organizer",
         "idpCertificate": "<IDP Certificate>",
         "sso_login_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/organizer/protocol/saml"
+        "sso_logout_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
+        "logout_redirect_url": "https://example.com"
       },
       {
         "name": "public",
         "idpCertificate": "<IDP Certificate>",
         "sso_login_url": "https://auth.example.com/auth/realms/public/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/public/protocol/saml"
+        "sso_logout_url": "https://auth.example.com/auth/realms/public/protocol/saml",
+        "logout_redirect_url": "https://example.com"
       }
     ]
   }

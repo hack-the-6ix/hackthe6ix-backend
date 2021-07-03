@@ -533,20 +533,22 @@ Used for configuring SAML identity provider.
 `provider` refers to the name of the SAML provider being operated on.
 
 ##### Output Specification
-The output is an XML file with a bunch of important metadata.
+The output is an XML file that can be used to configure the SAML identity provider.
 
 ### GET - Starting point for login
-`/auth/:provider/login`
+`/auth/:provider/login?redirectTo=https://example.com`
 
 Users should go to the login URL specified here to begin the SSO flow.
 
 ##### Input Specification
 `provider` refers to the name of the SAML provider being operated on.
 
+`redirectTo` (optional) is the URL that the user should be redirected to once the authentication is successful with the `token` query paramter set to the user's token. Note that the URL host must be present in `settings.saml.permittedRedirectHosts`. If it is not specified, a JSON with the property `token` will be returned with the issued token.
+
 ##### Output Specification
 ```
 {
-  "loginUrl": "https://auth.hackthe6ix.com/auth/reams/..." // The full login URL would be here
+  "loginUrl": "https://auth.hackthe6ix.com/auth/realms/..." // The full login URL would be here
 }
 ```
 
@@ -561,7 +563,9 @@ This endpoint is called after SAML authenticates the user and is used to issue t
 The SAML response goes in the request body.
 
 ##### Output Specification
-Note: The return value will change in the future to redirect to the frontend
+If `redirectTo` was set when requesting the login URL, the user will be redirected to that URL, provided its host is in `settings.saml.permittedRedirectHosts` with the query parameter `token` set to the user's token.
+
+If `redirectTo` was not set, the following JSON will be returned:
 ```
 {
   "token": "<JWT token goes here>"

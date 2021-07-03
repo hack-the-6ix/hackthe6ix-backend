@@ -20,6 +20,10 @@ const SAMLProvider = {
     type: String,
     required: true,
   },
+  logout_redirect_url: {
+    type: String,
+    required: true,
+  },
 };
 
 const saml = {
@@ -34,6 +38,10 @@ const saml = {
     },
     certificate: {
       type: String,
+      required: true,
+    },
+    permittedRedirectHosts: {
+      type: [String],
       required: true,
     },
     providers: {
@@ -121,11 +129,13 @@ export interface ISettings extends mongoose.Document {
   saml: {
     private_key: string,
     certificate: string,
+    permittedRedirectHosts: string[],
     providers: {
       name: string,
       idpCertificate: string,
       sso_login_url: string,
-      sso_logout_url: string
+      sso_logout_url: string,
+      logout_redirect_url: string
     }[]
   },
 
