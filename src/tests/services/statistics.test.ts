@@ -284,17 +284,53 @@ describe('Get statistics', () => {
 
     test('Review', async () => {
       const cases = [
-        {
-          status: { applied: false },
-          internal: { applicationScores: [1, 2, 3] },
-        },
-        {
+        { // Partially completed
           status: { applied: true },
-          internal: { applicationScores: [1, 2, 3] },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 100,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+            },
+          },
         },
-        {
+        { // complete
           status: { applied: true },
-          internal: { applicationScores: [] },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 100,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        },
+        { // not even touched
+          status: { applied: true },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: -1,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: -1,
+              },
+            },
+          },
         },
       ];
 
@@ -302,7 +338,7 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
       expect(statistics.hacker.submittedApplicationStats.review).toEqual({
         reviewed: 2,
-        notReviewed: 3,
+        notReviewed: 4,
       });
     });
   });

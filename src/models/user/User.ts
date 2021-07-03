@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { extractFields } from '../util';
-import { fields, IUser } from './fields';
+import { enumOptions, fields, IUser } from './fields';
 
 const schema = new mongoose.Schema(extractFields(fields), {
   toObject: {
@@ -57,14 +57,28 @@ schema.virtual('fullName').get(function() {
 });
 
 schema.virtual('internal.computedApplicationScore').get(function() {
-  const numReviews = this.internal?.applicationScores?.length;
-  let total = 0;
+  const user = this as IUser;
+  const applicationScores: any = user.internal.applicationScores;
 
-  for (let i = 0; i < numReviews; i++) {
-    total += this.internal.applicationScores[i];
+  // Calculate score in accordance to the agreed on formula
+  const firstHackathon = user.hackerApplication?.hackathonsAttended === enumOptions.hackathonsAttended[0];
+
+  // Ensure all categories are graded before performing the calculation
+  for (const category of ['accomplish', 'project', 'portfolio']) {
+    if (
+      (category !== 'portfolio' || !firstHackathon) && // If this is the applicant's first hackathon, we waive the validation for portfolio
+      (applicationScores[category]?.score < 0) // Ensure we have all the relevant data on file
+    ) {
+      return -1;
+    }
   }
 
-  return numReviews ? total / numReviews : -1;
+  const total: number = (user.hackerApplication.requestedWorkshops?.length > 0 ? 1 : 0) +
+    applicationScores.accomplish?.score +
+    applicationScores.project?.score +
+    (!firstHackathon ? applicationScores.portfolio?.score : 0);
+
+  return (total / (firstHackathon ? 9 : 11)) * 100;
 });
 
 export default mongoose.model<IUser>('User', schema);

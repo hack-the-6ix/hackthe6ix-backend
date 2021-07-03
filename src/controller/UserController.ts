@@ -1,5 +1,5 @@
 import { Mongoose } from 'mongoose';
-import { enumOptions, IApplication, IUser } from '../models/user/fields';
+import { enumOptions, fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -225,22 +225,35 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
  * Fetch a random applicant that hasn't been graded yet. Note that it is possible
  * for a candidate to be fetched by multiple reviewers simultaneously if the stars
  * align. We handle this by averaging out the scores.
+ *
+ * @param requestUser
+ * @param category - application score category to filter by (only results matching this category
+ *                   will be available). If omitted, all categories are considered.
  */
-export const getCandidate = async (requestUser: IUser) => {
-  const criteria = {
-    $or: [
-      {
+export const getCandidate = async (requestUser: IUser, category?: string) => {
+  const criteria: any = { $or: [] };
+
+  // It is possible for the
+  if (category) {
+    const query: any = {
+      'status.applied': true,
+    };
+
+    query[`internal.applicationScores.${category}.score`] = -1;
+
+    criteria['$or'].push(query);
+  } else {
+
+    // We'll review this user as long as one of their category is ungraded
+    for (const c in fields.FIELDS.internal.FIELDS.applicationScores.FIELDS) {
+      const query: any = {
         'status.applied': true,
-        'internal.applicationScores': {
-          $size: 0,
-        },
-      },
-      {
-        'status.applied': true,
-        'internal.applicationScores': null as any,
-      },
-    ],
-  };
+      };
+
+      query[`internal.applicationScores.${c}.score`] = -1;
+      criteria['$or'].push(query);
+    }
+  }
 
   const userCount = await User.countDocuments(criteria);
 
@@ -270,9 +283,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new BadRequestError('Invalid candidate ID');
   }
 
-  const parsedGrade = parseInt(grade);
-
-  if (grade === undefined || isNaN(parsedGrade)) {
+  if (!grade) {
     throw new BadRequestError('Invalid grade');
   }
 
@@ -288,18 +299,30 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new ForbiddenError('Candidate is not eligible to be graded');
   }
 
-  if (user?.internal?.reviewers.indexOf(requestUser._id.toString()) !== -1) {
-    throw new ForbiddenError('You have already graded this candidate!');
+  const changes: any = {};
+
+  for (const category in grade) {
+
+    if (category in user.internal.applicationScores) {
+      const score = parseInt(grade[category]);
+
+      if (!isNaN(score)) {
+        changes[`internal.applicationScores.${category}.score`] = score;
+        changes[`internal.applicationScores.${category}.reviewer`] = requestUser._id.toString();
+      } else {
+        throw new BadRequestError(`Could not parse score ${grade[category]} for category "${category}`);
+      }
+    } else {
+      throw new ForbiddenError(`Grading category "${category}" not found!`);
+    }
   }
 
-  await User.findOneAndUpdate({
-    _id: targetUserID,
-  }, {
-    $push: {
-      'internal.applicationScores': parsedGrade,
-      'internal.reviewers': requestUser._id.toString(),
+  await User.findOneAndUpdate(
+    {
+      _id: targetUserID,
     },
-  });
+    changes,
+  );
   return 'Success';
 };
 

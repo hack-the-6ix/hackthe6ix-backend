@@ -35,6 +35,8 @@ npm start
 In development mode, all emails will be written to disk instead of actually sent. They can be found under
 `dev_logs`. In addition, mailing list sync details are also available here.
 
+## Architecture
+
 ### Permission System
 
 Users are assigned groups (which are embedded in the SAML assertion) which determine what they can do.

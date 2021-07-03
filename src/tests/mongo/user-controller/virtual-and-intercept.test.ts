@@ -2,6 +2,7 @@ import moment from 'moment';
 import { timestampFormat } from '../../../consts';
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
+import { enumOptions } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import {
   canUpdateApplication,
@@ -278,21 +279,127 @@ describe('Virtual', () => {
       expect(user.internal.computedApplicationScore).toEqual(-1);
     });
 
-    test('Normal Scores', async () => {
-      const scores = [1, 2, 3, 4];
+    test('Partial Scores', async () => {
       const user = await User.create({
         ...hackerUser,
         internal: {
-          applicationScores: scores,
+          applicationScores: {
+            accomplish: {
+              score: 100,
+              reviewer: 'foobar',
+            },
+            project: {
+              score: 101,
+              reviewer: 'barfoo',
+            },
+          },
         },
       });
 
-      let total = 0;
-      for (let i = 0; i < scores.length; i++) {
-        total += scores[i];
-      }
+      expect(user.internal.computedApplicationScore).toEqual(-1);
+    });
 
-      expect(user.internal.computedApplicationScore).toEqual(total / scores.length);
+    describe('Fully graded', () => {
+      test('Workshop point', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          hackerApplication: {
+            requestedWorkshops: 'i want free swag thanks',
+          },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 2,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 3,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        });
+
+        expect(user.internal.computedApplicationScore).toEqual(7 / 11 * 100);
+      });
+
+      test('Pro haxxor', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 2,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 3,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        });
+
+        expect(user.internal.computedApplicationScore).toEqual(6 / 11 * 100);
+      });
+
+      test('Noob haxxor', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          hackerApplication: {
+            hackathonsAttended: enumOptions.hackathonsAttended[0],
+          },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 2,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        });
+
+        expect(user.internal.computedApplicationScore).toEqual(3 / 9 * 100);
+      });
+
+      test('Noob haxxor but they somehow also get their portfolio graded', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          hackerApplication: {
+            hackathonsAttended: enumOptions.hackathonsAttended[0],
+          },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              project: {
+                score: 2,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 100000,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        });
+
+        expect(user.internal.computedApplicationScore).toEqual(3 / 9 * 100);
+      });
     });
   });
 

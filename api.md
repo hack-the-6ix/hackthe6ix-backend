@@ -481,11 +481,13 @@ Once a user has declined, they cannot retract this decision.
 ```
 
 ### GET - Get candidate (Organizer)
-`/api/action/getCandidate`
+`/api/action/getCandidate?category=<category goes here>`
 
-Fetch a random applicant that hasn't been graded yet. Note that it is possible
-for a candidate to be fetched by multiple reviewers simultaneously if the stars
-align. We handle this by averaging out the scores.
+Fetch a random applicant that hasn't been graded yet.
+
+#### Input Specification
+`category` can be optionally specified as a query parameter to only return candidates
+who are ungraded in that category. If left blank, no category will be prioritized.
 
 #### Output Specification
 ```
@@ -500,17 +502,17 @@ align. We handle this by averaging out the scores.
 ### POST - Grade candidate (Organizer)
 `/api/action/gradeCandidate`
 
-Fetch a random applicant that hasn't been graded yet. Note that it is possible
-for a candidate to be fetched by multiple reviewers simultaneously if the stars
-align. We handle this by averaging out the scores.
-
-Note that a reviewer may only grade a user ONCE. The system will prevent subsequent submission attempts.
+Assign a grade to a user in a particular category. The submitted grades will override any existing
+ones and the dictionary will be merged (so omitted fields are unchanged).
 
 #### Input Specification
 ```
 {
   "candidateID": <id of user to grade>,
-   "grade": <grade to assign the user>
+   "grades": {
+     <category name>: <grade to assign the user>,
+     ... // multiple categories can be graded simultaneously, if needed
+   }
 }
 ```
 
