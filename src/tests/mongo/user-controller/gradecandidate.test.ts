@@ -119,6 +119,20 @@ describe('Grade candidate', () => {
 
       await expect(gradeCandidate(organizerUser, hacker._id, { category1: 'this is a bad grade' })).rejects.toThrow(BadRequestError);
     });
+
+    test('Invalid category', async () => {
+      const hacker = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        internal: {
+          applicationScores: null,
+        },
+      });
+
+      await expect(gradeCandidate(organizerUser, hacker._id, { asdsadas: 10 })).rejects.toThrow(ForbiddenError);
+    });
   });
 
   describe('Not eligible', () => {
@@ -175,21 +189,6 @@ describe('Grade candidate', () => {
         },
         internal: {
           applicationScores: null,
-        },
-      });
-
-      await expect(gradeCandidate(organizerUser, hacker._id, {})).rejects.toThrow(ForbiddenError);
-    });
-
-    test('Already graded', async () => {
-      const hacker = await User.create({
-        ...hackerUser,
-        status: {
-          applied: true,
-        },
-        internal: {
-          applicationScores: [1],
-          reviewers: [organizerUser._id.toString()],
         },
       });
 

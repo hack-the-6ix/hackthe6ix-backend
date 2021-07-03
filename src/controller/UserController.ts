@@ -283,9 +283,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new BadRequestError('Invalid candidate ID');
   }
 
-  const parsedGrade = parseInt(grade);
-
-  if (grade === undefined || isNaN(parsedGrade) || grade < 0) {
+  if (!grade) {
     throw new BadRequestError('Invalid grade');
   }
 
@@ -301,18 +299,30 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new ForbiddenError('Candidate is not eligible to be graded');
   }
 
-  if (user?.internal?.reviewers.indexOf(requestUser._id.toString()) !== -1) {
-    throw new ForbiddenError('You have already graded this candidate!');
+  const changes: any = {};
+
+  for (const category in grade) {
+
+    if (category in user.internal.applicationScores) {
+      const score = parseInt(grade[category]);
+
+      if (!isNaN(score)) {
+        changes[`internal.applicationScores.${category}.score`] = score;
+        changes[`internal.applicationScores.${category}.reviewer`] = requestUser._id.toString();
+      } else {
+        throw new BadRequestError(`Could not parse score ${grade[category]} for category "${category}`);
+      }
+    } else {
+      throw new ForbiddenError(`Grading category "${category}" not found!`);
+    }
   }
 
-  await User.findOneAndUpdate({
-    _id: targetUserID,
-  }, {
-    $push: {
-      'internal.applicationScores': parsedGrade,
-      'internal.reviewers': requestUser._id.toString(),
+  await User.findOneAndUpdate(
+    {
+      _id: targetUserID,
     },
-  });
+    changes,
+  );
   return 'Success';
 };
 

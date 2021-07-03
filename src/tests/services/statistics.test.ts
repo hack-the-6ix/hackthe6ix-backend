@@ -26,56 +26,6 @@ jest.mock('../../controller/util/resources', () => (
   }
 ));
 
-jest.mock('../../models/user/fields', () => {
-  const actualFields = jest.requireActual('../../models/user/fields');
-  const deepcopy = jest.requireActual('deepcopy');
-
-  const updatedFields = deepcopy(actualFields.fields);
-  updatedFields.FIELDS.internal.FIELDS.applicationScores = {
-    writeCheck: true,
-    readCheck: true,
-
-    FIELDS: {
-      category1: {
-        writeCheck: true,
-        readCheck: true,
-
-        FIELDS: {
-          score: {
-            type: Number,
-            default: -1,
-          },
-
-          reviewer: {
-            type: String,
-          },
-        },
-      },
-
-      category2: {
-        writeCheck: true,
-        readCheck: true,
-
-        FIELDS: {
-          score: {
-            type: Number,
-            default: -1,
-          },
-
-          reviewer: {
-            type: String,
-          },
-        },
-      },
-    },
-  };
-
-  return {
-    ...actualFields,
-    fields: updatedFields,
-  };
-});
-
 const generateMockusersA = async () => {
   await User.create({
     ...hackerUser,
@@ -334,43 +284,49 @@ describe('Get statistics', () => {
 
     test('Review', async () => {
       const cases = [
-        {
-          status: { applied: false },
+        { // Partially completed
+          status: { applied: true },
           internal: {
             applicationScores: {
-              category1: {
+              accomplish: {
                 score: 100,
                 reviewer: 'foobar',
               },
-              category2: {
+              project: {
                 score: 101,
+                reviewer: 'barfoo',
               },
             },
           },
         },
-        {
+        { // complete
           status: { applied: true },
           internal: {
             applicationScores: {
-              category1: {
+              accomplish: {
                 score: 100,
                 reviewer: 'foobar',
               },
-              category2: {
+              project: {
                 score: 101,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 101,
+                reviewer: 'barfoo',
               },
             },
           },
         },
-        {
+        { // not even touched
           status: { applied: true },
           internal: {
             applicationScores: {
-              category1: {
+              accomplish: {
                 score: -1,
                 reviewer: 'foobar',
               },
-              category2: {
+              project: {
                 score: -1,
               },
             },
@@ -382,7 +338,7 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
       expect(statistics.hacker.submittedApplicationStats.review).toEqual({
         reviewed: 2,
-        notReviewed: 3,
+        notReviewed: 4,
       });
     });
   });

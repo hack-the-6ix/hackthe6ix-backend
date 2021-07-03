@@ -398,7 +398,6 @@ const internal = {
 
     computedApplicationScore: {
       type: Number,
-      default: -1,
       caption: 'Computed Application score',
 
       virtual: true,
@@ -406,7 +405,7 @@ const internal = {
     },
 
     applicationScores: {
-      writeCheck: true,
+      writeCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
       readCheck: true,
 
       FIELDS: {
@@ -418,10 +417,14 @@ const internal = {
             score: {
               type: Number,
               default: -1,
+              writeCheck: true,
+              readCheck: true,
             },
 
             reviewer: {
               type: String,
+              writeCheck: true,
+              readCheck: true,
             },
           },
         },
@@ -434,10 +437,14 @@ const internal = {
             score: {
               type: Number,
               default: -1,
+              writeCheck: true,
+              readCheck: true,
             },
 
             reviewer: {
               type: String,
+              writeCheck: true,
+              readCheck: true,
             },
           },
         },
@@ -450,10 +457,14 @@ const internal = {
             score: {
               type: Number,
               default: -1,
+              writeCheck: true,
+              readCheck: true,
             },
 
             reviewer: {
               type: String,
+              writeCheck: true,
+              readCheck: true,
             },
           },
         },
