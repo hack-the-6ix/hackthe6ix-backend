@@ -1,0 +1,27 @@
+{
+  "openID": {
+    "permittedRedirectHosts": [],
+    "providers": [
+      {
+        "name": "organizer",
+        "authorization_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/auth",
+        "token_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/token",
+        "client_id": "<client id>",
+        "client_secret": "<client secret>",
+        "callback_url": "http://localhost:3005/auth/organizer/callback",
+        "userinfo_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/userinfo",
+        "logout_redirect_url": "https://example.com"
+      },
+      {
+        "name": "public",
+        "authorization_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/auth",
+        "token_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/token",
+        "client_id": "<client id>",
+        "client_secret": "<client secret>",
+        "callback_url": "http://localhost:3005/auth/public/callback",
+        "userinfo_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/userinfo",
+        "logout_redirect_url": "https://example.com"
+        }
+    ]
+  }
+}

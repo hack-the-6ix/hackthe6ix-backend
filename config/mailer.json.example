@@ -1,0 +1,104 @@
+{
+  "templates": {
+    "applicationIncomplete": {
+      "subject": "Your Hack the 6ix application is incomplete",
+      "templateID": "8"
+    },
+    "applied": {
+      "subject": "Your Hack the 6ix application has been received",
+      "templateID": "9"
+    },
+    "confirmed": {
+      "subject": "You have successfully confirmed your spot at Hack the 6ix",
+      "templateID": "10"
+    },
+    "declined": {
+      "subject": "You have declined your invitation to Hack the 6ix",
+      "templateID": "11"
+    },
+    "accepted": {
+      "subject": "Welcome to Hack the 6ix",
+      "templateID": "12"
+    },
+    "rejected": {
+      "subject": "Hack the 6ix Application Status Update",
+      "templateID": "13"
+    },
+    "waitlisted": {
+      "subject": "Hack the 6ix Application Status Update",
+      "templateID": "14"
+    }
+  },
+  "lists": {
+    "applicationIncomplete": {
+      "listID": "PRfCSpwtuo",
+      "query": {
+        "groups.hacker": true,
+        "status.applied": false
+      }
+    },
+    "applied": {
+      "listID": "yMGUBShwkA",
+      "query": {
+        "$or": [
+          {
+            "groups.hacker": true,
+            "status.applied": true,
+            "status.accepted": false,
+            "status.rejected": false,
+            "status.waitlisted": false
+          },
+          {
+            "groups.hacker": true,
+            "status.statusReleased": false,
+            "status.applied": true
+          }
+        ]
+      }
+    },
+    "confirmed": {
+      "listID": "FxhldDmesB",
+      "query": {
+        "groups.hacker": true,
+        "status.confirmed": true
+      }
+    },
+    "declined": {
+      "listID": "WOJjclXUbL",
+      "query": {
+        "groups.hacker": true,
+        "status.declined": true
+      }
+    },
+    "accepted": {
+      "listID": "JXQiyonenl",
+      "query": {
+        "groups.hacker": true,
+        "status.accepted": true,
+        "status.confirmed": false,
+        "status.declined": false,
+        "status.statusReleased": true
+      }
+    },
+    "rejected": {
+      "listID": "JfVlttjhlt",
+      "query": {
+        "groups.hacker": true,
+        "status.rejected": true,
+        "status.confirmed": false,
+        "status.declined": false,
+        "status.statusReleased": true
+      }
+    },
+    "waitlisted": {
+      "listID": "KypeueiHiZ",
+      "query": {
+        "groups.hacker": true,
+        "status.waitlisted": true,
+        "status.confirmed": false,
+        "status.declined": false,
+        "status.statusReleased": true
+      }
+    }
+  }
+}
