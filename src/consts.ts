@@ -8,7 +8,7 @@ export const systemUser = {
   _id: new ObjectID('000000000000000000000000'),
   firstName: 'System',
   lastName: 'System',
-  samlNameID: 'system',
+  idpLinkID: 'system',
   email: 'system',
   groups: {
     admin: true,

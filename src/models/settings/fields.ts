@@ -3,20 +3,32 @@ import { ReadCheckRequest, WriteCheckRequest } from '../../types/checker';
 import { UniverseState } from '../../types/types';
 import { isAdmin, isOrganizer } from '../validator';
 
-const SAMLProvider = {
+const OpenIDProvider = {
   name: {
     type: String,
     required: true,
   },
-  idpCertificate: {
+  authorization_url: {
     type: String,
     required: true,
   },
-  sso_login_url: {
+  token_url: {
     type: String,
     required: true,
   },
-  sso_logout_url: {
+  client_id: {
+    type: String,
+    required: true,
+  },
+  client_secret: {
+    type: String,
+    required: true,
+  },
+  callback_url: {
+    type: String,
+    required: true,
+  },
+  userinfo_url: {
     type: String,
     required: true,
   },
@@ -26,26 +38,18 @@ const SAMLProvider = {
   },
 };
 
-const saml = {
+const openID = {
 
   writeCheck: false,
   readCheck: false,
 
   FIELDS: {
-    private_key: {
-      type: String,
-      required: true,
-    },
-    certificate: {
-      type: String,
-      required: true,
-    },
     permittedRedirectHosts: {
       type: [String],
       required: true,
     },
     providers: {
-      type: [SAMLProvider],
+      type: [OpenIDProvider],
     },
   },
 };
@@ -119,22 +123,23 @@ export const fields = {
   writeCheck: (request: WriteCheckRequest<any, ISettings>) => isAdmin(request.requestUser),
 
   FIELDS: {
-    saml: saml,
+    openID: openID,
 
     universe: universe,
   },
 };
 
 export interface ISettings extends mongoose.Document {
-  saml: {
-    private_key: string,
-    certificate: string,
+  openID: {
     permittedRedirectHosts: string[],
     providers: {
       name: string,
-      idpCertificate: string,
-      sso_login_url: string,
-      sso_logout_url: string,
+      authorization_url: string,
+      token_url: string,
+      client_id: string,
+      client_secret: string,
+      callback_url: string,
+      userinfo_url: string,
       logout_redirect_url: string
     }[]
   },

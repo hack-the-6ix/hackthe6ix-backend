@@ -1,23 +1,27 @@
 {
-  "saml": {
-    "private_key": "<SP Private Key>",
-    "certificate": "<SP Certificate>",
+  "openID": {
     "permittedRedirectHosts": [],
     "providers": [
       {
         "name": "organizer",
-        "idpCertificate": "<IDP Certificate>",
-        "sso_login_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/organizer/protocol/saml",
+        "authorization_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/auth",
+        "token_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/token",
+        "client_id": "<client id>",
+        "client_secret": "<client secret>",
+        "callback_url": "http://localhost:3005/auth/organizer/callback",
+        "userinfo_url": "https://auth.example.com/auth/realms/organizer/protocol/openid-connect/userinfo",
         "logout_redirect_url": "https://example.com"
       },
       {
         "name": "public",
-        "idpCertificate": "<IDP Certificate>",
-        "sso_login_url": "https://auth.example.com/auth/realms/public/protocol/saml",
-        "sso_logout_url": "https://auth.example.com/auth/realms/public/protocol/saml",
+        "authorization_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/auth",
+        "token_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/token",
+        "client_id": "<client id>",
+        "client_secret": "<client secret>",
+        "callback_url": "http://localhost:3005/auth/public/callback",
+        "userinfo_url": "https://auth.example.com/auth/realms/public/protocol/openid-connect/userinfo",
         "logout_redirect_url": "https://example.com"
-      }
+        }
     ]
   }
 }

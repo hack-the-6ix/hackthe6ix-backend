@@ -11,6 +11,10 @@ export const verifyToken = (token: string): Record<string, any> => {
   }) as Record<string, any>;
 };
 
+export const decodeToken = (token: string): Record<string, any> => {
+  return jwt.decode(token) as Record<string, any>;
+};
+
 export const createJwt = (data: Record<string, unknown>): string => {
   return jwt.sign(data, process.env.JWT_SECRET, {
     algorithm: 'HS256',
@@ -23,7 +27,7 @@ export const createJwt = (data: Record<string, unknown>): string => {
 export const authenticate = async (token: string): Promise<IUser> | null => {
   const tokenData = verifyToken(token);
   const userInfo = await User.findOne({
-    samlNameID: tokenData.samlNameID,
+    idpLinkID: tokenData.idpLinkID,
   }) as IUser;
 
   if (userInfo.lastLogout > tokenData.iat) {
