@@ -548,7 +548,7 @@ Users should go to the login URL specified here to begin the SSO flow.
 ##### Output Specification
 ```
 {
-  "loginUrl": "https://auth.hackthe6ix.com/auth/reams/..." // The full login URL would be here
+  "loginUrl": "https://auth.hackthe6ix.com/auth/realms/..." // The full login URL would be here
 }
 ```
 

@@ -1,14 +1,13 @@
-import User from "../models/user/User";
-import {BadRequestError, InternalServerError} from "../types/errors";
-import * as permissions from "../services/permissions";
-import syncMailingLists from "../services/mailer/syncMailingLists";
-import Settings from "../models/settings/Settings";
-import {fetchSAMLBundle} from "../services/multisaml";
-
-import {IdentityProvider, SAMLAssertResponse, ServiceProvider} from "saml2-js";
-import {ISettings} from "../models/settings/fields";
-import {ArrayElement} from "../../@types/utilitytypes";
-import {ActionSpec} from "../../@types/logger";
+import { IdentityProvider, SAMLAssertResponse, ServiceProvider } from 'saml2-js';
+import { ActionSpec } from '../../@types/logger';
+import { ArrayElement } from '../../@types/utilitytypes';
+import { ISettings } from '../models/settings/fields';
+import Settings from '../models/settings/Settings';
+import User from '../models/user/User';
+import syncMailingLists from '../services/mailer/syncMailingLists';
+import { fetchSAMLBundle } from '../services/multisaml';
+import * as permissions from '../services/permissions';
+import { BadRequestError, InternalServerError } from '../types/errors';
 
 async function _handleLogin(saml_response:SAMLAssertResponse, relayState:Record<string, string>):Promise<ActionSpec> {
     // Receives the IDP's response after an authentication request.
@@ -185,7 +184,7 @@ export const handleACS = (providerName:string, requestBody:Record<string, unknow
         })
 
     });
-}
+};
 
 export const handleLogin = async (providerName:string, redirectTo?:string):Promise<Record<string, string>> => {
     return new Promise<Record<string, string>>((resolve, reject) => {
@@ -209,7 +208,7 @@ export const handleLogin = async (providerName:string, redirectTo?:string):Promi
             return reject(err);
         })
     });
-}
+};
 
 export const handleLogout = async (providerName:string, token:string):Promise<Record<string, string>> => {
     return new Promise<Record<string, string>>((resolve, reject) => {
@@ -233,4 +232,4 @@ export const handleLogout = async (providerName:string, token:string):Promise<Re
             });
         });
     });
-}
+};
