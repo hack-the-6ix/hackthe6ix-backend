@@ -155,25 +155,29 @@ export const handleACS = (providerName:string, requestBody:Record<string, unknow
                         // do nothing, invalid relay state
                     }
                 }
+                try {
+                    if (saml_response.type == 'logout_request') {
+                        /*
+                        logout_request is called when a logout is generated from another application.
+                        We need to destroy the user's session on our end and redirect back to the IDP.
+                         */
+                        return resolve(await _handleLogoutRequest(sp, idp, saml_response));
 
-                if (saml_response.type == 'logout_request') {
-                    /*
-                    logout_request is called when a logout is generated from another application.
-                    We need to destroy the user's session on our end and redirect back to the IDP.
-                     */
-                    return resolve(await _handleLogoutRequest(sp, idp, saml_response));
+                    } else if (saml_response.type == 'logout_response') {
+                        const samlInfo = await Settings.findOne({}, 'saml');
 
-                } else if (saml_response.type == 'logout_response') {
-                    const samlInfo = await Settings.findOne({}, 'saml');
+                        const provider = _getProviderByName(samlInfo, providerName);
 
-                    const provider = _getProviderByName(samlInfo, providerName);
-
-                    return resolve({
-                        action: "redirect",
-                        data: provider.logout_redirect_url
-                    });
-                } else {
-                    return resolve(await _handleLogin(saml_response, relayState));
+                        return resolve({
+                            action: "redirect",
+                            data: provider.logout_redirect_url
+                        });
+                    } else {
+                        return resolve(await _handleLogin(saml_response, relayState));
+                    }
+                }
+                catch(err) {
+                    return reject(err);
                 }
             });
         }).catch((err) => {
