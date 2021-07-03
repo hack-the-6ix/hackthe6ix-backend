@@ -133,6 +133,16 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    phoneNumber: {
+      type: String,
+      caption: 'Phone Number',
+      inTextSearch: true,
+
+      writeCheck: maxLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
+      readCheck: true,
+    },
+
     gender: {
       type: String,
       caption: 'Gender',
@@ -966,6 +976,7 @@ export interface IMailMerge {
 }
 
 export interface IApplication {
+  phoneNumber: string,
   teamCode: string,
   emailConsent: boolean,
   gender: string,
