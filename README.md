@@ -14,9 +14,12 @@ $ cd backend
 $ curl -O https://raw.githubusercontent.com/hack-the-6ix/hackthe6ix-backend/main/docker-compose.yml 
 $ # Go setup mailer and authentication as detailed below in data/backend-files/config
 $ # Go set up the .env file and place it in backend
-$ docker-compose up
+$ docker-compose up -d
 ```
 The server should be up and running on https://localhost:6971, or whatever is configured in `.env`.
+
+In `.env`, set `DATABASE` to `mongodb://mongo:27017/ht6-backend` to use the MongoDB instance hosted
+together with the backend.
 
 #### Mailer
 We are using Mailtrain (https://github.com/hack-the-6ix/mailtrain) to handle mailing lists and 
@@ -32,7 +35,7 @@ data.
 **NOTE: In development mode, ALL EMAILS will land in `dev_logs` instead of being actually sent**
 
 #### Authentication
-You will also need to configure SAML authentication. Copy `config/settings.json.example` to `confing/settings.json`and configure the settings as desired.
+You will also need to configure SSO authentication. Copy `config/settings.json.example` to `confing/settings.json`and configure the settings as desired.
 For certificates, you must encode the PEM certificate (with headers) to base64. Note that you can add as many providers as desired, the given ones are there as examples.
 
 

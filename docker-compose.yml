@@ -10,3 +10,12 @@ services:
       - .env
     volumes:
       - ./data/backend-files/config:/usr/ht6/server/config
+  mongo:
+    image: mongo:4-xenial
+    restart: always
+    volumes:
+      - ./data/mongo-data:/data/db
+networks:
+  default:
+    external:
+      name: ht6_backend
