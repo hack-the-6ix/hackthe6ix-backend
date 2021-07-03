@@ -4,6 +4,20 @@ View [API Documentation](api.md) for a detailed breakdown of the API.
 
 ## Setup
 
+#### Docker
+Note that if this repo is private, the curl may not work correctly and will instead require an alternate
+method of downloading `docker-compose.yml`.
+
+```bash
+$ mkdir -p backend/data/backend-files/config
+$ cd backend
+$ curl -O https://raw.githubusercontent.com/hack-the-6ix/hackthe6ix-backend/main/docker-compose.yml 
+$ # Go setup mailer and authentication as detailed below in data/backend-files/config
+$ # Go set up the .env file and place it in backend
+$ docker-compose up
+```
+The server should be up and running on https://localhost:6971, or whatever is configured in `.env`.
+
 #### Mailer
 We are using Mailtrain (https://github.com/hack-the-6ix/mailtrain) to handle mailing lists and 
 general email sending. As such, you should have an instance running prior to starting the backend,
