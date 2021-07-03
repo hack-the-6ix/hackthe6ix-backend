@@ -1,9 +1,9 @@
 import express, { Request, Response, Router } from 'express';
+import { handleACS, handleLogin, handleLogout } from '../controller/AuthController';
+
+import { logResponse } from '../services/logger';
 
 import { fetchSP } from '../services/multisaml';
-
-import {logResponse} from "../services/logger";
-import {handleACS, handleLogin, handleLogout} from "../controller/AuthController";
 
 const router: Router = express.Router();
 
@@ -17,28 +17,28 @@ router.get('/:provider/metadata.xml', async (req: Request, res: Response) => {
 // Starting point for login
 router.get('/:provider/login', async (req: Request, res: Response) => {
   logResponse(
-      req,
-      res,
-      handleLogin(req.params.provider, req.query.redirectTo as string)
-  )
+    req,
+    res,
+    handleLogin(req.params.provider, req.query.redirectTo as string),
+  );
 });
 
 // Assert endpoint for when login completes
 router.post('/:provider/acs', async (req: Request, res: Response) => {
   logResponse(
-      req,
-      res,
-      handleACS(req.params.provider, req.body),
-      true
-  )
+    req,
+    res,
+    handleACS(req.params.provider, req.body),
+    true,
+  );
 });
 
 // Starting point for logout
 router.post('/:provider/logout', async (req: Request, res: Response) => {
   logResponse(
-      req,
-      res,
-      handleLogout(req.params.provider, req.body.token)
-  )
+    req,
+    res,
+    handleLogout(req.params.provider, req.body.token),
+  );
 });
 export default router;

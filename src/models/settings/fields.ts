@@ -22,8 +22,8 @@ const SAMLProvider = {
   },
   logout_redirect_url: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 };
 
 const saml = {
@@ -42,7 +42,7 @@ const saml = {
     },
     permittedRedirectHosts: {
       type: [String],
-      required: true
+      required: true,
     },
     providers: {
       type: [SAMLProvider],

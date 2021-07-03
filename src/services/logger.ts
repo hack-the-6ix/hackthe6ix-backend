@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
+import { ActionSpec } from '../../@types/logger';
 import { HTTPError } from '../types/errors';
-import {ActionSpec} from "../../@types/logger";
 
 /**
  * Handles the promise from APIs calls and handles errors, or forwards data for a successful req.
@@ -9,7 +9,7 @@ import {ActionSpec} from "../../@types/logger";
  * @param res
  * @param promise
  */
-export const logResponse = (req: Request, res: Response, promise: Promise<any>,extendedActions=false) => {
+export const logResponse = (req: Request, res: Response, promise: Promise<any>, extendedActions = false) => {
 
   promise
   .then((data) => {
@@ -17,20 +17,18 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>,e
       console.log(`[${new Date()}] [${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
-    if(extendedActions){
+    if (extendedActions) {
       const actionSpec = data as ActionSpec;
 
-      if(actionSpec.action === "respond"){
+      if (actionSpec.action === 'respond') {
         return res.json({
           status: 200,
-          message: actionSpec.data
-        })
-      }
-      else if(actionSpec.action === "redirect"){
+          message: actionSpec.data,
+        });
+      } else if (actionSpec.action === 'redirect') {
         return res.redirect(actionSpec.data);
       }
-    }
-    else {
+    } else {
       return res.json({
         status: 200,
         message: data,
