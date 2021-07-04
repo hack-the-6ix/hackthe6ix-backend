@@ -1,4 +1,7 @@
+import schools from './schools';
+
 export const enumOptions = {
+  school: schools,
   programOfStudy: [
     'Engineering',
     'Computer Science',
