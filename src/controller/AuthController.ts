@@ -2,6 +2,8 @@
 // import { ActionSpec } from '../../@types/logger';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
+import { ITokenset } from '../models/tokenset/fields';
+import Tokenset from '../models/tokenset/Tokenset';
 // import Settings from '../models/settings/Settings';
 // import User from '../models/user/User';
 // import syncMailingLists from '../services/mailer/syncMailingLists';
@@ -230,3 +232,18 @@ export const getProviderByName = (settings: ISettings, providerName: string): Ar
 //     });
 //   });
 // };
+export const pushKeys = async (token: string, refreshToken:string):Promise<string> => {
+  const tokenset = await Tokenset.create({
+    token, refreshToken
+  });
+
+  return tokenset.id;
+}
+
+export const retrieveKeys = async (tokensetID:string):Promise<ITokenset> => {
+  const tokenset = await Tokenset.findOneAndDelete({
+    _id: tokensetID
+  });
+
+  return tokenset;
+}
