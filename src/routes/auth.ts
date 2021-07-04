@@ -5,6 +5,7 @@ import passport from 'passport';
 import OAuthStrategy, { VerifyCallback } from 'passport-oauth2';
 import { getProviderByName } from '../controller/AuthController';
 import Settings from '../models/settings/Settings';
+import { fields } from '../models/user/fields';
 import User from '../models/user/User';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import * as permissions from '../services/permissions';
@@ -47,9 +48,10 @@ const issueLocalToken = async (assertAttributes: Record<string, any>): Promise<s
   const groups: any = {};
 
   // Update the groups this user is in in the database
-  for (const group of assertAttributes.groups || []) {
-    // Remove the leading /
-    groups[group.substring(1)] = true;
+  // Ensure that we set all the groups the user is not in to FALSE and not NULL
+  for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
+    //                                              Assertion includes group with leading /
+    groups[group] = assertAttributes.groups.indexOf(`/${group}`) !== -1;
   }
 
   const userInfo = await User.findOneAndUpdate({
