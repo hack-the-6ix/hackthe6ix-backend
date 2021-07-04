@@ -59,6 +59,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
+            statusReleased: true,
           },
         });
 
@@ -84,6 +85,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
+            statusReleased: true,
           },
         });
 
@@ -111,6 +113,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
+            statusReleased: true,
           },
           personalConfirmationDeadline: new Date().getTime() + 10000,
         });
@@ -137,6 +140,7 @@ describe('RSVP', () => {
           ...hackerUser,
           status: {
             accepted: true,
+            statusReleased: true,
           },
           personalConfirmationDeadline: new Date().getTime() - 10000,
         });
@@ -166,6 +170,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: false,
+          statusReleased: true,
         },
       });
 
@@ -192,6 +197,7 @@ describe('RSVP', () => {
         status: {
           accepted: true,
           declined: true,
+          statusReleased: true,
         },
       });
 
@@ -209,6 +215,31 @@ describe('RSVP', () => {
       expect(resultObject.toJSON().status.confirmed).toEqual(false);
       expect(resultObject.toJSON().status.declined).toEqual(true);
     });
+
+    test('Status not released', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create({
+        ...hackerUser,
+        status: {
+          accepted: true,
+          statusReleased: false,
+        },
+      });
+
+      expect(rsvp(
+        user,
+        {
+          attending: true,
+        },
+      )).rejects.toThrow(RSVPRejectedError);
+
+      const resultObject = await User.findOne({
+        _id: user._id,
+      });
+
+      expect(resultObject.toJSON().status.confirmed).toEqual(false);
+    });
   });
 
   describe('Confirmation State', () => {
@@ -219,6 +250,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: true,
+          statusReleased: true,
         },
       });
 
@@ -257,6 +289,7 @@ describe('RSVP', () => {
         ...hackerUser,
         status: {
           accepted: true,
+          statusReleased: true,
         },
       });
 
