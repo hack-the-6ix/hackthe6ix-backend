@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { extractFields } from '../util';
-import { enumOptions, fields, IUser } from './fields';
+import { enumOptions } from './enums';
+import { fields, IUser } from './fields';
 
 const schema = new mongoose.Schema(extractFields(fields), {
   toObject: {
@@ -54,6 +55,26 @@ schema.virtual('roles').get(function() {
 
 schema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
+});
+
+schema.virtual('status.textStatus').get(function() {
+  if (this?.status?.declined) {
+    return 'Declined';
+  } else if (this.status?.checkedIn) {
+    return 'Checked In';
+  } else if (this?.status?.confirmed) {
+    return 'Confirmed';
+  } else if (this?.status?.accepted && this?.status?.statusReleased) {
+    return 'Accepted';
+  } else if (this?.status?.waitlisted && this?.status?.statusReleased) {
+    return 'Waitlisted';
+  } else if (this?.status?.rejected && this?.status?.statusReleased) {
+    return 'Rejected';
+  } else if (this?.status?.applied) {
+    return 'Applied';
+  }
+
+  return 'Not Applied';
 });
 
 schema.virtual('internal.computedApplicationScore').get(function() {

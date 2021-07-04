@@ -180,7 +180,10 @@ describe('Get statistics', () => {
           promises.push(User.create({
             ...hackerUser,
             _id: mongoose.Types.ObjectId(),
-            status: status,
+            status: {
+              ...status,
+              statusReleased: true,
+            },
           }));
         }
 
@@ -189,7 +192,7 @@ describe('Get statistics', () => {
 
       await Promise.all(promises);
       const statistics = await getStatistics(true);
-      expect(statistics.hacker.status).toEqual(expectedStatus);
+      expect(statistics.hacker.status).toMatchObject(expectedStatus);
     });
 
     test('Gender', async () => {

@@ -1,6 +1,7 @@
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
-import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
+import { enumOptions } from '../../../models/user/enums';
+import { IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/errors';
 import {
@@ -100,6 +101,7 @@ describe('Update Real Application', () => {
       timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
+      phoneNumber: '123123123',
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
@@ -178,6 +180,7 @@ describe('Submit Real Application', () => {
       timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
+      phoneNumber: '123123123',
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
@@ -315,6 +318,7 @@ describe('Submit Real Application', () => {
         hackathonsAttended: enumOptions['hackathonsAttended'][0],
         resumeSharePermission: true,
         githubLink: 'GitHub',
+        phoneNumber: '123123123',
         portfolioLink: 'Portfolio',
         linkedinLink: 'LinkedIn',
         projectEssay: 'X '.repeat(50),
@@ -362,6 +366,7 @@ describe('Submit Real Application', () => {
         ethnicity: enumOptions['ethnicity'][0],
         timezone: enumOptions['timezone'][0],
         wantSwag: true,
+        phoneNumber: '123123123',
         addressLine1: 'asdasdsdasdsa',
         addressLine2: '',
         city: 'asdasdas',
@@ -423,6 +428,7 @@ describe('Submit Real Application', () => {
         addressLine1: '',
         addressLine2: '',
         city: 'asdasdas',
+        phoneNumber: '123123123',
         province: enumOptions['province'][0],
         postalCode: 'N0B4V3',
         school: 'University of Toronto',

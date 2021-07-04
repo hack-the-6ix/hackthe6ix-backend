@@ -1,5 +1,6 @@
 import { Mongoose } from 'mongoose';
-import { enumOptions, fields, IApplication, IUser } from '../models/user/fields';
+import { enumOptions } from '../models/user/enums';
+import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -192,7 +193,7 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     throw new DeadlineExpiredError('The RSVP deadline has passed!');
   }
 
-  if (requestUser.status.accepted && !requestUser.status.declined) {
+  if (requestUser.status.statusReleased && requestUser.status.accepted && !requestUser.status.declined) {
 
     const isAttending = !!rsvp.attending;
 
