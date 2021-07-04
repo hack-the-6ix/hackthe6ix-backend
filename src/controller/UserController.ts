@@ -193,7 +193,7 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     throw new DeadlineExpiredError('The RSVP deadline has passed!');
   }
 
-  if (requestUser.status.accepted && !requestUser.status.declined) {
+  if (requestUser.status.statusReleased && requestUser.status.accepted && !requestUser.status.declined) {
 
     const isAttending = !!rsvp.attending;
 

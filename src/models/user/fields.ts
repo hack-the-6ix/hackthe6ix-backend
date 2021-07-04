@@ -411,6 +411,14 @@ const status = {
   readCheck: true,
 
   FIELDS: {
+    textStatus: {
+      type: String,
+      virtual: true,
+      caption: 'Status',
+
+      readCheck: true,
+    },
+
     // Only admins can read this field
     statusReleased: {
       type: Boolean,
@@ -847,7 +855,9 @@ export interface IStatus {
 
   // Intercepted fields (since they require universe state)
   canApply?: boolean,
-  canConfirm?: boolean
+  canConfirm?: boolean,
+
+  textStatus: string
 }
 
 export interface IUser extends mongoose.Document {

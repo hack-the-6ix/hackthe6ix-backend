@@ -3,6 +3,7 @@ import { timestampFormat } from '../../../consts';
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions } from '../../../models/user/enums';
+import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import {
   canUpdateApplication,
@@ -273,6 +274,164 @@ describe('Interceptor', () => {
 });
 
 describe('Virtual', () => {
+  describe('Text Status', () => {
+
+    test('Not applied', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.textStatus).toEqual('Not Applied');
+    });
+
+    test('Applied', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+      });
+
+      expect(user.status.textStatus).toEqual('Applied');
+    });
+
+    describe('Status Released', () => {
+      test('Accepted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Accepted');
+      });
+      test('Rejected', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            rejected: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Rejected');
+      });
+      test('Waitlisted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            waitlisted: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Waitlisted');
+      });
+    });
+    describe('Status Not Released', () => {
+      test('Accepted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Applied');
+      });
+      test('Rejected', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            rejected: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Applied');
+      });
+      test('Waitlisted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            waitlisted: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.textStatus).toEqual('Applied');
+      });
+    });
+
+    test('Declined', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          declined: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.textStatus).toEqual('Declined');
+    });
+
+    test('Confirmed', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.textStatus).toEqual('Confirmed');
+    });
+
+    test('Checked In', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          checkedIn: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.textStatus).toEqual('Checked In');
+    });
+
+    test('Checked In and Declined', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          checkedIn: true,
+          declined: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.textStatus).toEqual('Declined');
+    });
+  });
+
   describe('Computed Application Score', () => {
     test('No scores', async () => {
       const user = await User.create(hackerUser);
