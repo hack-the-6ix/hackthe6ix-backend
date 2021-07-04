@@ -58,3 +58,12 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      # Trigger deployment
+      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+        with:
+          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
+          workflow_file_name: deploy-container.yml
+          inputs: '{ "tag": "${{ github.event.inputs.tag }}", "dockerrepo": "${{ github.event.inputs.dockerrepo }}" }'
+          repo: ${{ github.event.repository.name }}
+          owner: hack-the-6ix

@@ -1,0 +1,32 @@
+name: Deploy docker container to server
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Specific container tag from preview container repository'
+        required: true
+      dockerrepo:
+        description: 'Docker Repo to deploy images to'
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Check if image exists
+      - name: Precheck
+        run: curl --silent -f -lSL https://hub.docker.com/v2/repositories/hackthe6ix/${REPO}/tags/${TAG} > /dev/null
+        env:
+          REPO: ${{ github.event.inputs.dockerrepo }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      # Create build
+      - name: Run deploy backend
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          script: /scripts/deploy-backend.sh -t ${{ github.event.inputs.tag }} -d hackthe6ix/${{ github.event.inputs.dockerrepo }}
