@@ -1,5 +1,6 @@
 import { Mongoose } from 'mongoose';
-import { enumOptions, fields, IApplication, IUser } from '../models/user/fields';
+import { enumOptions } from '../models/user/enums';
+import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
