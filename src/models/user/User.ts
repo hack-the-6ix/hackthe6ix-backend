@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { extractFields } from '../util';
-import { enumOptions, fields, IUser } from './fields';
+import { enumOptions } from './enums';
+import { fields, IUser } from './fields';
 
 const schema = new mongoose.Schema(extractFields(fields), {
   toObject: {

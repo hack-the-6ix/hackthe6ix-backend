@@ -1,6 +1,7 @@
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
-import { enumOptions, IApplication, IUser } from '../../../models/user/fields';
+import { enumOptions } from '../../../models/user/enums';
+import { IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import { SubmissionDeniedError, WriteDeniedError } from '../../../types/errors';
 import {

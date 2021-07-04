@@ -2,7 +2,7 @@ import moment from 'moment';
 import { timestampFormat } from '../../../consts';
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
-import { enumOptions } from '../../../models/user/fields';
+import { enumOptions } from '../../../models/user/enums';
 import User from '../../../models/user/User';
 import {
   canUpdateApplication,
