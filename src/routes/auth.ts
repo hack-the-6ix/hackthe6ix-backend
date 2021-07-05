@@ -197,8 +197,10 @@ router.post('/:provider/refresh', async (req: Request, res: Response, next: Next
 
     return res.json({
       status: 200,
-      token: token,
-      refreshToken: newTokens['refreshToken'],
+      message: {
+        token: token,
+        refreshToken: newTokens['refreshToken'],
+      },
     });
   } catch (err) {
     console.log(err);
@@ -220,13 +222,17 @@ router.post('/:provider/logout', async (req: Request, res: Response, next: NextF
     await User.findOneAndUpdate({
       idpLinkID: tokenInfo.sub,
     }, {
-      lastLogout: Date.now(),
+      lastLogout: new Date().getTime(),
     });
   } catch (err) {
     console.log(err);
     console.log('Unable to revoke past sessions.');
   }
 
+  return res.json({
+    status: 200,
+    message: 'ok',
+  });
   // TODO: Request logout to IDP
 
 });
