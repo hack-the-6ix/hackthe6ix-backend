@@ -117,7 +117,9 @@ export const hackerApplication = {
       caption: 'Address Line 1',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? minLength(1)(request) && maxLength(64)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
@@ -129,7 +131,9 @@ export const hackerApplication = {
       caption: 'Address Line 2',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? maxLength(64)(request)
         : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
@@ -141,7 +145,9 @@ export const hackerApplication = {
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? minLength(1)(request) && maxLength(64)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
@@ -154,8 +160,11 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? inEnum(enumOptions.province, true)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? inEnum(enumOptions.province)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
       readCheck: true,
     },
 
@@ -164,7 +173,9 @@ export const hackerApplication = {
       caption: 'Postal Code',
       inTextSearch: true,
 
-      writeCheck: maxLength(7),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(7)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? validatePostalCode()(request)
         : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
