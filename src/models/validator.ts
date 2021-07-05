@@ -29,7 +29,11 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
   return true;
 };
 
-export const inEnum = (validStates: string[]) => (request: WriteCheckRequest<string, any>) => validStates.indexOf(request?.fieldValue) != -1;
+/**
+ * @param validStates
+ * @param unstrict - when true, falsy values will pass the test
+ */
+export const inEnum = (validStates: string[], unstrict?: boolean) => (request: WriteCheckRequest<string, any>) => (unstrict && !request?.fieldValue) || validStates.indexOf(request?.fieldValue) != -1;
 
 export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.requestUser.status.applied;
 

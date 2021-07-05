@@ -43,7 +43,6 @@ export const hackerApplication = {
       submitCheck: true,
     },
 
-
     /* About You */
     emailConsent: {
       type: Boolean,
@@ -68,7 +67,8 @@ export const hackerApplication = {
       caption: 'Gender',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.gender),
+      writeCheck: inEnum(enumOptions.gender, true),
+      submitCheck: inEnum(enumOptions.gender),
       readCheck: true,
     },
 
@@ -77,7 +77,8 @@ export const hackerApplication = {
       caption: 'Pronouns',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.pronouns),
+      writeCheck: inEnum(enumOptions.pronouns, true),
+      submitCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
@@ -86,7 +87,8 @@ export const hackerApplication = {
       caption: 'Ethnicity',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.ethnicity),
+      writeCheck: inEnum(enumOptions.ethnicity, true),
+      submitCheck: inEnum(enumOptions.ethnicity),
       readCheck: true,
     },
 
@@ -95,7 +97,8 @@ export const hackerApplication = {
       caption: 'Timezone',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.timezone),
+      writeCheck: inEnum(enumOptions.timezone, true),
+      submitCheck: inEnum(enumOptions.timezone),
       readCheck: true,
     },
 
@@ -194,7 +197,8 @@ export const hackerApplication = {
       caption: 'Years of study',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.yearsOfStudy),
+      writeCheck: inEnum(enumOptions.yearsOfStudy, true),
+      submitCheck: inEnum(enumOptions.yearsOfStudy),
       readCheck: true,
     },
 
@@ -203,7 +207,8 @@ export const hackerApplication = {
       caption: 'Hackathons attended',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.hackathonsAttended),
+      writeCheck: inEnum(enumOptions.hackathonsAttended, true),
+      submitCheck: inEnum(enumOptions.hackathonsAttended),
       readCheck: true,
     },
 

@@ -255,7 +255,7 @@ export const flattenFields = (fields: any, prefix = '') => {
     const value = fields[k];
     const name = `${prefix}${prefix.length > 0 ? '.' : ''}${k}`;
 
-    if (value.constructor === Object) {
+    if (value?.constructor === Object) {
       out = {
         ...out,
         ...flattenFields(value, name),

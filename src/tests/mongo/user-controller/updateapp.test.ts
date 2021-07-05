@@ -243,6 +243,37 @@ describe('Update Application', () => {
         optionalField2: 'Test',
       });
     });
+
+    test('Merge', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create({
+        ...hackerUser,
+        status: {
+          applied: false,
+        },
+        hackerApplication: {
+          optionalField: 'foobar',
+        },
+      });
+
+      await updateApplication(
+        user.toJSON(),
+        false,
+        {
+          optionalField2: 'Test',
+        } as any,
+      );
+
+      const resultObject = await User.findOne({
+        _id: hackerUser._id,
+      });
+
+      expect(resultObject.toJSON().hackerApplication).toEqual({
+        optionalField2: 'Test',
+        optionalField: 'foobar',
+      });
+    });
   });
 
   describe('Fail', () => {
