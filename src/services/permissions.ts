@@ -30,7 +30,7 @@ export const authenticate = async (token: string): Promise<IUser> | null => {
     idpLinkID: tokenData.idpLinkID,
   }) as IUser;
 
-  if (userInfo.lastLogout > tokenData.iat) {
+  if (userInfo.lastLogout > tokenData.iat * 1000) {
     return null;
   }
 
