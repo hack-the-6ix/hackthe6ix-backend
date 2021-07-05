@@ -9,12 +9,13 @@ import {
   WriteCheckRequest,
 } from '../../types/checker';
 import {
+  canConfirm,
   canUpdateApplication,
   getApplicationDeadline,
   getConfirmationDeadline,
   inEnum,
   isAdmin,
-  isConfirmationOpen,
+  isApplicationOpen,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -43,7 +44,6 @@ export const hackerApplication = {
       submitCheck: true,
     },
 
-
     /* About You */
     emailConsent: {
       type: Boolean,
@@ -68,7 +68,8 @@ export const hackerApplication = {
       caption: 'Gender',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.gender),
+      writeCheck: inEnum(enumOptions.gender, true),
+      submitCheck: inEnum(enumOptions.gender),
       readCheck: true,
     },
 
@@ -77,7 +78,8 @@ export const hackerApplication = {
       caption: 'Pronouns',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.pronouns),
+      writeCheck: inEnum(enumOptions.pronouns, true),
+      submitCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
@@ -86,7 +88,8 @@ export const hackerApplication = {
       caption: 'Ethnicity',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.ethnicity),
+      writeCheck: inEnum(enumOptions.ethnicity, true),
+      submitCheck: inEnum(enumOptions.ethnicity),
       readCheck: true,
     },
 
@@ -95,7 +98,8 @@ export const hackerApplication = {
       caption: 'Timezone',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.timezone),
+      writeCheck: inEnum(enumOptions.timezone, true),
+      submitCheck: inEnum(enumOptions.timezone),
       readCheck: true,
     },
 
@@ -114,7 +118,9 @@ export const hackerApplication = {
       caption: 'Address Line 1',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? minLength(1)(request) && maxLength(64)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
@@ -126,7 +132,9 @@ export const hackerApplication = {
       caption: 'Address Line 2',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? maxLength(64)(request)
         : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
@@ -138,7 +146,9 @@ export const hackerApplication = {
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(64)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? minLength(1)(request) && maxLength(64)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
@@ -151,8 +161,11 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? inEnum(enumOptions.province, true)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? inEnum(enumOptions.province)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsu,
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
       readCheck: true,
     },
 
@@ -161,7 +174,9 @@ export const hackerApplication = {
       caption: 'Postal Code',
       inTextSearch: true,
 
-      writeCheck: maxLength(7),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+        ? maxLength(7)
+        : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? validatePostalCode()(request)
         : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
@@ -194,7 +209,8 @@ export const hackerApplication = {
       caption: 'Years of study',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.yearsOfStudy),
+      writeCheck: inEnum(enumOptions.yearsOfStudy, true),
+      submitCheck: inEnum(enumOptions.yearsOfStudy),
       readCheck: true,
     },
 
@@ -203,7 +219,8 @@ export const hackerApplication = {
       caption: 'Hackathons attended',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.hackathonsAttended),
+      writeCheck: inEnum(enumOptions.hackathonsAttended, true),
+      submitCheck: inEnum(enumOptions.hackathonsAttended),
       readCheck: true,
     },
 
@@ -513,6 +530,20 @@ const status = {
     },
 
     // Intercepted fields (virtual fields, but we populate them)
+    canAmendTeam: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Can Amend Team',
+
+      readCheck: true,
+
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isApplicationOpen({
+        ...request,
+        fieldValue: undefined,
+        submissionObject: undefined,
+      }),
+    },
     canApply: {
       type: Boolean,
       required: true,
@@ -535,7 +566,7 @@ const status = {
 
       readCheck: true,
 
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isConfirmationOpen({
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canConfirm()({
         ...request,
         fieldValue: undefined,
         submissionObject: undefined,
@@ -854,6 +885,7 @@ export interface IStatus {
   checkedIn?: boolean,
 
   // Intercepted fields (since they require universe state)
+  canAmendTeam?: boolean,
   canApply?: boolean,
   canConfirm?: boolean,
 
