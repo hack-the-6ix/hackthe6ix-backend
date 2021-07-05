@@ -55,7 +55,7 @@ filtered out as part of field sanitation.
 ```
 {
   status: 200,
-  data: [
+  message: [
     {
        ...results1
     },
@@ -93,7 +93,7 @@ Edit existing objects. Changes are validated against `writeCheck` policy.
 ```
 {
   status: 200,
-  data: [ // IDs of objects that were changed
+  message: [ // IDs of objects that were changed
     "id1234",
     "id1235",
     ...
@@ -125,7 +125,7 @@ All objects that match the filter query will be deleted.
 ```
 {
   status: 200,
-  data: [ // IDs of objects that were deleted
+  message: [ // IDs of objects that were deleted
     "id1234",
     "id1235",
     ...
@@ -156,7 +156,7 @@ Note that all inputs will be validated using `writeCheck`.
 ```
 {
   status: 200,
-  data: "id1234" // ID of the new object is returned
+  message: "id1234" // ID of the new object is returned
 }
 ```
 
@@ -222,7 +222,7 @@ Get the sanitized user object corresponding to the requesting user.
 ```
 {
   status: 200,
-  data: {
+  message: {
     // User object goes here
   }
 }
@@ -493,7 +493,7 @@ who are ungraded in that category. If left blank, no category will be prioritize
 ```
 {
   status: 200,
-  data: {
+  message: {
     // User object goes here
   }
 }
@@ -520,7 +520,7 @@ ones and the dictionary will be merged (so omitted fields are unchanged).
 ```
 {
   status: 200,
-  data: "Success"
+  message: "Success"
 }
 ```
 
@@ -552,6 +552,29 @@ This endpoint is called after SSO authenticates the user and is used to issue th
 
 ##### Output Specification
 If `redirectTo` was set when requesting the login URL, the user will be redirected to that URL, provided its host is in `settings.saml.permittedRedirectHosts` with the query parameter `token` set to the user's token.
+
+### POST - Refresh Token
+`/auth/:provider/refresh`
+
+##### Input Specification
+`provider` refers to the name of the OpenID provider being operated on.
+
+```
+{
+  "refreshToken": "<refresh token goes here>"
+}
+```
+
+##### Output Specification
+```
+{
+  status: 200,
+  message: {
+    token: ...,
+    refreshToken: ...
+  }
+}
+```
 
 ### POST - Starting point for logout
 `/auth/:provider/logout`

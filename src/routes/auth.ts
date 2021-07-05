@@ -197,8 +197,10 @@ router.post('/:provider/refresh', async (req: Request, res: Response, next: Next
 
     return res.json({
       status: 200,
-      token: token,
-      refreshToken: newTokens['refreshToken'],
+      message: {
+        token: token,
+        refreshToken: newTokens['refreshToken'],
+      },
     });
   } catch (err) {
     console.log(err);
