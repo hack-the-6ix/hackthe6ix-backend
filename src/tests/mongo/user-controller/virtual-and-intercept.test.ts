@@ -6,10 +6,11 @@ import { enumOptions } from '../../../models/user/enums';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import {
+  canConfirm,
   canUpdateApplication,
   getApplicationDeadline,
   getConfirmationDeadline,
-  isConfirmationOpen,
+  isApplicationOpen,
 } from '../../../models/validator';
 import {
   generateMockUniverseState,
@@ -51,15 +52,37 @@ jest.mock('../../../models/validator', () => {
   return {
     ...validators,
     canUpdateApplication: jest.fn(),
-    isConfirmationOpen: jest.fn(),
+    canConfirm: jest.fn(),
     getApplicationDeadline: jest.fn(),
     getConfirmationDeadline: jest.fn(),
+    isApplicationOpen: jest.fn(),
   };
 });
 
 describe('Interceptor', () => {
+  describe('Can Amend Team', () => {
+    beforeEach(() => canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm));
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+
+    test('Success', async () => {
+      isApplicationOpen.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canAmendTeam).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isApplicationOpen.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canAmendTeam).toBeFalsy();
+    });
+  });
+
   describe('Can Apply', () => {
-    beforeEach(() => isConfirmationOpen.mockImplementation(jest.requireActual('../../../models/validator').isConfirmationOpen));
+    beforeEach(() => canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm));
 
     test('Success', async () => {
       canUpdateApplication.mockReturnValue(() => true);
@@ -82,7 +105,7 @@ describe('Interceptor', () => {
     beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
     test('Success', async () => {
-      isConfirmationOpen.mockReturnValue(true);
+      canConfirm.mockReturnValue(() => true);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
@@ -90,7 +113,7 @@ describe('Interceptor', () => {
     });
 
     test('Fail', async () => {
-      isConfirmationOpen.mockReturnValue(false);
+      canConfirm.mockReturnValue(() => false);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
@@ -99,7 +122,10 @@ describe('Interceptor', () => {
   });
 
   describe('Mail Merge', () => {
-    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+    beforeEach(() => {
+      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm);
+    });
 
     test('First Name', async () => {
       const user = await User.create(organizerUser);
@@ -132,6 +158,7 @@ describe('Interceptor', () => {
   describe('Computed Deadlines', () => {
     beforeEach(() => {
       canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm);
       getApplicationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getApplicationDeadline);
       getConfirmationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getConfirmationDeadline);
     });

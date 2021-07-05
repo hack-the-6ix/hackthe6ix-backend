@@ -9,12 +9,13 @@ import {
   WriteCheckRequest,
 } from '../../types/checker';
 import {
+  canConfirm,
   canUpdateApplication,
   getApplicationDeadline,
   getConfirmationDeadline,
   inEnum,
   isAdmin,
-  isConfirmationOpen,
+  isApplicationOpen,
   isOrganizer,
   isUserOrOrganizer,
   maxLength,
@@ -529,6 +530,20 @@ const status = {
     },
 
     // Intercepted fields (virtual fields, but we populate them)
+    canAmendTeam: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Can Amend Team',
+
+      readCheck: true,
+
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isApplicationOpen({
+        ...request,
+        fieldValue: undefined,
+        submissionObject: undefined,
+      }),
+    },
     canApply: {
       type: Boolean,
       required: true,
@@ -551,7 +566,7 @@ const status = {
 
       readCheck: true,
 
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isConfirmationOpen({
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canConfirm()({
         ...request,
         fieldValue: undefined,
         submissionObject: undefined,
@@ -870,6 +885,7 @@ export interface IStatus {
   checkedIn?: boolean,
 
   // Intercepted fields (since they require universe state)
+  canAmendTeam?: boolean,
   canApply?: boolean,
   canConfirm?: boolean,
 
