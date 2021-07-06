@@ -117,3 +117,26 @@ export const testCanUpdateApplication = async (requestUser: IUser, writeRequest?
     }
   }
 };
+
+/**
+ * Throws an error if the user cannot update their application.
+ *
+ * If requestUser is provided, we will handle fetching the universe state and generating the writeRequest automatically
+ */
+export const testCanUpdateTeam = async (requestUser: IUser, writeRequest?: WriteCheckRequest<any, any>) => {
+  if (!writeRequest) {
+    const universeState = await fetchUniverseState();
+
+    writeRequest = {
+      requestUser: requestUser,
+      targetObject: requestUser,
+      submissionObject: {},
+      universeState: universeState,
+      fieldValue: undefined,
+    };
+  }
+
+  if (!isApplicationOpen(writeRequest)) {
+    throw new DeadlineExpiredError('The submission deadline has passed!');
+  }
+};

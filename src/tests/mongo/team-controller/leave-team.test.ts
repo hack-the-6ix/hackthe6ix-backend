@@ -2,11 +2,7 @@ import { leaveTeam } from '../../../controller/TeamController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
-import {
-  AlreadySubmittedError,
-  DeadlineExpiredError,
-  UnknownTeamError,
-} from '../../../types/errors';
+import { DeadlineExpiredError, UnknownTeamError } from '../../../types/errors';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -74,36 +70,6 @@ describe('Leave Team', () => {
 
     // Team should still have user
     expect((await Team.findOne({ code: team.code })).toJSON().memberIDs).toContain(mockTeam.memberIDs.toString());
-  });
-
-  test('Already applied', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
-
-    const mockTeam = {
-      code: 'banana',
-      memberIDs: [
-        hackerUser._id.toString(),
-      ],
-    };
-
-    const team = await Team.create(mockTeam);
-    const user = await User.create({
-      ...hackerUser,
-      hackerApplication: {
-        teamCode: mockTeam.code,
-      },
-      status: {
-        applied: true,
-      },
-    });
-
-    await expect(leaveTeam(user)).rejects.toThrow(AlreadySubmittedError);
-
-    // User should still be in team
-    expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication.teamCode).toEqual(mockTeam.code);
-
-    // Team should still have user
-    expect((await Team.findOne({ code: team.code })).toJSON().memberIDs).toEqual(mockTeam.memberIDs);
   });
 
   describe('Success', () => {
