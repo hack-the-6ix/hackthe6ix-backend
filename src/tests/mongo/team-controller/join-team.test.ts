@@ -4,7 +4,6 @@ import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import {
   AlreadyInTeamError,
-  AlreadySubmittedError,
   BadRequestError,
   DeadlineExpiredError,
   TeamFullError,
@@ -145,33 +144,6 @@ describe('Join Team', () => {
     const user = await User.create(hackerUser);
 
     await expect(joinTeam(user, mockTeam.code)).rejects.toThrow(DeadlineExpiredError);
-
-    // User is not amended
-    expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication).toEqual(undefined);
-
-    // Team not amended
-    expect((await Team.findOne({ code: mockTeam.code })).toJSON().memberIDs).toEqual(mockTeam.memberIDs);
-  });
-
-  test('User already applied', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
-
-    const mockTeam = {
-      code: 'foo',
-      memberIDs: [
-        'a',
-      ],
-    };
-
-    const team = await Team.create(mockTeam);
-    const user = await User.create({
-      ...hackerUser,
-      status: {
-        applied: true,
-      },
-    });
-
-    await expect(joinTeam(user, mockTeam.code)).rejects.toThrow(AlreadySubmittedError);
 
     // User is not amended
     expect((await User.findOne({ _id: user._id })).toJSON().hackerApplication).toEqual(undefined);

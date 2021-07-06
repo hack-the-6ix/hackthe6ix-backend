@@ -11,7 +11,7 @@ import {
   UnknownTeamError,
 } from '../types/errors';
 import { getObject } from './ModelController';
-import { testCanUpdateApplication } from './util/checker';
+import { testCanUpdateTeam } from './util/checker';
 
 const getSanitizedTeam = async (requestUser: IUser, teamCode: string) => {
   // We must use getObject to ensure the user fields are correctly intercepted
@@ -36,7 +36,7 @@ const getSanitizedTeam = async (requestUser: IUser, teamCode: string) => {
  * @param requestUser
  */
 export const createTeam = async (requestUser: IUser) => {
-  await testCanUpdateApplication(requestUser);
+  await testCanUpdateTeam(requestUser);
 
   if (requestUser.hackerApplication.teamCode?.length > 0) {
     throw new AlreadyInTeamError();
@@ -72,7 +72,7 @@ export const joinTeam = async (requestUser: IUser, teamCode: string) => {
     throw new BadRequestError('Invalid team code!');
   }
 
-  await testCanUpdateApplication(requestUser);
+  await testCanUpdateTeam(requestUser);
 
   if (requestUser.hackerApplication.teamCode?.length > 0) {
     throw new AlreadyInTeamError();
@@ -116,11 +116,18 @@ export const joinTeam = async (requestUser: IUser, teamCode: string) => {
  * @param requestUser
  */
 export const leaveTeam = async (requestUser: IUser) => {
-  await testCanUpdateApplication(requestUser);
+  await testCanUpdateTeam(requestUser);
 
   if (!requestUser.hackerApplication.teamCode || requestUser.hackerApplication.teamCode.length === 0) {
     throw new UnknownTeamError();
   }
+
+  // Update user object
+  await User.findOneAndUpdate({
+    _id: requestUser._id,
+  }, {
+    'hackerApplication.teamCode': undefined,
+  });
 
   // Update team object
   const updatedTeam = await Team.findOneAndUpdate({
@@ -139,13 +146,6 @@ export const leaveTeam = async (requestUser: IUser) => {
       code: requestUser.hackerApplication.teamCode,
     });
   }
-
-  // Update user object
-  await User.findOneAndUpdate({
-    _id: requestUser._id,
-  }, {
-    'hackerApplication.teamCode': undefined,
-  });
 
   return 'Success';
 };
