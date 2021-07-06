@@ -1,31 +1,31 @@
 {
   "templates": {
     "applicationIncomplete": {
-      "subject": "Your Hack the 6ix application is incomplete",
+      "subject": "\uD83D\uDED1 [ACTION REQUIRED]: Hack the 6ix Application Incomplete ",
       "templateID": "8"
     },
     "applied": {
-      "subject": "Your Hack the 6ix application has been received",
+      "subject": "Hack the 6ix Application Received",
       "templateID": "9"
     },
     "confirmed": {
-      "subject": "You have successfully confirmed your spot at Hack the 6ix",
+      "subject": "See you at Hack the 6ix!",
       "templateID": "10"
     },
     "declined": {
-      "subject": "You have declined your invitation to Hack the 6ix",
+      "subject": "We’re Sorry to See You Go",
       "templateID": "11"
     },
     "accepted": {
-      "subject": "You have been accepted to Hack the 6ix",
+      "subject": "[ACTION REQUIRED] Congratulations! Welcome to Hack the 6ix!",
       "templateID": "12"
     },
     "rejected": {
-      "subject": "Hack the 6ix Application Status Update",
+      "subject": "Hack the 6ix application update",
       "templateID": "13"
     },
     "waitlisted": {
-      "subject": "Hack the 6ix Application Status Update",
+      "subject": "Hack the 6ix application update",
       "templateID": "14"
     }
   },
