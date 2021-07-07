@@ -2,7 +2,7 @@ import User from '../models/user/User';
 
 let statistics: IStatistics;
 
-export const statisticsLifetime = 1000 * 60 * 5; // stats live for 5 minutes
+export const statisticsLifetime = 1000 * 60 * 60; // stats live for 60 minutes
 
 export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
   if (!statistics || (new Date().getTime() - statistics.timestamp) > statisticsLifetime || update) {
