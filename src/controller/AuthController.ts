@@ -2,36 +2,35 @@
 
 import axios from 'axios';
 
-import {BadRequestError, NotFoundError} from '../types/errors';
+import {BadRequestError, ForbiddenError, InternalServerError, NotFoundError} from '../types/errors';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
-import { ITokenset } from '../models/tokenset/fields';
-import { ActionSpec } from '../../@types/logger';
-import Tokenset from '../models/tokenset/Tokenset';
 import Settings from '../models/settings/Settings';
 import User from '../models/user/User';
 
 // import syncMailingLists from '../services/mailer/syncMailingLists';
-// import { fetchSAMLBundle } from '../services/multisaml';
 import * as permissions from '../services/permissions';
 import {BackendTokenset} from "../types/types";
-// import { BadRequestError, InternalServerError } from '../types/errors';
-//
+import {fetchClient} from "../services/multiprovider";
+import {set} from "mongoose";
+import {settings} from "cluster";
 
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
 async function _getCachedSettings():Promise<ISettings> {
-  if(settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) < Date.now()){
-    const settings = await Settings.findOne({}, 'openID');
-
-    settingsCache = settings;
-    settingsTime = Date.now();
-
-    return settings;
+  if(settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()){
+    console.log("cache hit", settingsCache);
+    return settingsCache;
   }
 
-  return settingsCache;
+  const settings = await Settings.findOne({}, 'openID');
+
+  settingsCache = settings;
+  settingsTime = Date.now();
+
+  console.log("cache miss", settings);
+  return settings;
 }
 
 export const getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
@@ -86,7 +85,7 @@ export async function issueLocalToken (assertAttributes: Record<string, any>): P
   });
 
   return token;
-};
+}
 
 async function _refreshToken(client_id: string, client_secret: string, url: string, refreshToken: string): Promise<{
   token: string,
@@ -104,6 +103,97 @@ async function _refreshToken(client_id: string, client_secret: string, url: stri
     token: response.data.access_token,
     refreshToken: response.data.refresh_token,
   };
+}
+
+export const handleCallback = async(providerName:string, code:string, stateText:string, callbackURL:string):Promise<{
+  token: string,
+  refreshToken:string,
+  redirectTo: string
+}> => {
+  if(!callbackURL){
+    throw new BadRequestError('Callback URL not specified.');
+  }
+
+  try {
+    const client = await fetchClient(providerName);
+    const settings = await _getCachedSettings();
+    console.log(settings);
+    const provider = getProviderByName(settings, providerName);
+
+    const accesstoken = await client.getToken({
+      code: code,
+      redirect_uri: callbackURL
+    });
+
+    const userData = await getUserData(provider.userinfo_url, accesstoken.token.access_token);
+
+    const localToken = await issueLocalToken(userData);
+
+    let redirectTo;
+    if(stateText){
+      try {
+        const state = JSON.parse(stateText);
+        redirectTo = state.redirectTo;
+      }
+      catch(ignored){
+        // invalid state, just ignore
+      }
+    }
+
+    return {
+      token: localToken,
+      refreshToken: accesstoken.token.refresh_token,
+      redirectTo: redirectTo
+    }
+  }
+  catch(err) {
+    console.log(err);
+
+    if(err.output?.statusCode === 400){
+      throw new ForbiddenError('Invalid code.');
+    }
+    else {
+      throw new InternalServerError('Unable to initialize the login provider.', err, false);
+    }
+  }
+}
+
+export const handleLoginRequest = async(providerName:string, redirectTo:string, callbackURL:string):Promise<{
+  url: string
+}> => {
+  const state = {} as Record<string, string>;
+
+  if (redirectTo) {
+    state['redirectTo'] = redirectTo as string;
+  }
+
+
+
+  try {
+    const client = await fetchClient(providerName);
+
+    if(!callbackURL){
+      const settings = await _getCachedSettings();
+      callbackURL = getProviderByName(settings, providerName).callback_url;
+    }
+
+    // store this so that frontend can be certain of the callback url used for the session
+    state['callbackURL'] = callbackURL
+
+    const redirectURL = client.authorizeURL({
+      redirect_uri: callbackURL,
+      scope: 'profile',
+      state: JSON.stringify(state)
+    });
+
+    return {
+      url: redirectURL
+    }
+  }
+  catch(err) {
+    console.log(err);
+    throw new InternalServerError('Unable to initialize the login provider.', err, false)
+  }
 }
 
 export const handleRefresh = async (providerName: string, refreshToken: string):Promise<{
@@ -130,7 +220,7 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
   }
 }
 
-export const handleLogout = async (providerName:string, refreshToken:string):Promise<ActionSpec> => {
+export const handleLogout = async (providerName:string, refreshToken:string):Promise<{}> => {
   const tokenInfo = permissions.decodeToken(refreshToken);
   const settings = await _getCachedSettings();
   const provider = getProviderByName(settings, providerName);
@@ -163,45 +253,5 @@ export const handleLogout = async (providerName:string, refreshToken:string):Pro
     console.log('Unable to log out of IDP session.');
   }
 
-  return {
-    action: "redirect",
-    data: provider.logout_redirect_url
-  };
-
-}
-
-export const retrieveTokenset = async (tokensetID:string):Promise<BackendTokenset> => {
-  if(!tokensetID){
-    throw new BadRequestError('Field tokensetID missing.');
-  }
-
-  const tokens = await _retrieveTokenset(tokensetID);
-
-  if(tokens){
-    return {
-      token: tokens.token,
-      refreshToken: tokens.refreshToken
-    }
-  }
-  else {
-    throw new NotFoundError('Token set not found.');
-  }
-
-}
-
-export const pushTokenset = async (token: string, refreshToken:string):Promise<string> => {
-  const tokenset = await Tokenset.create({
-    token, refreshToken
-  });
-
-  return tokenset.id;
-}
-
-async function _retrieveTokenset(tokensetID:string):Promise<ITokenset> {
-
-  const tokenset = await Tokenset.findOneAndDelete({
-    _id: tokensetID
-  });
-
-  return tokenset;
+  return {};
 }
