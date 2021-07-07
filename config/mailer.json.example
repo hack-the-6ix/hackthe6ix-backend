@@ -1,7 +1,7 @@
 {
   "templates": {
     "applicationIncomplete": {
-      "subject": "\uD83D\uDED1 [ACTION REQUIRED]: Hack the 6ix Application Incomplete ",
+      "subject": "[ACTION REQUIRED]: Hack the 6ix Application Incomplete ",
       "templateID": "8"
     },
     "applied": {
