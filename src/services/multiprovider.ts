@@ -4,7 +4,6 @@ import Settings from '../models/settings/Settings';
 const clientCache: {
   [key: string]: AuthorizationCode
 } = {};
-;
 
 export const loadProvider = async (name: string, all = false): Promise<void> => {
   const settings = await Settings.findOne({}, 'openID');
