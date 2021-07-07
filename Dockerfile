@@ -1,6 +1,9 @@
 FROM node:14 as base
 WORKDIR /usr/ht6/server
 
+ENV TZ=America/Toronto
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 EXPOSE 6971
 
 RUN mkdir build
