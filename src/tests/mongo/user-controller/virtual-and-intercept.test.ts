@@ -1,5 +1,3 @@
-import moment from 'moment';
-import { timestampFormat } from '../../../consts';
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions } from '../../../models/user/enums';
@@ -12,6 +10,7 @@ import {
   getConfirmationDeadline,
   isApplicationOpen,
 } from '../../../models/validator';
+import { stringifyUnixTime } from '../../../util/date';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -143,7 +142,7 @@ describe('Interceptor', () => {
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
     test('Confirmation Deadline', async () => {
       const mockDate = 54321;
@@ -151,7 +150,7 @@ describe('Interceptor', () => {
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(moment(mockDate).format(timestampFormat));
+      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
   });
 
