@@ -105,40 +105,28 @@ async function _refreshToken(client_id: string, client_secret: string, url: stri
   };
 }
 
-export const handleCallback = async(providerName:string, code:string, stateText:string, callbackURL:string):Promise<{
+export const handleCallback = async(providerName:string, code:string, stateText:string):Promise<{
   token: string,
   refreshToken:string,
   redirectTo: string
 }> => {
-  if(!callbackURL){
-    throw new BadRequestError('Callback URL not specified.');
-  }
-
   try {
     const client = await fetchClient(providerName);
     const settings = await _getCachedSettings();
-    console.log(settings);
+
     const provider = getProviderByName(settings, providerName);
+
+    const state = JSON.parse(stateText);
+    const redirectTo = state.redirectTo;
 
     const accesstoken = await client.getToken({
       code: code,
-      redirect_uri: callbackURL
+      redirect_uri: state.callbackURL
     });
 
     const userData = await getUserData(provider.userinfo_url, accesstoken.token.access_token);
 
     const localToken = await issueLocalToken(userData);
-
-    let redirectTo;
-    if(stateText){
-      try {
-        const state = JSON.parse(stateText);
-        redirectTo = state.redirectTo;
-      }
-      catch(ignored){
-        // invalid state, just ignore
-      }
-    }
 
     return {
       token: localToken,
@@ -166,8 +154,6 @@ export const handleLoginRequest = async(providerName:string, redirectTo:string, 
   if (redirectTo) {
     state['redirectTo'] = redirectTo as string;
   }
-
-
 
   try {
     const client = await fetchClient(providerName);

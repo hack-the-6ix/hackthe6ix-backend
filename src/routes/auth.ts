@@ -14,7 +14,7 @@ router.post('/:provider/callback', (req: Request, res: Response, next: NextFunct
   logResponse(
       req,
       res,
-      handleCallback(req.params.provider, req.body.code, req.body.state, req.body.callbackURL)
+      handleCallback(req.params.provider, req.body.code, req.body.state)
   )
 });
 
