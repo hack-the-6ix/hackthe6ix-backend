@@ -323,6 +323,7 @@ export const hackerApplication = {
       caption: 'MLH Data',
 
       writeCheck: true,
+      submitCheck: (request: WriteCheckRequest<boolean, IUser>) => request.fieldValue,
       readCheck: true,
     },
   },

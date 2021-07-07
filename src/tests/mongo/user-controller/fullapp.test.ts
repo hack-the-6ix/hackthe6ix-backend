@@ -320,6 +320,7 @@ describe('Submit Real Application', () => {
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
+      mlhData: true,
     } as IApplication;
 
     const user = await User.create({
@@ -364,6 +365,7 @@ describe('Submit Real Application', () => {
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
+      mlhData: true,
     } as IApplication;
 
     const user = await User.create({
@@ -408,6 +410,51 @@ describe('Submit Real Application', () => {
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: false,
+      mlhData: true,
+    } as IApplication;
+
+    const user = await User.create({
+      ...hackerUser,
+      status: {
+        applied: false,
+      },
+      hackerApplication: {
+        resumeFileName: 'wtf.exe',
+      },
+    });
+
+    await expect(updateApplication(
+      user.toJSON() as IUser,
+      true,
+      hackerApplication,
+    )).rejects.toThrow(SubmissionDeniedError);
+
+    const resultObject = await User.findOne({
+      _id: hackerUser._id,
+    });
+
+    expect(resultObject.toJSON().hackerApplication).toEqual({
+      resumeFileName: 'wtf.exe',
+    });
+    expect(resultObject.status.applied).toBeFalsy();
+  });
+
+  test('MLH Data Denied', async () => {
+    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+    const hackerApplication = {
+      gender: enumOptions['gender'][0],
+      pronouns: enumOptions['pronouns'][0],
+      ethnicity: enumOptions['ethnicity'][0],
+      timezone: enumOptions['timezone'][0],
+      school: 'University of Toronto',
+      program: 'Computer Science',
+      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      hackathonsAttended: enumOptions['hackathonsAttended'][0],
+      projectEssay: 'X '.repeat(50),
+      accomplishEssay: 'X '.repeat(50),
+      mlhCOC: true,
+      mlhData: false,
     } as IApplication;
 
     const user = await User.create({
@@ -451,6 +498,7 @@ describe('Submit Real Application', () => {
       projectEssay: 'X '.repeat(50),
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
+      mlhData: true,
     } as IApplication;
 
     const user = await User.create({
