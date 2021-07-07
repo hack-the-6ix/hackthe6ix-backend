@@ -526,32 +526,58 @@ ones and the dictionary will be merged (so omitted fields are unchanged).
 
 ## Auth - Authentication related operations
 
-### GET - Starting point for login
-`/auth/:provider/login?redirectTo=https://example.com`
+### POST - Starting point for login
+`/auth/:provider/login`
 
-Users should go to the login URL specified here to begin the SSO flow.
-
-##### Input Specification
-`provider` refers to the name of the OpenID provider being operated on.
-
-`redirectTo` (optional) is the URL that the user should be redirected to once the authentication is successful with the `token` query paramter set to the user's token. Note that the URL host must be present in `settings.saml.permittedRedirectHosts`. If it is not specified, a JSON with the property `token` will be returned with the issued token.
-
-##### Output Specification
-User will be redirected to the SSO sign on page. Afterwards, `token` and `refreshToken` will be added
-to the query parameters of the redirect URL.
-
-### GET - Assert endpoint for when login completes
-`/auth/:provider/callback?state=<openid state>`
-
-This endpoint is called after SSO authenticates the user and is used to issue the final JWT access and refresh tokens.
 
 ##### Input Specification
 `provider` refers to the name of the OpenID provider being operated on.
 
-`state` is the OpenID state.
+```
+{
+  "redirectTo": "<url to redirect the user to after authentication>", // the redirect is handled by frontend
+  "callbackURL": "<url of the OpenID callback endpoint>" // will default to provider.callback_url
+}
+```
+
 
 ##### Output Specification
-If `redirectTo` was set when requesting the login URL, the user will be redirected to that URL, provided its host is in `settings.saml.permittedRedirectHosts` with the query parameter `token` set to the user's token.
+```
+{
+  "status": 200,
+  "message": {
+    "url": "<url to redirect the user to to begin auth flow>"
+  }
+}
+```
+
+The flow state will be set to a JSON string. The callback URL is stored in the `callbackURL` property and the redirect URL is stored in the `redirectTo` property.
+
+### POST - Assert endpoint for when login completes
+`/auth/:provider/callback`
+
+
+##### Input Specification
+`provider` refers to the name of the OpenID provider being operated on.
+
+```
+{
+  "code": "<OpenID authorization code>",
+  "state": "<the flow state>"
+}
+```
+
+##### Output Specification
+```
+{
+  "status": 200,
+  "message": {
+    "token": "<backend access token>",
+    "refreshToken": "<OpenID refresh token>",
+    "redirectTo": "<the url to redirect the user to> (optional)"
+  }
+}
+```
 
 ### POST - Refresh Token
 `/auth/:provider/refresh`
@@ -576,7 +602,7 @@ If `redirectTo` was set when requesting the login URL, the user will be redirect
 }
 ```
 
-### POST - Starting point for logout
+### POST - Destroy the session
 `/auth/:provider/logout`
 
 ##### Input Specification
@@ -591,6 +617,6 @@ If `redirectTo` was set when requesting the login URL, the user will be redirect
 ##### Output Specification
 ```
 {
-  "logoutUrl": "<logout url goes here>" // User should go to this URL to complete logout process
+  "status": 200
 }
 ```
