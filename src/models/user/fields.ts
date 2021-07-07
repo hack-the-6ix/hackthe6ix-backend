@@ -1,6 +1,4 @@
-import moment from 'moment';
 import mongoose from 'mongoose';
-import { timestampFormat } from '../../consts';
 import {
   CreateCheckRequest,
   DeleteCheckRequest,
@@ -8,6 +6,7 @@ import {
   ReadInterceptRequest,
   WriteCheckRequest,
 } from '../../types/checker';
+import { stringifyUnixTime } from '../../util/date';
 import {
   canConfirm,
   canUpdateApplication,
@@ -618,22 +617,22 @@ const mailmerge = {
       default: '',
 
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => moment(getApplicationDeadline({
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getApplicationDeadline({
         ...request,
         requestUser: request.targetObject,
         submissionObject: {} as IUser,
-      })).format(timestampFormat),
+      })),
     },
     MERGE_CONFIRMATION_DEADLINE: {
       type: String,
       default: '',
 
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => moment(getConfirmationDeadline({
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getConfirmationDeadline({
         ...request,
         requestUser: request.targetObject,
         submissionObject: {} as IUser,
-      })).format(timestampFormat),
+      })),
     },
   },
 };

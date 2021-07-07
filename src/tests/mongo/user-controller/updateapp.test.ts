@@ -1,5 +1,3 @@
-import moment from 'moment';
-import { timestampFormat } from '../../../consts';
 import { updateApplication } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
@@ -15,6 +13,7 @@ import {
   WriteDeniedError,
 } from '../../../types/errors';
 import { MailTemplate } from '../../../types/mailer';
+import { stringifyUnixTime } from '../../../util/date';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -438,8 +437,8 @@ describe('Submit Application', () => {
         expect.objectContaining({
           'TAGS[FIRST_NAME]': user.firstName,
           'TAGS[LAST_NAME]': user.lastName,
-          'TAGS[MERGE_APPLICATION_DEADLINE]': moment(universeState.public.globalApplicationDeadline).format(timestampFormat),
-          'TAGS[MERGE_CONFIRMATION_DEADLINE]': moment(universeState.public.globalConfirmationDeadline).format(timestampFormat),
+          'TAGS[MERGE_APPLICATION_DEADLINE]': stringifyUnixTime(universeState.public.globalApplicationDeadline),
+          'TAGS[MERGE_CONFIRMATION_DEADLINE]': stringifyUnixTime(universeState.public.globalConfirmationDeadline),
         }),
       );
 
