@@ -119,10 +119,10 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? maxLength(64)
+        ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? minLength(1)(request) && maxLength(64)(request)
+        ? minLength(1)(request) && maxLength(256)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
@@ -133,10 +133,10 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? maxLength(64)
+        ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? maxLength(64)(request)
+        ? maxLength(256)(request)
         : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
       readCheck: true,
     },
@@ -147,10 +147,10 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? maxLength(64)
+        ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? minLength(1)(request) && maxLength(64)(request)
+        ? minLength(1)(request) && maxLength(256)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
@@ -189,7 +189,7 @@ export const hackerApplication = {
       caption: 'School',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: maxLength(256),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
       readCheck: true,
     },
@@ -199,7 +199,7 @@ export const hackerApplication = {
       caption: 'Program',
       inTextSearch: true,
 
-      writeCheck: maxLength(64),
+      writeCheck: maxLength(256),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
       readCheck: true,
     },
@@ -249,7 +249,7 @@ export const hackerApplication = {
       caption: 'GitHub',
       inTextSearch: true,
 
-      writeCheck: maxLength(256),
+      writeCheck: maxLength(1024),
       readCheck: true,
     },
 
@@ -258,7 +258,7 @@ export const hackerApplication = {
       caption: 'Portfolio',
       inTextSearch: true,
 
-      writeCheck: maxLength(256),
+      writeCheck: maxLength(1024),
       readCheck: true,
     },
 
@@ -267,7 +267,7 @@ export const hackerApplication = {
       caption: 'LinkedIn',
       inTextSearch: true,
 
-      writeCheck: maxLength(256),
+      writeCheck: maxLength(1024),
       readCheck: true,
     },
 
@@ -323,6 +323,7 @@ export const hackerApplication = {
       caption: 'MLH Data',
 
       writeCheck: true,
+      submitCheck: (request: WriteCheckRequest<boolean, IUser>) => request.fieldValue,
       readCheck: true,
     },
   },
