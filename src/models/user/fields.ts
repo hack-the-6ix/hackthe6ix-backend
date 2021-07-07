@@ -175,7 +175,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
-        ? maxLength(7)
+        ? maxLength(6)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
         ? validatePostalCode()(request)
