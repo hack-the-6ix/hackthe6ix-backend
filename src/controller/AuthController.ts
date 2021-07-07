@@ -1,26 +1,20 @@
-// import { IdentityProvider, SAMLAssertResponse, ServiceProvider } from 'saml2-js';
-
 import axios from 'axios';
 
-import {BadRequestError, ForbiddenError, InternalServerError, NotFoundError} from '../types/errors';
+import {BadRequestError, ForbiddenError, InternalServerError} from '../types/errors';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
 import Settings from '../models/settings/Settings';
 import User from '../models/user/User';
 
-// import syncMailingLists from '../services/mailer/syncMailingLists';
+import syncMailingLists from '../services/mailer/syncMailingLists';
 import * as permissions from '../services/permissions';
-import {BackendTokenset} from "../types/types";
 import {fetchClient} from "../services/multiprovider";
-import {set} from "mongoose";
-import {settings} from "cluster";
 
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
 async function _getCachedSettings():Promise<ISettings> {
   if(settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()){
-    console.log("cache hit", settingsCache);
     return settingsCache;
   }
 
@@ -29,20 +23,19 @@ async function _getCachedSettings():Promise<ISettings> {
   settingsCache = settings;
   settingsTime = Date.now();
 
-  console.log("cache miss", settings);
   return settings;
 }
 
-export const getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
+function _getProviderByName (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined {
   for (const provider of settings['openID']['providers']) {
     if (provider['name'] === providerName) {
       return provider;
     }
   }
   return;
-};
+}
 
-export async function getUserData (url: string, token: string): Promise<Record<string, any>> {
+async function _getUserData (url: string, token: string): Promise<Record<string, any>> {
   const response = await axios({
     method: 'GET',
     url: url,
@@ -52,9 +45,9 @@ export async function getUserData (url: string, token: string): Promise<Record<s
   });
 
   return response.data;
-};
+}
 
-export async function issueLocalToken (assertAttributes: Record<string, any>): Promise<string> {
+async function _issueLocalToken (assertAttributes: Record<string, any>): Promise<string> {
   const groups: any = {};
 
   // Update the groups this user is in in the database
@@ -114,7 +107,7 @@ export const handleCallback = async(providerName:string, code:string, stateText:
     const client = await fetchClient(providerName);
     const settings = await _getCachedSettings();
 
-    const provider = getProviderByName(settings, providerName);
+    const provider = _getProviderByName(settings, providerName);
 
     const state = JSON.parse(stateText);
     const redirectTo = state.redirectTo;
@@ -124,9 +117,19 @@ export const handleCallback = async(providerName:string, code:string, stateText:
       redirect_uri: state.callbackURL
     });
 
-    const userData = await getUserData(provider.userinfo_url, accesstoken.token.access_token);
+    const userData = await _getUserData(provider.userinfo_url, accesstoken.token.access_token);
 
-    const localToken = await issueLocalToken(userData);
+    const localToken = await _issueLocalToken(userData);
+
+    // Trigger a mailing list sync on login
+    // We don't really need to wait for this, so we'll run it async
+    syncMailingLists(undefined, true, userData.email)
+        .then(() => {
+          console.log(`Synced mailing list for ${userData.email}`);
+        })
+        .catch((e) => {
+          console.log(`Unable to sync mailing list for ${userData.email}`, e);
+        });
 
     return {
       token: localToken,
@@ -160,7 +163,7 @@ export const handleLoginRequest = async(providerName:string, redirectTo:string, 
 
     if(!callbackURL){
       const settings = await _getCachedSettings();
-      callbackURL = getProviderByName(settings, providerName).callback_url;
+      callbackURL = _getProviderByName(settings, providerName).callback_url;
     }
 
     // store this so that frontend can be certain of the callback url used for the session
@@ -187,14 +190,14 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
   refreshToken: string
 }> => {
   const settings = await _getCachedSettings();
-  const provider = getProviderByName(settings, providerName);
+  const provider = _getProviderByName(settings, providerName);
 
   try {
     const newTokens = await _refreshToken(provider.client_id, provider.client_secret, provider.token_url, refreshToken);
 
-    const userData = await getUserData(provider.userinfo_url, newTokens['token']);
+    const userData = await _getUserData(provider.userinfo_url, newTokens['token']);
 
-    const token = await issueLocalToken(userData);
+    const token = await _issueLocalToken(userData);
 
     return {
       token: token,
@@ -206,10 +209,10 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
   }
 }
 
-export const handleLogout = async (providerName:string, refreshToken:string):Promise<{}> => {
+export const handleLogout = async (providerName:string, refreshToken:string):Promise<Record<string, never>> => {
   const tokenInfo = permissions.decodeToken(refreshToken);
   const settings = await _getCachedSettings();
-  const provider = getProviderByName(settings, providerName);
+  const provider = _getProviderByName(settings, providerName);
 
   if(!refreshToken){
     throw new BadRequestError('No refresh token provided.');
