@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-import { BadRequestError } from 'types/errors';
+import {BadRequestError, NotFoundError} from '../types/errors';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
 import { ITokenset } from '../models/tokenset/fields';
@@ -14,6 +14,7 @@ import User from '../models/user/User';
 // import syncMailingLists from '../services/mailer/syncMailingLists';
 // import { fetchSAMLBundle } from '../services/multisaml';
 import * as permissions from '../services/permissions';
+import {BackendTokenset} from "../types/types";
 // import { BadRequestError, InternalServerError } from '../types/errors';
 //
 
@@ -42,7 +43,7 @@ export const getProviderByName = (settings: ISettings, providerName: string): Ar
   return;
 };
 
-const getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
+export async function getUserData (url: string, token: string): Promise<Record<string, any>> {
   const response = await axios({
     method: 'GET',
     url: url,
@@ -54,7 +55,7 @@ const getUserData = async (url: string, token: string): Promise<Record<string, a
   return response.data;
 };
 
-const issueLocalToken = async (assertAttributes: Record<string, any>): Promise<string> => {
+export async function issueLocalToken (assertAttributes: Record<string, any>): Promise<string> {
   const groups: any = {};
 
   // Update the groups this user is in in the database
@@ -145,21 +146,21 @@ export const handleLogout = async (providerName:string, refreshToken:string):Pro
       lastLogout: Date.now(),
     });
   } catch (err) {
-    console.log(err);
     console.log('Unable to revoke past sessions.');
   }
   
   try {
     const params = new URLSearchParams();
     params.append('refresh_token', refreshToken);
-    axios({
+
+    await axios({
       url: provider.logout_url,
       method: "POST",
       data: params
     });
   } catch(err) {
     console.log(err);
-    console.log('Unable to logout of IDP session.');
+    console.log('Unable to log out of IDP session.');
   }
 
   return {
@@ -169,7 +170,26 @@ export const handleLogout = async (providerName:string, refreshToken:string):Pro
 
 }
 
-export const pushKeys = async (token: string, refreshToken:string):Promise<string> => {
+export const retrieveTokenset = async (tokensetID:string):Promise<BackendTokenset> => {
+  if(!tokensetID){
+    throw new BadRequestError('Field tokensetID missing.');
+  }
+
+  const tokens = await _retrieveTokenset(tokensetID);
+
+  if(tokens){
+    return {
+      token: tokens.token,
+      refreshToken: tokens.refreshToken
+    }
+  }
+  else {
+    throw new NotFoundError('Token set not found.');
+  }
+
+}
+
+export const pushTokenset = async (token: string, refreshToken:string):Promise<string> => {
   const tokenset = await Tokenset.create({
     token, refreshToken
   });
@@ -177,7 +197,8 @@ export const pushKeys = async (token: string, refreshToken:string):Promise<strin
   return tokenset.id;
 }
 
-export const retrieveKeys = async (tokensetID:string):Promise<ITokenset> => {
+async function _retrieveTokenset(tokensetID:string):Promise<ITokenset> {
+
   const tokenset = await Tokenset.findOneAndDelete({
     _id: tokensetID
   });

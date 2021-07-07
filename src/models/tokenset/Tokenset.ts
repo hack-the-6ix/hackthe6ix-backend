@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import {extractFields} from '../util';
 import {fields, ITokenset} from './fields';
 
-const schema = new mongoose.Schema(extractFields(fields), {
+const schema = new mongoose.Schema(fields, {
     toObject: {
       virtuals: true,
     },

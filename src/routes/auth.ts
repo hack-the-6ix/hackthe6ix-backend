@@ -1,66 +1,20 @@
-import axios from 'axios';
 import express, { NextFunction, Request, Response, Router } from 'express';
 
 import passport from 'passport';
 import OAuthStrategy, { VerifyCallback } from 'passport-oauth2';
-import { logResponse } from 'services/logger';
-import { getProviderByName, handleLogout } from '../controller/AuthController';
+import { logResponse } from '../services/logger';
+import {
+  getUserData,
+  handleLogout,
+  handleRefresh,
+  issueLocalToken, pushTokenset,   retrieveTokenset
+} from '../controller/AuthController';
 import Settings from '../models/settings/Settings';
-import { fields } from '../models/user/fields';
-import User from '../models/user/User';
 import syncMailingLists from '../services/mailer/syncMailingLists';
-import * as permissions from '../services/permissions';
 
 const router: Router = express.Router();
 
 router.use(passport.initialize());
-
-// const getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
-//   const response = await axios({
-//     method: 'GET',
-//     url: url,
-//     headers: {
-//       Authorization: 'Bearer ' + token,
-//     },
-//   });
-
-//   return response.data;
-// };
-
-
-
-// const issueLocalToken = async (assertAttributes: Record<string, any>): Promise<string> => {
-//   const groups: any = {};
-
-//   // Update the groups this user is in in the database
-//   for (const group of assertAttributes.groups || []) {
-//     // Remove the leading /
-//     groups[group.substring(1)] = true;
-//   }
-
-//   const userInfo = await User.findOneAndUpdate({
-//     idpLinkID: assertAttributes.sub,
-//   }, {
-//     email: assertAttributes.email.toLowerCase(),
-//     firstName: assertAttributes.given_name,
-//     lastName: assertAttributes.family_name,
-//     groups: groups,
-//   }, {
-//     upsert: true,
-//     new: true,
-//     setDefaultsOnInsert: true,
-//   });
-
-//   console.log(assertAttributes);
-
-//   const token = permissions.createJwt({
-//     id: userInfo._id,
-//     idpLinkID: assertAttributes.sub,
-//     roles: userInfo.roles,
-//   });
-
-//   return token;
-// };
 
 //TODO: This will get nothing when the server is first initialized, add hot reloading/JIT check?
 Settings.findOne({}, 'openID').then((settings) => {
@@ -82,73 +36,81 @@ Settings.findOne({}, 'openID').then((settings) => {
     }));
   }
 }).catch((err) => {
-  console.log('Unable to fetch provider configuration!');
+  console.log('Unable to fetch provider configuration!', err);
 });
 
-// TODO: These will fail if there is a request before the server initializes, respond better
 router.get('/:provider/callback', (req: Request, res: Response, next: NextFunction) => {
-  return passport.authenticate(req.params.provider, async function(err: any, data: any) {
-    if (err) {
-      console.log(err);
-      return res.send({
-        error: 'Error',
-      });
-    }
-
-    let state = {} as Record<string, string>;
-
-    console.log('query', req.query);
-
-    try {
-      state = JSON.parse(req.query.state as string);
-    } catch (ignored) {
-      // ignore
-      console.log('ignored', ignored);
-    }
-
-    console.log('statue', state);
-
-    const settings = await Settings.findOne({}, 'openID');
-
-    const assertAttributes = data.user;
-
-    const token = await issueLocalToken(assertAttributes);
-
-    // Trigger a mailing list sync on login
-    // We don't really need to wait for this, so we'll run it async
-    syncMailingLists(undefined, true, assertAttributes.email)
-    .then(() => {
-      console.log(`Synced mailing list for ${assertAttributes.email}`);
-    })
-    .catch((e) => {
-      console.log(`Unable to sync mailing list for ${assertAttributes.email}`, e);
-    });
-
-    console.log(data);
-    console.log('issued token', token);
-
-    if (state.redirect) {
-      const redirectURL = new URL(state.redirect);
-      if (settings['openID'].permittedRedirectHosts.indexOf(redirectURL.host) !== -1) {
-        redirectURL.searchParams.set('token', token);
-        redirectURL.searchParams.set('refreshToken', data.refreshToken);
-        // return {
-        //   action: 'redirect',
-        //   data: redirectURL.toString(),
-        // };
-
-        return res.redirect(redirectURL.toString());
-      } else {
-        return res.json({
-          error: 'Host not in allowed redirect hosts!',
+  try {
+    return passport.authenticate(req.params.provider, async function(err: any, data: any) {
+      if (err) {
+        console.log(err);
+        return res.send({
+          error: 'Error',
         });
       }
-    }
 
-    return res.json({
-      status: 'OK',
+      let state = {} as Record<string, string>;
+
+      try {
+        state = JSON.parse(req.query.state as string);
+      } catch (ignored) {
+        // ignore
+      }
+
+      const settings = await Settings.findOne({}, 'openID');
+
+      const assertAttributes = data.user;
+
+      const token = await issueLocalToken(assertAttributes);
+
+      // Trigger a mailing list sync on login
+      // We don't really need to wait for this, so we'll run it async
+      syncMailingLists(undefined, true, assertAttributes.email)
+          .then(() => {
+            console.log(`Synced mailing list for ${assertAttributes.email}`);
+          })
+          .catch((e) => {
+            console.log(`Unable to sync mailing list for ${assertAttributes.email}`, e);
+          });
+
+      const tokensetID = await pushTokenset(token, data.refreshToken);
+
+      if (state.redirect) {
+        const redirectURL = new URL(state.redirect);
+        if (settings['openID'].permittedRedirectHosts.indexOf(redirectURL.host) !== -1) {
+          redirectURL.searchParams.set('tokensetID', tokensetID);
+
+          return res.redirect(redirectURL.toString());
+        } else {
+          return res.json({
+            error: 'Host not in allowed redirect hosts!',
+          });
+        }
+      }
+      else {
+        if(process.env.NODE_ENV === 'development'){
+          console.log("Authentication successful but no redirect, printing tokens: ", {
+            localToken: token,
+            kcToken: data.token,
+            refreshToken: data.refreshToken
+          });
+        }
+      }
+
+      return res.json({
+        status: 200,
+        message: "Authentication succeeded but no redirect URL provided.",
+        tokensetID: tokensetID
+      });
+
+    })(req, res, next);
+  }
+  catch(err) {
+    return res.status(400).json({
+      status: 400,
+      error: 'Unable to initialize authentication.'
     });
-  })(req, res, next);
+  }
 });
 
 router.get('/:provider/login', (req: Request, res: Response, next: NextFunction) => {
@@ -158,41 +120,31 @@ router.get('/:provider/login', (req: Request, res: Response, next: NextFunction)
     state['redirect'] = req.query.redirectTo as string;
   }
 
-  return passport.authenticate(req.params.provider, {
-    session: false,
-    scope: ['profile'],
-    state: JSON.stringify(state),
-  })(req, res, next);
-});
-
-router.post('/:provider/refresh', async (req: Request, res: Response, next: NextFunction) => {
-  const refreshToken = req.body.refreshToken;
-  const settings = await Settings.findOne({}, 'openID');
-  const provider = getProviderByName(settings, req.params.provider);
-
   try {
-    const newTokens = await _refreshToken(provider.client_id, provider.client_secret, provider.token_url, refreshToken);
-
-    const userData = await getUserData(provider.userinfo_url, newTokens['token']);
-
-    const token = await issueLocalToken(userData);
-
-    return res.json({
-      status: 200,
-      message: {
-        token: token,
-        refreshToken: newTokens['refreshToken'],
-      },
-    });
-  } catch (err) {
-    console.log(err);
+    return passport.authenticate(req.params.provider, {
+      session: false,
+      scope: ['profile'],
+      state: JSON.stringify(state),
+    })(req, res, next);
+  }
+  catch(err) {
     return res.status(400).json({
-      error: 'Unable to refresh tokens.',
+      status: 400,
+      error: 'Unable to initialize authentication.'
     });
   }
+
 });
 
-router.post('/:provider/logout', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/:provider/refresh',  (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      handleRefresh(req.params.providerName, req.body.refreshToken)
+  )
+});
+
+router.post('/:provider/logout', (req: Request, res: Response) => {
   logResponse(
     req,
     res,
@@ -200,5 +152,13 @@ router.post('/:provider/logout', async (req: Request, res: Response, next: NextF
     true
   )
 });
+
+router.get('/:provider/tokenset', (req:Request, res:Response) => {
+  logResponse(
+      req,
+      res,
+      retrieveTokenset(req.query.tokensetID as string)
+  )
+})
 
 export default router;

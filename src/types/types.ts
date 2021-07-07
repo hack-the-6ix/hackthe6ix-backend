@@ -18,3 +18,7 @@ export interface IRSVP {
   attending: boolean
 }
 
+export interface BackendTokenset {
+  token: string,
+  refreshToken: string
+}
