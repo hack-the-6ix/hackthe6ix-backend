@@ -541,6 +541,7 @@ ones and the dictionary will be merged (so omitted fields are unchanged).
 ```
 
 `callbackURL` should be set to the OpenID callback endpoint on the frontend. The frontend callback should then POST the code and state query parameters to the callback endpoint on the backend to retrieve the JWTs.
+(e.g. `dash.hackthe6ix.com/callback`, will direct the user to the main app after getting the tokens)
 
 `redirectTo` is simply passed to the callback endpoint on the frontend. Generally it will be where the user is redirected to after the JWTs are retrieved and the session is started.
 ##### Output Specification
