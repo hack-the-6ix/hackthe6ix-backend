@@ -1,20 +1,21 @@
 import axios from 'axios';
-
-import {BadRequestError, ForbiddenError, InternalServerError} from '../types/errors';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
 import Settings from '../models/settings/Settings';
+import { fields } from '../models/user/fields';
 import User from '../models/user/User';
 
 import syncMailingLists from '../services/mailer/syncMailingLists';
+import { fetchClient } from '../services/multiprovider';
 import * as permissions from '../services/permissions';
-import {fetchClient} from "../services/multiprovider";
+
+import { BadRequestError, ForbiddenError, InternalServerError } from '../types/errors';
 
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
-const _getCachedSettings = async ():Promise<ISettings> => {
-  if(settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()){
+const _getCachedSettings = async (): Promise<ISettings> => {
+  if (settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()) {
     return settingsCache;
   }
 
@@ -24,7 +25,7 @@ const _getCachedSettings = async ():Promise<ISettings> => {
   settingsTime = Date.now();
 
   return settings;
-}
+};
 
 const _getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
   for (const provider of settings['openID']['providers']) {
@@ -33,7 +34,7 @@ const _getProviderByName = (settings: ISettings, providerName: string): ArrayEle
     }
   }
   return;
-}
+};
 
 const _getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
   const response = await axios({
@@ -45,15 +46,16 @@ const _getUserData = async (url: string, token: string): Promise<Record<string, 
   });
 
   return response.data;
-}
+};
 
-const _issueLocalToken = async (assertAttributes: Record<string, any>):Promise<string> => {
+const _issueLocalToken = async (assertAttributes: Record<string, any>): Promise<string> => {
   const groups: any = {};
 
   // Update the groups this user is in in the database
-  for (const group of assertAttributes.groups || []) {
-    // Remove the leading /
-    groups[group.substring(1)] = true;
+  // Ensure that we set all the groups the user is not in to FALSE and not NULL
+  for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
+    //                                              Assertion includes group with leading /
+    groups[group] = assertAttributes.groups.indexOf(`/${group}`) !== -1;
   }
 
   const userInfo = await User.findOneAndUpdate({
@@ -78,7 +80,7 @@ const _issueLocalToken = async (assertAttributes: Record<string, any>):Promise<s
   });
 
   return token;
-}
+};
 
 const _refreshToken = async (client_id: string, client_secret: string, url: string, refreshToken: string): Promise<{
   token: string,
@@ -96,11 +98,11 @@ const _refreshToken = async (client_id: string, client_secret: string, url: stri
     token: response.data.access_token,
     refreshToken: response.data.refresh_token,
   };
-}
+};
 
-export const handleCallback = async(providerName:string, code:string, stateText:string):Promise<{
+export const handleCallback = async (providerName: string, code: string, stateText: string): Promise<{
   token: string,
-  refreshToken:string,
+  refreshToken: string,
   redirectTo: string
 }> => {
   try {
@@ -114,7 +116,7 @@ export const handleCallback = async(providerName:string, code:string, stateText:
 
     const accesstoken = await client.getToken({
       code: code,
-      redirect_uri: state.callbackURL
+      redirect_uri: state.callbackURL,
     });
 
     const userData = await _getUserData(provider.userinfo_url, accesstoken.token.access_token);
@@ -124,32 +126,30 @@ export const handleCallback = async(providerName:string, code:string, stateText:
     // Trigger a mailing list sync on login
     // We don't really need to wait for this, so we'll run it async
     syncMailingLists(undefined, true, userData.email)
-        .then(() => {
-          console.log(`Synced mailing list for ${userData.email}`);
-        })
-        .catch((e) => {
-          console.log(`Unable to sync mailing list for ${userData.email}`, e);
-        });
+    .then(() => {
+      console.log(`Synced mailing list for ${userData.email}`);
+    })
+    .catch((e) => {
+      console.log(`Unable to sync mailing list for ${userData.email}`, e);
+    });
 
     return {
       token: localToken,
       refreshToken: accesstoken.token.refresh_token,
-      redirectTo: redirectTo
-    }
-  }
-  catch(err) {
+      redirectTo: redirectTo,
+    };
+  } catch (err) {
     console.log(err);
 
-    if(err.output?.statusCode === 400){
+    if (err.output?.statusCode === 400) {
       throw new ForbiddenError('Invalid code.');
-    }
-    else {
+    } else {
       throw new InternalServerError('Unable to initialize the login provider.', err, false);
     }
   }
-}
+};
 
-export const handleLoginRequest = async(providerName:string, redirectTo:string, callbackURL:string):Promise<{
+export const handleLoginRequest = async (providerName: string, redirectTo: string, callbackURL: string): Promise<{
   url: string
 }> => {
   const state = {} as Record<string, string>;
@@ -161,31 +161,30 @@ export const handleLoginRequest = async(providerName:string, redirectTo:string, 
   try {
     const client = await fetchClient(providerName);
 
-    if(!callbackURL){
+    if (!callbackURL) {
       const settings = await _getCachedSettings();
       callbackURL = _getProviderByName(settings, providerName).callback_url;
     }
 
     // store this so that frontend can be certain of the callback url used for the session
-    state['callbackURL'] = callbackURL
+    state['callbackURL'] = callbackURL;
 
     const redirectURL = client.authorizeURL({
       redirect_uri: callbackURL,
       scope: 'profile',
-      state: JSON.stringify(state)
+      state: JSON.stringify(state),
     });
 
     return {
-      url: redirectURL
-    }
-  }
-  catch(err) {
+      url: redirectURL,
+    };
+  } catch (err) {
     console.log(err);
-    throw new InternalServerError('Unable to initialize the login provider.', err, false)
+    throw new InternalServerError('Unable to initialize the login provider.', err, false);
   }
-}
+};
 
-export const handleRefresh = async (providerName: string, refreshToken: string):Promise<{
+export const handleRefresh = async (providerName: string, refreshToken: string): Promise<{
   token: string,
   refreshToken: string
 }> => {
@@ -201,20 +200,20 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
 
     return {
       token: token,
-      refreshToken: newTokens['refreshToken']
-    }
+      refreshToken: newTokens['refreshToken'],
+    };
   } catch (err) {
     console.log(err);
-    throw new BadRequestError("Unable to refresh token");
+    throw new BadRequestError('Unable to refresh token');
   }
-}
+};
 
-export const handleLogout = async (providerName:string, refreshToken:string):Promise<Record<string, never>> => {
+export const handleLogout = async (providerName: string, refreshToken: string): Promise<Record<string, never>> => {
   const tokenInfo = permissions.decodeToken(refreshToken);
   const settings = await _getCachedSettings();
   const provider = _getProviderByName(settings, providerName);
 
-  if(!refreshToken){
+  if (!refreshToken) {
     throw new BadRequestError('No refresh token provided.');
   }
 
@@ -227,20 +226,20 @@ export const handleLogout = async (providerName:string, refreshToken:string):Pro
   } catch (err) {
     console.log('Unable to revoke past sessions.');
   }
-  
+
   try {
     const params = new URLSearchParams();
     params.append('refresh_token', refreshToken);
 
     await axios({
       url: provider.logout_url,
-      method: "POST",
-      data: params
+      method: 'POST',
+      data: params,
     });
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     console.log('Unable to log out of IDP session.');
   }
 
   return {};
-}
+};

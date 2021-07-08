@@ -240,7 +240,7 @@ describe('Grade candidate', () => {
         ...hackerUser,
         status: {
           applied: true,
-        }
+        },
       });
 
       await gradeCandidate(organizerUser, hacker._id, {

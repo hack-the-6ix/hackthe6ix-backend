@@ -1,4 +1,4 @@
-import {AuthorizationCode} from "simple-oauth2";
+import { AuthorizationCode } from 'simple-oauth2';
 import Settings from '../models/settings/Settings';
 
 const clientCache: {
@@ -16,15 +16,15 @@ export const loadProvider = async (name: string, all = false): Promise<void> => 
         const tokenURL = new URL(provider.token_url);
         const authorizeURL = new URL(provider.authorization_url);
         const client = new AuthorizationCode({
-            client: {
-                id: provider.client_id,
-                secret: provider.client_secret
-            },
-            auth: {
-                tokenHost: tokenURL.origin,
-                tokenPath: tokenURL.pathname,
-                authorizePath: authorizeURL.pathname
-            }
+          client: {
+            id: provider.client_id,
+            secret: provider.client_secret,
+          },
+          auth: {
+            tokenHost: tokenURL.origin,
+            tokenPath: tokenURL.pathname,
+            authorizePath: authorizeURL.pathname,
+          },
         });
 
         clientCache[name] = client;
