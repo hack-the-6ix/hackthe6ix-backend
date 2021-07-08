@@ -7,6 +7,7 @@ import { SubmissionDeniedError, WriteDeniedError } from '../../../types/errors';
 import {
   generateMockUniverseState,
   hackerUser,
+  mockDate,
   mockGetMailTemplate,
   mockSuccessResponse,
   runAfterAll,
@@ -77,17 +78,23 @@ describe('Update Real Application', () => {
       },
     });
 
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
       hackerApplication,
     );
+    restoreDateMock();
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
     });
 
-    expect(resultObject.toJSON().hackerApplication).toEqual(hackerApplication);
+    expect(resultObject.toJSON().hackerApplication).toEqual({
+      ...hackerApplication,
+      lastUpdated: mockTS,
+    });
     expect(resultObject.status.applied).toBeFalsy();
   });
 
@@ -115,17 +122,23 @@ describe('Update Real Application', () => {
       },
     });
 
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
       hackerApplication,
     );
+    restoreDateMock();
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
     });
 
-    expect(resultObject.toJSON().hackerApplication).toEqual(hackerApplication);
+    expect(resultObject.toJSON().hackerApplication).toEqual({
+      ...hackerApplication,
+      lastUpdated: mockTS,
+    });
     expect(resultObject.status.applied).toBeFalsy();
   });
 
@@ -378,11 +391,14 @@ describe('Submit Real Application', () => {
       },
     });
 
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       true,
       hackerApplication,
     );
+    restoreDateMock();
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -390,6 +406,7 @@ describe('Submit Real Application', () => {
 
     expect(resultObject.toJSON().hackerApplication).toEqual({
       ...hackerApplication,
+      lastUpdated: mockTS,
       resumeFileName: 'wtf.exe',
     });
     expect(resultObject.status.applied).toBeTruthy();
@@ -565,11 +582,14 @@ describe('Submit Real Application', () => {
         },
       });
 
+      const mockTS = 696969;
+      let restoreDateMock = mockDate(mockTS);
       await updateApplication(
         user.toJSON() as IUser,
         true,
         hackerApplication,
       );
+      restoreDateMock();
 
       const resultObject = await User.findOne({
         _id: hackerUser._id,
@@ -577,6 +597,7 @@ describe('Submit Real Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         ...hackerApplication,
+        lastUpdated: mockTS,
         resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeTruthy();
@@ -624,11 +645,14 @@ describe('Submit Real Application', () => {
         },
       });
 
+      const mockTS = 696969;
+      let restoreDateMock = mockDate(mockTS);
       await updateApplication(
         user.toJSON() as IUser,
         true,
         hackerApplication,
       );
+      restoreDateMock();
 
       const resultObject = await User.findOne({
         _id: hackerUser._id,
@@ -636,6 +660,7 @@ describe('Submit Real Application', () => {
 
       expect(resultObject.toJSON().hackerApplication).toEqual({
         ...hackerApplication,
+        lastUpdated: mockTS,
         resumeFileName: 'wtf.exe',
       });
       expect(resultObject.status.applied).toBeTruthy();
