@@ -106,18 +106,19 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
   }
 
   // Lastly, if the user intends to submit we will amend their user object with the new status
+  // We will directly interface with the User model since this update will be done with "admin permissions"
+  const statusUpdateResult = await User.findOneAndUpdate({
+    _id: requestUser._id,
+  }, {
+    'status.applied': !!submit,
+    'hackerApplication.lastUpdated': new Date().getTime(),
+  });
+
+  if (!statusUpdateResult) {
+    throw new InternalServerError('Unable to update status');
+  }
+
   if (submit) {
-    // We will directly interface with the User model since this update will be done with "admin permissions"
-    const statusUpdateResult = await User.findOneAndUpdate({
-      _id: requestUser._id,
-    }, {
-      'status.applied': true,
-    });
-
-    if (!statusUpdateResult) {
-      throw new InternalServerError('Unable to update status');
-    }
-
     await syncMailingLists(undefined, true, requestUser.email);
     await sendTemplateEmail(requestUser.email, MailTemplate.applied);
   }

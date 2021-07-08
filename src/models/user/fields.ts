@@ -32,6 +32,16 @@ export const hackerApplication = {
 
   FIELDS: {
 
+    // We will set this internally when the application is updated
+    lastUpdated: {
+      type: Number,
+      caption: 'Last Updated',
+
+      readCheck: true,
+      writeCheck: false,
+      submitCheck: true,
+    },
+
     // We will set the team code internally
     teamCode: {
       type: String,
@@ -817,6 +827,13 @@ export const fields = {
       readCheck: true,
     },
 
+    created: {
+      type: Number,
+      caption: 'Created',
+      default: Date.now,
+
+      readCheck: true,
+    },
     personalConfirmationDeadline: {
       type: Number,
       caption: 'RSVP Deadline',
@@ -899,6 +916,7 @@ export interface IUser extends mongoose.Document {
   firstName: string,
   lastName: string,
   email: string,
+  created: number,
   personalConfirmationDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
@@ -938,6 +956,7 @@ export interface IMailMerge {
 }
 
 export interface IApplication {
+  lastUpdated: number,
   phoneNumber: string,
   teamCode: string,
   emailConsent: boolean,
