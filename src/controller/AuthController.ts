@@ -55,7 +55,7 @@ const _issueLocalToken = async (assertAttributes: Record<string, any>): Promise<
   // Ensure that we set all the groups the user is not in to FALSE and not NULL
   for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
     //                                              Assertion includes group with leading /
-    groups[group] = assertAttributes.groups.indexOf(`/${group}`) !== -1;
+    groups[group] = (assertAttributes.groups || []).indexOf(`/${group}`) !== -1;
   }
 
   const userInfo = await User.findOneAndUpdate({
