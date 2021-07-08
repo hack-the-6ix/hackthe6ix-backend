@@ -13,7 +13,7 @@ import {fetchClient} from "../services/multiprovider";
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
-async function _getCachedSettings():Promise<ISettings> {
+const _getCachedSettings = async ():Promise<ISettings> => {
   if(settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()){
     return settingsCache;
   }
@@ -26,7 +26,7 @@ async function _getCachedSettings():Promise<ISettings> {
   return settings;
 }
 
-function _getProviderByName (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined {
+const _getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
   for (const provider of settings['openID']['providers']) {
     if (provider['name'] === providerName) {
       return provider;
@@ -35,7 +35,7 @@ function _getProviderByName (settings: ISettings, providerName: string): ArrayEl
   return;
 }
 
-async function _getUserData (url: string, token: string): Promise<Record<string, any>> {
+const _getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
   const response = await axios({
     method: 'GET',
     url: url,
@@ -47,7 +47,7 @@ async function _getUserData (url: string, token: string): Promise<Record<string,
   return response.data;
 }
 
-async function _issueLocalToken (assertAttributes: Record<string, any>): Promise<string> {
+const _issueLocalToken = async (assertAttributes: Record<string, any>):Promise<string> => {
   const groups: any = {};
 
   // Update the groups this user is in in the database
@@ -80,10 +80,10 @@ async function _issueLocalToken (assertAttributes: Record<string, any>): Promise
   return token;
 }
 
-async function _refreshToken(client_id: string, client_secret: string, url: string, refreshToken: string): Promise<{
+const _refreshToken = async (client_id: string, client_secret: string, url: string, refreshToken: string): Promise<{
   token: string,
   refreshToken: string
-}> {
+}> => {
   const params = new URLSearchParams();
   params.append('client_id', client_id);
   params.append('client_secret', client_secret);
