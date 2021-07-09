@@ -21,4 +21,5 @@ RUN mv ./build/dist/ .
 RUN mv ./build/node_modules/ .
 RUN rm -r ./build
 RUN ls -la dist
+ENV NODE_ENV=production
 CMD ["node", "./dist/index.js"]

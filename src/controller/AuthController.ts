@@ -11,6 +11,7 @@ import * as permissions from '../services/permissions';
 
 import { BadRequestError, ForbiddenError, InternalServerError } from '../types/errors';
 
+import {log} from "../services/logger";
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
@@ -71,8 +72,6 @@ const _issueLocalToken = async (assertAttributes: Record<string, any>): Promise<
     setDefaultsOnInsert: true,
   });
 
-  console.log(assertAttributes);
-
   const token = permissions.createJwt({
     id: userInfo._id,
     idpLinkID: assertAttributes.sub,
@@ -126,23 +125,22 @@ export const handleCallback = async (providerName: string, code: string, stateTe
     // Trigger a mailing list sync on login
     // We don't really need to wait for this, so we'll run it async
     syncMailingLists(undefined, true, userData.email)
-    .then(() => {
-      console.log(`Synced mailing list for ${userData.email}`);
-    })
-    .catch((e) => {
-      console.log(`Unable to sync mailing list for ${userData.email}`, e);
-    });
+        .then(() => {
+          log.debug(`Synced mailing list for ${userData.email}`);
+        })
+        .catch((e) => {
+          log.warn(`Unable to sync mailing list for ${userData.email}`, e);
+        });
 
     return {
       token: localToken,
       refreshToken: accesstoken.token.refresh_token,
-      redirectTo: redirectTo,
-    };
-  } catch (err) {
-    console.log(err);
-
-    if (err.output?.statusCode === 400) {
-      throw new ForbiddenError('Invalid code.');
+      redirectTo: redirectTo
+    }
+  }
+  catch(err) {
+    if(err.output?.statusCode === 400){
+      throw new ForbiddenError('Invalid code.', err, false);
     } else {
       throw new InternalServerError('Unable to initialize the login provider.', err, false);
     }
@@ -176,11 +174,11 @@ export const handleLoginRequest = async (providerName: string, redirectTo: strin
     });
 
     return {
-      url: redirectURL,
-    };
-  } catch (err) {
-    console.log(err);
-    throw new InternalServerError('Unable to initialize the login provider.', err, false);
+      url: redirectURL
+    }
+  }
+  catch(err) {
+    throw new InternalServerError('Unable to initialize the login provider.', err, false)
   }
 };
 
@@ -203,8 +201,7 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
       refreshToken: newTokens['refreshToken'],
     };
   } catch (err) {
-    console.log(err);
-    throw new BadRequestError('Unable to refresh token');
+    throw new BadRequestError("Unable to refresh token", err, false);
   }
 };
 
@@ -224,7 +221,7 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
       lastLogout: Date.now(),
     });
   } catch (err) {
-    console.log('Unable to revoke past sessions.');
+    log.warn(`Unable to revoke past sessions for user with link ID ${tokenInfo.sub}.`, err);
   }
 
   try {
@@ -236,9 +233,8 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
       method: 'POST',
       data: params,
     });
-  } catch (err) {
-    console.log(err);
-    console.log('Unable to log out of IDP session.');
+  } catch(err) {
+    log.warn(`Unable to log out of IDP session for user with link ID ${tokenInfo.sub}.`, err);
   }
 
   return {};

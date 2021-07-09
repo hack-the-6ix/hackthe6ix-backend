@@ -10,6 +10,7 @@ services:
       - .env
     volumes:
       - ./data/backend-files/config:/usr/ht6/server/config
+      - ./data/backend-files/logs:/usr/ht6/server/logs
   mongo:
     image: mongo:4-xenial
     restart: always
