@@ -232,6 +232,10 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
       url: provider.logout_url,
       method: 'POST',
       data: params,
+      auth: {
+        username: encodeURIComponent(provider.client_id).replace(/%20/g, '+'),
+        password: provider.client_secret
+      }
     });
   } catch(err) {
     log.warn(`Unable to log out of IDP session for user with link ID ${tokenInfo.sub}.`, err);
