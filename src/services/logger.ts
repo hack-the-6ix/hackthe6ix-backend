@@ -8,6 +8,20 @@ import { HTTPError } from '../types/errors';
 
 const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
+// Courtesy of https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#examples
+const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (key: any, value: any) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+};
+
 const prepareMessage = function(args: any) {
   const msg = args.map((e:any) => {
     if(e === undefined || e === null){
@@ -123,7 +137,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
       requestBody: req.body,
       responseBody: data,
       executorUser: req.executor,
-    }, null, 2);
+    }, getCircularReplacer(), 2);
 
     if (process.env.NODE_ENV === 'development') {
       log.debug(`[${req.url}]`, logPayload);
@@ -161,7 +175,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
       error: error,
       responseBody: body,
       executorUser: req.executor,
-    }, null, 2);
+    }, getCircularReplacer(), 2);
 
     log.error(`[${req.url}]`, logPayload);
 
