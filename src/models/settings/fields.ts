@@ -32,6 +32,10 @@ const OpenIDProvider = {
     type: String,
     required: true,
   },
+  logout_url: {
+    type: String,
+    required: true,
+  },
   logout_redirect_url: {
     type: String,
     required: true,
@@ -44,10 +48,6 @@ const openID = {
   readCheck: false,
 
   FIELDS: {
-    permittedRedirectHosts: {
-      type: [String],
-      required: true,
-    },
     providers: {
       type: [OpenIDProvider],
     },
@@ -131,7 +131,6 @@ export const fields = {
 
 export interface ISettings extends mongoose.Document {
   openID: {
-    permittedRedirectHosts: string[],
     providers: {
       name: string,
       authorization_url: string,
@@ -140,6 +139,7 @@ export interface ISettings extends mongoose.Document {
       client_secret: string,
       callback_url: string,
       userinfo_url: string,
+      logout_url: string,
       logout_redirect_url: string
     }[]
   },

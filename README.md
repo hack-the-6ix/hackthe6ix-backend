@@ -21,6 +21,11 @@ The server should be up and running on https://localhost:6971, or whatever is co
 In `.env`, set `DATABASE` to `mongodb://mongo:27017/ht6-backend` to use the MongoDB instance hosted
 together with the backend.
 
+#### Logging
+
+We are using [Stackdriver](https://cloud.google.com/products/operations) to log events in our system. Be sure to setup the `GCP_LOGGING` environment
+variables! Local logs will be stored in `logs`.
+
 #### Mailer
 We are using Mailtrain (https://github.com/hack-the-6ix/mailtrain) to handle mailing lists and 
 general email sending. As such, you should have an instance running prior to starting the backend,

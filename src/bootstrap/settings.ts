@@ -7,7 +7,8 @@ const settingsData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..',
 const settings = Settings.findOne({}).then((settings) => {
   if (!settings) {
     Settings.create(settingsData).then(() => {
-      console.log('Settings initialized!');
+      console.log('Settings initialized! Restart the server to apply changes.');
+      process.exit(0);
     }).catch((err) => {
       console.log(err);
       console.log('Error initializing settings! Exiting.');

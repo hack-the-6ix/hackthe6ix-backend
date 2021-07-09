@@ -1,129 +1,34 @@
-// import { IdentityProvider, SAMLAssertResponse, ServiceProvider } from 'saml2-js';
-// import { ActionSpec } from '../../@types/logger';
+import axios from 'axios';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
-// import Settings from '../models/settings/Settings';
-// import User from '../models/user/User';
-// import syncMailingLists from '../services/mailer/syncMailingLists';
-// import { fetchSAMLBundle } from '../services/multisaml';
-// import * as permissions from '../services/permissions';
-// import { BadRequestError, InternalServerError } from '../types/errors';
-//
-// async function _handleLogin(saml_response: SAMLAssertResponse, relayState: Record<string, string>): Promise<ActionSpec> {
-//   // Receives the IDP's response after an authentication request.
-//   const name_id = saml_response.user.name_id;
-//   const assertAttributes = saml_response.user.attributes;
-//
-//   // IDP did not send enough data, probably forgot to set up mappers.
-//   if (!assertAttributes.email || !assertAttributes.firstName || !assertAttributes.lastName) {
-//     throw new BadRequestError('Missing SAML fields.');
-//   }
-//
-//   let token: string;
-//
-//   try {
-//     const groups: any = {};
-//
-//     // Update the groups this user is in in the database
-//     for (const group of assertAttributes.groups || []) {
-//       // Remove the leading /
-//       groups[group.substring(1)] = true;
-//     }
-//
-//     const userInfo = await User.findOneAndUpdate({
-//       idpLinkID: name_id,
-//     }, {
-//       email: assertAttributes.email[0].toLowerCase(),
-//       firstName: assertAttributes.firstName[0],
-//       lastName: assertAttributes.lastName[0],
-//       groups: groups,
-//     }, {
-//       upsert: true,
-//       new: true,
-//       setDefaultsOnInsert: true,
-//     });
-//
-//     console.log(assertAttributes);
-//
-//     token = permissions.createJwt({
-//       id: userInfo._id,
-//       idpLinkID: name_id,
-//       samlSessionIndex: saml_response.user.session_index,
-//       roles: userInfo.roles,
-//     });
-//
-//     // Trigger a mailing list sync on login
-//     // We don't really need to wait for this, so we'll run it async
-//     syncMailingLists(undefined, true, userInfo.email)
-//     .then(() => {
-//       console.log(`Synced mailing list for ${userInfo.email}`);
-//     })
-//     .catch((e) => {
-//       console.log(`Unable to sync mailing list for ${userInfo.email}`, e);
-//     });
-//
-//   } catch (err) {
-//     console.log(err);
-//     throw new InternalServerError('Error logging user in.', err);
-//   }
-//
-//   if (relayState.redirect) {
-//     const samlInfo = await Settings.findOne({}, 'saml');
-//     const redirectURL = new URL(relayState.redirect);
-//     if (samlInfo.saml.permittedRedirectHosts.indexOf(redirectURL.host) !== -1) {
-//       redirectURL.searchParams.set('token', token);
-//       return {
-//         action: 'redirect',
-//         data: redirectURL.toString(),
-//       };
-//     }
-//     throw new BadRequestError('Redirect URL host not permitted.');
-//   } else {
-//     return {
-//       action: 'respond',
-//       data: {
-//         token,
-//       },
-//     };
-//   }
-// }
-//
-// function _handleLogoutRequest(sp: ServiceProvider, idp: IdentityProvider, saml_response: SAMLAssertResponse): Promise<ActionSpec> {
-//   return new Promise<ActionSpec>((resolve, reject) => {
-//     //definition is wrong for this type
-//     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//     //@ts-ignore
-//     const name_id = saml_response.name_id;
-//
-//     // remote slo logout, revoke all tokens issued before now
-//     User.findOneAndUpdate({
-//       idpLinkID: name_id,
-//     }, {
-//       lastLogout: Date.now(),
-//     }).catch((err) => {
-//       console.log(err);
-//       console.log('Unable to revoke past sessions.');
-//     }).finally(() => {
-//       sp.create_logout_response_url(idp, {
-//         in_response_to: saml_response.response_header.id,
-//       }, (error: Error | null, response_url: string) => {
-//         if (error) {
-//           return reject(error);
-//         }
-//
-//         return resolve({
-//           action: 'redirect',
-//           data: response_url,
-//         });
-//       });
-//     });
-//
-//
-//   });
-//
-// }
-//
-export const getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
+import Settings from '../models/settings/Settings';
+import { fields } from '../models/user/fields';
+import User from '../models/user/User';
+
+import syncMailingLists from '../services/mailer/syncMailingLists';
+import { fetchClient } from '../services/multiprovider';
+import * as permissions from '../services/permissions';
+
+import { BadRequestError, ForbiddenError, InternalServerError } from '../types/errors';
+
+import {log} from "../services/logger";
+let settingsCache = {} as ISettings;
+let settingsTime = 0;
+
+const _getCachedSettings = async (): Promise<ISettings> => {
+  if (settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()) {
+    return settingsCache;
+  }
+
+  const settings = await Settings.findOne({}, 'openID');
+
+  settingsCache = settings;
+  settingsTime = Date.now();
+
+  return settings;
+};
+
+const _getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
   for (const provider of settings['openID']['providers']) {
     if (provider['name'] === providerName) {
       return provider;
@@ -131,102 +36,210 @@ export const getProviderByName = (settings: ISettings, providerName: string): Ar
   }
   return;
 };
-//
-// export const handleACS = (providerName: string, requestBody: Record<string, unknown>): Promise<ActionSpec> => {
-//   return new Promise<ActionSpec>((resolve, reject) => {
-//     const options = { request_body: requestBody };
-//     fetchSAMLBundle(providerName.toLowerCase()).then(({ sp, idp }) => {
-//       sp.post_assert(idp, options, async (err, saml_response) => {
-//         if (err != null) {
-//           return reject(new InternalServerError('Internal server error.', err, false));
-//         }
-//
-//         console.log(saml_response);
-//
-//         let relayState = {} as Record<string, string>;
-//
-//         if (requestBody.RelayState) {
-//           try {
-//             relayState = JSON.parse(requestBody.RelayState as string);
-//           } catch (ignored) {
-//             // do nothing, invalid relay state
-//           }
-//         }
-//         try {
-//           if (saml_response.type == 'logout_request') {
-//             /*
-//             logout_request is called when a logout is generated from another application.
-//             We need to destroy the user's session on our end and redirect back to the IDP.
-//              */
-//             return resolve(await _handleLogoutRequest(sp, idp, saml_response));
-//
-//           } else if (saml_response.type == 'logout_response') {
-//             const samlInfo = await Settings.findOne({}, 'saml');
-//
-//             const provider = _getProviderByName(samlInfo, providerName);
-//
-//             return resolve({
-//               action: 'redirect',
-//               data: provider.logout_redirect_url,
-//             });
-//           } else {
-//             return resolve(await _handleLogin(saml_response, relayState));
-//           }
-//         } catch (err) {
-//           return reject(err);
-//         }
-//       });
-//     }).catch((err) => {
-//       return reject(err);
-//     });
-//
-//   });
-// };
-//
-// export const handleLogin = async (providerName: string, redirectTo?: string): Promise<Record<string, string>> => {
-//   return new Promise<Record<string, string>>((resolve, reject) => {
-//     fetchSAMLBundle(providerName.toLowerCase()).then(({ sp, idp }) => {
-//       const relayState = {} as Record<string, string>;
-//
-//       if (redirectTo) {
-//         relayState['redirect'] = redirectTo;
-//       }
-//       sp.create_login_request_url(idp, {
-//         relay_state: JSON.stringify(relayState),
-//       }, (err: Error | null, login_url: string) => {
-//         if (err != null)
-//           return reject(new InternalServerError('Internal server error.', err, false));
-//
-//         return resolve({
-//           loginUrl: login_url,
-//         });
-//       });
-//     }).catch((err) => {
-//       return reject(err);
-//     });
-//   });
-// };
-//
-// export const handleLogout = async (providerName: string, token: string): Promise<Record<string, string>> => {
-//   return new Promise<Record<string, string>>((resolve, reject) => {
-//     if (!token) {
-//       return reject(new BadRequestError('No token provided.'));
-//     }
-//
-//     fetchSAMLBundle(providerName.toLowerCase()).then(({ sp, idp }) => {
-//       const tokenInfo = permissions.verifyToken(token);
-//
-//       sp.create_logout_request_url(idp, {
-//         name_id: tokenInfo.idpLinkID,
-//         session_index: tokenInfo.samlSessionIndex,
-//       }, (err: Error | null, logout_url: string) => {
-//         if (err != null)
-//           return reject(new InternalServerError('Internal server error.', err, false));
-//
-//         return resolve({
-//           logoutUrl: logout_url,
-//         });
-//       });
-//     });
-//   });
-// };
+
+const _getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
+  const response = await axios({
+    method: 'GET',
+    url: url,
+    headers: {
+      Authorization: 'Bearer ' + token,
+    },
+  });
+
+  return response.data;
+};
+
+const _issueLocalToken = async (assertAttributes: Record<string, any>): Promise<string> => {
+  const groups: any = {};
+
+  // Update the groups this user is in in the database
+  // Ensure that we set all the groups the user is not in to FALSE and not NULL
+  for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
+    //                                              Assertion includes group with leading /
+    groups[group] = (assertAttributes.groups || []).indexOf(`/${group}`) !== -1;
+  }
+
+  const userInfo = await User.findOneAndUpdate({
+    idpLinkID: assertAttributes.sub,
+  }, {
+    email: assertAttributes.email.toLowerCase(),
+    firstName: assertAttributes.given_name,
+    lastName: assertAttributes.family_name,
+    groups: groups,
+  }, {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  });
+
+  const token = permissions.createJwt({
+    id: userInfo._id,
+    idpLinkID: assertAttributes.sub,
+    roles: userInfo.roles,
+  });
+
+  return token;
+};
+
+const _refreshToken = async (client_id: string, client_secret: string, url: string, refreshToken: string): Promise<{
+  token: string,
+  refreshToken: string
+}> => {
+  const params = new URLSearchParams();
+  params.append('client_id', client_id);
+  params.append('client_secret', client_secret);
+  params.append('grant_type', 'refresh_token');
+  params.append('refresh_token', refreshToken);
+
+  const response = await axios.post(url, params);
+
+  return {
+    token: response.data.access_token,
+    refreshToken: response.data.refresh_token,
+  };
+};
+
+export const handleCallback = async (providerName: string, code: string, stateText: string): Promise<{
+  token: string,
+  refreshToken: string,
+  redirectTo: string
+}> => {
+  try {
+    const client = await fetchClient(providerName);
+    const settings = await _getCachedSettings();
+
+    const provider = _getProviderByName(settings, providerName);
+
+    const state = JSON.parse(stateText);
+    const redirectTo = state.redirectTo;
+
+    const accesstoken = await client.getToken({
+      code: code,
+      redirect_uri: state.callbackURL,
+    });
+
+    const userData = await _getUserData(provider.userinfo_url, accesstoken.token.access_token);
+
+    const localToken = await _issueLocalToken(userData);
+
+    // Trigger a mailing list sync on login
+    // We don't really need to wait for this, so we'll run it async
+    syncMailingLists(undefined, true, userData.email)
+        .then(() => {
+          log.debug(`Synced mailing list for ${userData.email}`);
+        })
+        .catch((e) => {
+          log.warn(`Unable to sync mailing list for ${userData.email}`, e);
+        });
+
+    return {
+      token: localToken,
+      refreshToken: accesstoken.token.refresh_token,
+      redirectTo: redirectTo
+    }
+  }
+  catch(err) {
+    if(err.output?.statusCode === 400){
+      throw new ForbiddenError('Invalid code.', err, false);
+    } else {
+      throw new InternalServerError('Unable to initialize the login provider.', err, false);
+    }
+  }
+};
+
+export const handleLoginRequest = async (providerName: string, redirectTo: string, callbackURL: string): Promise<{
+  url: string
+}> => {
+  const state = {} as Record<string, string>;
+
+  if (redirectTo) {
+    state['redirectTo'] = redirectTo as string;
+  }
+
+  try {
+    const client = await fetchClient(providerName);
+
+    if (!callbackURL) {
+      const settings = await _getCachedSettings();
+      callbackURL = _getProviderByName(settings, providerName).callback_url;
+    }
+
+    // store this so that frontend can be certain of the callback url used for the session
+    state['callbackURL'] = callbackURL;
+
+    const redirectURL = client.authorizeURL({
+      redirect_uri: callbackURL,
+      scope: 'profile',
+      state: JSON.stringify(state),
+    });
+
+    return {
+      url: redirectURL
+    }
+  }
+  catch(err) {
+    throw new InternalServerError('Unable to initialize the login provider.', err, false)
+  }
+};
+
+export const handleRefresh = async (providerName: string, refreshToken: string): Promise<{
+  token: string,
+  refreshToken: string
+}> => {
+  const settings = await _getCachedSettings();
+  const provider = _getProviderByName(settings, providerName);
+
+  try {
+    const newTokens = await _refreshToken(provider.client_id, provider.client_secret, provider.token_url, refreshToken);
+
+    const userData = await _getUserData(provider.userinfo_url, newTokens['token']);
+
+    const token = await _issueLocalToken(userData);
+
+    return {
+      token: token,
+      refreshToken: newTokens['refreshToken'],
+    };
+  } catch (err) {
+    throw new BadRequestError("Unable to refresh token", err, false);
+  }
+};
+
+export const handleLogout = async (providerName: string, refreshToken: string): Promise<Record<string, never>> => {
+  const tokenInfo = permissions.decodeToken(refreshToken);
+  const settings = await _getCachedSettings();
+  const provider = _getProviderByName(settings, providerName);
+
+  if (!refreshToken) {
+    throw new BadRequestError('No refresh token provided.');
+  }
+
+  try {
+    await User.findOneAndUpdate({
+      idpLinkID: tokenInfo.sub,
+    }, {
+      lastLogout: Date.now(),
+    });
+  } catch (err) {
+    log.warn(`Unable to revoke past sessions for user with link ID ${tokenInfo.sub}.`, err);
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.append('refresh_token', refreshToken);
+
+    await axios({
+      url: provider.logout_url,
+      method: 'POST',
+      data: params,
+      auth: {
+        username: encodeURIComponent(provider.client_id).replace(/%20/g, '+'),
+        password: provider.client_secret
+      }
+    });
+  } catch(err) {
+    log.warn(`Unable to log out of IDP session for user with link ID ${tokenInfo.sub}.`, err);
+  }
+
+  return {};
+};

@@ -17,4 +17,3 @@ export type UniverseState = {
 export interface IRSVP {
   attending: boolean
 }
-
