@@ -1,6 +1,5 @@
 {
   "openID": {
-    "permittedRedirectHosts": [],
     "providers": [
       {
         "name": "organizer",

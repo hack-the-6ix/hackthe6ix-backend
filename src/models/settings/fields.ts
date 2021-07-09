@@ -48,10 +48,6 @@ const openID = {
   readCheck: false,
 
   FIELDS: {
-    permittedRedirectHosts: {
-      type: [String],
-      required: true,
-    },
     providers: {
       type: [OpenIDProvider],
     },
@@ -135,7 +131,6 @@ export const fields = {
 
 export interface ISettings extends mongoose.Document {
   openID: {
-    permittedRedirectHosts: string[],
     providers: {
       name: string,
       authorization_url: string,
