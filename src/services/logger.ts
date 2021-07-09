@@ -99,7 +99,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
     if (process.env.NODE_ENV === 'development') {
       log.debug(`[${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
-    log.info(`[${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
+
     return res.json({
       status: 200,
       message: data,
