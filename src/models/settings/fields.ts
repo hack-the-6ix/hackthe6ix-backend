@@ -32,6 +32,10 @@ const OpenIDProvider = {
     type: String,
     required: true,
   },
+  logout_url: {
+    type: String,
+    required: true,
+  },
   logout_redirect_url: {
     type: String,
     required: true,
@@ -140,6 +144,7 @@ export interface ISettings extends mongoose.Document {
       client_secret: string,
       callback_url: string,
       userinfo_url: string,
+      logout_url: string,
       logout_redirect_url: string
     }[]
   },

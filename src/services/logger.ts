@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { ActionSpec } from '../../@types/logger';
 import { HTTPError } from '../types/errors';
 
 /**
@@ -9,7 +8,7 @@ import { HTTPError } from '../types/errors';
  * @param res
  * @param promise
  */
-export const logResponse = (req: Request, res: Response, promise: Promise<any>, extendedActions = false) => {
+export const logResponse = (req: Request, res: Response, promise: Promise<any>) => {
 
   promise
   .then((data) => {
@@ -17,23 +16,10 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       console.log(`[${new Date()}] [${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
     }
 
-    if (extendedActions) {
-      const actionSpec = data as ActionSpec;
-
-      if (actionSpec.action === 'respond') {
-        return res.json({
-          status: 200,
-          message: actionSpec.data,
-        });
-      } else if (actionSpec.action === 'redirect') {
-        return res.redirect(actionSpec.data);
-      }
-    } else {
-      return res.json({
-        status: 200,
-        message: data,
-      });
-    }
+    return res.json({
+      status: 200,
+      message: data,
+    });
   })
   .catch((error: HTTPError) => {
 
