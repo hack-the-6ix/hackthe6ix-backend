@@ -1,9 +1,12 @@
+import { LoggingWinston } from '@google-cloud/logging-winston';
 import { Request, Response } from 'express';
-import { HTTPError } from '../types/errors';
+import fs from 'fs';
+import * as util from 'util';
 
 import winston from 'winston';
-import * as util from 'util';
-import {LoggingWinston} from "@google-cloud/logging-winston";
+import { HTTPError } from '../types/errors';
+
+const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
 const prepareMessage = function(args: any) {
   const msg = args.map((e:any) => {
@@ -17,15 +20,32 @@ const prepareMessage = function(args: any) {
       return util.inspect(e.toObject(), false, 10);
     else if (e.toString() === '[object Object]') {
       return util.inspect(e, false, 5);
-    }
-    else if (e instanceof Error)
-      return e.stack
+    } else if (e instanceof Error)
+      return e.stack;
     else
       return e;
   }).join(' ');
 
+  // We will truncate the message if we reach the stackdriver limit
+  const uint8 = new TextEncoder().encode(msg);
+  const messageSize = uint8.length;
+
+  if (messageSize > maxMessageSize) {
+    console.log(`Truncating message of length ${messageSize}`);
+
+    // We'll write any overflow messages to disk
+    fs.appendFile('logs/truncated.log', `${new Date()} ${msg}\n`, function(err) {
+      if (err) {
+        console.log(`Error writing truncated message: ${err}`);
+      }
+    });
+
+    const truncatedSection = uint8.slice(0, maxMessageSize);
+    return `[TRUNCATED!] ${new TextDecoder('utf-8').decode(truncatedSection)}`;
+  }
+
   return msg;
-}
+};
 
 const cFormat = winston.format.printf(({ level, message, label, timestamp}) => {
   return `${timestamp} [${label}] [${level.toUpperCase()}]: ${message}`;
@@ -96,8 +116,17 @@ function createWinstonLogger() {
 export const logResponse = (req: Request, res: Response, promise: Promise<any>) => {
   promise
   .then((data) => {
+    const logPayload = JSON.stringify({
+      requestURL: req.url,
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      uid: req.executor?._id || 'N/A',
+      requestBody: req.body,
+      responseBody: data,
+      executorUser: req.executor,
+    }, null, 2);
+
     if (process.env.NODE_ENV === 'development') {
-      log.debug(`[${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${JSON.stringify(data)}`);
+      log.debug(`[${req.url}]`, logPayload);
     }
 
     return res.json({
@@ -124,7 +153,17 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
       body.error = error.error;
     }
 
-    log.error(`[${req.url}] Req: ${JSON.stringify(req.body)} Full Response: ${error.toString()} ${JSON.stringify(body)}`);
+    const logPayload = JSON.stringify({
+      requestURL: req.url,
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      uid: req.executor?._id || 'N/A',
+      requestBody: req.body,
+      error: error,
+      responseBody: body,
+      executorUser: req.executor,
+    }, null, 2);
+
+    log.error(`[${req.url}]`, logPayload);
 
     return res.status(status).json(body);
   });

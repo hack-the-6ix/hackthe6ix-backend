@@ -48,4 +48,4 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-console.log(`Development Mode: ${process.env.NODE_ENV}`);
+console.log(`Node Environment: ${process.env.NODE_ENV}`);
