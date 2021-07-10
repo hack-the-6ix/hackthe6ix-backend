@@ -33,9 +33,20 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const corsFilter = process.env.PRODUCTION?.toLowerCase() === 'true' ? /hackthe6ix\.com$/ : '*';
 app.use(cors({
-  origin: corsFilter,
+  origin: (origin: string, callback: any) => {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (origin.match(/hackthe6ix\.com$/)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS!'));
+      }
+    } else {
+      callback(null, true);
+    }
+
+  },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 }));
 
