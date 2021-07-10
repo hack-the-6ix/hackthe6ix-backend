@@ -199,7 +199,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -209,7 +209,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(64)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
