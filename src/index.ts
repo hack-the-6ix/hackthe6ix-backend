@@ -36,7 +36,6 @@ app.use(bodyParser.json());
 app.use(cors({
   origin: (origin: string, callback: any) => {
 
-    /*
     if (process.env.NODE_ENV === 'production') {
       if (origin.match(/hackthe6ix\.com$/)) {
         callback(null, true);
@@ -45,8 +44,7 @@ app.use(cors({
       }
     } else {
       callback(null, true);
-    }*/
-    callback(null, true);
+    }
 
   },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
