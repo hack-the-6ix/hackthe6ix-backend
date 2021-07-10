@@ -14,7 +14,7 @@ router.post('/:provider/callback', (req: Request, res: Response, next: NextFunct
   logResponse(
     req,
     res,
-    handleCallback(req.params.provider, req.body.code, req.body.state),
+    handleCallback(req.params.provider, req.body.code, req.body.state, JSON.stringify(req.headers['x-forwarded-for']) || req.socket.remoteAddress),
   );
 });
 

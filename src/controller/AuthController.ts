@@ -5,13 +5,14 @@ import Settings from '../models/settings/Settings';
 import { fields } from '../models/user/fields';
 import User from '../models/user/User';
 
+import { getCircularReplacer, log } from '../services/logger';
+
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import { fetchClient } from '../services/multiprovider';
 import * as permissions from '../services/permissions';
 
 import { BadRequestError, ForbiddenError, InternalServerError } from '../types/errors';
 
-import {log} from "../services/logger";
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
@@ -99,7 +100,7 @@ const _refreshToken = async (client_id: string, client_secret: string, url: stri
   };
 };
 
-export const handleCallback = async (providerName: string, code: string, stateText: string): Promise<{
+export const handleCallback = async (providerName: string, code: string, stateText: string, ip?: string): Promise<{
   token: string,
   refreshToken: string,
   redirectTo: string
@@ -131,6 +132,13 @@ export const handleCallback = async (providerName: string, code: string, stateTe
         .catch((e) => {
           log.warn(`Unable to sync mailing list for ${userData.email}`, e);
         });
+
+    // Log the login event
+    const logPayload = JSON.stringify({
+      ip: ip || 'N/A',
+      user: userData,
+    }, getCircularReplacer(), 2);
+    log.info(`[ LOGIN ]`, logPayload);
 
     return {
       token: localToken,

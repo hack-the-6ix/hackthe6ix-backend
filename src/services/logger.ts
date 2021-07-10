@@ -9,7 +9,7 @@ import { HTTPError } from '../types/errors';
 const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
 // Courtesy of https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#examples
-const getCircularReplacer = () => {
+export const getCircularReplacer = () => {
   const seen = new WeakSet();
   return (key: any, value: any) => {
     if (typeof value === 'object' && value !== null) {
@@ -126,8 +126,9 @@ function createWinstonLogger() {
  * @param req
  * @param res
  * @param promise
+ * @param alwaysLog - when enabled, this event will trigger an info level log in production
  */
-export const logResponse = (req: Request, res: Response, promise: Promise<any>) => {
+export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean) => {
   promise
   .then((data) => {
     const logPayload = JSON.stringify({
@@ -141,6 +142,8 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>) 
 
     if (process.env.NODE_ENV === 'development') {
       log.debug(`[${req.url}]`, logPayload);
+    } else if (alwaysLog) {
+      log.info(`[${req.url}]`, logPayload);
     }
 
     return res.json({

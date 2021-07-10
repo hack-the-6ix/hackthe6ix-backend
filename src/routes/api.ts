@@ -45,6 +45,7 @@ apiRouter.post('/edit/:objectType', isOrganizer, (req: Request, res: Response) =
       req.body.filter,
       req.body.changes,
     ),
+    true,
   );
 });
 
@@ -61,6 +62,7 @@ apiRouter.post('/delete/:objectType', isAdmin, (req: Request, res: Response) => 
       req.params.objectType,
       req.body,
     ),
+    true,
   );
 });
 
@@ -77,6 +79,7 @@ apiRouter.post('/create/:objectType', isAdmin, (req: Request, res: Response) => 
       req.params.objectType,
       req.body,
     ),
+    true,
   );
 });
 
@@ -117,6 +120,7 @@ apiRouter.put('/gridfs', isOrganizer, (req: Request, res: Response) => {
       mongoose,
       (req as any)?.files?.file,
     ),
+    true,
   );
 });
 
@@ -133,6 +137,7 @@ apiRouter.delete('/gridfs', isOrganizer, (req: Request, res: Response) => {
       req.query.filename as string,
       mongoose,
     ),
+    true,
   );
 });
 

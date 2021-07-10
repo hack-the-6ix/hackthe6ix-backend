@@ -53,6 +53,7 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
       req.body.submit,
       req.body.application,
     ),
+    true,
   );
 });
 
@@ -70,6 +71,7 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
       (req as any)?.files?.resume,
       mongoose,
     ),
+    true,
   );
 });
 
@@ -98,6 +100,7 @@ actionRouter.post('/createTeam', isHacker, (req: Request, res: Response) => {
     createTeam(
       req.executor,
     ),
+    true,
   );
 });
 
@@ -114,6 +117,7 @@ actionRouter.post('/joinTeam', isHacker, (req: Request, res: Response) => {
       req.executor,
       req.body.teamCode,
     ),
+    true,
   );
 });
 
@@ -129,6 +133,7 @@ actionRouter.post('/leaveTeam', isHacker, (req: Request, res: Response) => {
     leaveTeam(
       req.executor,
     ),
+    true,
   );
 });
 
@@ -160,6 +165,7 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
       req.executor,
       req.body.rsvp,
     ),
+    true,
   );
 });
 
@@ -200,6 +206,7 @@ actionRouter.post('/syncMailingLists', isOrganizer, (req: Request, res: Response
       req.body.forceUpdate,
       req.body.email,
     ),
+    true,
   );
 });
 
@@ -215,6 +222,7 @@ actionRouter.post('/verifyMailingList', isOrganizer, (req: Request, res: Respons
     verifyMailingList(
       req.executor,
     ),
+    true,
   );
 });
 
@@ -232,6 +240,7 @@ actionRouter.post('/sendEmail', isOrganizer, (req: Request, res: Response) => {
       req.body.templateName,
       req.body.tags,
     ),
+    true,
   );
 });
 
@@ -247,6 +256,7 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
     sendAllTemplates(
       req.executor,
     ),
+    true,
   );
 });
 
@@ -268,6 +278,7 @@ actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => 
     req,
     res,
     getCandidate(req.executor),
+    true,
   );
 });
 
@@ -285,6 +296,7 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
       req.body.candidateID,
       req.body.grade,
     ),
+    true,
   );
 });
 
