@@ -1,5 +1,6 @@
 import { IUser } from '../models/user/fields';
 import { getInTextSearchableFields } from '../models/util';
+import { jsonify, log } from '../services/logger';
 import {
   CreateCheckRequest,
   DeleteCheckRequest,
@@ -323,6 +324,14 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
   // Keep track of IDs that were affected
   for (const o of Object.keys(results)) {
     amendedIDs.push(results[o]._id);
+
+    log.info('[OBJECT EDITED]', jsonify({
+      requestUser: requestUser,
+      filter: filter,
+      objectType: objectTypeName,
+      objectEdited: results[o],
+      changes: changes,
+    }));
   }
 
   // Flatten changes so it merges instead of replacing
@@ -386,12 +395,19 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
-    }),
+    })
   );
 
   // Keep track of IDs that were affected
   for (const o of Object.keys(results)) {
     amendedIDs.push(results[o]._id);
+
+    log.info('[OBJECT DELETION]', jsonify({
+      requestUser: requestUser,
+      filter: filter,
+      objectType: objectTypeName,
+      objectDeleted: results[o],
+    }));
   }
 
   // Changes accepted and are made

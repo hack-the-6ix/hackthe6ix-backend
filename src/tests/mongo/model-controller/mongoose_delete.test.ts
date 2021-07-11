@@ -1,5 +1,6 @@
 import { deleteObject } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
+import { log } from '../../../services/logger';
 import { DeleteDeniedError } from '../../../types/errors';
 import {
   generateTestModel,
@@ -30,6 +31,17 @@ jest.mock('../../../controller/util/resources', () => (
     getModels: jest.fn(),
   }
 ));
+
+jest.mock('../../../services/logger', () => {
+  const real = jest.requireActual('../../../services/logger');
+
+  return {
+    ...real,
+    log: {
+      info: jest.fn(),
+    },
+  };
+});
 
 describe('Model Delete', () => {
 
@@ -69,6 +81,48 @@ describe('Model Delete', () => {
     expect(data).toContainEqual(fail1._id);
     expect(data).toContainEqual(fail2._id);
     expect(data.length).toEqual(2);
+  });
+
+  test('Logger', async () => {
+    const [successDeleteTestModel, mockModels] = generateTestModel({
+      deleteCheck: true,
+      FIELDS: {
+        foo: {
+          type: Boolean,
+        },
+      },
+    }, 'LoggerDeleteTest');
+
+    getModels.mockReturnValue(mockModels);
+
+    // Create some objects to fill the DB
+    const originalObject = await successDeleteTestModel.create({
+      foo: true,
+    });
+    const originalObject2 = await successDeleteTestModel.create({
+      foo: true,
+    });
+    const originalObject3 = await successDeleteTestModel.create({
+      foo: false,
+    });
+    const resultObject1 = await successDeleteTestModel.find({});
+    expect(resultObject1.length).toEqual(3);
+
+    const data = await deleteObject(
+      hackerUser,
+      'LoggerDeleteTest',
+      {
+        foo: true,
+      },
+    );
+
+    // Object deleted
+    const resultObject2 = await successDeleteTestModel.find({});
+    expect(resultObject2.length).toEqual(1);
+
+    // Verify deleted IDs are returned
+    expect(data.sort()).toEqual([originalObject._id, originalObject2._id].sort());
+    expect(log.info).toHaveBeenCalledTimes(2);
   });
 
   describe('Delete Check', () => {

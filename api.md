@@ -73,6 +73,9 @@ filtered out as part of field sanitation.
 
 Edit existing objects. Changes are validated against `writeCheck` policy.
 
+WARNING! This is an **EXTREMELY** dangerous operation! If the query is incorrect, it could potentially break the database.
+Remember that `{}` means match **EVERYTHING**.
+
 ##### Input Specification
 `objectType` refers to the name of the object being operated on (duh).
 
@@ -106,6 +109,9 @@ Edit existing objects. Changes are validated against `writeCheck` policy.
 
 Delete existing objects. Changes are validated against `deleteCheck` policy.
 
+WARNING! This is an **EXTREMELY** dangerous operation! If the query is incorrect, it could potentially nuke the database.
+Remember that `{}` means match **EVERYTHING**.
+
 ##### Input Specification
 `objectType` refers to the name of the object being operated on (duh).
 
@@ -120,6 +126,8 @@ All objects that match the filter query will be deleted.
 ```
 
 ##### Output Specification
+WARNING! This is an **EXTREMELY** dangerous operation! If the query is incorrect, it could potentially nuke the database.
+Remember that `{}` means match **EVERYTHING**.
 
 
 ```

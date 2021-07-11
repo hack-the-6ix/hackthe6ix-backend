@@ -50,6 +50,17 @@ jest.mock('../../../services/mailer/util/external', () => {
 
 jest.mock('../../../services/mailer/syncMailingList', () => jest.fn((): any => undefined));
 
+jest.mock('../../../services/logger', () => {
+  const real = jest.requireActual('../../../services/logger');
+
+  return {
+    ...real,
+    log: {
+      info: jest.fn(),
+    },
+  };
+});
+
 /**
  * We will be using the real User schema and submitting a simulated real application
  */

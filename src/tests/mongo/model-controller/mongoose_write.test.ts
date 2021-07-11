@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { editObject, flattenFields } from '../../../controller/ModelController';
 import { getModels } from '../../../controller/util/resources';
 import { extractFields } from '../../../models/util';
+import { log } from '../../../services/logger';
 import { WriteCheckRequest } from '../../../types/checker';
 import { WriteDeniedError } from '../../../types/errors';
 import {
@@ -34,6 +35,16 @@ jest.mock('../../../controller/util/resources', () => (
   }
 ));
 
+jest.mock('../../../services/logger', () => {
+  const real = jest.requireActual('../../../services/logger');
+
+  return {
+    ...real,
+    log: {
+      info: jest.fn(),
+    },
+  };
+});
 
 const [recursionCreateWriteTestModel, mockRecrusionCreateWriteTestModels] = generateTestModel({
   createCheck: true,
@@ -273,10 +284,51 @@ describe('Model Write', () => {
     });
   });
 
+  test('Logger', async () => {
+
+    await writeTestModel.create({});
+    const originalObject = await writeTestModel.create({
+      field1: 'Banana',
+      field2: 'Apple',
+    });
+
+    expect((await writeTestModel.find({})).length).toEqual(2);
+
+    const data = await editObject(
+      hackerUser,
+      'WriteTest',
+      {
+        field1: 'Banana',
+      },
+      {
+        field2: 'Orange',
+      },
+    );
+
+    // Ensure only amended object is modified
+    expect(data.length).toEqual(1);
+    expect(data).toContainEqual(originalObject._id);
+
+    expect(log.info).toHaveBeenCalledTimes(1);
+
+    const resultObject = await writeTestModel.find({ _id: data[0] });
+    expect(resultObject.length).toEqual(1);
+
+    const resultJSON = resultObject[0].toJSON();
+    delete resultJSON['_id'];
+    delete resultJSON['id'];
+    delete resultJSON['__v'];
+
+    expect(resultJSON).toEqual({
+      field1: 'Banana',
+      field2: 'Orange',
+      virtual: 'virtualboi!',
+    });
+  });
+
   describe('Write check', () => {
 
     test('Success', async () => {
-
       await writeTestModel.create({});
       const originalObject = await writeTestModel.create({
         field1: 'Banana',

@@ -56,6 +56,17 @@ jest.mock('../../../services/mailer/util/external', () => {
   };
 });
 
+jest.mock('../../../services/logger', () => {
+  const real = jest.requireActual('../../../services/logger');
+
+  return {
+    ...real,
+    log: {
+      info: jest.fn(),
+    },
+  };
+});
+
 jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => undefined));
 
 jest.mock('../../../models/user/fields', () => {

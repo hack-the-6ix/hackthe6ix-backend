@@ -22,6 +22,10 @@ export const getCircularReplacer = () => {
   };
 };
 
+export const jsonify = (message) => {
+  return JSON.stringify(message, getCircularReplacer(), 2);
+};
+
 const prepareMessage = function(args: any) {
   const msg = args.map((e:any) => {
     if(e === undefined || e === null){
@@ -131,14 +135,14 @@ function createWinstonLogger() {
 export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean) => {
   promise
   .then((data) => {
-    const logPayload = JSON.stringify({
+    const logPayload = jsonify({
       requestURL: req.url,
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       uid: req.executor?._id || 'N/A',
       requestBody: req.body,
       responseBody: data,
       executorUser: req.executor,
-    }, getCircularReplacer(), 2);
+    });
 
     if (process.env.NODE_ENV === 'development') {
       log.debug(`[${req.url}]`, logPayload);
@@ -170,7 +174,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       body.error = error.error;
     }
 
-    const logPayload = JSON.stringify({
+    const logPayload = jsonify({
       requestURL: req.url,
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       uid: req.executor?._id || 'N/A',
@@ -178,7 +182,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       error: error,
       responseBody: body,
       executorUser: req.executor,
-    }, getCircularReplacer(), 2);
+    });
 
     log.error(`[${req.url}]`, logPayload);
 
