@@ -287,6 +287,7 @@ describe('Update Real Application', () => {
       mlhCOC: true,
       mlhEmail: true,
       mlhData: true,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -334,6 +335,7 @@ describe('Submit Real Application', () => {
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -379,6 +381,7 @@ describe('Submit Real Application', () => {
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -428,6 +431,7 @@ describe('Submit Real Application', () => {
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: false,
       mlhData: true,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -472,6 +476,7 @@ describe('Submit Real Application', () => {
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: false,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -516,6 +521,7 @@ describe('Submit Real Application', () => {
       accomplishEssay: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      country: 'Canada',
     } as IApplication;
 
     const user = await User.create({
@@ -570,6 +576,7 @@ describe('Submit Real Application', () => {
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
+        country: 'Canada',
       } as IApplication;
 
       const user = await User.create({
@@ -633,6 +640,7 @@ describe('Submit Real Application', () => {
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
+        country: 'Canada',
       } as IApplication;
 
       const user = await User.create({
@@ -696,6 +704,7 @@ describe('Submit Real Application', () => {
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
+        country: 'Canada',
       } as IApplication;
 
       const user = await User.create({
@@ -753,6 +762,7 @@ describe('Submit Real Application', () => {
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
+        country: 'Canada',
       } as IApplication;
 
       const user = await User.create({

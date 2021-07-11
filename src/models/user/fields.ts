@@ -88,7 +88,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: inEnum(enumOptions.pronouns, true),
-      submitCheck: inEnum(enumOptions.pronouns, true),
+      submitCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
@@ -109,6 +109,16 @@ export const hackerApplication = {
 
       writeCheck: inEnum(enumOptions.timezone, true),
       submitCheck: inEnum(enumOptions.timezone),
+      readCheck: true,
+    },
+
+    country: {
+      type: String,
+      caption: 'Country',
+      inTextSearch: true,
+
+      writeCheck: inEnum(enumOptions.countries, true),
+      submitCheck: inEnum(enumOptions.countries),
       readCheck: true,
     },
 
@@ -963,7 +973,8 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
-  timezone: string
+  timezone: string,
+  country: string,
   wantSwag: boolean,
   addressLine1: string,
   addressLine2: string,
