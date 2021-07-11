@@ -88,7 +88,7 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: inEnum(enumOptions.pronouns, true),
-      submitCheck: inEnum(enumOptions.pronouns, true),
+      submitCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
