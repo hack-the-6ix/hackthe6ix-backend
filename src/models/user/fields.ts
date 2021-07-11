@@ -97,8 +97,12 @@ export const hackerApplication = {
       caption: 'Ethnicity',
       inTextSearch: true,
 
+      writeCheck: maxLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
+      /*
+      Oops i messed up some enums earlier, so we won't check enums
       writeCheck: inEnum(enumOptions.ethnicity, true),
-      submitCheck: inEnum(enumOptions.ethnicity),
+      submitCheck: inEnum(enumOptions.ethnicity),*/
       readCheck: true,
     },
 
