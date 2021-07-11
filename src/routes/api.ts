@@ -44,6 +44,8 @@ apiRouter.post('/edit/:objectType', isOrganizer, (req: Request, res: Response) =
       req.params.objectType,
       req.body.filter,
       req.body.changes,
+      req.body.noFlatten,
+      true,
     ),
     true,
   );

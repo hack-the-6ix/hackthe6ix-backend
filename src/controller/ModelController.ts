@@ -285,8 +285,9 @@ export const flattenFields = (fields: any, prefix = '') => {
  *                                                                          is enabled!
  *                     The default behaviour (when this is disabled) is to merge all fields, so only fields that are
  *                    explicitly mentioned in changes will be touched.
+ * @param logEvent - whether to write this event to the system log
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, noFlatten?: boolean) => {
+export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, noFlatten?: boolean, logEvent?: boolean) => {
 
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
@@ -325,13 +326,15 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
   for (const o of Object.keys(results)) {
     amendedIDs.push(results[o]._id);
 
-    log.info('[OBJECT EDITED]', jsonify({
-      requestUser: requestUser,
-      filter: filter,
-      objectType: objectTypeName,
-      objectEdited: results[o],
-      changes: changes,
-    }));
+    if (logEvent) {
+      log.info('[OBJECT EDITED]', jsonify({
+        requestUser: requestUser,
+        filter: filter,
+        objectType: objectTypeName,
+        objectEdited: results[o],
+        changes: changes,
+      }));
+    }
   }
 
   // Flatten changes so it merges instead of replacing

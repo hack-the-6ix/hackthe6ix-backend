@@ -284,46 +284,92 @@ describe('Model Write', () => {
     });
   });
 
-  test('Logger', async () => {
+  describe('Logger', () => {
 
-    await writeTestModel.create({});
-    const originalObject = await writeTestModel.create({
-      field1: 'Banana',
-      field2: 'Apple',
-    });
-
-    expect((await writeTestModel.find({})).length).toEqual(2);
-
-    const data = await editObject(
-      hackerUser,
-      'WriteTest',
-      {
+    test('Enabled Logger', async () => {
+      await writeTestModel.create({});
+      const originalObject = await writeTestModel.create({
         field1: 'Banana',
-      },
-      {
+        field2: 'Apple',
+      });
+
+      expect((await writeTestModel.find({})).length).toEqual(2);
+
+      const data = await editObject(
+        hackerUser,
+        'WriteTest',
+        {
+          field1: 'Banana',
+        },
+        {
+          field2: 'Orange',
+        },
+      );
+
+      // Ensure only amended object is modified
+      expect(data.length).toEqual(1);
+      expect(data).toContainEqual(originalObject._id);
+
+      expect(log.info).toHaveBeenCalledTimes(0);
+
+      const resultObject = await writeTestModel.find({ _id: data[0] });
+      expect(resultObject.length).toEqual(1);
+
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
+
+      expect(resultJSON).toEqual({
+        field1: 'Banana',
         field2: 'Orange',
-      },
-    );
-
-    // Ensure only amended object is modified
-    expect(data.length).toEqual(1);
-    expect(data).toContainEqual(originalObject._id);
-
-    expect(log.info).toHaveBeenCalledTimes(1);
-
-    const resultObject = await writeTestModel.find({ _id: data[0] });
-    expect(resultObject.length).toEqual(1);
-
-    const resultJSON = resultObject[0].toJSON();
-    delete resultJSON['_id'];
-    delete resultJSON['id'];
-    delete resultJSON['__v'];
-
-    expect(resultJSON).toEqual({
-      field1: 'Banana',
-      field2: 'Orange',
-      virtual: 'virtualboi!',
+        virtual: 'virtualboi!',
+      });
     });
+
+    test('Enabled Logger', async () => {
+      await writeTestModel.create({});
+      const originalObject = await writeTestModel.create({
+        field1: 'Banana',
+        field2: 'Apple',
+      });
+
+      expect((await writeTestModel.find({})).length).toEqual(2);
+
+      const data = await editObject(
+        hackerUser,
+        'WriteTest',
+        {
+          field1: 'Banana',
+        },
+        {
+          field2: 'Orange',
+        },
+        false,
+        true,
+      );
+
+      // Ensure only amended object is modified
+      expect(data.length).toEqual(1);
+      expect(data).toContainEqual(originalObject._id);
+
+      expect(log.info).toHaveBeenCalledTimes(1);
+
+      const resultObject = await writeTestModel.find({ _id: data[0] });
+      expect(resultObject.length).toEqual(1);
+
+      const resultJSON = resultObject[0].toJSON();
+      delete resultJSON['_id'];
+      delete resultJSON['id'];
+      delete resultJSON['__v'];
+
+      expect(resultJSON).toEqual({
+        field1: 'Banana',
+        field2: 'Orange',
+        virtual: 'virtualboi!',
+      });
+    });
+
   });
 
   describe('Write check', () => {

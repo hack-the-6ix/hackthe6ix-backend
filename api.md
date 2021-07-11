@@ -87,7 +87,8 @@ Remember that `{}` means match **EVERYTHING**.
   },
   changes: { // Changes to apply to the object (mongoDB format)
     firstName: "foobar"
-  }  
+  },
+  noFlatten: false // if true, the changes will REPLACE rather than merge
 }
 ```
 
