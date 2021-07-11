@@ -18,7 +18,7 @@ export const decodeToken = (token: string): Record<string, any> => {
 export const createJwt = (data: Record<string, unknown>): string => {
   return jwt.sign(data, process.env.JWT_SECRET, {
     algorithm: 'HS256',
-    expiresIn: '1 hour',
+    expiresIn: '1 day',
     issuer: 'hackthe6ix-backend',
     audience: 'hackthe6ix-backend',
   });
