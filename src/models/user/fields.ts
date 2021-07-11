@@ -112,6 +112,16 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    country: {
+      type: String,
+      caption: 'Country',
+      inTextSearch: true,
+
+      writeCheck: inEnum(enumOptions.countries, true),
+      submitCheck: inEnum(enumOptions.countries),
+      readCheck: true,
+    },
+
     wantSwag: {
       type: Boolean,
       caption: 'I live in Canada and want to receive HT6 swag',
@@ -963,7 +973,8 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
-  timezone: string
+  timezone: string,
+  country: string,
   wantSwag: boolean,
   addressLine1: string,
   addressLine2: string,
