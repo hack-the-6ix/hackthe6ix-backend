@@ -22,7 +22,7 @@ export const getCircularReplacer = () => {
   };
 };
 
-export const jsonify = (message) => {
+export const jsonify = (message: any) => {
   return JSON.stringify(message, getCircularReplacer(), 2);
 };
 
