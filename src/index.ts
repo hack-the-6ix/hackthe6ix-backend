@@ -33,7 +33,9 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const corsFilter = process.env.NODE_ENV === 'production' ? /hackthe6ix\.com$/ : '*';
+const corsFilter = process.env.NODE_ENV === 'production'
+  ? [/hackthe6ix\.com$/, /localhost:/]
+  : '*';
 app.use(cors({
   origin: corsFilter,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
