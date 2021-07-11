@@ -21,8 +21,9 @@ export const enumOptions = {
     'Latinx',
     'Southeast Asian (e.g. India, Pakistan, Sri Lanka)',
     'West Asian (e.g. Afghanistan, Iran)',
-    'White / People of European Descent, other, prefer not to answer"',
+    'White / People of European Descent',
     'Other',
+    'Prefer not to answer',
   ],
   timezone: [
     'MIT - Midway Islands Time (GMT-11:00)',
