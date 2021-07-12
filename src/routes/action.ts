@@ -277,7 +277,7 @@ actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    getCandidate(req.executor),
+    getCandidate(req.executor, req.query.category as string),
     true,
   );
 });
