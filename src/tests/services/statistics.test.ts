@@ -342,6 +342,11 @@ describe('Get statistics', () => {
       expect(statistics.hacker.submittedApplicationStats.review).toEqual({
         reviewed: 2,
         notReviewed: 4,
+        applicationScores: {
+          accomplish: 3,
+          portfolio: 2,
+          project: 3,
+        },
       });
     });
   });

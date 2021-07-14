@@ -38,6 +38,11 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
           review: {
             reviewed: 0,
             notReviewed: 0,
+            applicationScores: {
+              accomplish: 0,
+              project: 0,
+              portfolio: 0,
+            },
           },
         },
       },
@@ -96,6 +101,17 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         } else {
           statistics.hacker.submittedApplicationStats.review.notReviewed++;
         }
+
+        // Individual questions
+        if (user?.internal?.applicationScores?.accomplish?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.accomplish++;
+        }
+        if (user?.internal?.applicationScores?.project?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.project++;
+        }
+        if (user?.internal?.applicationScores?.portfolio?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.portfolio++;
+        }
       }
 
       // Roles
@@ -137,7 +153,12 @@ export type IStatistics = {
       },
       review: {
         reviewed: number,
-        notReviewed: number
+        notReviewed: number,
+        applicationScores: {
+          accomplish: number,
+          project: number,
+          portfolio: number
+        }
       }
     }
   },
