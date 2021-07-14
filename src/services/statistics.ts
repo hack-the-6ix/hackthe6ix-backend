@@ -45,6 +45,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             },
           },
         },
+        questionBreakdown: {},
       },
       groups: {
         hacker: 0,
@@ -60,6 +61,17 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
       const user = rawUser.toJSON();
 
       statistics.total++;
+
+      // Statistics for each question
+      for (const question in user.hackerApplication) {
+        if ((user.hackerApplication as any)[question]) {
+          if (statistics.hacker.questionBreakdown[question] === undefined) {
+            statistics.hacker.questionBreakdown[question] = 1;
+          } else {
+            statistics.hacker.questionBreakdown[question]++;
+          }
+        }
+      }
 
       // Update status
       for (const s of Object.keys(user.status)) {
@@ -160,7 +172,8 @@ export type IStatistics = {
           portfolio: number
         }
       }
-    }
+    },
+    questionBreakdown: any
   },
   groups: {
     hacker: number,

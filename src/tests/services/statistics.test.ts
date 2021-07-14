@@ -263,6 +263,45 @@ describe('Get statistics', () => {
         noSwag: 3,
       });
     });
+    test('Question Breakdown', async () => {
+      const cases = [
+        {
+          hackerApplication: {
+            wantSwag: true,
+            githubLink: 'asdasiojasoidjsa',
+          },
+          status: {
+            applied: false,
+          },
+        },
+        {
+          hackerApplication: {
+            wantSwag: true,
+            githubLink: 'asdasiojasoidjsa',
+            linkedinLink: 'asdasda',
+          },
+          status: {
+            applied: true,
+          },
+        },
+        {
+          hackerApplication: {
+            wantSwag: false,
+          },
+          status: {
+            applied: true,
+          },
+        },
+      ];
+
+      await generateUsersFromTestCase(cases);
+      const statistics = await getStatistics(true);
+      expect(statistics.hacker.questionBreakdown).toEqual({
+        githubLink: 3,
+        wantSwag: 3,
+        linkedinLink: 2,
+      });
+    });
 
     test('Groups', async () => {
       const cases = ['hacker', 'admin', 'organizer', 'volunteer'].map((x) => {
