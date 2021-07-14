@@ -10,6 +10,7 @@ export const enumOptions = {
     'Liberal Arts',
     'UX design',
     'Sciences',
+    'Other',
   ],
   gender: ['Male', 'Female', 'Non-Binary', 'Other', 'Prefer not to say'],
   pronouns: ['He/Him', 'She/Her', 'They/Them', 'Other', 'Prefer not to say'],
