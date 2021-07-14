@@ -75,6 +75,7 @@ export const enumOptions = {
     'Yukon',
   ],
   countries: [
+    'Canada',
     'Afghanistan',
     'Albania',
     'Algeria',
