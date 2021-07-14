@@ -1,0 +1,6 @@
+/*
+meetingID,
+userID,
+enterTime,
+exitTime
+*/
