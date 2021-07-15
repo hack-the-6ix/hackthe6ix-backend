@@ -1,7 +1,7 @@
-export const recordJoin = async (meetingID: String, userID: String, time: Number) => {
-
+export const recordJoin = async (meetingID: string, userID: string, time: number) => {
+    
 }
 
-export const recordLeave = async (meetingID: String, userID: String, time: Number) => {
+export const recordLeave = async (meetingID: string, userID: string, time: number) => {
 
 }
