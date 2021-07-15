@@ -3,6 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { ErrorMessage } from '../types/types';
+import { jsonify, log } from './logger';
 
 export const verifyToken = (token: string): Record<string, any> => {
   return jwt.verify(token, process.env.JWT_SECRET, {
@@ -66,6 +67,16 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
 
 const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response> => {
   if (!await injectExecutor(req)) {
+    log.error(`[INVALID TOKEN]`, jsonify({
+      requestURL: req.url,
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      uid: req.executor?._id || 'N/A',
+      requestBody: req.body,
+      role: role,
+      responseBody: 'Invalid Token',
+      executorUser: req.executor,
+    }));
+
     return res.status(401).send({
       message: 'Access Denied - Invalid Token',
       status: 401,
@@ -73,6 +84,16 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
   }
 
   if (!req.executor.roles[role]) {
+    log.error(`[INSUFFICIENT PERMISSIONS]`, jsonify({
+      requestURL: req.url,
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      uid: req.executor?._id || 'N/A',
+      requestBody: req.body,
+      role: role,
+      responseBody: 'Invalid Token',
+      executorUser: req.executor,
+    }));
+
     return res.status(403).send({
       message: 'Access Denied - Insufficient permissions',
       status: 403,
