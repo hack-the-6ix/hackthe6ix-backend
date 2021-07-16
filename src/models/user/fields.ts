@@ -117,8 +117,8 @@ export const hackerApplication = {
       caption: 'Country',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.countries, true),
-      submitCheck: inEnum(enumOptions.countries),
+      writeCheck: maxLength(256),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
