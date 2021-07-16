@@ -263,6 +263,73 @@ describe('Get statistics', () => {
         noSwag: 3,
       });
     });
+    test('Summary Statistics', async () => {
+      const [DAY1, DAY2, DAY3] = [
+        18000000,
+        104400000,
+        190800000,
+      ];
+
+      const cases = [
+        {
+          hackerApplication: {
+            lastUpdated: DAY1,
+          },
+          status: {
+            applied: true,
+          },
+          created: DAY1,
+        },
+        {
+          hackerApplication: {
+            lastUpdated: DAY3,
+          },
+          status: {
+            applied: true,
+          },
+          created: DAY2,
+        },
+        {
+          hackerApplication: {},
+          status: {
+            applied: false,
+            lastUpdated: DAY3,
+          },
+          created: DAY3,
+        },
+      ];
+
+      await generateUsersFromTestCase(cases);
+      const statistics = await getStatistics(true);
+      expect(statistics.summary).toEqual({
+        '1-1': {
+          created: {
+            cumulative: 1,
+            dailyChange: 1,
+          },
+          submitted: {
+            cumulative: 1,
+            dailyChange: 1,
+          },
+        },
+        '1-2': {
+          created: {
+            cumulative: 3,
+            dailyChange: 2,
+          },
+        },
+        '1-3': {
+          created: {
+            cumulative: 6,
+            dailyChange: 3,
+          },
+          submitted: {
+            cumulative: 3,
+            dailyChange: 2,
+          },
+        },
+      });
+    });
     test('Question Breakdown', async () => {
       const cases = [
         {

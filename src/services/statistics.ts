@@ -80,12 +80,12 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
 
       // Summary statistics
       const created = new Date(user.created);
-      const createdStr = `${created.getMonth()}-${created.getDate()}`;
+      const createdStr = `${created.getMonth() + 1}-${created.getDate()}`;
       addSummaryDate(createdStr, 'created');
 
       if (user?.status?.applied && user?.hackerApplication?.lastUpdated) {
         const lastUpdated = new Date(user?.hackerApplication?.lastUpdated);
-        const lastUpdatedStr = `${lastUpdated.getMonth()}-${lastUpdated.getDate()}`;
+        const lastUpdatedStr = `${lastUpdated.getMonth() + 1}-${lastUpdated.getDate()}`;
         addSummaryDate(lastUpdatedStr, 'submitted');
       }
 
