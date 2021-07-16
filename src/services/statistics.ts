@@ -74,18 +74,36 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
       statistics.summary[date][category].dailyChange++;
     };
 
+    const generateDate = (date: Date) => {
+
+      let month = (date.getMonth() + 1).toString();
+
+      if (month.length < 2) {
+        month = `0${month}`;
+      }
+
+      let day = date.getDate().toString();
+
+      if (day.length < 2) {
+        day = `0${day}`;
+      }
+
+      return `${month}-${day}`;
+
+    };
+
     for (const rawUser of users) {
       const user = rawUser.toJSON();
       statistics.total++;
 
       // Summary statistics
       const created = new Date(user.created);
-      const createdStr = `${created.getMonth() + 1}-${created.getDate()}`;
+      const createdStr = generateDate(created);
       addSummaryDate(createdStr, 'created');
 
       if (user?.status?.applied && user?.hackerApplication?.lastUpdated) {
         const lastUpdated = new Date(user?.hackerApplication?.lastUpdated);
-        const lastUpdatedStr = `${lastUpdated.getMonth() + 1}-${lastUpdated.getDate()}`;
+        const lastUpdatedStr = generateDate(lastUpdated);
         addSummaryDate(lastUpdatedStr, 'submitted');
       }
 
@@ -164,7 +182,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
     // Compute cumulative statistics
     const cumulativeRecords: any = {};
 
-    for (const date in statistics.summary) {
+    for (const date of Object.keys(statistics.summary).sort()) {
       for (const category in statistics.summary[date]) {
 
         if (!cumulativeRecords[category]) {

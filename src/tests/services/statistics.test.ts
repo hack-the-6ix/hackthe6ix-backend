@@ -302,7 +302,7 @@ describe('Get statistics', () => {
       await generateUsersFromTestCase(cases);
       const statistics = await getStatistics(true);
       expect(statistics.summary).toEqual({
-        '1-1': {
+        '01-01': {
           created: {
             cumulative: 1,
             dailyChange: 1,
@@ -312,13 +312,13 @@ describe('Get statistics', () => {
             dailyChange: 1,
           },
         },
-        '1-2': {
+        '01-02': {
           created: {
             cumulative: 3,
             dailyChange: 2,
           },
         },
-        '1-3': {
+        '01-03': {
           created: {
             cumulative: 6,
             dailyChange: 3,
