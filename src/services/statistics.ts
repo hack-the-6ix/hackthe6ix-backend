@@ -53,14 +53,41 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         organizer: 0,
         volunteer: 0,
       },
+      summary: {},
     };
 
     const users = await User.find({});
 
+    // Write a summary statistic entry
+    const addSummaryDate = (date: string, category: string) => {
+      if (!statistics.summary[date]) {
+        statistics.summary[date] = {};
+      }
+
+      if (!statistics.summary[date][category]) {
+        statistics.summary[date][category] = {
+          dailyChange: 0,
+          cumulative: 0,
+        };
+      }
+
+      statistics.summary[date][category].dailyChange++;
+    };
+
     for (const rawUser of users) {
       const user = rawUser.toJSON();
-
       statistics.total++;
+
+      // Summary statistics
+      const created = new Date(user.created);
+      const createdStr = `${created.getMonth()}-${created.getDate()}`;
+      addSummaryDate(createdStr, 'created');
+
+      if (user?.status?.applied && user?.hackerApplication?.lastUpdated) {
+        const lastUpdated = new Date(user?.hackerApplication?.lastUpdated);
+        const lastUpdatedStr = `${lastUpdated.getMonth()}-${lastUpdated.getDate()}`;
+        addSummaryDate(lastUpdatedStr, 'submitted');
+      }
 
       // Statistics for each question
       for (const question in user.hackerApplication) {
@@ -133,6 +160,22 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         }
       }
     }
+
+    // Compute cumulative statistics
+    const cumulativeRecords: any = {};
+
+    for (const date in statistics.summary) {
+      for (const category in statistics.summary[date]) {
+
+        if (!cumulativeRecords[category]) {
+          cumulativeRecords[category] = 0;
+        }
+
+        cumulativeRecords[category] += statistics.summary[date][category].dailyChange;
+
+        statistics.summary[date][category].cumulative = cumulativeRecords[category];
+      }
+    }
   }
 
   return statistics;
@@ -180,5 +223,13 @@ export type IStatistics = {
     admin: number,
     organizer: number,
     volunteer: number
+  },
+  summary: {
+    [date: string]: {
+      [category: string]: {
+        dailyChange: number,
+        cumulative: number
+      }
+    }
   }
 }
