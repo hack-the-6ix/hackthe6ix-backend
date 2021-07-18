@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { releaseApplicationStatus } from '../../../controller/UserController';
 import User from '../../../models/user/User';
+import syncMailingLists from '../../../services/mailer/syncMailingLists';
 import { hackerUser, runAfterAll, runAfterEach, runBeforeAll } from '../../test-utils';
 
 /**
@@ -17,6 +18,8 @@ afterEach(runAfterEach);
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
+
+jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => undefined));
 
 describe('Release Admission Status', () => {
 
@@ -144,5 +147,7 @@ describe('Release Admission Status', () => {
     expect((await User.findOne({ _id: hackerAccepted._id })).toJSON().status.statusReleased).toBeTruthy();
     expect((await User.findOne({ _id: hackerWaitlisted._id })).toJSON().status.statusReleased).toBeTruthy();
     expect((await User.findOne({ _id: hackerNoStatus._id })).toJSON().status.statusReleased).toBeFalsy();
+
+    expect(syncMailingLists).toHaveBeenCalledWith(null, true);
   });
 });

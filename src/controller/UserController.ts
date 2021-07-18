@@ -357,6 +357,8 @@ export const releaseApplicationStatus = async () => {
     'status.statusReleased': true,
   });
 
+  await syncMailingLists(null, true);
+
   return usersModified;
 };
 
