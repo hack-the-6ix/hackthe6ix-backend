@@ -2,6 +2,7 @@ import { mockRandom } from 'jest-mock-random';
 import mongoose from 'mongoose';
 import { getCandidate } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
+import { enumOptions } from '../../../models/user/enums';
 import User from '../../../models/user/User';
 import { NotFoundError } from '../../../types/errors';
 import {
@@ -80,6 +81,22 @@ jest.mock('../../../models/user/fields', () => {
           },
         },
       },
+
+      portfolio: {
+        writeCheck: true,
+        readCheck: true,
+
+        FIELDS: {
+          score: {
+            type: Number,
+            default: -1,
+          },
+
+          reviewer: {
+            type: String,
+          },
+        },
+      },
     },
   };
 
@@ -93,13 +110,13 @@ describe('Get candidate', () => {
   describe('Failure', () => {
     test('No candidates', async () => {
       const organizer = await User.create(organizerUser);
-      await expect(getCandidate((organizer))).rejects.toThrow(NotFoundError);
+      await expect(getCandidate(organizer)).rejects.toThrow(NotFoundError);
     });
 
     test('Candidate not applied', async () => {
       const organizer = await User.create(organizerUser);
       const hacker = await User.create(hackerUser);
-      await expect(getCandidate((organizer))).rejects.toThrow(NotFoundError);
+      await expect(getCandidate(organizer)).rejects.toThrow(NotFoundError);
     });
 
     test('Candidate has scores', async () => {
@@ -118,10 +135,13 @@ describe('Get candidate', () => {
             category2: {
               score: 101,
             },
+            portfolio: {
+              score: 101,
+            },
           },
         },
       });
-      await expect(getCandidate((organizer))).rejects.toThrow(NotFoundError);
+      await expect(getCandidate(organizer)).rejects.toThrow(NotFoundError);
     });
 
     test('No results for category', async () => {
@@ -159,7 +179,52 @@ describe('Get candidate', () => {
         },
       });
 
-      const candidate = await getCandidate((organizer));
+      const candidate = await getCandidate(organizer);
+      expect(candidate._id).toEqual(hacker._id);
+    });
+
+    test('Candidate is a noob', async () => {
+      const organizer = await User.create(organizerUser);
+      const hacker = await User.create({
+        ...hackerUser,
+        hackerApplication: {
+          hackathonsAttended: enumOptions.hackathonsAttended[0],
+        },
+        status: {
+          applied: true,
+        },
+        internal: {
+          applicationScores: {
+            portfolio: {
+              score: -1,
+            },
+          },
+        },
+      });
+
+      await expect(getCandidate((organizer), 'portfolio')).rejects.toThrow(NotFoundError);
+    });
+
+    test('Candidate is not a noob', async () => {
+      const organizer = await User.create(organizerUser);
+      const hacker = await User.create({
+        ...hackerUser,
+        hackerApplication: {
+          hackathonsAttended: enumOptions.hackathonsAttended[1],
+        },
+        status: {
+          applied: true,
+        },
+        internal: {
+          applicationScores: {
+            portfolio: {
+              score: -1,
+            },
+          },
+        },
+      });
+
+      const candidate = await getCandidate(organizer, 'portfolio');
       expect(candidate._id).toEqual(hacker._id);
     });
 
@@ -182,7 +247,7 @@ describe('Get candidate', () => {
         },
       });
 
-      const candidate = await getCandidate((organizer));
+      const candidate = await getCandidate(organizer);
       expect(candidate._id).toEqual(hacker._id);
     });
 
@@ -206,14 +271,14 @@ describe('Get candidate', () => {
 
       mockRandom([0.0, 0.9, 0.5, 0.0, 0.9, 0.9, 0.4, 0.2]);
 
-      expect((await getCandidate((organizer)))._id).toEqual(hacker1._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker3._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker2._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker1._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker3._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker3._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker2._id);
-      expect((await getCandidate((organizer)))._id).toEqual(hacker1._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker1._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker3._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker2._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker1._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker3._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker3._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker2._id);
+      expect((await getCandidate(organizer))._id).toEqual(hacker1._id);
     });
 
     test('Filter by category', async () => {
