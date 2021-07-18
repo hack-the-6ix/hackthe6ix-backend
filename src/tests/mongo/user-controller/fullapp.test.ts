@@ -588,6 +588,7 @@ describe('Submit Real Application', () => {
         mlhEmail: true,
         mlhData: true,
         country: 'Canada',
+        preEventWorkshops: enumOptions['preEventWorkshops'][0],
       } as IApplication;
 
       const user = await User.create({
@@ -652,6 +653,7 @@ describe('Submit Real Application', () => {
         mlhEmail: true,
         mlhData: true,
         country: 'Canada',
+        preEventWorkshops: enumOptions['preEventWorkshops'][0],
       } as IApplication;
 
       const user = await User.create({
@@ -716,6 +718,7 @@ describe('Submit Real Application', () => {
         mlhEmail: true,
         mlhData: true,
         country: 'Canada',
+        preEventWorkshops: enumOptions['preEventWorkshops'][0],
       } as IApplication;
 
       const user = await User.create({
@@ -774,6 +777,7 @@ describe('Submit Real Application', () => {
         mlhEmail: true,
         mlhData: true,
         country: 'Canada',
+        preEventWorkshops: enumOptions['preEventWorkshops'][0],
       } as IApplication;
 
       const user = await User.create({
