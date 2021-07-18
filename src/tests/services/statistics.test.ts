@@ -228,6 +228,50 @@ describe('Get statistics', () => {
       });
     });
 
+    test('Preevent workshops', async () => {
+      const cases = [
+        {
+          hackerApplication: {
+            preEventWorkshops: 'Yes',
+          },
+          status: {
+            applied: true,
+          },
+        },
+        {
+          hackerApplication: {
+            preEventWorkshops: 'No',
+          },
+          status: {
+            applied: true,
+          },
+        },
+        {
+          hackerApplication: {
+            preEventWorkshops: 'Maybe',
+          },
+          status: {
+            applied: true,
+          },
+        },
+        {
+          hackerApplication: {
+            preEventWorkshops: undefined,
+          },
+          status: {
+            applied: true,
+          },
+        },
+      ];
+
+      await generateUsersFromTestCase(cases);
+      const statistics = await getStatistics(true);
+      expect(statistics.hacker.submittedApplicationStats.preEventWorkshops).toEqual({
+        Yes: 1,
+        No: 2,
+        Maybe: 3,
+      });
+    });
     test('Swag', async () => {
       const cases = [
         {

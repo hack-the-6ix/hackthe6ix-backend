@@ -310,6 +310,15 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    preEventWorkshops: {
+      type: String,
+      caption: 'Would you be interested in attending introductory workshops the week prior to the hackathon?',
+      inTextSearch: true,
+
+      writeCheck: maxLength(10),
+      readCheck: true,
+    },
+
     accomplishEssay: {
       type: String,
       caption: 'Accomplishment Essay',
@@ -995,5 +1004,6 @@ export interface IApplication {
   accomplishEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
-  mlhData: boolean
+  mlhData: boolean,
+  preEventWorkshops: string
 }
