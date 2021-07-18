@@ -231,11 +231,18 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
 export const getCandidate = async (requestUser: IUser, category?: string) => {
   const criteria: any = { $or: [] };
 
-  // It is possible for the
   if (category) {
     const query: any = {
       'status.applied': true,
     };
+
+    // We have an exception for the portfolio question, which is that the user must
+    // not be a first time hacker
+    if (category === 'portfolio') {
+      query['hackerApplication.hackathonsAttended'] = {
+        $ne: enumOptions.hackathonsAttended[0],
+      };
+    }
 
     query[`internal.applicationScores.${category}.score`] = -1;
 
