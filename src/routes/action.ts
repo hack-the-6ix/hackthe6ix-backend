@@ -5,10 +5,13 @@
 import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
+  advanceWaitlist,
+  assignAdmissionStatus,
   fetchUser,
   getCandidate,
   getEnumOptions,
   gradeCandidate,
+  releaseApplicationStatus,
   rsvp,
   updateApplication,
   updateResume,
@@ -19,7 +22,7 @@ import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
-import { isHacker, isOrganizer } from '../services/permissions';
+import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 
 const actionRouter = express.Router();
@@ -261,12 +264,47 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
 });
 
 /**
- * TODO: Add endpoint to release admission statuses
+ * (Admin)
+ *
+ * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
+actionRouter.post('/releaseApplicationStatus', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    releaseApplicationStatus(),
+    true,
+  );
+});
 
 /**
- * TODO: Add endpoint to assign admission status based on score (admitted, rejected, waitlisted, etc)
+ * (Admin)
+ *
+ * Change the status of the top waitlisted users to accepted until the number of accepted users reaches
+ * the cap.
  */
+actionRouter.post('/advanceWaitlist', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    advanceWaitlist(),
+    true,
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Assign the application status to users using the grading algorithm.
+ */
+actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    assignAdmissionStatus(),
+    true,
+  );
+});
 
 /**
  * (Organizer)

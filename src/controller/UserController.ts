@@ -331,8 +331,30 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
   return 'Success';
 };
 
+
 /**
- * TODO: Determine application status based on grade
- *
- *       Remember to sync mailing lists after the decision is made + released
+ * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
+export const releaseApplicationStatus = async () => {
+
+  // TODO: Sync mailing list
+};
+
+/**
+ * Admits a number of waitlisted participants
+ */
+export const advanceWaitlist = async () => {
+
+
+  // TODO: Sync mailing list
+};
+
+/**
+ * Runs the grading algorithm to assign admission states
+ */
+export const assignAdmissionStatus = async () => {
+
+  // TODO: Only assign status to users who applied. Users who did not finish
+  //       their application will stay "applied"
+
+};
