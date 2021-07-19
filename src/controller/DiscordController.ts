@@ -48,32 +48,43 @@ export const fetchUserInfo = async (email: string):Promise<DiscordVerifyInfo> =>
     return _assembleReturnInfo(userInfo);
 }
 
-export const verifyDiscordUser = async (email: string, discordID: string):Promise<DiscordVerifyInfo> => {
+export const verifyDiscordUser = async (email: string, discordID: string, discordUsername: string):Promise<DiscordVerifyInfo> => {
     if(!email || !discordID){
         throw new BadRequestError("email and discordID fields are required.");
     }
 
-    const queryFilter = {
-        $and: [
-            {
-                email: email
-            },
-            {
-                $or: [
-                    {
-                        "discord.discordID": discordID
-                    },{
-                        "discord.discordID": {
-                            $exists: false
-                        }
+    const queryFilters = [
+        {
+            email: email
+        },
+        {
+            $or: [
+                {
+                    "discord.discordID": discordID
+                },{
+                    "discord.discordID": {
+                        $exists: false
                     }
-                ]
-            }
-        ]
-    }
+                }
+            ]
+        }
+    ]
 
-    let userInfo:BasicUser = await User.findOneAndUpdate(queryFilter, {
+    let userInfo:BasicUser = await User.findOneAndUpdate({
+        $and: [{
+            $or: [
+                {
+                    "groups.admin": true
+                },{
+                    "groups.organizer": true
+                }, {
+                    "status.confirmed": true
+                }
+            ]
+        }, ...queryFilters]
+    }, {
         "discord.discordID": discordID,
+        "discord.username": discordUsername,
         "discord.verifyTime": Date.now()
     })
 
@@ -81,8 +92,11 @@ export const verifyDiscordUser = async (email: string, discordID: string):Promis
         return _assembleReturnInfo(userInfo);
     }
     else {
-        userInfo = await ExternalUser.findOneAndUpdate(queryFilter, {
+        userInfo = await ExternalUser.findOneAndUpdate({
+            $and: queryFilters
+        }, {
             "discord.discordID": discordID,
+            "discord.username": discordUsername,
             "discord.verifyTime": Date.now()
         })
 

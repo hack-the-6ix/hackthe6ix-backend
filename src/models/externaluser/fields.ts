@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { BasicUser } from '../../types/types';
-import { ReadCheckRequest } from '../../types/checker';
-import { IUser } from '../user/fields';
+import { ReadCheckRequest, WriteCheckRequest, DeleteCheckRequest, CreateCheckRequest } from '../../types/checker';
 import { isOrganizer } from '../validator';
 import discordShared from '../shared/discordShared';
 export const fields = {
-    createCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-    deleteCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-    writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+    createCheck: (request: CreateCheckRequest<any, IExternalUser>) => isOrganizer(request.requestUser),
+    readCheck: (request: ReadCheckRequest<IExternalUser>) => isOrganizer(request.requestUser),
+    deleteCheck: (request: DeleteCheckRequest<IExternalUser>) => isOrganizer(request.requestUser),
+    writeCheck: (request: WriteCheckRequest<any, IExternalUser>) => isOrganizer(request.requestUser),
     FIELDS: {
         firstName: {
             type: String,

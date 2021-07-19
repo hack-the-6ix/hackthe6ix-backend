@@ -1,6 +1,6 @@
 import { Mongoose } from 'mongoose';
 import { enumOptions } from '../models/user/enums';
-import { fields, IApplication, IUser } from '../models/user/fields';
+import { fields, IApplication, IUser, IRoles } from '../models/user/fields';
 import User from '../models/user/User';
 import { isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -22,6 +22,32 @@ import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
+
+export const createFederatedUser = async(linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix=true):Promise<IUser> => {
+  const groups: any = {};
+
+  // Update the groups this user is in in the database
+  // Ensure that we set all the groups the user is not in to FALSE and not NULL
+  for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
+    //                                              Assertion includes group with leading /
+    groups[group] = (groupsList || []).indexOf(`${groupsHaveIDPPrefix ? process.env.IDP_GROUP_PREFIX : ''}${group}`) !== -1;
+  }
+
+  const userInfo = await User.findOneAndUpdate({
+    idpLinkID: linkID,
+  }, {
+    email: email.toLowerCase(),
+    firstName: firstName,
+    lastName: lastName,
+    groups: groups,
+  }, {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  });
+
+  return userInfo;
+}
 
 /**
  * Fetch a sanitized user profile of the requester

@@ -9,8 +9,10 @@ import { fields as teamFields } from '../../models/team/fields';
 import Team from '../../models/team/Team';
 import { fields as userFields } from '../../models/user/fields';
 import User from '../../models/user/User';
-import { fields as externalUserFields } from '../../models/user/fields';
+import { fields as externalUserFields } from '../../models/externaluser/fields';
 import ExternalUser from '../../models/externaluser/ExternalUser';
+import { fields as apiTokenFields } from '../../models/apitoken/fields';
+import APIToken from '../../models/apitoken/APIToken';
 import { UniverseState } from '../../types/types';
 
 const models = {
@@ -29,6 +31,10 @@ const models = {
   externaluser: {
     mongoose: ExternalUser,
     rawFields: externalUserFields
+  },
+  apitoken: {
+    mongoose: APIToken,
+    rawFields: apiTokenFields
   }
 };
 

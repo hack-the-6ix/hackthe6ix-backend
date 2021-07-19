@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
+import APIToken from '../models/apitoken/APIToken';
 import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { ErrorMessage } from '../types/types';
@@ -39,6 +40,7 @@ export const authenticate = async (token: string): Promise<IUser> | null => {
 };
 
 export const getTokenFromHeader = (req: Request): string => req['headers']['x-access-token'] || req.body.token;
+export const getAPITokenFromHeader = (req: Request): string => req['headers']['x-api-token'] as string;
 
 /**
  * Returns  true iff login token is valid and was injected successfully
@@ -48,16 +50,41 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
     const token = getTokenFromHeader(req);
 
     if (!token) {
-      return false;
+      const apiToken = getAPITokenFromHeader(req);
+
+      if(!apiToken){
+        return false;
+      }
+
+      const apiTokenInfo = await APIToken.findOne({
+        token: apiToken
+      });
+
+      if(!apiTokenInfo){
+        return false;
+      }
+
+      const user = await User.findOne({
+        _id: apiTokenInfo.internalUserID
+      });
+
+      if(!user){
+        return false;
+      }
+
+      req.executor = user;
+    }
+    else {
+      const user = await authenticate(token);
+
+      if (!user) {
+        return false;
+      }
+  
+      req.executor = user;
     }
 
-    const user = await authenticate(token);
-
-    if (!user) {
-      return false;
-    }
-
-    req.executor = user;
+    
   } catch (e) {
     return false;
   }

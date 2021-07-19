@@ -27,6 +27,7 @@ export interface BasicUser extends mongoose.Document {
   email: string,
   discord: {
     discordID?: string,
+    username?: string,
     verifyTime?: number,
     additionalRoles?: string[],
     suffix?: string

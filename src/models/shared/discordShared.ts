@@ -8,6 +8,11 @@ export default {
       readCheck: true,
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },
+    username: {
+      type: String,
+      readCheck: true,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+    },
     verifyTime: {
       type: Number,
       readCheck: true,

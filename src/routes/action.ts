@@ -25,6 +25,7 @@ import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
 import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
+import { createAPIToken } from '../controller/AuthController';
 
 const actionRouter = express.Router();
 
@@ -347,7 +348,22 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
   logResponse(
     req,
     res,
-    verifyDiscordUser(req.body.email, req.body.discordID)
+    verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername)
+  )
+})
+
+
+/**
+ * (Organizer)
+ *
+ * Create an API token for programmatic access
+ */
+
+ actionRouter.post('/createAPIToken', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    createAPIToken(req.executor, req.body.groups, req.body.description)
   )
 })
 export default actionRouter;
