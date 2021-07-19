@@ -9,6 +9,8 @@ import { fields as teamFields } from '../../models/team/fields';
 import Team from '../../models/team/Team';
 import { fields as userFields } from '../../models/user/fields';
 import User from '../../models/user/User';
+import { fields as externalUserFields } from '../../models/user/fields';
+import ExternalUser from '../../models/externaluser/ExternalUser';
 import { UniverseState } from '../../types/types';
 
 const models = {
@@ -24,6 +26,10 @@ const models = {
     mongoose: Team,
     rawFields: teamFields,
   },
+  externaluser: {
+    mongoose: ExternalUser,
+    rawFields: externalUserFields
+  }
 };
 
 export const getModels = () => models;

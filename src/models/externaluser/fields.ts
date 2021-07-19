@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
+import { BasicUser } from '../../types/types';
 import { ReadCheckRequest } from '../../types/checker';
 import { IUser } from '../user/fields';
 import { isOrganizer } from '../validator';
-/*
-name
-*/
+import discordShared from '../shared/discordShared';
 export const fields = {
     createCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
     deleteCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
@@ -29,30 +28,15 @@ export const fields = {
             readCheck: true,
             writeCheck: true,
         },
-        roles: {
-            type: [String],
-            readCheck: true,
-            writeCheck: true,
-        },
-        suffix: {
+        notes: {
             type: String,
             readCheck: true,
             writeCheck: true,
         },
-        discordID: {
-            type: String,
-            index: true,
-            readCheck: true,
-            writeCheck: true,
-        }
+        discord: discordShared
     }
 }
 
-export interface IExternalUser extends mongoose.Document {
-    firstName: string,
-    lastName: string,
-    email: string,
-    roles: string[],
-    suffix: string,
-    discordID: string
+export interface IExternalUser extends BasicUser {
+    notes: string
 }

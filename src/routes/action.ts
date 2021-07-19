@@ -6,6 +6,7 @@ import express, { Request, Response } from 'express';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
+import { verifyDiscordUser } from '../controller/DiscordController';
 import {
   fetchUser,
   getCandidate,
@@ -337,19 +338,16 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
 
 
 /**
- * TODO: Add endpoint for discord verification
- *       Make this a separate model and link it back to the user object
+ * (Organizer)
  *
- *       /verify -> given an email, determine if it can be verified and return roles to give + name
- *                  When a user RSVPs, create a DiscordObj for them
- *
- *       DiscordObj
- *       |-Full Name
- *       |-roles
- *       |-discord username
- *       |-discord ID
- *       |-time of verification
+ * Associate a user on Discord
  */
 
-
+actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    verifyDiscordUser(req.body.email, req.body.discordID)
+  )
+})
 export default actionRouter;
