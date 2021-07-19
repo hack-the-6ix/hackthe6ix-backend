@@ -44,6 +44,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
               project: 0,
               portfolio: 0,
             },
+            reviewers: {},
           },
         },
         questionBreakdown: {},
@@ -182,6 +183,32 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         if (user?.internal?.applicationScores?.portfolio?.score >= 0) {
           statistics.hacker.submittedApplicationStats.review.applicationScores.portfolio++;
         }
+
+        const scores: any = user?.internal?.applicationScores || {};
+
+        for (const question in scores) {
+          const reviewerID = scores[question]?.reviewer;
+
+          if (reviewerID) {
+
+            if (!statistics.hacker.submittedApplicationStats.review.reviewers[reviewerID]) {
+
+              let name;
+              try {
+                name = (await User.findOne({ _id: reviewerID }))?.fullName || 'Unknown';
+              } catch (e) {
+                name = 'Unknown';
+              }
+
+              statistics.hacker.submittedApplicationStats.review.reviewers[reviewerID] = {
+                total: 0,
+                name: name,
+              };
+            }
+
+            statistics.hacker.submittedApplicationStats.review.reviewers[reviewerID].total++;
+          }
+        }
       }
 
       // Roles
@@ -245,7 +272,8 @@ export type IStatistics = {
           accomplish: number,
           project: number,
           portfolio: number
-        }
+        },
+        reviewers: any
       },
     },
     questionBreakdown: any

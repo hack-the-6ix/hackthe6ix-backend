@@ -2,7 +2,14 @@ import mongoose from 'mongoose';
 import User from '../../models/user/User';
 import { getStatistics, statisticsLifetime } from '../../services/statistics';
 import * as dbHandler from '../db-handler';
-import { hackerUser, mockDate, runAfterAll, runAfterEach, runBeforeAll } from '../test-utils';
+import {
+  hackerUser,
+  mockDate,
+  organizerUser,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+} from '../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -436,6 +443,9 @@ describe('Get statistics', () => {
     });
 
     test('Review', async () => {
+
+      const organizer = await User.create(organizerUser);
+
       const cases = [
         { // Partially completed
           status: { applied: true },
@@ -443,7 +453,7 @@ describe('Get statistics', () => {
             applicationScores: {
               accomplish: {
                 score: 100,
-                reviewer: 'foobar',
+                reviewer: organizer._id,
               },
               project: {
                 score: 101,
@@ -458,7 +468,7 @@ describe('Get statistics', () => {
             applicationScores: {
               accomplish: {
                 score: 100,
-                reviewer: 'foobar',
+                reviewer: organizer._id,
               },
               project: {
                 score: 101,
@@ -477,7 +487,7 @@ describe('Get statistics', () => {
             applicationScores: {
               accomplish: {
                 score: -1,
-                reviewer: 'foobar',
+                reviewer: organizer._id,
               },
               project: {
                 score: -1,
@@ -489,7 +499,8 @@ describe('Get statistics', () => {
 
       await generateUsersFromTestCase(cases);
       const statistics = await getStatistics(true);
-      expect(statistics.hacker.submittedApplicationStats.review).toEqual({
+
+      const expectedReviewStats: any = {
         reviewed: 2,
         notReviewed: 4,
         applicationScores: {
@@ -497,7 +508,19 @@ describe('Get statistics', () => {
           portfolio: 2,
           project: 3,
         },
-      });
+        reviewers: {
+          barfoo: {
+            name: 'Unknown',
+            total: 5,
+          },
+        },
+      };
+      expectedReviewStats.reviewers[organizer._id] = {
+        name: organizer.fullName,
+        total: 6,
+      };
+
+      expect(statistics.hacker.submittedApplicationStats.review).toEqual(expectedReviewStats);
     });
   });
 });
