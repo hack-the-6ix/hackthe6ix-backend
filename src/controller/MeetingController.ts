@@ -5,7 +5,7 @@ export const recordJoin = async (meetingID: string, userID: string, time: number
     })
 
     // Only record it is there is no record already or the current enter time is later than the requested
-    if(!meetingAttendanceInfo || meetingAttendanceInfo.enterTime > time){
+    if(!meetingAttendanceInfo || meetingAttendanceInfo.enterTime > time || meetingAttendanceInfo.enterTime === -1){
         meetingAttendanceInfo = await MeetingAttendance.findOneAndUpdate({
             meetingID, userID
         }, {
