@@ -359,11 +359,11 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  * Associate a user on Discord
  */
 
- actionRouter.post('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
+ actionRouter.get('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUserByDiscordID(req.body.discordID)
+    fetchUserByDiscordID(req.query.discordID as string)
   )
 })
 
