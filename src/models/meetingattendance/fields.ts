@@ -1,17 +1,11 @@
 import mongoose from 'mongoose';
-import { ReadCheckRequest } from '../../types/checker';
-import { IUser } from '../user/fields';
+import { ReadCheckRequest, WriteCheckRequest, DeleteCheckRequest, CreateCheckRequest } from '../../types/checker';
 import { isOrganizer } from '../validator';
-/*
-meetingID,
-userID,
-enterTime,
-exitTime
-*/
 export const fields = {
-    createCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-    deleteCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-    writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+    createCheck: (request: CreateCheckRequest<any, IMeetingAttendance>) => isOrganizer(request.requestUser),
+    readCheck: (request: ReadCheckRequest<IMeetingAttendance>) => isOrganizer(request.requestUser),
+    deleteCheck: (request: DeleteCheckRequest<IMeetingAttendance>) => isOrganizer(request.requestUser),
+    writeCheck: (request: WriteCheckRequest<any, IMeetingAttendance>) => isOrganizer(request.requestUser),
     FIELDS: {
         meetingID: {
             type: String,
@@ -30,6 +24,7 @@ export const fields = {
         enterTime: {
             type: Number,
             required: true,
+            default: 0,
             readCheck: true,
             writeCheck: true,
         },
@@ -44,6 +39,6 @@ export const fields = {
 export interface IMeetingAttendance extends mongoose.Document {
     meetingID: string,
     userID: string,
-    enterTime: number,
-    exitTime: number
+    enterTime?: number,
+    exitTime?: number
 }

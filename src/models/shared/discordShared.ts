@@ -5,6 +5,7 @@ import { isOrganizer } from '../validator';
 export default {
     discordID: {
       type: String,
+      index: true,
       readCheck: true,
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
     },

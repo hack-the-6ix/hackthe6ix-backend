@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
-import { verifyDiscordUser } from '../controller/DiscordController';
+import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
 import {
   fetchUser,
   getCandidate,
@@ -26,6 +26,7 @@ import mongoose from '../services/mongoose_service';
 import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 import { createAPIToken } from '../controller/AuthController';
+import { recordJoin, recordLeave } from '../controller/MeetingController';
 
 const actionRouter = express.Router();
 
@@ -352,6 +353,20 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
   )
 })
 
+/**
+ * (Organizer)
+ *
+ * Associate a user on Discord
+ */
+
+ actionRouter.post('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    fetchUserByDiscordID(req.body.discordID)
+  )
+})
+
 
 /**
  * (Organizer)
@@ -364,6 +379,35 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
     req,
     res,
     createAPIToken(req.executor, req.body.groups, req.body.description)
+  )
+})
+
+
+/**
+ * (Organizer)
+ *
+ * Record someone joining a meeting
+ */
+
+ actionRouter.post('/recordMeetingJoin', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now())
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Record someone leaving a meeting
+ */
+
+ actionRouter.post('/recordMeetingLeave', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now())
   )
 })
 export default actionRouter;

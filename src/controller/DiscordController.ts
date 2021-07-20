@@ -106,5 +106,30 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
 
         return _assembleReturnInfo(userInfo);
     }
-
 }
+
+/**
+ * Retrieves a user from their Discord ID
+ *
+ * @param discordID
+ */
+ export const fetchUserByDiscordID = async(discordID: string): Promise<BasicUser> => {
+    if(!discordID) {
+        throw new BadRequestError("No discordID given.");
+    }
+    let userInfo:BasicUser = await User.findOne({
+        "discord.discordID": discordID
+    });
+  
+    if(!userInfo) {
+        userInfo = await ExternalUser.findOne({
+            "discord.discordID": discordID
+        });
+    }
+  
+    if(!userInfo) {
+        throw new NotFoundError('No user found with the given email.');
+    }
+  
+    return userInfo;
+  }
