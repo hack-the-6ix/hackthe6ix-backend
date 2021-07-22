@@ -331,8 +331,73 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
   return 'Success';
 };
 
+
 /**
- * TODO: Determine application status based on grade
- *
- *       Remember to sync mailing lists after the decision is made + released
+ * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
+export const releaseApplicationStatus = async () => {
+  const filter = {
+    'status.statusReleased': false,
+    $or: [
+      {
+        'status.waitlisted': true,
+      },
+      {
+        'status.accepted': true,
+      },
+      {
+        'status.rejected': true,
+      },
+    ],
+  };
+
+  const usersModified = (await User.find(filter)).map((u: IUser) => u._id.toString());
+
+  await User.updateMany(filter, {
+    'status.statusReleased': true,
+  });
+
+  await syncMailingLists(null, true);
+
+  return usersModified;
+};
+
+/**
+ * Export a list of users who have applied in descending order by grade
+ */
+export const getRanks = async () => {
+  const users = await User.find({
+    'status.applied': true,
+  });
+
+  if (!users) {
+    throw new InternalServerError('Unable to fetch users');
+  }
+
+  return users
+  .map((user: IUser) => user.toJSON())
+  .sort((a: IUser, b: IUser) => b.internal.computedApplicationScore - a.internal.computedApplicationScore);
+};
+
+/**
+ * Admits a number of waitlisted participants
+ */
+export const advanceWaitlist = async () => {
+
+
+  // TODO: Sync mailing list
+
+
+  await syncMailingLists(null, true);
+
+};
+
+/**
+ * Runs the grading algorithm to assign admission states
+ */
+export const assignAdmissionStatus = async () => {
+
+  // TODO: Only assign status to users who applied. Users who did not finish
+  //       their application will stay as is
+
+};
