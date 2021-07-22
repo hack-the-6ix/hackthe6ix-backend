@@ -42,8 +42,6 @@ const createUsers = async (num: number) => {
 
 describe('Get ranks', () => {
 
-  // NOTE: These tests probably could've been done better by making
-
   test('No users', async () => {
     const users = await getRanks();
     expect(users.length).toEqual(0);
