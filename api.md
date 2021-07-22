@@ -483,6 +483,24 @@ Set application released status to true for all users who have been either waitl
 }
 ```
 
+### GET - Get ranks
+`/api/action/getRanks`
+
+Since application scores are a computed value, we cannot sort them in our query. Instead, we will
+have to use this dedicated endpoint to have it sorted manually.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: [
+    // List of users who have been scored and graded, in descending order
+    // NOTE: To reduce the computational load, these users will be fetched directly
+    //       from MongoDB and thus not go through the usual read/write checks + interceptors
+  ]
+}
+```
+
 ### POST - Advance Waitlist
 `/api/action/advanceWaitlist`
 

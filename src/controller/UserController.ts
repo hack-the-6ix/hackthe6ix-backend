@@ -363,12 +363,33 @@ export const releaseApplicationStatus = async () => {
 };
 
 /**
+ * Export a list of users who have applied in descending order by grade
+ */
+export const getRanks = async () => {
+  const users = await User.find({
+    'status.applied': true,
+  });
+
+  if (!users) {
+    throw new InternalServerError('Unable to fetch users');
+  }
+
+  return users
+  .map((user: IUser) => user.toJSON())
+  .sort((a: IUser, b: IUser) => b.internal.computedApplicationScore - a.internal.computedApplicationScore);
+};
+
+/**
  * Admits a number of waitlisted participants
  */
 export const advanceWaitlist = async () => {
 
 
   // TODO: Sync mailing list
+
+
+  await syncMailingLists(null, true);
+
 };
 
 /**
@@ -377,6 +398,6 @@ export const advanceWaitlist = async () => {
 export const assignAdmissionStatus = async () => {
 
   // TODO: Only assign status to users who applied. Users who did not finish
-  //       their application will stay "applied"
+  //       their application will stay as is
 
 };

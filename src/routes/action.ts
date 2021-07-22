@@ -10,6 +10,7 @@ import {
   fetchUser,
   getCandidate,
   getEnumOptions,
+  getRanks,
   gradeCandidate,
   releaseApplicationStatus,
   rsvp,
@@ -273,6 +274,20 @@ actionRouter.post('/releaseApplicationStatus', isAdmin, (req: Request, res: Resp
     req,
     res,
     releaseApplicationStatus(),
+    true,
+  );
+});
+
+/**
+ * (Organizer)
+ *
+ * Get a list of applied users in descending order of computed score
+ */
+actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getRanks(),
     true,
   );
 });
