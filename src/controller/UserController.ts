@@ -376,7 +376,16 @@ export const getRanks = async () => {
 
   return users
   .map((user: IUser) => user.toJSON())
-  .sort((a: IUser, b: IUser) => b.internal.computedApplicationScore - a.internal.computedApplicationScore);
+  .sort((a: IUser, b: IUser) => {
+    const diff = b.internal.computedApplicationScore - a.internal.computedApplicationScore;
+
+    if (diff === 0) {
+      // If the scores are the same, the tiebreaker is whoever submitted earlier
+      return a.hackerApplication.lastUpdated - b.hackerApplication.lastUpdated;
+    } else {
+      return diff;
+    }
+  });
 };
 
 /**
