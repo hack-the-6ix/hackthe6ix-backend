@@ -22,7 +22,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../../models/user/computeApplicationScore', () => jest.fn((): any => undefined));
 
-const createUsers = async (num: number) => {
+const createUsers = async (num: number, lastUpdated?: number[]) => {
 
   let out: IUser[] = [];
 
@@ -32,6 +32,9 @@ const createUsers = async (num: number) => {
       _id: mongoose.Types.ObjectId(),
       status: {
         applied: true,
+      },
+      hackerApplication: {
+        lastUpdated: (lastUpdated || [])[i] || new Date().getTime(),
       },
     }));
   }
@@ -71,12 +74,13 @@ describe('Get ranks', () => {
   });
 
   test('Graded and ungraded users', async () => {
-    const rawUsers = await createUsers(6);
+    const rawUsers = await createUsers(6, [1000, 1, 1, 1, 1, 1, 1]);
     User.create(hackerUser); // non-applied user
 
     const scoreMap: any = {};
 
     scoreMap[rawUsers[2]._id] = 1000;
+    scoreMap[rawUsers[0]._id] = 1000;
     scoreMap[rawUsers[4]._id] = 1000000;
     scoreMap[rawUsers[5]._id] = 2000;
 
