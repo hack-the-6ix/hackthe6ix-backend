@@ -43,13 +43,13 @@ schema.virtual('teamScore', {
 });
 
 // Hook to auto populate memberNames
-const autoPopulateMemberNames = function(next: any) {
-  this.populate('memberNames');
-  this.populate('teamScore');
+const autoPopulate = function(next: any) {
+  this.populate('memberNames', 'firstName lastName');
+  this.populate('teamScore', 'internal.applicationScores');
   next();
 };
 
-schema.pre('findOne', autoPopulateMemberNames)
-.pre('find', autoPopulateMemberNames);
+schema.pre('findOne', autoPopulate)
+.pre('find', autoPopulate);
 
 export default mongoose.model<ITeam>('Team', schema);

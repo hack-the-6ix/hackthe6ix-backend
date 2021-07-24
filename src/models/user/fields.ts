@@ -945,6 +945,7 @@ export interface IUser extends mongoose.Document {
   internal: {
     notes?: string,
     computedApplicationScore?: number,
+    computedFinalApplicationScore?: number, // This value is added by get-rank and usually isn't populated
     applicationScores?: {
       accomplish: {
         score: number

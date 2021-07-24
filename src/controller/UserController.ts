@@ -1,4 +1,5 @@
 import { Mongoose } from 'mongoose';
+import Team from '../models/team/Team';
 import { enumOptions } from '../models/user/enums';
 import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
@@ -366,18 +367,33 @@ export const releaseApplicationStatus = async () => {
  * Export a list of users who have applied in descending order by grade
  */
 export const getRanks = async () => {
-  const users = await User.find({
+  const users = await Promise.all((await User.find({
     'status.applied': true,
-  });
+  })).map(async (user: IUser) => {
+    // We will inject the team score at this point
+    // This isn't done at the user object level to prevent recursive dependencies
 
-  if (!users) {
-    throw new InternalServerError('Unable to fetch users');
-  }
+    const jsonUser: IUser = user.toJSON() as IUser;
+    const teamCode = jsonUser?.hackerApplication?.teamCode;
+
+    let teamScore = -1;
+
+    if (teamCode) {
+      const team = await Team.findOne({ code: teamCode });
+
+      if (team?.teamScore !== undefined) {
+        teamScore = team.teamScore;
+      }
+    }
+
+    jsonUser.internal.computedFinalApplicationScore = Math.max(teamScore, jsonUser.internal.computedApplicationScore);
+
+    return jsonUser;
+  }));
 
   return users
-  .map((user: IUser) => user.toJSON())
   .sort((a: IUser, b: IUser) => {
-    const diff = b.internal.computedApplicationScore - a.internal.computedApplicationScore;
+    const diff = b.internal.computedFinalApplicationScore - a.internal.computedFinalApplicationScore;
 
     if (diff === 0) {
       // If the scores are the same, the tiebreaker is whoever submitted earlier

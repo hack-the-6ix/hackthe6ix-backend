@@ -40,5 +40,6 @@ export const fields = {
 export interface ITeam extends mongoose.Document {
   code: string,
   memberIDs: string[],
-  memberNames: string[]
+  memberNames: string[],
+  teamScore: number
 }
