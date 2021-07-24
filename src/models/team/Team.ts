@@ -18,9 +18,17 @@ schema.virtual('memberNames', {
   justOne: false,
 });
 
+schema.virtual('teamScore', {
+  ref: 'User',
+  localField: 'code',
+  foreignField: 'hackerApplication.teamCode',
+  justOne: false,
+});
+
 // Hook to auto populate memberNames
 const autoPopulateMemberNames = function(next: any) {
   this.populate('memberNames');
+  this.populate('teamScore');
   next();
 };
 
