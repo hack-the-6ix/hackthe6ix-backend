@@ -99,14 +99,16 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
       statistics.total++;
 
       // Summary statistics
-      const created = new Date(user.created);
-      const createdStr = generateDate(created);
-      addSummaryDate(createdStr, 'created');
+      if (user?.groups?.hacker) {
+        const created = new Date(user.created);
+        const createdStr = generateDate(created);
+        addSummaryDate(createdStr, 'created');
 
-      if (user?.status?.applied && user?.hackerApplication?.lastUpdated) {
-        const lastUpdated = new Date(user?.hackerApplication?.lastUpdated);
-        const lastUpdatedStr = generateDate(lastUpdated);
-        addSummaryDate(lastUpdatedStr, 'submitted');
+        if (user?.status?.applied && user?.hackerApplication?.lastUpdated) {
+          const lastUpdated = new Date(user?.hackerApplication?.lastUpdated);
+          const lastUpdatedStr = generateDate(lastUpdated);
+          addSummaryDate(lastUpdatedStr, 'submitted');
+        }
       }
 
       // Statistics for each question
