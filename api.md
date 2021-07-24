@@ -484,10 +484,15 @@ Set application released status to true for all users who have been either waitl
 ```
 
 ### GET - Get ranks
-`/api/action/getRanks`
+`/api/action/getRanks?usePersonalScore=<true | false>`
 
 Since application scores are a computed value, we cannot sort them in our query. Instead, we will
 have to use this dedicated endpoint to have it sorted manually.
+
+#### Input Specification
+`usePersonalScore` can be optionally passed in the query string to alter the metric used to order the users.
+By default, users are ordered by their `computedFinalApplicationScore`, which is the max of their personal
+score and their team's score. 
 
 #### Output Specification
 ```

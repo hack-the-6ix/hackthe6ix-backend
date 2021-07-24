@@ -365,8 +365,15 @@ export const releaseApplicationStatus = async () => {
 
 /**
  * Export a list of users who have applied in descending order by grade
+ *
+ * @param usePersonalApplicationScore - when true, users are sorted by their individual scores,
+ *                                      without any adjustment from their team
  */
-export const getRanks = async () => {
+export const getRanks = async (usePersonalApplicationScore?: boolean) => {
+  const sortCriteria = usePersonalApplicationScore
+    ? 'computedApplicationScore'
+    : 'computedFinalApplicationScore';
+
   const users = await Promise.all((await User.find({
     'status.applied': true,
   })).map(async (user: IUser) => {
@@ -393,7 +400,7 @@ export const getRanks = async () => {
 
   return users
   .sort((a: IUser, b: IUser) => {
-    const diff = b.internal.computedFinalApplicationScore - a.internal.computedFinalApplicationScore;
+    const diff = b.internal[sortCriteria] - a.internal[sortCriteria];
 
     if (diff === 0) {
       // If the scores are the same, the tiebreaker is whoever submitted earlier

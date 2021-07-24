@@ -287,7 +287,9 @@ actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    getRanks(),
+    getRanks(
+      req.query.usePersonalScore === 'true',
+    ),
     true,
   );
 });
