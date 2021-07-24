@@ -56,6 +56,9 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         volunteer: 0,
       },
       summary: {},
+      gradeDistribution: {
+        overall: {},
+      },
     };
 
     const users = await User.find({});
@@ -190,6 +193,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
 
         for (const question in scores) {
           const reviewerID = scores[question]?.reviewer;
+          const score = scores[question]?.score;
 
           if (reviewerID) {
 
@@ -210,7 +214,23 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
 
             statistics.hacker.submittedApplicationStats.review.reviewers[reviewerID].total++;
           }
+
+          // Compute grade distribution
+          if (statistics.gradeDistribution[question] === undefined) {
+            statistics.gradeDistribution[question] = {};
+          }
+          if (!statistics.gradeDistribution[question][score]) {
+            statistics.gradeDistribution[question][score] = 0;
+          }
+          statistics.gradeDistribution[question][score]++;
         }
+
+        // Overall score
+        const computedApplicationScore = Math.round(user?.internal?.computedApplicationScore);
+        if (statistics.gradeDistribution.overall[computedApplicationScore] === undefined) {
+          statistics.gradeDistribution.overall[computedApplicationScore] = 0;
+        }
+        statistics.gradeDistribution.overall[computedApplicationScore]++;
       }
 
       // Roles
@@ -292,6 +312,11 @@ export type IStatistics = {
         dailyChange: number,
         cumulative: number
       }
+    }
+  },
+  gradeDistribution: {
+    [question: string]: {
+      [score: number]: number
     }
   }
 }

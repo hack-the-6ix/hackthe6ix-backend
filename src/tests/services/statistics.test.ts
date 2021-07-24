@@ -314,6 +314,79 @@ describe('Get statistics', () => {
         noSwag: 3,
       });
     });
+    test('Grade Distribution', async () => {
+
+      const cases = [
+        { // Partially completed
+          status: { applied: true },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 100,
+              },
+              project: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        },
+        { // complete
+          status: { applied: true },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: 100,
+              },
+              project: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+              portfolio: {
+                score: 101,
+                reviewer: 'barfoo',
+              },
+            },
+          },
+        },
+        { // not even touched
+          status: { applied: true },
+          internal: {
+            applicationScores: {
+              accomplish: {
+                score: -1,
+              },
+              project: {
+                score: -1,
+              },
+            },
+          },
+        },
+      ];
+
+      await generateUsersFromTestCase(cases);
+      const statistics = await getStatistics(true);
+
+      expect(statistics.gradeDistribution).toEqual({
+        accomplish: {
+          100: 3,
+          '-1': 3,
+        },
+        project: {
+          101: 3,
+          '-1': 3,
+        },
+        portfolio: {
+          '-1': 4,
+          101: 2,
+        },
+        overall: {
+          '-1': 4,
+          2745: 2,
+        },
+      });
+
+    });
     test('Summary Statistics', async () => {
       const [DAY1, DAY2, DAY3] = [
         18000000,
