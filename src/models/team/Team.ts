@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { IUser } from '../user/fields';
 import { extractFields } from '../util';
 import { fields, ITeam } from './fields';
 
@@ -16,6 +17,8 @@ schema.virtual('memberNames', {
   localField: 'code',
   foreignField: 'hackerApplication.teamCode',
   justOne: false,
+}).get(function(members: IUser[]) {
+  return members.map((u: IUser) => u.fullName);
 });
 
 schema.virtual('teamScore', {
@@ -23,6 +26,20 @@ schema.virtual('teamScore', {
   localField: 'code',
   foreignField: 'hackerApplication.teamCode',
   justOne: false,
+}).get(function(members: IUser[]) {
+  let count = 0;
+  let total = 0;
+
+  for (const user of members) {
+    if (user?.internal?.computedApplicationScore > -1) {
+      count++;
+      total += user?.internal?.computedApplicationScore;
+    } else {
+      return -1; // Everyone needs to be graded
+    }
+  }
+
+  return total / count;
 });
 
 // Hook to auto populate memberNames

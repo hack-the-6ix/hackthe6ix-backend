@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ReadCheckRequest, ReadInterceptRequest } from '../../types/checker';
+import { ReadCheckRequest } from '../../types/checker';
 import { IUser } from '../user/fields';
 import { isOrganizer } from '../validator';
 
@@ -28,29 +28,11 @@ export const fields = {
       type: [String],
       readCheck: true,
       virtual: true,
-      readInterceptor: (request: ReadInterceptRequest<IUser[], ITeam>) => request.fieldValue.map((u: IUser) => u.fullName), // Replace the user object with just their full name
     },
     teamScore: {
       type: Number,
       readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
       virtual: true,
-      readInterceptor: (request: ReadInterceptRequest<IUser[], ITeam>) => {
-
-        let count = 0;
-        let total = 0;
-
-        for (const user of request.fieldValue) {
-          if (user?.internal?.computedApplicationScore > -1) {
-            count++;
-            total += user?.internal?.computedApplicationScore;
-          } else {
-            return -1; // Everyone needs to be graded
-          }
-        }
-
-        return total / count;
-
-      }, // Compute the team score for organizers
     },
   },
 };
