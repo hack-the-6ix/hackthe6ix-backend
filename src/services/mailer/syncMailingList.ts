@@ -21,7 +21,7 @@ import {
  */
 export default async (mailingListID: string, emails: string[], forceUpdate?: boolean, email?: string) => {
   const expctedAfterSubscribers = new Set(emails.filter(
-    (e: string) => !email || e === email, // If email is specified then we will only operate on it
+    (e: string) => e && (!email || e === email), // If email is specified then we will only operate on it
   ));
 
   // Step 1: Fetch a list of the current emails from the relevant mailing list
@@ -35,14 +35,14 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
     currentEmailsResult?.data?.data?.subscriptions.map(
       (x: any) => x.email,
     ).filter(
-      (e: string) => !email || e === email, // If email is specified then we will only operate on it
+      (e: string) => e && (!email || e === email), // If email is specified then we will only operate on it
     ),
   );
 
   // Step 2: Subscribe users that aren't on the list yet that should be
   const toBeAdded = forceUpdate
     ? [...expctedAfterSubscribers]
-    : [...expctedAfterSubscribers].filter(x => !beforeSubscribers.has(x));
+    : [...expctedAfterSubscribers].filter(x => !beforeSubscribers.has(x) && x);
 
   const subscribeNewResults = await Promise.all(toBeAdded.map(
     async (userEmail: string) => {
@@ -63,7 +63,7 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
   }
 
   // Step 3: Delete users that are on the list that shouldn't be
-  const toBeDeleted = [...beforeSubscribers].filter(x => !expctedAfterSubscribers.has(x));
+  const toBeDeleted = [...beforeSubscribers].filter(x => !expctedAfterSubscribers.has(x) && x);
 
   const deleteOldResults = await Promise.all(toBeDeleted.map(
     (userEmail: string) => deleteSubscriptionRequest(mailingListID, userEmail),
@@ -86,7 +86,7 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
     updatedEmailsResult?.data?.data?.subscriptions.map(
       (x: any) => x.email,
     ).filter(
-      (e: string) => !email || e === email, // If email is specified then we will only operate on it
+      (e: string) => e && (!email || e === email), // If email is specified then we will only operate on it
     ),
   );
 
