@@ -507,7 +507,7 @@ score and their team's score.
 ```
 
 ### POST - Assign Application Status
-`/api/action/assignApplicationStatus?legit=<true|false>`
+`/api/action/assignApplicationStatus?legit=false&waitlistOver=false?waitlistDeadline=123`
 
 Assign the application status to users using the grading algorithm. The top n applicants (where n is
 the maximum number of accepted users) are assigned the accepted role, and the next m applicants (where
@@ -522,6 +522,12 @@ who applied are rejected.
 `legit` can be optionally passed in the query string to indicate whether or not the changes will be 
 actually written to the database. If `legit` is not `true`, then it will essentially give a "preview"
 into what the list would look like.
+
+`waitlistOver` can be set `true` to reject all users that would otherwise be waitlisted / are on the waitlist
+currently.
+
+`waitlistDeadline` will be used to set the confirmation deadline for users who were moved off the waitlist.
+By default, this will be 1 week away.
 
 #### Output Specification
 ```

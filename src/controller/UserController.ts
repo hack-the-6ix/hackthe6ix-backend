@@ -419,8 +419,22 @@ export const getRanks = async (usePersonalApplicationScore?: boolean) => {
  *       be very careful running this!
  *
  * @param legit - when true, we write the changes to disk
+ * @param waitlistOver - when true, reject all waitlisted users
+ * @param rawWaitlistDeadline - if specified, all newly waitlisted users will have until this date to RSVP
  */
-export const assignAdmissionStatus = async (legit?: boolean) => {
+export const assignAdmissionStatus = async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadline?: any) => {
+
+  let waitlistDeadline: number;
+
+  if (rawWaitlistDeadline) {
+    waitlistDeadline = parseInt(rawWaitlistDeadline);
+
+    if (isNaN(waitlistDeadline)) {
+      throw new BadRequestError('Waitlist deadline is NaN!');
+    }
+  }
+
+  const ONE_WEEK = 604800000;
 
   const universeState = await fetchUniverseState();
 
@@ -459,16 +473,92 @@ export const assignAdmissionStatus = async (legit?: boolean) => {
     }
   }
 
-  // TODO: Add function to dynamically update the running budget
-  // TODO: Only write to database if legit is true
-  // Remember to increment the waitlist budget if the user is moved to accepted
+  /**
+   * Updates a dictionary with a
+   *
+   * @param object - dictionary to operate on
+   * @param changes - dictionary of changes, where the key is a string delimited by periods (.)
+   *                  where each keyword is converted into dictionary index notation.
+   *
+   *                  For example: { 'a.b.c': 123 } would result in object['a']['b']['c'] = 123
+   */
+  const updateLocalUser = (object: any, changes: any) => {
+    for (const change of Object.keys(changes)) {
+      const fields = change.split('.');
+      let value: any = object;
+
+      for (const field of fields) {
+        value = value[field];
+      }
+
+      value = changes[change];
+    }
+  };
 
   const acceptUser = async (user: IUser, personalDeadline?: number) => {
+    const update: any = {
+      'status.accepted': true,
+      'status.waitlisted': false,
+    };
 
+    if (personalDeadline !== undefined) {
+      update['personalConfirmationDeadline'] = personalDeadline;
+    }
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    if (user.status.waitlisted) {
+      budgetWaitlisted++;
+    }
+    budgetAccepted--;
+
+    // Update return user
+    updateLocalUser(user, update);
   };
   const rejectUser = async (user: IUser) => {
+    const update = {
+      'status.rejected': true,
+      'status.waitlisted': false,
+    };
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    if (user.status.waitlisted) {
+      budgetWaitlisted++;
+    }
+
+    // Update return user
+    updateLocalUser(user, update);
   };
   const waitlistUser = async (user: IUser) => {
+    const update = {
+      'status.waitlisted': true,
+    };
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    budgetWaitlisted--;
+
+    // Update return user
+    updateLocalUser(user, update);
   };
 
   // Now, we will do a second pass and accept + waitlist as many people as we can
@@ -483,8 +573,10 @@ export const assignAdmissionStatus = async (legit?: boolean) => {
         // Try to move people from waitlisted -> accepted
 
         if (budgetAccepted > 0) {
-          // TODO: Set a new personal deadline one week from now, or whatever the admin specifies
-          await acceptUser(user, -1);
+          await acceptUser(user, waitlistDeadline === undefined ? new Date().getTime() + ONE_WEEK : waitlistDeadline);
+        } else if (waitlistOver) {
+          // Reject any waitlisted users
+          await rejectUser(user);
         }
 
       } else {
@@ -493,7 +585,7 @@ export const assignAdmissionStatus = async (legit?: boolean) => {
 
         if (budgetAccepted > 0) {
           await acceptUser(user);
-        } else if (budgetWaitlisted > 0) {
+        } else if (budgetWaitlisted > 0 && !waitlistOver) {
           await waitlistUser(user);
         } else {
           await rejectUser(user);

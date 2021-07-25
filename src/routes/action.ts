@@ -304,6 +304,8 @@ actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Respo
     res,
     assignAdmissionStatus(
       req.query.legit === 'true',
+      req.query.waitlistOver === 'true',
+      req.query.waitlistDeadline,
     ),
     true,
   );
