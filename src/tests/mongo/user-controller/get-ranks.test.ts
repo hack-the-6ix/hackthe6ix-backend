@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { getRanks } from '../../../controller/UserController';
+import getRanks from '../../../controller/application-status/get-ranks';
 import { ITeam } from '../../../models/team/fields';
 import Team from '../../../models/team/Team';
 import computeApplicationScore from '../../../models/user/computeApplicationScore';

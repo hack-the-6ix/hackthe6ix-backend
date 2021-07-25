@@ -3,9 +3,9 @@
  */
 
 import express, { Request, Response } from 'express';
+import assignAdmissionStatus from '../controller/application-status/assign-application-status';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
-  assignAdmissionStatus,
   fetchUser,
   getCandidate,
   getEnumOptions,

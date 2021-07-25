@@ -1,0 +1,195 @@
+import { systemUser } from '../../consts';
+import { IUser } from '../../models/user/fields';
+import User from '../../models/user/User';
+import { canConfirm } from '../../models/validator';
+import syncMailingLists from '../../services/mailer/syncMailingLists';
+import { BadRequestError } from '../../types/errors';
+import { fetchUniverseState } from '../util/resources';
+import getRanks from './get-ranks';
+
+/**
+ * Runs the grading algorithm to assign admission states
+ *
+ * NOTE: Once people are marked "accepted", their spot cannot be revoked (at least not easily), so
+ *       be very careful running this!
+ *
+ * @param legit - when true, we write the changes to disk
+ * @param waitlistOver - when true, reject all waitlisted users
+ * @param rawWaitlistDeadline - if specified, all newly waitlisted users will have until this date to RSVP
+ */
+export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadline?: any) => {
+
+  let waitlistDeadline: number;
+
+  if (rawWaitlistDeadline) {
+    waitlistDeadline = parseInt(rawWaitlistDeadline);
+
+    if (isNaN(waitlistDeadline)) {
+      throw new BadRequestError('Waitlist deadline is NaN!');
+    }
+  }
+
+  const ONE_WEEK = 604800000;
+
+  const universeState = await fetchUniverseState();
+
+  const userCanConfirm = (user: IUser) => canConfirm()({
+    requestUser: systemUser,
+    targetObject: user,
+    universeState: universeState,
+    fieldValue: undefined,
+    submissionObject: undefined,
+  });
+
+  // A user is in a "dead state" if this predicate is false
+  const userEligible = (user: IUser) =>
+    (!(user.status.accepted || user.status.waitlisted) || userCanConfirm(user) || user.status.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    !user.status.rejected && !user.status.declined; // If a user is rejected or declined, they're out
+
+  const rawRankedUsers = await getRanks();
+
+  const rankedUsers = rawRankedUsers.filter(userEligible);
+
+  const dead: IUser[] = rawRankedUsers.filter((user: IUser) => !userEligible(user));
+  const accepted: IUser[] = [];
+  const rejected: IUser[] = [];
+  const waitlisted: IUser[] = [];
+
+  let budgetAccepted = universeState.private.maxAccepted;
+  let budgetWaitlisted = universeState.private.maxWaitlist;
+
+  // First pass is to check how many slots we have left to allocate
+  for (const user of rankedUsers) {
+    if (user.status.accepted) {
+      budgetAccepted--;
+    }
+    if (user.status.waitlisted) {
+      budgetWaitlisted--;
+    }
+  }
+
+  /**
+   * Updates a dictionary with a
+   *
+   * @param object - dictionary to operate on
+   * @param changes - dictionary of changes, where the key is a string delimited by periods (.)
+   *                  where each keyword is converted into dictionary index notation.
+   *
+   *                  For example: { 'a.b.c': 123 } would result in object['a']['b']['c'] = 123
+   */
+  const updateLocalUser = (object: any, changes: any) => {
+    for (const change of Object.keys(changes)) {
+      const fields = change.split('.');
+      let value: any = object;
+
+      for (const field of fields) {
+        value = value[field];
+      }
+
+      value = changes[change];
+    }
+  };
+
+  const acceptUser = async (user: IUser, personalDeadline?: number) => {
+    const update: any = {
+      'status.accepted': true,
+      'status.waitlisted': false,
+    };
+
+    if (personalDeadline !== undefined) {
+      update['personalConfirmationDeadline'] = personalDeadline;
+    }
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    if (user.status.waitlisted) {
+      budgetWaitlisted++;
+    }
+    budgetAccepted--;
+
+    // Update return user
+    updateLocalUser(user, update);
+  };
+  const rejectUser = async (user: IUser) => {
+    const update = {
+      'status.rejected': true,
+      'status.waitlisted': false,
+    };
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    if (user.status.waitlisted) {
+      budgetWaitlisted++;
+    }
+
+    // Update return user
+    updateLocalUser(user, update);
+  };
+  const waitlistUser = async (user: IUser) => {
+    const update = {
+      'status.waitlisted': true,
+    };
+
+    // Write changes to database
+    if (legit) {
+      await User.findOneAndUpdate({
+        _id: user._id,
+      }, update);
+    }
+
+    // Update budgets
+    budgetWaitlisted--;
+
+    // Update return user
+    updateLocalUser(user, update);
+  };
+
+  // Now, we will do a second pass and accept + waitlist as many people as we can
+  // At this point, all the users should either be eligible to confirm (we'll leave them alone),
+  // confirmed (we'll leave them alone), waitlisted (we'll try to admit them if possible), or
+  // not assigned a score (we'll try to give them a state).
+  for (const user of rankedUsers) {
+    // We don't watch to touch people who are currently accepted or confirmed
+    if (!user.status.accepted && !user.status.confirmed) {
+
+      if (user.status.waitlisted) {
+        // Try to move people from waitlisted -> accepted
+
+        if (budgetAccepted > 0) {
+          await acceptUser(user, waitlistDeadline === undefined ? new Date().getTime() + ONE_WEEK : waitlistDeadline);
+        } else if (waitlistOver) {
+          // Reject any waitlisted users
+          await rejectUser(user);
+        }
+
+      } else {
+        // This user has not been assigned a state
+        // Try to accept or waitlist people who haven't been assigned a state
+
+        if (budgetAccepted > 0) {
+          await acceptUser(user);
+        } else if (budgetWaitlisted > 0 && !waitlistOver) {
+          await waitlistUser(user);
+        } else {
+          await rejectUser(user);
+        }
+      }
+    }
+  }
+
+  await syncMailingLists(null, true);
+
+  return { dead, accepted, rejected, waitlisted };
+};
