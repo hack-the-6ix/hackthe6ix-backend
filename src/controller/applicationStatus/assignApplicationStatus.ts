@@ -5,7 +5,8 @@ import { canConfirm } from '../../models/validator';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { BadRequestError } from '../../types/errors';
 import { fetchUniverseState } from '../util/resources';
-import getRanks from './get-ranks';
+import updateObject from '../util/update-object';
+import getRanks from './getRanks';
 
 /**
  * Runs the grading algorithm to assign admission states
@@ -43,8 +44,8 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
 
   // A user is in a "dead state" if this predicate is false
   const userEligible = (user: IUser) =>
-    (!(user.status.accepted || user.status.waitlisted) || userCanConfirm(user) || user.status.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
-    !user.status.rejected && !user.status.declined; // If a user is rejected or declined, they're out
+    (!(user?.status?.accepted || user?.status?.waitlisted) || userCanConfirm(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    !user?.status?.rejected && !user?.status?.declined; // If a user is rejected or declined, they're out
 
   const rawRankedUsers = await getRanks();
 
@@ -67,28 +68,6 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
       budgetWaitlisted--;
     }
   }
-
-  /**
-   * Updates a dictionary with a
-   *
-   * @param object - dictionary to operate on
-   * @param changes - dictionary of changes, where the key is a string delimited by periods (.)
-   *                  where each keyword is converted into dictionary index notation.
-   *
-   *                  For example: { 'a.b.c': 123 } would result in object['a']['b']['c'] = 123
-   */
-  const updateLocalUser = (object: any, changes: any) => {
-    for (const change of Object.keys(changes)) {
-      const fields = change.split('.');
-      let value: any = object;
-
-      for (const field of fields) {
-        value = value[field];
-      }
-
-      value = changes[change];
-    }
-  };
 
   const acceptUser = async (user: IUser, personalDeadline?: number) => {
     const update: any = {
@@ -114,7 +93,9 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
     budgetAccepted--;
 
     // Update return user
-    updateLocalUser(user, update);
+    updateObject(user, update);
+
+    accepted.push(user);
   };
   const rejectUser = async (user: IUser) => {
     const update = {
@@ -135,7 +116,9 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
     }
 
     // Update return user
-    updateLocalUser(user, update);
+    updateObject(user, update);
+
+    rejected.push(user);
   };
   const waitlistUser = async (user: IUser) => {
     const update = {
@@ -153,7 +136,9 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
     budgetWaitlisted--;
 
     // Update return user
-    updateLocalUser(user, update);
+    updateObject(user, update);
+
+    waitlisted.push(user);
   };
 
   // Now, we will do a second pass and accept + waitlist as many people as we can
