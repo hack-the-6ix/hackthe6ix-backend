@@ -5,7 +5,6 @@
 import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
-  advanceWaitlist,
   assignAdmissionStatus,
   fetchUser,
   getCandidate,
@@ -297,28 +296,15 @@ actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
 /**
  * (Admin)
  *
- * Change the status of the top waitlisted users to accepted until the number of accepted users reaches
- * the cap.
- */
-actionRouter.post('/advanceWaitlist', isAdmin, (req: Request, res: Response) => {
-  logResponse(
-    req,
-    res,
-    advanceWaitlist(),
-    true,
-  );
-});
-
-/**
- * (Admin)
- *
  * Assign the application status to users using the grading algorithm.
  */
 actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    assignAdmissionStatus(),
+    assignAdmissionStatus(
+      req.query.legit === 'true',
+    ),
     true,
   );
 });

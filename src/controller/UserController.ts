@@ -1,9 +1,10 @@
 import { Mongoose } from 'mongoose';
+import { systemUser } from '../consts';
 import Team from '../models/team/Team';
 import { enumOptions } from '../models/user/enums';
 import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { isConfirmationOpen } from '../models/validator';
+import { canConfirm, isConfirmationOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import { WriteCheckRequest } from '../types/checker';
@@ -412,24 +413,96 @@ export const getRanks = async (usePersonalApplicationScore?: boolean) => {
 };
 
 /**
- * Admits a number of waitlisted participants
+ * Runs the grading algorithm to assign admission states
+ *
+ * NOTE: Once people are marked "accepted", their spot cannot be revoked (at least not easily), so
+ *       be very careful running this!
+ *
+ * @param legit - when true, we write the changes to disk
  */
-export const advanceWaitlist = async () => {
+export const assignAdmissionStatus = async (legit?: boolean) => {
 
+  const universeState = await fetchUniverseState();
 
-  // TODO: Sync mailing list
+  const userCanConfirm = (user: IUser) => canConfirm()({
+    requestUser: systemUser,
+    targetObject: user,
+    universeState: universeState,
+    fieldValue: undefined,
+    submissionObject: undefined,
+  });
 
+  // A user is in a "dead state" if this predicate is false
+  const userEligible = (user: IUser) =>
+    (!(user.status.accepted || user.status.waitlisted) || userCanConfirm(user) || user.status.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    !user.status.rejected && !user.status.declined; // If a user is rejected or declined, they're out
+
+  const rawRankedUsers = await getRanks();
+
+  const rankedUsers = rawRankedUsers.filter(userEligible);
+
+  const dead: IUser[] = rawRankedUsers.filter((user: IUser) => !userEligible(user));
+  const accepted: IUser[] = [];
+  const rejected: IUser[] = [];
+  const waitlisted: IUser[] = [];
+
+  let budgetAccepted = universeState.private.maxAccepted;
+  let budgetWaitlisted = universeState.private.maxWaitlist;
+
+  // First pass is to check how many slots we have left to allocate
+  for (const user of rankedUsers) {
+    if (user.status.accepted) {
+      budgetAccepted--;
+    }
+    if (user.status.waitlisted) {
+      budgetWaitlisted--;
+    }
+  }
+
+  // TODO: Add function to dynamically update the running budget
+  // TODO: Only write to database if legit is true
+  // Remember to increment the waitlist budget if the user is moved to accepted
+
+  const acceptUser = async (user: IUser, personalDeadline?: number) => {
+
+  };
+  const rejectUser = async (user: IUser) => {
+  };
+  const waitlistUser = async (user: IUser) => {
+  };
+
+  // Now, we will do a second pass and accept + waitlist as many people as we can
+  // At this point, all the users should either be eligible to confirm (we'll leave them alone),
+  // confirmed (we'll leave them alone), waitlisted (we'll try to admit them if possible), or
+  // not assigned a score (we'll try to give them a state).
+  for (const user of rankedUsers) {
+    // We don't watch to touch people who are currently accepted or confirmed
+    if (!user.status.accepted && !user.status.confirmed) {
+
+      if (user.status.waitlisted) {
+        // Try to move people from waitlisted -> accepted
+
+        if (budgetAccepted > 0) {
+          // TODO: Set a new personal deadline one week from now, or whatever the admin specifies
+          await acceptUser(user, -1);
+        }
+
+      } else {
+        // This user has not been assigned a state
+        // Try to accept or waitlist people who haven't been assigned a state
+
+        if (budgetAccepted > 0) {
+          await acceptUser(user);
+        } else if (budgetWaitlisted > 0) {
+          await waitlistUser(user);
+        } else {
+          await rejectUser(user);
+        }
+      }
+    }
+  }
 
   await syncMailingLists(null, true);
 
-};
-
-/**
- * Runs the grading algorithm to assign admission states
- */
-export const assignAdmissionStatus = async () => {
-
-  // TODO: Only assign status to users who applied. Users who did not finish
-  //       their application will stay as is
-
+  return { dead, accepted, rejected, waitlisted };
 };

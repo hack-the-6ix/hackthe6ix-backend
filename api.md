@@ -506,37 +506,41 @@ score and their team's score.
 }
 ```
 
-### POST - Advance Waitlist
-`/api/action/advanceWaitlist`
-
-Change the status of the top waitlisted users to accepted until the number of accepted users reaches
-the cap.
-
-#### Output Specification
-```
-{
-  status: 200,
-  message: [
-    // List of users who were updated
-  ]
-}
-```
-
 ### POST - Assign Application Status
-`/api/action/assignApplicationStatus`
+`/api/action/assignApplicationStatus?legit=<true|false>`
 
 Assign the application status to users using the grading algorithm. The top n applicants (where n is
 the maximum number of accepted users) are assigned the accepted role, and the next m applicants (where
 m is the maximum number of waitlisted usuers) are assigned the waitlisted role. All remaining users 
 who applied are rejected.
 
+**Warning**: Once this action has executed and people are accepted, their spots will be reserved until
+             it expires or it is manually revoked. Be very careful and ensure that everyone is graded
+             prior to running this!
+
+#### Input Specification
+`legit` can be optionally passed in the query string to indicate whether or not the changes will be 
+actually written to the database. If `legit` is not `true`, then it will essentially give a "preview"
+into what the list would look like.
+
 #### Output Specification
 ```
 {
   status: 200,
-  message: [
-    // List of users who were updated
-  ]
+  message: {
+    "accepted": [
+      // Users
+    ],
+    "waitlisted": [
+      // Users    
+    ],
+    "rejected": [
+      // Users    
+    ],
+    "dead": [
+      // Users    
+    ]
+  }
 }
 ```
 
