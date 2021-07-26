@@ -41,10 +41,6 @@ jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => 
 
 describe('Assign Application Status', () => {
 
-  test('Waitlist Over', () => {
-
-  });
-
   describe('Waitlist deadline', () => {
 
     test('Default', () => {
@@ -78,7 +74,6 @@ describe('Assign Application Status', () => {
 
   describe('Functionality', () => {
     test('Fresh slate', async () => {
-
       fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 3, 2));
 
       const users = (await Promise.all([...new Array(10)].map(() => User.create({
@@ -133,11 +128,111 @@ describe('Assign Application Status', () => {
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
     });
 
-    test('Existing accepted users', () => {
+    test('Existing accepted and waitlisted users', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 3, 2));
+
+      const users = (await Promise.all([
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            waitlisted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+          },
+        }),
+      ])).map((u: IUser) => u.toJSON());
+
+      // Some other rando user that should not have their status updated
+      const rando = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: false,
+        },
+      });
+
+      getRanks.mockReturnValue(cloneDeep(users));
+
+      const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus();
+
+      expect(dead).toEqual([]);
+      expect(accepted).toEqual([users[0], users[1], users[2]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          accepted: true,
+          waitlisted: false,
+          rejected: false,
+        },
+      })));
+      expect(waitlisted).toEqual([users[3], users[4]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          waitlisted: true,
+          accepted: false,
+          rejected: false,
+        },
+      })));
+      expect(rejected).toEqual([users[5]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          rejected: true,
+          accepted: false,
+          waitlisted: false,
+        },
+      })));
+      expect(syncMailingLists).toHaveBeenCalledWith(null, true);
+    });
+
+    // TODO: Add dead state users (declined, rejected, expired), ensure confirmed users are exempt
+    test('Existing rejected and declined users', () => {
 
     });
 
-    test('Existing rejected and declined users', () => {
+    test('Accept waitlisted people', () => {
+
+    });
+
+    test('Waitlist Over', () => {
 
     });
   });

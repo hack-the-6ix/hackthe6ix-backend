@@ -35,8 +35,8 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
  */
 export const inEnum = (validStates: string[], unstrict?: boolean) => (request: WriteCheckRequest<string, any>) => (unstrict && !request?.fieldValue) || validStates.indexOf(request?.fieldValue) != -1;
 
-export const isApplied = (request: WriteCheckRequest<any, IUser>) => request.requestUser.status.applied;
-export const isDeclined = (request: WriteCheckRequest<any, IUser>) => request.requestUser.status.declined;
+export const isApplied = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.applied;
+export const isDeclined = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.declined;
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
 export const getApplicationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalApplicationDeadline === undefined ? request.universeState.public.globalApplicationDeadline : request.requestUser.personalApplicationDeadline;
@@ -46,13 +46,11 @@ export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => get
 export const isConfirmationOpen = (request: WriteCheckRequest<any, IUser>) => getConfirmationDeadline(request) >= new Date().getTime();
 
 export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) => (
-  isUser(request.requestUser, request.targetObject) &&
   !isApplied(request) &&
   isApplicationOpen(request)
 );
 
 export const canConfirm = () => (request: WriteCheckRequest<any, IUser>) => (
-  isUser(request.requestUser, request.targetObject) &&
   !isDeclined(request) &&
   isConfirmationOpen(request)
 );

@@ -148,7 +148,6 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
   for (const user of rankedUsers) {
     // We don't watch to touch people who are currently accepted or confirmed
     if (!user.status.accepted && !user.status.confirmed) {
-
       if (user.status.waitlisted) {
         // Try to move people from waitlisted -> accepted
 
@@ -157,6 +156,8 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
         } else if (waitlistOver) {
           // Reject any waitlisted users
           await rejectUser(user);
+        } else {
+          waitlisted.push(user);
         }
 
       } else {
@@ -171,6 +172,8 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
           await rejectUser(user);
         }
       }
+    } else {
+      accepted.push(user);
     }
   }
 
