@@ -61,16 +61,69 @@ describe('Assign Application Status', () => {
 
   });
 
-  describe('Legit mode', () => {
+  test('Legit mode', async () => {
+    fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 1));
 
-    test('Legit', () => {
+    const users = (await Promise.all([...new Array(3)].map(() => User.create({
+      ...hackerUser,
+      _id: mongoose.Types.ObjectId(),
+      status: {
+        applied: true,
+      },
+    })))).map((u: IUser) => u.toJSON());
 
+    // Some other rando user that should not have their status updated
+    const rando = await User.create({
+      ...hackerUser,
+      _id: mongoose.Types.ObjectId(),
+      status: {
+        applied: false,
+      },
     });
 
-    test('Not legit', () => {
+    getRanks.mockReturnValue(cloneDeep(users));
 
-    });
+    const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(true);
 
+    expect(dead).toEqual([]);
+
+    const acceptedExpected = {
+      ...users[0],
+      status: {
+        ...users[0].status,
+        accepted: true,
+        waitlisted: false,
+        rejected: false,
+      },
+    };
+    expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(acceptedExpected.status);
+    expect(accepted).toEqual([acceptedExpected]);
+
+    const waitlistedExpected = {
+      ...users[1],
+      status: {
+        ...users[1].status,
+        accepted: false,
+        waitlisted: true,
+        rejected: false,
+      },
+    };
+    expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(waitlistedExpected.status);
+    expect(waitlisted).toEqual([waitlistedExpected]);
+
+    const rejectedExpected = {
+      ...users[2],
+      status: {
+        ...users[2].status,
+        accepted: false,
+        waitlisted: false,
+        rejected: true,
+      },
+    };
+    expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(rejectedExpected.status);
+    expect(rejected).toEqual([rejectedExpected]);
+
+    expect(syncMailingLists).toHaveBeenCalledWith(null, true);
   });
 
   describe('Functionality', () => {
