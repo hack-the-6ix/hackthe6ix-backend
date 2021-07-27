@@ -2,13 +2,16 @@
  * Model dependent API endpoints
  */
 
+import assignAdmissionStatus from 'assignApplicationStatus.ts';
 import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
   getCandidate,
   getEnumOptions,
+  getRanks,
   gradeCandidate,
+  releaseApplicationStatus,
   rsvp,
   updateApplication,
   updateResume,
@@ -19,7 +22,7 @@ import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
-import { isHacker, isOrganizer } from '../services/permissions';
+import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 
 const actionRouter = express.Router();
@@ -170,13 +173,6 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
 });
 
 
-// Post application endpoints
-
-/**
- * TODO: Add endpoint to submit code for badge
- *       To be done later once plan is finalized
- */
-
 // Admin endpoints
 
 /**
@@ -261,12 +257,52 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
 });
 
 /**
- * TODO: Add endpoint to release admission statuses
+ * (Admin)
+ *
+ * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
+actionRouter.post('/releaseApplicationStatus', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    releaseApplicationStatus(),
+    true,
+  );
+});
 
 /**
- * TODO: Add endpoint to assign admission status based on score (admitted, rejected, waitlisted, etc)
+ * (Organizer)
+ *
+ * Get a list of applied users in descending order of computed score
  */
+actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    getRanks(
+      req.query.usePersonalScore === 'true',
+    ),
+    true,
+  );
+});
+
+/**
+ * (Admin)
+ *
+ * Assign the application status to users using the grading algorithm.
+ */
+actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    assignAdmissionStatus(
+      req.query.legit === 'true',
+      req.query.waitlistOver === 'true',
+      req.query.waitlistDeadline,
+    ),
+    true,
+  );
+});
 
 /**
  * (Organizer)

@@ -22,6 +22,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
           confirmed: 0,
           declined: 0,
           checkedIn: 0,
+          statusReleased: 0,
         },
         submittedApplicationStats: {
           gender: {
@@ -224,6 +225,7 @@ export type IStatistics = {
       confirmed: number,
       declined: number,
       checkedIn: number,
+      statusReleased: number
     },
     submittedApplicationStats: {
       gender: {

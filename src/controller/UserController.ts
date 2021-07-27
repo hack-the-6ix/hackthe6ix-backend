@@ -331,8 +331,33 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
   return 'Success';
 };
 
+
 /**
- * TODO: Determine application status based on grade
- *
- *       Remember to sync mailing lists after the decision is made + released
+ * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
+export const releaseApplicationStatus = async () => {
+  const filter = {
+    'status.statusReleased': false,
+    $or: [
+      {
+        'status.waitlisted': true,
+      },
+      {
+        'status.accepted': true,
+      },
+      {
+        'status.rejected': true,
+      },
+    ],
+  };
+
+  const usersModified = (await User.find(filter)).map((u: IUser) => u._id.toString());
+
+  await User.updateMany(filter, {
+    'status.statusReleased': true,
+  });
+
+  await syncMailingLists(null, true);
+
+  return usersModified;
+};
