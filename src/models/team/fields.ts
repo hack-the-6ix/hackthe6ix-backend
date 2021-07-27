@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ReadCheckRequest, ReadInterceptRequest } from '../../types/checker';
+import { ReadCheckRequest } from '../../types/checker';
 import { IUser } from '../user/fields';
 import { isOrganizer } from '../validator';
 
@@ -28,7 +28,11 @@ export const fields = {
       type: [String],
       readCheck: true,
       virtual: true,
-      readInterceptor: (request: ReadInterceptRequest<IUser[], ITeam>) => request.fieldValue.map((u: IUser) => u.fullName), // Replace the user object with just their full name
+    },
+    teamScore: {
+      type: Number,
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+      virtual: true,
     },
   },
 };
@@ -36,5 +40,6 @@ export const fields = {
 export interface ITeam extends mongoose.Document {
   code: string,
   memberIDs: string[],
-  memberNames: string[]
+  memberNames: string[],
+  teamScore: number
 }

@@ -484,10 +484,15 @@ Set application released status to true for all users who have been either waitl
 ```
 
 ### GET - Get ranks
-`/api/action/getRanks`
+`/api/action/getRanks?usePersonalScore=<true | false>`
 
 Since application scores are a computed value, we cannot sort them in our query. Instead, we will
 have to use this dedicated endpoint to have it sorted manually.
+
+#### Input Specification
+`usePersonalScore` can be optionally passed in the query string to alter the metric used to order the users.
+By default, users are ordered by their `computedFinalApplicationScore`, which is the max of their personal
+score and their team's score. 
 
 #### Output Specification
 ```
@@ -501,37 +506,47 @@ have to use this dedicated endpoint to have it sorted manually.
 }
 ```
 
-### POST - Advance Waitlist
-`/api/action/advanceWaitlist`
-
-Change the status of the top waitlisted users to accepted until the number of accepted users reaches
-the cap.
-
-#### Output Specification
-```
-{
-  status: 200,
-  message: [
-    // List of users who were updated
-  ]
-}
-```
-
 ### POST - Assign Application Status
-`/api/action/assignApplicationStatus`
+`/api/action/assignApplicationStatus?legit=false&waitlistOver=false?waitlistDeadline=123`
 
 Assign the application status to users using the grading algorithm. The top n applicants (where n is
 the maximum number of accepted users) are assigned the accepted role, and the next m applicants (where
 m is the maximum number of waitlisted usuers) are assigned the waitlisted role. All remaining users 
 who applied are rejected.
 
+**Warning**: Once this action has executed and people are accepted, their spots will be reserved until
+             it expires or it is manually revoked. Be very careful and ensure that everyone is graded
+             prior to running this!
+
+#### Input Specification
+`legit` can be optionally passed in the query string to indicate whether or not the changes will be 
+actually written to the database. If `legit` is not `true`, then it will essentially give a "preview"
+into what the list would look like.
+
+`waitlistOver` can be set `true` to reject all users that would otherwise be waitlisted / are on the waitlist
+currently.
+
+`waitlistDeadline` will be used to set the confirmation deadline for users who were moved off the waitlist.
+By default, this will be the system confirmation deadline.
+
 #### Output Specification
 ```
 {
   status: 200,
-  message: [
-    // List of users who were updated
-  ]
+  message: {
+    "accepted": [
+      // Users
+    ],
+    "waitlisted": [
+      // Users    
+    ],
+    "rejected": [
+      // Users    
+    ],
+    "dead": [
+      // Users    
+    ]
+  }
 }
 ```
 

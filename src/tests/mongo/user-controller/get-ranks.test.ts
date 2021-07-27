@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
-import { getRanks } from '../../../controller/UserController';
+import getRanks from '../../../controller/applicationStatus/getRanks';
+import { ITeam } from '../../../models/team/fields';
+import Team from '../../../models/team/Team';
 import computeApplicationScore from '../../../models/user/computeApplicationScore';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
@@ -99,5 +101,195 @@ describe('Get ranks', () => {
 
     const outUsers = await getRanks();
     expect(outUsers).toMatchObject(expectedUsers);
+  });
+
+
+  test('Sort by personal computed score', async () => {
+    const mockTeamCode = 'banana';
+
+    const userA = await User.create({
+      ...hackerUser,
+      status: {
+        applied: true,
+      },
+      hackerApplication: {
+        teamCode: mockTeamCode,
+      },
+      _id: mongoose.Types.ObjectId(),
+    });
+    const userB = await User.create({
+      ...hackerUser,
+      status: {
+        applied: true,
+      },
+      _id: mongoose.Types.ObjectId(),
+    });
+    const userC = await User.create({
+      ...hackerUser,
+      status: {
+        applied: true,
+      },
+      hackerApplication: {
+        teamCode: mockTeamCode,
+      },
+      _id: mongoose.Types.ObjectId(),
+    });
+
+    await Team.create({
+      code: mockTeamCode,
+      memberIDs: [
+        userA._id,
+        userC._id,
+      ],
+    } as ITeam);
+
+    const scoreMap: any = {};
+
+    scoreMap[userA._id] = 100;
+    scoreMap[userB._id] = 101;
+    scoreMap[userC._id] = 1000000;
+
+    // Originally the order was C > B > A, but now C helped boost A to be higher than B
+
+    computeApplicationScore.mockImplementation(function() {
+      return scoreMap[this._id] || -1;
+    });
+
+    const expectedUsers = [
+      userC,
+      userB,
+      userA,
+    ].map(user => user.toJSON());
+
+    const outUsers = await getRanks(true);
+    expect(outUsers).toMatchObject(expectedUsers);
+  });
+
+  describe('Team score adjustment', () => {
+
+    test('Team score boost', async () => {
+      const mockTeamCode = 'banana';
+
+      const userA = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCode,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userB = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userC = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCode,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+
+      await Team.create({
+        code: mockTeamCode,
+        memberIDs: [
+          userA._id,
+          userC._id,
+        ],
+      } as ITeam);
+
+      const scoreMap: any = {};
+
+      scoreMap[userA._id] = 100;
+      scoreMap[userB._id] = 101;
+      scoreMap[userC._id] = 1000000;
+
+      // Originally the order was C > B > A, but now C helped boost A to be higher than B
+
+      computeApplicationScore.mockImplementation(function() {
+        return scoreMap[this._id] || -1;
+      });
+
+      const expectedUsers = [
+        userC,
+        userA,
+        userB,
+      ].map(user => user.toJSON());
+
+      const outUsers = await getRanks();
+      expect(outUsers).toMatchObject(expectedUsers);
+    });
+
+
+    test('Team score actually made it worse', async () => {
+
+      const mockTeamCode = 'banana';
+
+      const userA = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCode,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userB = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userC = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCode,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      await Team.create({
+        code: mockTeamCode,
+        memberIDs: [
+          userB._id,
+          userC._id,
+        ],
+      } as ITeam);
+
+      const scoreMap: any = {};
+
+      scoreMap[userA._id] = 100;
+      scoreMap[userB._id] = 101;
+      scoreMap[userC._id] = 0;
+
+      // Originally the order was B > A > C. If B and C team up, C should not drag down B's score.
+
+      computeApplicationScore.mockImplementation(function() {
+        return scoreMap[this._id] || -1;
+      });
+
+      const expectedUsers = [
+        userB,
+        userA,
+        userC,
+      ].map(user => user.toJSON());
+
+      const outUsers = await getRanks();
+      expect(outUsers).toMatchObject(expectedUsers);
+
+    });
+
   });
 });

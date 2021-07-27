@@ -2,11 +2,10 @@
  * Model dependent API endpoints
  */
 
+import assignAdmissionStatus from 'assignApplicationStatus.ts';
 import express, { Request, Response } from 'express';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
-  advanceWaitlist,
-  assignAdmissionStatus,
   fetchUser,
   getCandidate,
   getEnumOptions,
@@ -174,13 +173,6 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
 });
 
 
-// Post application endpoints
-
-/**
- * TODO: Add endpoint to submit code for badge
- *       To be done later once plan is finalized
- */
-
 // Admin endpoints
 
 /**
@@ -287,22 +279,9 @@ actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    getRanks(),
-    true,
-  );
-});
-
-/**
- * (Admin)
- *
- * Change the status of the top waitlisted users to accepted until the number of accepted users reaches
- * the cap.
- */
-actionRouter.post('/advanceWaitlist', isAdmin, (req: Request, res: Response) => {
-  logResponse(
-    req,
-    res,
-    advanceWaitlist(),
+    getRanks(
+      req.query.usePersonalScore === 'true',
+    ),
     true,
   );
 });
@@ -316,7 +295,11 @@ actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Respo
   logResponse(
     req,
     res,
-    assignAdmissionStatus(),
+    assignAdmissionStatus(
+      req.query.legit === 'true',
+      req.query.waitlistOver === 'true',
+      req.query.waitlistDeadline,
+    ),
     true,
   );
 });
