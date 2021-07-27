@@ -6,6 +6,7 @@ import { fetchUniverseState } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import syncMailingLists from '../../../services/mailer/syncMailingLists';
+import { BadRequestError } from '../../../types/errors';
 import {
   generateMockUniverseState,
   hackerUser,
@@ -43,22 +44,74 @@ jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => 
 describe('Assign Application Status', () => {
 
   describe('Waitlist deadline', () => {
+    test('Default', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 0));
 
-    test('Default', () => {
+      const user = (await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: true,
+          waitlisted: true,
+        },
+      })).toJSON();
 
+      getRanks.mockReturnValue(cloneDeep([user]));
+      const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(false);
+
+      expect(dead).toEqual([]);
+      expect(waitlisted).toEqual([]);
+      expect(accepted).toEqual([{
+        ...user,
+        status: {
+          ...user.status,
+          waitlisted: false,
+          rejected: false,
+          accepted: true,
+        },
+        personalConfirmationDeadline: (await fetchUniverseState()).public.globalConfirmationDeadline,
+      }]);
+      expect(rejected).toEqual([]);
     });
+
     describe('Override', () => {
 
-      test('Success', () => {
+      test('Success', async () => {
+        fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 0));
+
+        const user = (await User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            waitlisted: true,
+          },
+        })).toJSON();
+
+        getRanks.mockReturnValue(cloneDeep([user]));
+        const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(false, false, '696969');
+
+        expect(dead).toEqual([]);
+        expect(waitlisted).toEqual([]);
+        expect(accepted).toEqual([{
+          ...user,
+          status: {
+            ...user.status,
+            waitlisted: false,
+            rejected: false,
+            accepted: true,
+          },
+          personalConfirmationDeadline: 696969,
+        }]);
+        expect(rejected).toEqual([]);
 
       });
 
-      test('Error', () => {
-
+      test('Error', async () => {
+        await expect(assignApplicationStatus(false, false, 'ASdasdsad')).rejects.toThrow(BadRequestError);
       });
 
     });
-
   });
 
   test('Legit mode', async () => {
@@ -498,7 +551,7 @@ describe('Assign Application Status', () => {
           rejected: false,
         },
       }));
-      mockAcceptedUsers[3].personalConfirmationDeadline = mockTimestamp + 1000 * 60 * 60 * 24 * 7; // Formerly waitlisted user is now given a week to respond
+      mockAcceptedUsers[3].personalConfirmationDeadline = (await fetchUniverseState()).public.globalConfirmationDeadline; // Formerly waitlisted user is now given a week to respond
       expect(accepted).toEqual(mockAcceptedUsers);
       expect(waitlisted).toEqual([users[5], users[6]].map((u: IUser) => ({
         ...u,

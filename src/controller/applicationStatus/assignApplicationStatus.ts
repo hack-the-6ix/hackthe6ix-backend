@@ -153,7 +153,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
         // Try to move people from waitlisted -> accepted
 
         if (budgetAccepted > 0) {
-          await acceptUser(user, waitlistDeadline === undefined ? new Date().getTime() + ONE_WEEK : waitlistDeadline);
+          await acceptUser(user, waitlistDeadline === undefined ? universeState.public.globalConfirmationDeadline : waitlistDeadline);
         } else if (waitlistOver) {
           // Reject any waitlisted users
           await rejectUser(user);
