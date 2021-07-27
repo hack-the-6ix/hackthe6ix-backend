@@ -2,14 +2,14 @@
  * Model dependent API endpoints
  */
 
-import assignAdmissionStatus from 'assignApplicationStatus.ts';
 import express, { Request, Response } from 'express';
+import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
+import getRanks from '../controller/applicationStatus/getRanks';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
   getCandidate,
   getEnumOptions,
-  getRanks,
   gradeCandidate,
   releaseApplicationStatus,
   rsvp,
