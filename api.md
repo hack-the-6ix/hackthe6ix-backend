@@ -527,7 +527,7 @@ into what the list would look like.
 currently.
 
 `waitlistDeadline` will be used to set the confirmation deadline for users who were moved off the waitlist.
-By default, this will be 1 week away.
+By default, this will be the system confirmation deadline.
 
 #### Output Specification
 ```

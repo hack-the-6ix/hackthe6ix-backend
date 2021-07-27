@@ -15,16 +15,16 @@ import getRanks from './getRanks';
  *
  * @param legit - when true, we write the changes to disk
  * @param waitlistOver - when true, reject all waitlisted users
- * @param rawWaitlistDeadline - if specified, all newly waitlisted users will have until this date to RSVP
+ * @param rawWaitlistAcceptanceDeadline - if specified, all waitlisted users who are now accepted will have until this date to RSVP
  */
-export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadline?: any) => {
+export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAcceptanceDeadline?: any) => {
 
-  let waitlistDeadline: number;
+  let waitlistAcceptanceDeadline: number;
 
-  if (rawWaitlistDeadline) {
-    waitlistDeadline = parseInt(rawWaitlistDeadline);
+  if (rawWaitlistAcceptanceDeadline) {
+    waitlistAcceptanceDeadline = parseInt(rawWaitlistAcceptanceDeadline);
 
-    if (isNaN(waitlistDeadline)) {
+    if (isNaN(waitlistAcceptanceDeadline)) {
       throw new BadRequestError('Waitlist deadline is NaN!');
     }
   }
@@ -153,7 +153,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
         // Try to move people from waitlisted -> accepted
 
         if (budgetAccepted > 0) {
-          await acceptUser(user, waitlistDeadline === undefined ? universeState.public.globalConfirmationDeadline : waitlistDeadline);
+          await acceptUser(user, waitlistAcceptanceDeadline === undefined ? universeState.public.globalConfirmationDeadline : waitlistAcceptanceDeadline);
         } else if (waitlistOver) {
           // Reject any waitlisted users
           await rejectUser(user);

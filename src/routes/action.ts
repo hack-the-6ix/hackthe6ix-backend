@@ -173,13 +173,6 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
 });
 
 
-// Post application endpoints
-
-/**
- * TODO: Add endpoint to submit code for badge
- *       To be done later once plan is finalized
- */
-
 // Admin endpoints
 
 /**
