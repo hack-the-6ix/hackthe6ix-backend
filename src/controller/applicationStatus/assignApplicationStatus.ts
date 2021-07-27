@@ -1,4 +1,3 @@
-import { systemUser } from '../../consts';
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
 import { canConfirm } from '../../models/validator';
@@ -35,7 +34,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
   const universeState = await fetchUniverseState();
 
   const userCanConfirm = (user: IUser) => canConfirm()({
-    requestUser: systemUser,
+    requestUser: user,
     targetObject: user,
     universeState: universeState,
     fieldValue: undefined,
@@ -51,9 +50,11 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistDeadli
 
   const rankedUsers = rawRankedUsers.filter(userEligible);
 
-  const dead: IUser[] = rawRankedUsers.filter((user: IUser) => !userEligible(user));
+  // Although being rejected technically puts a user in a "dead state", we will classify it separately to be consistent
+  const dead: IUser[] = rawRankedUsers.filter((user: IUser) => !userEligible(user) && !user?.status?.rejected);
+  const rejected: IUser[] = rawRankedUsers.filter((user: IUser) => user?.status?.rejected);
+
   const accepted: IUser[] = [];
-  const rejected: IUser[] = [];
   const waitlisted: IUser[] = [];
 
   let budgetAccepted = universeState.private.maxAccepted;
