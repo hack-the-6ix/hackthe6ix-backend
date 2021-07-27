@@ -26,10 +26,7 @@ export default async (usePersonalApplicationScore?: boolean) => {
 
     if (teamCode) {
       const team = await Team.findOne({ code: teamCode });
-
-      if (team?.teamScore !== undefined) {
-        teamScore = team.teamScore;
-      }
+      teamScore = team.teamScore;
     }
 
     jsonUser.internal.computedFinalApplicationScore = Math.max(teamScore, jsonUser.internal.computedApplicationScore);

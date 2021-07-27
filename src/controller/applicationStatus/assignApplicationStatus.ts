@@ -29,8 +29,6 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
     }
   }
 
-  const ONE_WEEK = 604800000;
-
   const universeState = await fetchUniverseState();
 
   const userCanConfirm = (user: IUser) => canConfirm()({
