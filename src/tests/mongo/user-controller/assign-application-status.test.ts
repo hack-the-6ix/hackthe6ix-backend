@@ -114,69 +114,140 @@ describe('Assign Application Status', () => {
     });
   });
 
-  test('Legit mode', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 1));
+  describe('Legitness', () => {
 
-    const users = (await Promise.all([...new Array(3)].map(() => User.create({
-      ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
-      status: {
-        applied: true,
-      },
-    })))).map((u: IUser) => u.toJSON());
+    test('Legit mode', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 1));
 
-    // Some other rando user that should not have their status updated
-    const rando = await User.create({
-      ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
-      status: {
-        applied: false,
-      },
+      const users = (await Promise.all([...new Array(3)].map(() => User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: true,
+        },
+      })))).map((u: IUser) => u.toJSON());
+
+      // Some other rando user that should not have their status updated
+      const rando = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: false,
+        },
+      });
+
+      getRanks.mockReturnValue(cloneDeep(users));
+
+      const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(true);
+
+      expect(dead).toEqual([]);
+
+      const acceptedExpected = {
+        ...users[0],
+        status: {
+          ...users[0].status,
+          accepted: true,
+          waitlisted: false,
+          rejected: false,
+        },
+      };
+      expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(acceptedExpected.status);
+      expect(accepted).toEqual([acceptedExpected]);
+
+      const waitlistedExpected = {
+        ...users[1],
+        status: {
+          ...users[1].status,
+          accepted: false,
+          waitlisted: true,
+          rejected: false,
+        },
+      };
+      expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(waitlistedExpected.status);
+      expect(waitlisted).toEqual([waitlistedExpected]);
+
+      const rejectedExpected = {
+        ...users[2],
+        status: {
+          ...users[2].status,
+          accepted: false,
+          waitlisted: false,
+          rejected: true,
+        },
+      };
+      expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(rejectedExpected.status);
+      expect(rejected).toEqual([rejectedExpected]);
+
+      expect(syncMailingLists).toHaveBeenCalledWith(null, true);
     });
 
-    getRanks.mockReturnValue(cloneDeep(users));
 
-    const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(true);
+    test('Not Legit mode', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, 1, 1));
 
-    expect(dead).toEqual([]);
+      const users = (await Promise.all([...new Array(3)].map(() => User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: true,
+        },
+      })))).map((u: IUser) => u.toJSON());
 
-    const acceptedExpected = {
-      ...users[0],
-      status: {
-        ...users[0].status,
-        accepted: true,
-        waitlisted: false,
-        rejected: false,
-      },
-    };
-    expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(acceptedExpected.status);
-    expect(accepted).toEqual([acceptedExpected]);
+      // Some other rando user that should not have their status updated
+      const rando = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: false,
+        },
+      });
 
-    const waitlistedExpected = {
-      ...users[1],
-      status: {
-        ...users[1].status,
-        accepted: false,
-        waitlisted: true,
-        rejected: false,
-      },
-    };
-    expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(waitlistedExpected.status);
-    expect(waitlisted).toEqual([waitlistedExpected]);
+      getRanks.mockReturnValue(cloneDeep(users));
 
-    const rejectedExpected = {
-      ...users[2],
-      status: {
-        ...users[2].status,
-        accepted: false,
-        waitlisted: false,
-        rejected: true,
-      },
-    };
-    expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(rejectedExpected.status);
-    expect(rejected).toEqual([rejectedExpected]);
+      const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus(false);
 
-    expect(syncMailingLists).toHaveBeenCalledWith(null, true);
+      expect(dead).toEqual([]);
+
+      const acceptedExpected = {
+        ...users[0],
+        status: {
+          ...users[0].status,
+          accepted: true,
+          waitlisted: false,
+          rejected: false,
+        },
+      };
+      // The status should not have changed at all on the database side
+      expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(users[0].status);
+      expect(accepted).toEqual([acceptedExpected]);
+
+      const waitlistedExpected = {
+        ...users[1],
+        status: {
+          ...users[1].status,
+          accepted: false,
+          waitlisted: true,
+          rejected: false,
+        },
+      };
+      expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(users[1].status);
+      expect(waitlisted).toEqual([waitlistedExpected]);
+
+      const rejectedExpected = {
+        ...users[2],
+        status: {
+          ...users[2].status,
+          accepted: false,
+          waitlisted: false,
+          rejected: true,
+        },
+      };
+      expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(users[2].status);
+      expect(rejected).toEqual([rejectedExpected]);
+
+      expect(syncMailingLists).toHaveBeenCalledWith(null, true);
+    });
+
   });
 
   describe('Functionality', () => {
