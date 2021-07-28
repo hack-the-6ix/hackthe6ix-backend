@@ -109,12 +109,13 @@ export const generateTestModel = (testFields: any, name: string) => {
   return [Test, models];
 };
 
-export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 100000, maxAccept = 100, maxWaitlist = 100) => new Promise(
+export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 200000, waitlistAcceptedConfirmationOffset = 300000, maxAccept = 100, maxWaitlist = 100) => new Promise(
   (resolve) => resolve({
       systemTime: new Date().getTime(),
       public: {
         globalApplicationDeadline: new Date().getTime() + applyOffset,
         globalConfirmationDeadline: new Date().getTime() + confirmOffset,
+        globalWaitlistAcceptedConfirmationDeadline: new Date().getTime() + waitlistAcceptedConfirmationOffset,
       },
       private: {
         maxAccepted: maxAccept,

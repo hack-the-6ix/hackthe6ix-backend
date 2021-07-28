@@ -84,6 +84,14 @@ const universe = {
           readCheck: true,
           writeCheck: true,
         },
+        globalWaitlistAcceptedConfirmationDeadline: {
+          type: Number,
+          default: Date.now() + 31104000000,
+          required: true,
+
+          readCheck: true,
+          writeCheck: true,
+        },
       },
 
     },
