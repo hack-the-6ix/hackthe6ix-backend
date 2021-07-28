@@ -7,6 +7,7 @@ export type UniverseState = {
   public: {
     globalApplicationDeadline: number,
     globalConfirmationDeadline: number,
+    globalWaitlistAcceptedConfirmationDeadline: number,
   },
   private: {
     maxAccepted: number,
