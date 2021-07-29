@@ -296,9 +296,9 @@ actionRouter.post('/assignApplicationStatus', isAdmin, (req: Request, res: Respo
     req,
     res,
     assignAdmissionStatus(
-      req.query.legit === 'true',
-      req.query.waitlistOver === 'true',
-      req.query.waitlistDeadline,
+      req.body.legit,
+      req.body.waitlistOver,
+      req.body.waitlistDeadline,
     ),
     true,
   );

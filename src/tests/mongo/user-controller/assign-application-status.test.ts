@@ -401,6 +401,88 @@ describe('Assign Application Status', () => {
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
     });
 
+    test('Existing accepted and waitlisted users -- No changes', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 0, 0));
+
+      const users = (await Promise.all([
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            waitlisted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            rejected: true,
+          },
+        }),
+      ])).map((u: IUser) => u.toJSON());
+
+      // Some other rando user that should not have their status updated
+      const rando = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        status: {
+          applied: false,
+        },
+      });
+
+      getRanks.mockReturnValue(cloneDeep(users));
+
+      const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus();
+
+      expect(dead).toEqual([]);
+      expect(accepted).toEqual([users[0], users[1]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          accepted: true,
+          waitlisted: false,
+          rejected: false,
+        },
+      })));
+      expect(waitlisted).toEqual([users[2]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          waitlisted: true,
+          accepted: false,
+          rejected: false,
+        },
+      })));
+      expect(rejected).toEqual([users[3]].map((u: IUser) => ({
+        ...u,
+        status: {
+          ...u.status,
+          rejected: true,
+          accepted: false,
+          waitlisted: false,
+        },
+      })));
+      expect(syncMailingLists).toHaveBeenCalledWith(null, true);
+    });
+
     test('Existing rejected and declined users', async () => {
       fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 3, 2));
 
