@@ -35,7 +35,7 @@ const roleAliases: any = {
  */
 schema.virtual('roles').get(function() {
   const out: any = {};
-  const groups: any = this.groups || {}; // Current groups
+  const groups: any = this.groups?.toJSON() || {}; // Current groups
 
   for (const group of Object.keys(groups)) {
     out[group] = out[group] || groups[group];

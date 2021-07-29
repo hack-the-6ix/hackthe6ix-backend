@@ -151,7 +151,7 @@ describe('Assign Application Status', () => {
           rejected: false,
         },
       };
-      expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(acceptedExpected.status);
+      expect((await User.findOne({ _id: users[0]._id })).toJSON()).toEqual(acceptedExpected);
       expect(accepted).toEqual([acceptedExpected]);
 
       const waitlistedExpected = {
@@ -163,7 +163,7 @@ describe('Assign Application Status', () => {
           rejected: false,
         },
       };
-      expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(waitlistedExpected.status);
+      expect((await User.findOne({ _id: users[1]._id })).toJSON()).toEqual(waitlistedExpected);
       expect(waitlisted).toEqual([waitlistedExpected]);
 
       const rejectedExpected = {
@@ -175,7 +175,7 @@ describe('Assign Application Status', () => {
           rejected: true,
         },
       };
-      expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(rejectedExpected.status);
+      expect((await User.findOne({ _id: users[2]._id })).toJSON()).toEqual(rejectedExpected);
       expect(rejected).toEqual([rejectedExpected]);
 
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
@@ -218,7 +218,7 @@ describe('Assign Application Status', () => {
         },
       };
       // The status should not have changed at all on the database side
-      expect((await User.findOne({ _id: users[0]._id })).status.toJSON()).toEqual(users[0].status);
+      expect((await User.findOne({ _id: users[0]._id })).toJSON()).toEqual(users[0]);
       expect(accepted).toEqual([acceptedExpected]);
 
       const waitlistedExpected = {
@@ -230,7 +230,7 @@ describe('Assign Application Status', () => {
           rejected: false,
         },
       };
-      expect((await User.findOne({ _id: users[1]._id })).status.toJSON()).toEqual(users[1].status);
+      expect((await User.findOne({ _id: users[1]._id })).toJSON()).toEqual(users[1]);
       expect(waitlisted).toEqual([waitlistedExpected]);
 
       const rejectedExpected = {
@@ -242,7 +242,7 @@ describe('Assign Application Status', () => {
           rejected: true,
         },
       };
-      expect((await User.findOne({ _id: users[2]._id })).status.toJSON()).toEqual(users[2].status);
+      expect((await User.findOne({ _id: users[2]._id })).toJSON()).toEqual(users[2]);
       expect(rejected).toEqual([rejectedExpected]);
 
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
