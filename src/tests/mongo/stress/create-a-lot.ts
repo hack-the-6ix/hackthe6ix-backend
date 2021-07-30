@@ -18,9 +18,7 @@ dotenv.config();
   for (let i = 0; i < 300; i++) {
     console.log('Creating', i);
 
-    User.findOneAndUpdate({
-      email: 'test' + i.toString() + '@test.ca',
-    }, {
+    User.create({
       firstName: 'Test ' + i.toString(),
       lastName: 'Testerson',
       idpLinkID: 'wtf',
