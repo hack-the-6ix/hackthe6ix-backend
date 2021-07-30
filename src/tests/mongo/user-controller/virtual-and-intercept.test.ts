@@ -457,6 +457,163 @@ describe('Virtual', () => {
       expect(user.status.textStatus).toEqual('Declined');
     });
   });
+  describe('Internal Text Status', () => {
+
+    test('Not applied', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Not Applied');
+    });
+
+    test('Applied', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Applied');
+    });
+
+    describe('Status Released', () => {
+      test('Accepted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Accepted');
+      });
+      test('Rejected', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            rejected: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Rejected');
+      });
+      test('Waitlisted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            waitlisted: true,
+            statusReleased: true,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Waitlisted');
+      });
+    });
+    describe('Status Not Released', () => {
+      test('Accepted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Accepted');
+      });
+      test('Rejected', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            rejected: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Rejected');
+      });
+      test('Waitlisted', async () => {
+        const user: IUser = await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            waitlisted: true,
+            statusReleased: false,
+          },
+        });
+
+        expect(user.status.internalTextStatus).toEqual('Waitlisted');
+      });
+    });
+
+    test('Declined', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          declined: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Declined');
+    });
+
+    test('Confirmed', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Confirmed');
+    });
+
+    test('Checked In', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          checkedIn: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Checked In');
+    });
+
+    test('Checked In and Declined', async () => {
+      const user: IUser = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          accepted: true,
+          confirmed: true,
+          checkedIn: true,
+          declined: true,
+          statusReleased: true,
+        },
+      });
+
+      expect(user.status.internalTextStatus).toEqual('Declined');
+    });
+  });
 
   describe('Computed Application Score', () => {
     test('No scores', async () => {

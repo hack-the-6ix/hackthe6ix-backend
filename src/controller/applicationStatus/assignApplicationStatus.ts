@@ -92,7 +92,10 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
     budgetAccepted--;
 
     // Update return user
-    updateObject(user, update);
+    updateObject(user, {
+      ...update,
+      'status.internalTextStatus': 'Accepted',
+    });
 
     accepted.push(user);
   };
@@ -115,7 +118,11 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
     }
 
     // Update return user
-    updateObject(user, update);
+    updateObject(user, {
+      ...update,
+      'status.internalTextStatus': 'Rejected',
+    });
+
 
     rejected.push(user);
   };
@@ -135,7 +142,11 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
     budgetWaitlisted--;
 
     // Update return user
-    updateObject(user, update);
+    updateObject(user, {
+      ...update,
+      'status.internalTextStatus': 'Waitlisted',
+    });
+
 
     waitlisted.push(user);
   };

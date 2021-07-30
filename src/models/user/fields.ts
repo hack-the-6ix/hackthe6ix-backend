@@ -465,6 +465,14 @@ const status = {
       readCheck: true,
     },
 
+    internalTextStatus: {
+      type: String,
+      virtual: true,
+      caption: 'Internal Status',
+
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+    },
+
     // Only admins can read this field
     statusReleased: {
       type: Boolean,
@@ -926,6 +934,7 @@ export interface IStatus {
   canConfirm?: boolean,
 
   textStatus: string
+  internalTextStatus: string
 }
 
 export interface IUser extends mongoose.Document {

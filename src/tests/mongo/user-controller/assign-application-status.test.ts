@@ -68,6 +68,7 @@ describe('Assign Application Status', () => {
           waitlisted: false,
           rejected: false,
           accepted: true,
+          internalTextStatus: 'Accepted',
         },
         personalConfirmationDeadline: (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline,
       }]);
@@ -100,6 +101,7 @@ describe('Assign Application Status', () => {
             waitlisted: false,
             rejected: false,
             accepted: true,
+            internalTextStatus: 'Accepted',
           },
           personalConfirmationDeadline: 696969,
         }]);
@@ -149,6 +151,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
       };
       expect((await User.findOne({ _id: users[0]._id })).toJSON()).toEqual(acceptedExpected);
@@ -161,6 +164,7 @@ describe('Assign Application Status', () => {
           accepted: false,
           waitlisted: true,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       };
       expect((await User.findOne({ _id: users[1]._id })).toJSON()).toEqual(waitlistedExpected);
@@ -173,6 +177,7 @@ describe('Assign Application Status', () => {
           accepted: false,
           waitlisted: false,
           rejected: true,
+          internalTextStatus: 'Rejected',
         },
       };
       expect((await User.findOne({ _id: users[2]._id })).toJSON()).toEqual(rejectedExpected);
@@ -215,6 +220,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
       };
       // The status should not have changed at all on the database side
@@ -228,6 +234,7 @@ describe('Assign Application Status', () => {
           accepted: false,
           waitlisted: true,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       };
       expect((await User.findOne({ _id: users[1]._id })).toJSON()).toEqual(users[1]);
@@ -240,6 +247,7 @@ describe('Assign Application Status', () => {
           accepted: false,
           waitlisted: false,
           rejected: true,
+          internalTextStatus: 'Rejected',
         },
       };
       expect((await User.findOne({ _id: users[2]._id })).toJSON()).toEqual(users[2]);
@@ -283,6 +291,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
       })));
       expect(waitlisted).toEqual([users[3], users[4]].map((u: IUser) => ({
@@ -292,6 +301,7 @@ describe('Assign Application Status', () => {
           waitlisted: true,
           accepted: false,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       })));
       expect(rejected).toEqual([users[5], users[6], users[7], users[8], users[9]].map((u: IUser) => ({
@@ -301,6 +311,7 @@ describe('Assign Application Status', () => {
           rejected: true,
           accepted: false,
           waitlisted: false,
+          internalTextStatus: 'Rejected',
         },
       })));
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
@@ -378,6 +389,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
       })));
       expect(waitlisted).toEqual([users[3], users[4]].map((u: IUser) => ({
@@ -387,6 +399,7 @@ describe('Assign Application Status', () => {
           waitlisted: true,
           accepted: false,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       })));
       expect(rejected).toEqual([users[5]].map((u: IUser) => ({
@@ -396,6 +409,7 @@ describe('Assign Application Status', () => {
           rejected: true,
           accepted: false,
           waitlisted: false,
+          internalTextStatus: 'Rejected',
         },
       })));
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
@@ -582,15 +596,19 @@ describe('Assign Application Status', () => {
       const { dead, accepted, waitlisted, rejected } = await assignApplicationStatus();
 
       expect(dead).toEqual([users[1], users[3]]);
-      expect(accepted).toEqual([users[0], users[2], users[9]].map((u: IUser) => ({
+      const expectedAcceptedUsers = [users[0], users[2], users[9]].map((u: IUser) => ({
         ...u,
         status: {
           ...u.status,
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
-      })));
+      }));
+      expectedAcceptedUsers[2].status.internalTextStatus = 'Confirmed';
+
+      expect(accepted).toEqual(expectedAcceptedUsers);
       expect(waitlisted).toEqual([users[4], users[6]].map((u: IUser) => ({
         ...u,
         status: {
@@ -598,6 +616,7 @@ describe('Assign Application Status', () => {
           waitlisted: true,
           accepted: false,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       })));
       expect(rejected).toEqual([users[5], users[7], users[8]].map((u: IUser) => ({
@@ -607,6 +626,7 @@ describe('Assign Application Status', () => {
           rejected: true,
           accepted: false,
           waitlisted: false,
+          internalTextStatus: 'Rejected',
         },
       })));
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
@@ -702,6 +722,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
       }));
       mockAcceptedUsers[3].personalConfirmationDeadline = (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline; // Formerly waitlisted user is now given a week to respond
@@ -713,6 +734,7 @@ describe('Assign Application Status', () => {
           waitlisted: true,
           accepted: false,
           rejected: false,
+          internalTextStatus: 'Waitlisted',
         },
       })));
       expect(rejected).toEqual([users[7]].map((u: IUser) => ({
@@ -722,6 +744,7 @@ describe('Assign Application Status', () => {
           rejected: true,
           accepted: false,
           waitlisted: false,
+          internalTextStatus: 'Rejected',
         },
       })));
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);
@@ -830,15 +853,19 @@ describe('Assign Application Status', () => {
 
       expect(dead).toEqual([users[8]]);
 
-      expect(accepted).toEqual([users[0], users[5], users[9]].map((u: IUser) => ({
+      const expectedAcceptedUsers = [users[0], users[5], users[9]].map((u: IUser) => ({
         ...u,
         status: {
           ...u.status,
           accepted: true,
           waitlisted: false,
           rejected: false,
+          internalTextStatus: 'Accepted',
         },
-      })));
+      }));
+      expectedAcceptedUsers[1].status.internalTextStatus = 'Confirmed';
+
+      expect(accepted).toEqual(expectedAcceptedUsers);
       expect(waitlisted).toEqual([]);
 
       // #6 is sent to the beginning since existing rejected users are added to the list first
@@ -849,6 +876,7 @@ describe('Assign Application Status', () => {
           rejected: true,
           accepted: false,
           waitlisted: false,
+          internalTextStatus: 'Rejected',
         },
       })));
       expect(syncMailingLists).toHaveBeenCalledWith(null, true);

@@ -58,17 +58,32 @@ schema.virtual('fullName').get(function() {
 });
 
 schema.virtual('status.textStatus').get(function() {
+  const textStatus = this?.status?.internalTextStatus || '';
+  const maskedStatuses = [
+    'Accepted',
+    'Waitlisted',
+    'Rejected',
+  ];
+
+  if (!this?.status?.statusReleased && maskedStatuses.indexOf(textStatus) !== -1) {
+    return 'Applied';
+  }
+
+  return textStatus;
+});
+
+schema.virtual('status.internalTextStatus').get(function() {
   if (this?.status?.declined) {
     return 'Declined';
   } else if (this.status?.checkedIn) {
     return 'Checked In';
   } else if (this?.status?.confirmed) {
     return 'Confirmed';
-  } else if (this?.status?.accepted && this?.status?.statusReleased) {
+  } else if (this?.status?.accepted) {
     return 'Accepted';
-  } else if (this?.status?.waitlisted && this?.status?.statusReleased) {
+  } else if (this?.status?.waitlisted) {
     return 'Waitlisted';
-  } else if (this?.status?.rejected && this?.status?.statusReleased) {
+  } else if (this?.status?.rejected) {
     return 'Rejected';
   } else if (this?.status?.applied) {
     return 'Applied';
