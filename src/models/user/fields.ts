@@ -577,6 +577,7 @@ const status = {
 
       readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isApplicationOpen({
         ...request,
+        requestUser: request.targetObject,
         fieldValue: undefined,
         submissionObject: undefined,
       }),
@@ -591,6 +592,7 @@ const status = {
 
       readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canUpdateApplication()({
         ...request,
+        requestUser: request.targetObject,
         fieldValue: undefined,
         submissionObject: undefined,
       }),
@@ -605,6 +607,7 @@ const status = {
 
       readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canConfirm()({
         ...request,
+        requestUser: request.targetObject,
         fieldValue: undefined,
         submissionObject: undefined,
       }),
