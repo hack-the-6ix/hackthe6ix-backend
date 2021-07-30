@@ -29,18 +29,18 @@ export default async (usePersonalApplicationScore?: boolean) => {
       teamScore = team.teamScore;
     }
 
-    jsonUser.internal.computedFinalApplicationScore = Math.max(teamScore, jsonUser.internal.computedApplicationScore);
+    jsonUser.internal.computedFinalApplicationScore = Math.max(teamScore, jsonUser?.internal?.computedApplicationScore || -1);
 
     return jsonUser;
   }));
 
   return users
   .sort((a: IUser, b: IUser) => {
-    const diff = b.internal[sortCriteria] - a.internal[sortCriteria];
+    const diff = (b?.internal || {})[sortCriteria] - (a?.internal || {})[sortCriteria];
 
     if (diff === 0) {
       // If the scores are the same, the tiebreaker is whoever submitted earlier
-      return a.hackerApplication.lastUpdated - b.hackerApplication.lastUpdated;
+      return a?.hackerApplication?.lastUpdated - b?.hackerApplication?.lastUpdated;
     } else {
       return diff;
     }
