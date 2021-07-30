@@ -32,6 +32,7 @@ dotenv.config();
       status: {
         applied: true,
       } as IStatus,
+      created: i,
     }, {
       upsert: true,
       new: true,
