@@ -29,6 +29,9 @@ dotenv.config();
         organizer: false,
         volunteer: false,
       },
+      hackerApplication: {
+        lastUpdated: i,
+      },
       status: {
         applied: true,
       } as IStatus,
