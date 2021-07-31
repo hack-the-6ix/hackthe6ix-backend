@@ -9,9 +9,12 @@ const _assembleReturnInfo = (userInfo:BasicUser):DiscordVerifyInfo => {
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
         email: userInfo.email,
-        suffix: userInfo.discord?.suffix,
         roles: []
     } as DiscordVerifyInfo;
+
+    if(userInfo.discord?.suffix !== undefined){
+        returnInfo.suffix = userInfo.discord.suffix;
+    }
 
     if(Array.isArray(userInfo.discord?.additionalRoles)){
         returnInfo.roles.push(...userInfo.discord.additionalRoles);
@@ -21,7 +24,7 @@ const _assembleReturnInfo = (userInfo:BasicUser):DiscordVerifyInfo => {
 
     if(fullUser.roles){
         for(const roleName of Object.keys(fullUser.roles)){
-            if(fullUser.roles[roleName as keyof IRoles]){
+            if(fullUser.roles[roleName as keyof IRoles] && roleName !== '$init'){
                 returnInfo.roles.push(roleName);
             }
         }
@@ -30,25 +33,7 @@ const _assembleReturnInfo = (userInfo:BasicUser):DiscordVerifyInfo => {
     return returnInfo;
 }
 
-export const fetchUserInfo = async (email: string):Promise<DiscordVerifyInfo> => {
-    let userInfo:BasicUser = await User.findOne({
-        email: email
-    })
-
-    if(!userInfo) {
-        userInfo = await ExternalUser.findOne({
-            email: email
-        })
-    }
-
-    if(!userInfo) {
-        throw new NotFoundError('No user found with the given email.');
-    }
-    
-    return _assembleReturnInfo(userInfo);
-}
-
-export const verifyDiscordUser = async (email: string, discordID: string, discordUsername: string):Promise<DiscordVerifyInfo> => {
+export const verifyDiscordUser = async (email: string, discordID: string, discordUsername: string, timeOverride?: number):Promise<DiscordVerifyInfo> => {
     if(!email || !discordID){
         throw new BadRequestError("email and discordID fields are required.");
     }
@@ -85,7 +70,7 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
     }, {
         "discord.discordID": discordID,
         "discord.username": discordUsername,
-        "discord.verifyTime": Date.now(),
+        "discord.verifyTime": timeOverride || Date.now(),
         "status.checkedIn": true
     })
 
@@ -98,7 +83,7 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
         }, {
             "discord.discordID": discordID,
             "discord.username": discordUsername,
-            "discord.verifyTime": Date.now()
+            "discord.verifyTime": timeOverride || Date.now()
         })
 
         if(!userInfo) {
