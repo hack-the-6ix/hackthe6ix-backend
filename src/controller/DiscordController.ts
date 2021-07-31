@@ -85,7 +85,8 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
     }, {
         "discord.discordID": discordID,
         "discord.username": discordUsername,
-        "discord.verifyTime": Date.now()
+        "discord.verifyTime": Date.now(),
+        "status.checkedIn": true
     })
 
     if(userInfo){
