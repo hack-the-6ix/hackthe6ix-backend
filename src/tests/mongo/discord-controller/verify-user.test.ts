@@ -78,6 +78,7 @@ describe('Verify user in Discord', () => {
         _id: confirmedHackerUser._id
       });
 
+      expect(newUser.status?.checkedIn).toEqual(true);
       expect(newUser.discord?.discordID).toEqual(DISCORD_ID);
       expect(newUser.discord?.username).toEqual(DISCORD_NAME);
       expect(newUser.discord?.verifyTime).toEqual(SIM_TIME);
@@ -107,6 +108,7 @@ describe('Verify user in Discord', () => {
         _id: confirmedHackerUser._id
       });
 
+      expect(newUser.status?.checkedIn).toEqual(true);
       expect(newUser.discord?.discordID).toEqual(DISCORD_ID);
       expect(newUser.discord?.username).toEqual(DISCORD_NAME);
       expect(newUser.discord?.verifyTime).toEqual(SIM_TIME);
