@@ -344,7 +344,6 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
  *
  * Associate a user on Discord
  */
-
 actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,
@@ -358,7 +357,6 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Associate a user on Discord
  */
-
  actionRouter.get('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,
@@ -373,7 +371,6 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Create an API token for programmatic access
  */
-
  actionRouter.post('/createAPIToken', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,
@@ -388,7 +385,6 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Record someone joining a meeting
  */
-
  actionRouter.post('/recordMeetingJoin', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,
@@ -402,7 +398,6 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Record someone leaving a meeting
  */
-
  actionRouter.post('/recordMeetingLeave', isOrganizer, (req:Request, res: Response) => {
   logResponse(
     req,

@@ -11,6 +11,7 @@ import {
   runAfterEach,
   runBeforeAll,
   } from '../../test-utils';
+import { NotFoundError } from '../../../types/errors';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -46,7 +47,7 @@ describe('Verify user in Discord', () => {
     test('User does not exist', async () => {
       await expect(async () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID, DISCORD_NAME);
-      }).rejects.toThrow();
+      }).rejects.toThrow(NotFoundError);
     })
   })
   describe('Internal user', () => {
@@ -57,7 +58,7 @@ describe('Verify user in Discord', () => {
 
       await expect(async () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID, DISCORD_NAME);
-      }).rejects.toThrow();
+      }).rejects.toThrow(NotFoundError);
     });
 
     test('No past verification, no additional roles', async () => {
@@ -126,7 +127,29 @@ describe('Verify user in Discord', () => {
 
       await expect(async () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID2, DISCORD_NAME);
-      }).rejects.toThrow();
+      }).rejects.toThrow(NotFoundError);
+    });
+
+    test('With suffix', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create({
+        ...confirmedHackerUser,
+        discord: {
+          additionalRoles: ['testrole'],
+          suffix: 'testsuffix'
+        }
+      });
+
+      const userInfo = await verifyDiscordUser(confirmedHackerUser.email, DISCORD_ID, DISCORD_NAME);
+
+      expect(userInfo).toEqual({
+        firstName: confirmedHackerUser.firstName,
+        lastName: confirmedHackerUser.lastName,
+        email: confirmedHackerUser.email,
+        suffix: 'testsuffix',
+        roles: ['testrole', 'hacker']
+      });
     });
 
     test('Additional roles', async () => {
@@ -211,8 +234,30 @@ describe('Verify user in Discord', () => {
       });
 
       await expect(async () => {
-        const userInfo = await verifyDiscordUser(externalUser.email, DISCORD2_ID, DISCORD_NAME);
-      }).rejects.toThrow();
+        const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID2, DISCORD_NAME);
+      }).rejects.toThrow(NotFoundError);
+    });
+
+    test('With suffix', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      const eUser = await ExternalUser.create({
+        ...externalUser, 
+        discord: {
+          discordID: DISCORD_ID,
+          additionalRoles: ['testrole'],
+          suffix: 'testsuffix'
+        }
+      });
+
+      const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID, DISCORD_NAME);
+
+      expect(userInfo).toEqual({
+        firstName: externalUser.firstName,
+        lastName: externalUser.lastName,
+        email: externalUser.email,
+        suffix: 'testsuffix',
+        roles: ['testrole']
+      });
     });
 
     test('Additional roles', async () => {

@@ -637,6 +637,7 @@ Attempt to associate a user with a given Discord account. Will fail if the user 
     firstName: <first name of the user>,
     lastName: <last name of the user>,
     email: <email of the user>,
+    suffix: <Discord suffix of the user> (optional),
     roles: [
       <user Discord roles>
     ]
