@@ -623,6 +623,38 @@ ones and the dictionary will be merged (so omitted fields are unchanged).
 }
 ```
 
+### POST - Verify a Discord user (Organizer)
+`/api/action/verifyDiscord`
+
+Attempt to associate a user with a given Discord account. Will fail if the user does not exist or is already bound to another Discord account.
+
+#### Input Specification
+```
+{
+  "email": <email of the user>,
+  "discordID": <Discord account ID>,
+  "discordUsername": <Discord account username (not checked, for display only)>
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    firstName: <first name of the user>,
+    lastName: <last name of the user>,
+    email: <email of the user>,
+    suffix: <Discord suffix of the user> (optional),
+    roles: [
+      <user Discord roles>
+    ]
+  }
+}
+```
+
+The user's Discord roles is taken from the user's permission roles as well as any in their `discord.additionalRoles` field.
+
 ## Auth - Authentication related operations
 
 ### POST - Starting point for login
