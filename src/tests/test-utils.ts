@@ -71,6 +71,33 @@ export const hackerUser = {
   },
 } as IUser;
 
+export const confirmedHackerUser = {
+  _id: new ObjectID('610590f06b11d739a107c636'),
+  firstName: 'Confirmed',
+  lastName: 'Last Hacker',
+  idpLinkID: 'hackerconfirmed',
+  email: 'hackerconfirmed@test.ca',
+  status: {
+    confirmed: true
+  },
+  groups: {
+    hacker: true,
+  },
+  roles: {
+    hacker: true,
+  },
+  internal: {
+    notes: 'This is a confirmed bad person',
+  },
+} as IUser;
+
+export const externalUser = {
+  _id: new ObjectID('61058ea2185c1e4282509faa'),
+  firstName: 'External',
+  lastName: 'Last External',
+  email: 'external@test.ca'
+}
+
 export const nopermUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd17'),
   firstName: 'Noperm',

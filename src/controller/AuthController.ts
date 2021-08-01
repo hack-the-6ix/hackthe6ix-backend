@@ -1,9 +1,11 @@
 import axios from 'axios';
+import short from 'short-uuid';
 import { ArrayElement } from '../../@types/utilitytypes';
 import { ISettings } from '../models/settings/fields';
 import Settings from '../models/settings/Settings';
-import { fields } from '../models/user/fields';
+import { IRoles, IUser } from '../models/user/fields';
 import User from '../models/user/User';
+import APIToken from '../models/apitoken/APIToken';
 
 import { getCircularReplacer, log } from '../services/logger';
 
@@ -12,6 +14,7 @@ import { fetchClient } from '../services/multiprovider';
 import * as permissions from '../services/permissions';
 
 import { BadRequestError, ForbiddenError, InternalServerError } from '../types/errors';
+import { createFederatedUser } from './UserController';
 
 let settingsCache = {} as ISettings;
 let settingsTime = 0;
@@ -51,27 +54,7 @@ const _getUserData = async (url: string, token: string): Promise<Record<string, 
 };
 
 const _issueLocalToken = async (assertAttributes: Record<string, any>): Promise<string> => {
-  const groups: any = {};
-
-  // Update the groups this user is in in the database
-  // Ensure that we set all the groups the user is not in to FALSE and not NULL
-  for (const group of Object.keys(fields.FIELDS.groups.FIELDS) || []) {
-    //                                              Assertion includes group with leading /
-    groups[group] = (assertAttributes.groups || []).indexOf(`/${group}`) !== -1;
-  }
-
-  const userInfo = await User.findOneAndUpdate({
-    idpLinkID: assertAttributes.sub,
-  }, {
-    email: assertAttributes.email.toLowerCase(),
-    firstName: assertAttributes.given_name,
-    lastName: assertAttributes.family_name,
-    groups: groups,
-  }, {
-    upsert: true,
-    new: true,
-    setDefaultsOnInsert: true,
-  });
+  const userInfo = await createFederatedUser(assertAttributes.sub, assertAttributes.email, assertAttributes.given_name, assertAttributes.family_name, assertAttributes.groups, true);
 
   const token = permissions.createJwt({
     id: userInfo._id,
@@ -251,3 +234,31 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
 
   return {};
 };
+
+export const createAPIToken = async (requestUser: IUser, groups: string[], description: string): Promise<{
+  token: string
+}> => {
+  if(!Array.isArray(groups)){
+    throw new BadRequestError("Groups must be an array of strings.");
+  }
+
+  for(const group of groups){
+    if(!requestUser.roles[group as keyof IRoles]){
+      throw new ForbiddenError("Cannot issue token of higher privilege than the requesting user.");
+    }
+  }
+
+  const tokenString = short.uuid();
+
+  const internalUser = await createFederatedUser(`TOKEN-${tokenString}`, `${tokenString}@apitoken.invalid`, `TOKEN-${tokenString}`, `TOKEN-${tokenString}`, groups, false);
+
+  await APIToken.create({
+    token: tokenString,
+    description: description,
+    internalUserID: internalUser._id
+  });
+
+  return {
+    token: tokenString
+  }
+}
