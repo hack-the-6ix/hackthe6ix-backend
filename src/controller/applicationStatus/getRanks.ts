@@ -29,7 +29,12 @@ export default async (usePersonalApplicationScore?: boolean) => {
       teamScore = team.teamScore;
     }
 
-    jsonUser.internal.computedFinalApplicationScore = Math.max(teamScore, jsonUser?.internal?.computedApplicationScore ? ? -1);
+    jsonUser.internal.computedFinalApplicationScore = Math.max(
+      teamScore,
+      jsonUser?.internal?.computedApplicationScore === undefined
+        ? -1
+        : jsonUser?.internal?.computedApplicationScore,
+    );
 
     return jsonUser;
   }));
