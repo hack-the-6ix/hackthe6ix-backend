@@ -2,7 +2,7 @@ import { Mongoose } from 'mongoose';
 import { enumOptions } from '../models/user/enums';
 import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import { isConfirmationOpen } from '../models/validator';
+import { canRSVP, isRSVPOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import { WriteCheckRequest } from '../types/checker';
@@ -47,7 +47,7 @@ export const createFederatedUser = async(linkID: string, email: string, firstNam
   });
 
   return userInfo;
-}
+};
 
 /**
  * Fetch a sanitized user profile of the requester
@@ -212,11 +212,11 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     fieldValue: undefined as any,
   };
 
-  if (!isConfirmationOpen(writeRequest)) {
+  if (!isRSVPOpen(writeRequest)) {
     throw new DeadlineExpiredError('The RSVP deadline has passed!');
   }
 
-  if (requestUser.status.statusReleased && requestUser.status.accepted && !requestUser.status.declined) {
+  if (canRSVP()(writeRequest)) {
 
     const isAttending = !!rsvp.attending;
 
@@ -226,10 +226,6 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
     });
-
-    /**
-     * TODO: Invite them to discord
-     */
 
     await syncMailingLists(undefined, true, requestUser.email);
 

@@ -10,14 +10,15 @@ import { stringifyUnixTime } from '../../util/date';
 
 import discordShared from '../shared/discordShared';
 import {
-  canConfirm,
+  canRSVP,
   canUpdateApplication,
   getApplicationDeadline,
-  getConfirmationDeadline,
+  getRSVPDeadline,
   inEnum,
   isAdmin,
   isApplicationOpen,
   isOrganizer,
+  isRSVPOpen,
   isUserOrOrganizer,
   maxLength,
   minLength,
@@ -593,15 +594,30 @@ const status = {
         submissionObject: undefined,
       }),
     },
-    canConfirm: {
+    canRSVP: {
       type: Boolean,
       required: true,
       default: false,
-      caption: 'Can Confirm',
+      caption: 'Can RSVP',
 
       readCheck: true,
 
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canConfirm()({
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canRSVP()({
+        ...request,
+        requestUser: request.targetObject,
+        fieldValue: undefined,
+        submissionObject: undefined,
+      }),
+    },
+    isRSVPOpen: {
+      type: Boolean,
+      required: true,
+      default: false,
+      caption: 'Is Confirmation Open',
+
+      readCheck: true,
+
+      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isRSVPOpen({
         ...request,
         requestUser: request.targetObject,
         fieldValue: undefined,
@@ -664,7 +680,7 @@ const mailmerge = {
       default: '',
 
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getConfirmationDeadline({
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getRSVPDeadline({
         ...request,
         requestUser: request.targetObject,
         submissionObject: {} as IUser,
@@ -894,7 +910,7 @@ export const fields = {
       default: 0,
 
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getConfirmationDeadline({
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getRSVPDeadline({
         ...request,
         requestUser: request.targetObject,
         submissionObject: {} as IUser,
@@ -930,7 +946,8 @@ export interface IStatus {
   // Intercepted fields (since they require universe state)
   canAmendTeam?: boolean,
   canApply?: boolean,
-  canConfirm?: boolean,
+  canRSVP?: boolean,
+  isRSVPOpen?: boolean,
 
   textStatus: string
   internalTextStatus: string

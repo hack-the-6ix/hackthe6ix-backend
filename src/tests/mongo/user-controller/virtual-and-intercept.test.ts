@@ -4,11 +4,12 @@ import { enumOptions } from '../../../models/user/enums';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
 import {
-  canConfirm,
+  canRSVP,
   canUpdateApplication,
   getApplicationDeadline,
-  getConfirmationDeadline,
+  getRSVPDeadline,
   isApplicationOpen,
+  isRSVPOpen,
 } from '../../../models/validator';
 import { stringifyUnixTime } from '../../../util/date';
 import {
@@ -51,16 +52,17 @@ jest.mock('../../../models/validator', () => {
   return {
     ...validators,
     canUpdateApplication: jest.fn(),
-    canConfirm: jest.fn(),
+    canRSVP: jest.fn(),
+    isRSVPOpen: jest.fn(),
     getApplicationDeadline: jest.fn(),
-    getConfirmationDeadline: jest.fn(),
+    getRSVPDeadline: jest.fn(),
     isApplicationOpen: jest.fn(),
   };
 });
 
 describe('Interceptor', () => {
   describe('Can Amend Team', () => {
-    beforeEach(() => canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm));
+    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
     beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
     test('Success', async () => {
@@ -81,7 +83,7 @@ describe('Interceptor', () => {
   });
 
   describe('Can Apply', () => {
-    beforeEach(() => canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm));
+    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
 
     test('Success', async () => {
       canUpdateApplication.mockReturnValue(() => true);
@@ -104,26 +106,46 @@ describe('Interceptor', () => {
     beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
     test('Success', async () => {
-      canConfirm.mockReturnValue(() => true);
+      canRSVP.mockReturnValue(() => true);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
-      expect(fetchedUser.status.canConfirm).toBeTruthy();
+      expect(fetchedUser.status.canRSVP).toBeTruthy();
     });
 
     test('Fail', async () => {
-      canConfirm.mockReturnValue(() => false);
+      canRSVP.mockReturnValue(() => false);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
-      expect(fetchedUser.status.canConfirm).toBeFalsy();
+      expect(fetchedUser.status.canRSVP).toBeFalsy();
+    });
+  });
+
+  describe('Is Confirmation Open', () => {
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+
+    test('Success', async () => {
+      isRSVPOpen.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.isRSVPOpen).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isRSVPOpen.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.isRSVPOpen).toBeFalsy();
     });
   });
 
   describe('Mail Merge', () => {
     beforeEach(() => {
       canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
-      canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm);
+      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
     });
 
     test('First Name', async () => {
@@ -146,7 +168,7 @@ describe('Interceptor', () => {
     });
     test('Confirmation Deadline', async () => {
       const mockDate = 54321;
-      getConfirmationDeadline.mockReturnValue(mockDate);
+      getRSVPDeadline.mockReturnValue(mockDate);
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
@@ -157,9 +179,9 @@ describe('Interceptor', () => {
   describe('Computed Deadlines', () => {
     beforeEach(() => {
       canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
-      canConfirm.mockImplementation(jest.requireActual('../../../models/validator').canConfirm);
+      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
       getApplicationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getApplicationDeadline);
-      getConfirmationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getConfirmationDeadline);
+      getRSVPDeadline.mockImplementation(jest.requireActual('../../../models/validator').getRSVPDeadline);
     });
 
     describe('Application', () => {
@@ -246,7 +268,7 @@ describe('Interceptor', () => {
 
       beforeEach(() => {
         canUpdateApplication.mockReturnValue(() => true);
-        canConfirm.mockReturnValue(() => true);
+        canRSVP.mockReturnValue(() => true);
       });
 
       test('Released', async () => {

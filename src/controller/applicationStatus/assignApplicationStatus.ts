@@ -1,6 +1,6 @@
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
-import { canConfirm } from '../../models/validator';
+import { isRSVPOpen } from '../../models/validator';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { BadRequestError } from '../../types/errors';
 import { fetchUniverseState } from '../util/resources';
@@ -15,23 +15,23 @@ import getRanks from './getRanks';
  *
  * @param legit - when true, we write the changes to disk
  * @param waitlistOver - when true, reject all waitlisted users
- * @param rawWaitlistAcceptanceDeadline - if specified, all waitlisted users who are now accepted will have until this date to RSVP
+ * @param rawAcceptedFromWaitlistRSVPDeadline - if specified, all waitlisted users who are now accepted will have until this date to RSVP
  */
-export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAcceptanceDeadline?: any) => {
+export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWaitlistRSVPDeadline?: any) => {
 
-  let waitlistAcceptanceDeadline: number;
+  let acceptedFromWaitlistRSVPDeadline: number;
 
-  if (rawWaitlistAcceptanceDeadline) {
-    waitlistAcceptanceDeadline = parseInt(rawWaitlistAcceptanceDeadline);
+  if (rawAcceptedFromWaitlistRSVPDeadline) {
+    acceptedFromWaitlistRSVPDeadline = parseInt(rawAcceptedFromWaitlistRSVPDeadline);
 
-    if (isNaN(waitlistAcceptanceDeadline)) {
+    if (isNaN(acceptedFromWaitlistRSVPDeadline)) {
       throw new BadRequestError('Waitlist deadline is NaN!');
     }
   }
 
   const universeState = await fetchUniverseState();
 
-  const userCanConfirm = (user: IUser) => canConfirm()({
+  const userRSVPOpen = (user: IUser) => isRSVPOpen({
     requestUser: user,
     targetObject: user,
     universeState: universeState,
@@ -41,7 +41,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
 
   // A user is in a "dead state" if this predicate is false
   const userEligible = (user: IUser) =>
-    (!(user?.status?.accepted || user?.status?.waitlisted) || userCanConfirm(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    (!(user?.status?.accepted || user?.status?.waitlisted) || userRSVPOpen(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
     !user?.status?.rejected && !user?.status?.declined; // If a user is rejected or declined, they're out
 
   const rawRankedUsers = await getRanks();
@@ -162,7 +162,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawWaitlistAccept
         // Try to move people from waitlisted -> accepted
 
         if (budgetAccepted > 0) {
-          await acceptUser(user, waitlistAcceptanceDeadline === undefined ? universeState.public.globalWaitlistAcceptedConfirmationDeadline : waitlistAcceptanceDeadline);
+          await acceptUser(user, acceptedFromWaitlistRSVPDeadline === undefined ? universeState.public.globalWaitlistAcceptedConfirmationDeadline : acceptedFromWaitlistRSVPDeadline);
         } else if (waitlistOver) {
           // Reject any waitlisted users
           await rejectUser(user);

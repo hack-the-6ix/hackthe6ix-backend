@@ -37,22 +37,26 @@ export const inEnum = (validStates: string[], unstrict?: boolean) => (request: W
 
 export const isApplied = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.applied;
 export const isDeclined = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.declined;
+export const isAccepted = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.accepted;
+export const isStatusReleased = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.statusReleased;
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
 export const getApplicationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalApplicationDeadline === undefined ? request.universeState.public.globalApplicationDeadline : request.requestUser.personalApplicationDeadline;
-export const getConfirmationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalConfirmationDeadline === undefined ? request.universeState.public.globalConfirmationDeadline : request.requestUser.personalConfirmationDeadline;
+export const getRSVPDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalConfirmationDeadline === undefined ? request.universeState.public.globalConfirmationDeadline : request.requestUser.personalConfirmationDeadline;
 
 export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => getApplicationDeadline(request) >= new Date().getTime();
-export const isConfirmationOpen = (request: WriteCheckRequest<any, IUser>) => getConfirmationDeadline(request) >= new Date().getTime();
+export const isRSVPOpen = (request: WriteCheckRequest<any, IUser>) => getRSVPDeadline(request) >= new Date().getTime();
 
 export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) => (
   !isApplied(request) &&
   isApplicationOpen(request)
 );
 
-export const canConfirm = () => (request: WriteCheckRequest<any, IUser>) => (
+export const canRSVP = () => (request: WriteCheckRequest<any, IUser>) => (
   !isDeclined(request) &&
-  isConfirmationOpen(request)
+  isRSVPOpen(request) &&
+  isAccepted(request) &&
+  isStatusReleased(request)
 );
 
 export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue?.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);
