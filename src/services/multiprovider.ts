@@ -12,7 +12,7 @@ export const loadProvider = async (name: string, all = false): Promise<void> => 
     for (const provider of settings['openID']['providers']) {
       if (provider['name'] === name || all) {
         found = true;
-        // Build and cache the ServiceProvider and IdentityProvider as they will probably not be modified
+        // Build and cache the provider since it will probably not be modified
         const tokenURL = new URL(provider.token_url);
         const authorizeURL = new URL(provider.authorization_url);
         const client = new AuthorizationCode({

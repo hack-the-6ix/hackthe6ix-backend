@@ -9,6 +9,14 @@ import { fields as teamFields } from '../../models/team/fields';
 import Team from '../../models/team/Team';
 import { fields as userFields } from '../../models/user/fields';
 import User from '../../models/user/User';
+import { fields as externalUserFields } from '../../models/externaluser/fields';
+import ExternalUser from '../../models/externaluser/ExternalUser';
+import { fields as apiTokenFields } from '../../models/apitoken/fields';
+import APIToken from '../../models/apitoken/APIToken';
+import { fields as meetingFields } from '../../models/meeting/fields';
+import Meeting from '../../models/meeting/Meeting';
+import { fields as meetingAttendanceFields } from '../../models/meetingattendance/fields';
+import MeetingAttendance from '../../models/meetingattendance/MeetingAttendance';
 import { UniverseState } from '../../types/types';
 
 const models = {
@@ -24,6 +32,22 @@ const models = {
     mongoose: Team,
     rawFields: teamFields,
   },
+  externaluser: {
+    mongoose: ExternalUser,
+    rawFields: externalUserFields
+  },
+  apitoken: {
+    mongoose: APIToken,
+    rawFields: apiTokenFields
+  },
+  meeting: {
+    mongoose: Meeting,
+    rawFields: meetingFields
+  },
+  meetingattendance: {
+    mongoose: MeetingAttendance,
+    rawFields: meetingAttendanceFields
+  }
 };
 
 export const getModels = () => models;

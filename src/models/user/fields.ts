@@ -6,6 +6,7 @@ import {
   ReadInterceptRequest,
   WriteCheckRequest,
 } from '../../types/checker';
+import { BasicUser } from '../../types/types';
 import { stringifyUnixTime } from '../../util/date';
 import {
   canConfirm,
@@ -24,6 +25,8 @@ import {
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
+
+import discordShared from '../shared/discordShared';
 
 // Main application
 export const hackerApplication = {
@@ -904,7 +907,7 @@ export const fields = {
         submissionObject: {} as IUser,
       }),
     },
-
+    discord: discordShared,
     roles: roles,
     groups: groups,
     status: status,
@@ -940,13 +943,10 @@ export interface IStatus {
   internalTextStatus: string
 }
 
-export interface IUser extends mongoose.Document {
+export interface IUser extends BasicUser {
   lastLogout: number,
   idpLinkID: string,
   fullName: string,
-  firstName: string,
-  lastName: string,
-  email: string,
   created: number,
   personalConfirmationDeadline?: number,
   personalApplicationDeadline?: number,
@@ -975,7 +975,7 @@ export interface IUser extends mongoose.Document {
   },
   mailmerge: IMailMerge,
   computedApplicationDeadline: number,
-  computedConfirmationDeadline: number,
+  computedConfirmationDeadline: number
 }
 
 export interface IMailMerge {

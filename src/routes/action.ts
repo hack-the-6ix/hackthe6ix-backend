@@ -6,6 +6,7 @@ import express, { Request, Response } from 'express';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
+import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
 import {
   fetchUser,
   getCandidate,
@@ -24,6 +25,8 @@ import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
 import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
+import { createAPIToken } from '../controller/AuthController';
+import { recordJoin, recordLeave } from '../controller/MeetingController';
 
 const actionRouter = express.Router();
 
@@ -337,19 +340,69 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
 
 
 /**
- * TODO: Add endpoint for discord verification
- *       Make this a separate model and link it back to the user object
+ * (Organizer)
  *
- *       /verify -> given an email, determine if it can be verified and return roles to give + name
- *                  When a user RSVPs, create a DiscordObj for them
- *
- *       DiscordObj
- *       |-Full Name
- *       |-roles
- *       |-discord username
- *       |-discord ID
- *       |-time of verification
+ * Associate a user on Discord
  */
+actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername)
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Associate a user on Discord
+ */
+ actionRouter.get('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    fetchUserByDiscordID(req.query.discordID as string)
+  )
+})
 
 
+/**
+ * (Organizer)
+ *
+ * Create an API token for programmatic access
+ */
+ actionRouter.post('/createAPIToken', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    createAPIToken(req.executor, req.body.groups, req.body.description)
+  )
+})
+
+
+/**
+ * (Organizer)
+ *
+ * Record someone joining a meeting
+ */
+ actionRouter.post('/recordMeetingJoin', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now())
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Record someone leaving a meeting
+ */
+ actionRouter.post('/recordMeetingLeave', isOrganizer, (req:Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now())
+  )
+})
 export default actionRouter;
