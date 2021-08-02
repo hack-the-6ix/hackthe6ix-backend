@@ -243,6 +243,12 @@ describe('Interceptor', () => {
     };
 
     describe('Hacker', () => {
+
+      beforeEach(() => {
+        canUpdateApplication.mockReturnValue(() => true);
+        canConfirm.mockReturnValue(() => true);
+      });
+
       test('Released', async () => {
         const user = await User.create({
           ...hackerUser,
@@ -273,9 +279,9 @@ describe('Interceptor', () => {
           accepted: false,
           rejected: false,
           waitlisted: false,
-          confirmed: false,
-          declined: false,
-          checkedIn: false,
+          confirmed: true,
+          declined: true,
+          checkedIn: true,
         });
       });
     });

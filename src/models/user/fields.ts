@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import {
   CreateCheckRequest,
   DeleteCheckRequest,
@@ -8,6 +7,8 @@ import {
 } from '../../types/checker';
 import { BasicUser } from '../../types/types';
 import { stringifyUnixTime } from '../../util/date';
+
+import discordShared from '../shared/discordShared';
 import {
   canConfirm,
   canUpdateApplication,
@@ -25,8 +26,6 @@ import {
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
-
-import discordShared from '../shared/discordShared';
 
 // Main application
 export const hackerApplication = {
@@ -541,8 +540,6 @@ const status = {
 
       writeCheck: true,
       readCheck: true,
-
-      readInterceptor: maskStatus<boolean>(false),
     },
 
     declined: {
@@ -553,8 +550,6 @@ const status = {
 
       writeCheck: true,
       readCheck: true,
-
-      readInterceptor: maskStatus<boolean>(false),
     },
 
     checkedIn: {
@@ -565,8 +560,6 @@ const status = {
 
       writeCheck: true,
       readCheck: true,
-
-      readInterceptor: maskStatus<boolean>(false),
     },
 
     // Intercepted fields (virtual fields, but we populate them)
