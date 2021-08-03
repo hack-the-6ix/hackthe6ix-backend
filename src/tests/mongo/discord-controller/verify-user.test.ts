@@ -7,6 +7,7 @@ import {
   externalUser,
   generateMockUniverseState,
   hackerUser,
+  organizerUser,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
@@ -171,6 +172,16 @@ describe('Verify user in Discord', () => {
         roles: ['testrole', 'hacker']
       });
     });
+
+    test('Disallow verification with organizer/admin account', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create(organizerUser);
+
+      await expect(async () => {
+        const userInfo = await verifyDiscordUser(organizerUser.email, DISCORD_ID, DISCORD_NAME);
+      }).rejects.toThrow(NotFoundError);
+    })
   });
 
   describe('External user', () => {
