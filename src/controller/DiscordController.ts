@@ -57,16 +57,12 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
 
     let userInfo:BasicUser = await User.findOneAndUpdate({
         $and: [{
-            $or: [
-                {
-                    "groups.admin": true
-                },{
-                    "groups.organizer": true
-                }, {
-                    "status.confirmed": true
-                }
-            ]
-        }, ...queryFilters]
+                "groups.admin": false
+            },{
+                "groups.organizer": false
+            }, {
+                "status.confirmed": true
+            }, ...queryFilters]
     }, {
         "discord.discordID": discordID,
         "discord.username": discordUsername,
