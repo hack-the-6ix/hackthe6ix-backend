@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { stringifyUnixTime } from '../../util/date';
 import { extractFields } from '../util';
 import computeApplicationScore from './computeApplicationScore';
 import { fields, IUser } from './fields';
@@ -57,6 +58,9 @@ schema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
+/**
+ * Application Status
+ */
 schema.virtual('status.textStatus').get(function() {
   const textStatus = this?.status?.internalTextStatus || '';
   const maskedStatuses = [
@@ -92,6 +96,47 @@ schema.virtual('status.internalTextStatus').get(function() {
   return 'Not Applied';
 });
 
+/**
+ * Application scores
+ */
 schema.virtual('internal.computedApplicationScore').get(computeApplicationScore);
+
+/**
+ * Mail Merge
+ */
+schema.virtual('mailmerge.FIRST_NAME').get(function() {
+  return this.firstName;
+});
+schema.virtual('mailmerge.LAST_NAME').get(function() {
+  return this.lastName;
+});
+schema.virtual('mailmerge.MERGE_FIRST_NAME').get(function() {
+  return this.firstName;
+});
+schema.virtual('mailmerge.MERGE_LAST_NAME').get(function() {
+  return this.lastName;
+});
+schema.virtual('mailmerge.MERGE_APPLICATION_DEADLINE').get(function() {
+  return stringifyUnixTime(this.computedApplicationDeadline);
+});
+schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
+  return stringifyUnixTime(this.computedConfirmationDeadline);
+});
+
+/**
+ * Computed Deadlines
+ */
+schema.virtual('computedApplicationDeadline', {
+  'ref': 'Settings',
+  justOne: true,
+}).get(function(setting: any) {
+
+  // TODO: Verify that this actually fails, and it's not just our unit test setup
+
+  console.log(setting);
+
+  return -1;
+
+});
 
 export default mongoose.model<IUser>('User', schema);

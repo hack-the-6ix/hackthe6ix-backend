@@ -6,13 +6,11 @@ import {
   WriteCheckRequest,
 } from '../../types/checker';
 import { BasicUser } from '../../types/types';
-import { stringifyUnixTime } from '../../util/date';
 
 import discordShared from '../shared/discordShared';
 import {
   canRSVP,
   canUpdateApplication,
-  getApplicationDeadline,
   getRSVPDeadline,
   inEnum,
   isAdmin,
@@ -635,56 +633,37 @@ const mailmerge = {
   FIELDS: {
     FIRST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+      virtual: true,
     },
     LAST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+      virtual: true,
     },
     // All fields for transactional emails should be prefixed by MERGE
     // For mailing list enrollment, first and last name do not have the prefix, but we'll store a version
     // with it for the template emails
     MERGE_FIRST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+      virtual: true,
     },
     MERGE_LAST_NAME: {
       type: String,
       default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+      virtual: true,
     },
     MERGE_APPLICATION_DEADLINE: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getApplicationDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      })),
+      virtual: true,
     },
     MERGE_CONFIRMATION_DEADLINE: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getRSVPDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      })),
+      virtual: true,
     },
   },
 };
@@ -896,14 +875,15 @@ export const fields = {
     // If the user has a personal deadline, it takes precedence over the global deadline
     computedApplicationDeadline: {
       type: Number,
-      default: 0,
-
+      virtual: true,
       readCheck: true,
+
+      /*
       readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getApplicationDeadline({
         ...request,
         requestUser: request.targetObject,
         submissionObject: {} as IUser,
-      }),
+      }),*/
     },
     computedConfirmationDeadline: {
       type: Number,

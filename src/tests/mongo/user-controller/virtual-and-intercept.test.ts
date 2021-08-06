@@ -61,6 +61,83 @@ jest.mock('../../../models/validator', () => {
 });
 
 describe('Interceptor', () => {
+
+
+  describe('Status', () => {
+    const baseStatus = {
+      applied: true,
+      accepted: true,
+      rejected: true,
+      waitlisted: true,
+      confirmed: true,
+      declined: true,
+      checkedIn: true,
+    };
+
+    describe('Hacker', () => {
+
+      beforeEach(() => {
+        canUpdateApplication.mockReturnValue(() => true);
+        canRSVP.mockReturnValue(() => true);
+      });
+
+      test('Released', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          status: {
+            ...baseStatus,
+            statusReleased: true,
+          },
+        });
+
+        const fetchedUser = await fetchUser(user);
+
+        expect(fetchedUser.status).toMatchObject(baseStatus);
+      });
+
+      test('Not released', async () => {
+        const user = await User.create({
+          ...hackerUser,
+          status: {
+            ...baseStatus,
+            statusReleased: false,
+          },
+        });
+
+        const fetchedUser = await fetchUser(user);
+
+        expect(fetchedUser.status).toMatchObject({
+          applied: true,
+          accepted: false,
+          rejected: false,
+          waitlisted: false,
+          confirmed: true,
+          declined: true,
+          checkedIn: true,
+        });
+      });
+    });
+
+    test('Organizer', async () => {
+      const status = {
+        ...baseStatus,
+        statusReleased: false,
+      };
+
+      const user = await User.create({
+        ...organizerUser,
+        status: status,
+      });
+
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status).toMatchObject(status);
+    });
+  });
+
+});
+
+describe('Virtual', () => {
   describe('Can Amend Team', () => {
     beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
     beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
@@ -142,40 +219,6 @@ describe('Interceptor', () => {
     });
   });
 
-  describe('Mail Merge', () => {
-    beforeEach(() => {
-      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
-      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
-    });
-
-    test('First Name', async () => {
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.FIRST_NAME).toEqual(user.firstName);
-    });
-    test('Last Name', async () => {
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.LAST_NAME).toEqual(user.lastName);
-    });
-    test('Application Deadline', async () => {
-      const mockDate = 12345;
-      getApplicationDeadline.mockReturnValue(mockDate);
-
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
-    });
-    test('Confirmation Deadline', async () => {
-      const mockDate = 54321;
-      getRSVPDeadline.mockReturnValue(mockDate);
-
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
-    });
-  });
-
   describe('Computed Deadlines', () => {
     beforeEach(() => {
       canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
@@ -253,81 +296,41 @@ describe('Interceptor', () => {
     });
   });
 
-  describe('Status', () => {
-    const baseStatus = {
-      applied: true,
-      accepted: true,
-      rejected: true,
-      waitlisted: true,
-      confirmed: true,
-      declined: true,
-      checkedIn: true,
-    };
-
-    describe('Hacker', () => {
-
-      beforeEach(() => {
-        canUpdateApplication.mockReturnValue(() => true);
-        canRSVP.mockReturnValue(() => true);
-      });
-
-      test('Released', async () => {
-        const user = await User.create({
-          ...hackerUser,
-          status: {
-            ...baseStatus,
-            statusReleased: true,
-          },
-        });
-
-        const fetchedUser = await fetchUser(user);
-
-        expect(fetchedUser.status).toMatchObject(baseStatus);
-      });
-
-      test('Not released', async () => {
-        const user = await User.create({
-          ...hackerUser,
-          status: {
-            ...baseStatus,
-            statusReleased: false,
-          },
-        });
-
-        const fetchedUser = await fetchUser(user);
-
-        expect(fetchedUser.status).toMatchObject({
-          applied: true,
-          accepted: false,
-          rejected: false,
-          waitlisted: false,
-          confirmed: true,
-          declined: true,
-          checkedIn: true,
-        });
-      });
+  describe('Mail Merge', () => {
+    beforeEach(() => {
+      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
     });
 
-    test('Organizer', async () => {
-      const status = {
-        ...baseStatus,
-        statusReleased: false,
-      };
-
-      const user = await User.create({
-        ...organizerUser,
-        status: status,
-      });
-
+    test('First Name', async () => {
+      const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.FIRST_NAME).toEqual(user.firstName);
+    });
+    test('Last Name', async () => {
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.LAST_NAME).toEqual(user.lastName);
+    });
+    test('Application Deadline', async () => {
+      const mockDate = 12345;
+      getApplicationDeadline.mockReturnValue(mockDate);
 
-      expect(fetchedUser.status).toMatchObject(status);
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
+    });
+    test('Confirmation Deadline', async () => {
+      const mockDate = 54321;
+      getRSVPDeadline.mockReturnValue(mockDate);
+
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
   });
 
-});
 
-describe('Virtual', () => {
   describe('Text Status', () => {
 
     test('Not applied', async () => {
