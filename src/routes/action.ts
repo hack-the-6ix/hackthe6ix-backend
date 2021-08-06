@@ -5,8 +5,10 @@
 import express, { Request, Response } from 'express';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
-import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
+import { createAPIToken } from '../controller/AuthController';
 import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
+import { recordJoin, recordLeave } from '../controller/MeetingController';
+import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
   getCandidate,
@@ -25,8 +27,6 @@ import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
 import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
 import { getStatistics } from '../services/statistics';
-import { createAPIToken } from '../controller/AuthController';
-import { recordJoin, recordLeave } from '../controller/MeetingController';
 
 const actionRouter = express.Router();
 
@@ -348,9 +348,10 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
   logResponse(
     req,
     res,
-    verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername)
+    verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername),
+    true,
   )
-})
+});
 
 /**
  * (Organizer)
@@ -363,7 +364,7 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
     res,
     fetchUserByDiscordID(req.query.discordID as string)
   )
-})
+ });
 
 
 /**
@@ -377,7 +378,7 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
     res,
     createAPIToken(req.executor, req.body.groups, req.body.description)
   )
-})
+ });
 
 
 /**
@@ -391,7 +392,7 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
     res,
     recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now())
   )
-})
+ });
 
 /**
  * (Organizer)
@@ -404,5 +405,5 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
     res,
     recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now())
   )
-})
+ });
 export default actionRouter;
