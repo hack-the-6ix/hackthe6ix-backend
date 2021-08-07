@@ -14,6 +14,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -26,18 +27,14 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
+
 jest.mock('../../../controller/applicationStatus/getRanks', () => jest.fn((): any => undefined));
 jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => undefined));
 
@@ -45,7 +42,7 @@ describe('Assign Application Status', () => {
 
   describe('Waitlist deadline', () => {
     test('Default', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 1, 0));
+      await generateMockUniverseState(undefined, undefined, undefined, 1, 0);
 
       const user = (await User.create({
         ...hackerUser,
@@ -78,7 +75,7 @@ describe('Assign Application Status', () => {
     describe('Override', () => {
 
       test('Success', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 1, 0));
+        await generateMockUniverseState(undefined, undefined, undefined, 1, 0);
 
         const user = (await User.create({
           ...hackerUser,
@@ -119,7 +116,7 @@ describe('Assign Application Status', () => {
   describe('Legitness', () => {
 
     test('Legit mode', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 1, 1));
+      await generateMockUniverseState(undefined, undefined, undefined, 1, 1);
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
@@ -188,7 +185,7 @@ describe('Assign Application Status', () => {
 
 
     test('Not Legit mode', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 1, 1));
+      await generateMockUniverseState(undefined, undefined, undefined, 1, 1);
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
@@ -260,7 +257,7 @@ describe('Assign Application Status', () => {
 
   describe('Functionality', () => {
     test('Fresh slate', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 3, 2));
+      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
 
       const users = (await Promise.all([...new Array(10)].map(() => User.create({
         ...hackerUser,
@@ -318,7 +315,7 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing accepted and waitlisted users', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 3, 2));
+      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
 
       const users = (await Promise.all([
         User.create({
@@ -416,7 +413,7 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing accepted and waitlisted users -- No changes', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 0, 0));
+      await generateMockUniverseState(undefined, undefined, undefined, 0, 0);
 
       const users = (await Promise.all([
         User.create({
@@ -498,7 +495,7 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing rejected and declined users', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 3, 2));
+      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
 
       const users = (await Promise.all([
         User.create({ // Accept
@@ -633,7 +630,7 @@ describe('Assign Application Status', () => {
     });
 
     test('Accept waitlisted people', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 5, 2));
+      await generateMockUniverseState(undefined, undefined, undefined, 5, 2);
 
       const users = (await Promise.all([
         User.create({
@@ -751,7 +748,7 @@ describe('Assign Application Status', () => {
     });
 
     test('Waitlist Over', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, undefined, undefined, 3, 3));
+      await generateMockUniverseState(undefined, undefined, undefined, 3, 3);
 
       const mockTimestamp = 69696969;
 

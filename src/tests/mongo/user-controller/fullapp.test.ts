@@ -1,5 +1,4 @@
 import { updateApplication } from '../../../controller/UserController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions } from '../../../models/user/enums';
 import { IApplication, IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
@@ -13,6 +12,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -25,18 +25,14 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
+
 
 jest.mock('../../../services/mailer/util/external', () => {
   const external = jest.requireActual('../../../services/mailer/util/external');
@@ -66,7 +62,7 @@ jest.mock('../../../services/logger', () => {
  */
 describe('Update Real Application', () => {
   test('Valid update', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -110,7 +106,7 @@ describe('Update Real Application', () => {
   });
 
   test('Enum is falsy', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: '',
@@ -154,7 +150,7 @@ describe('Update Real Application', () => {
   });
 
   test('Tried to update read only field', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -193,7 +189,7 @@ describe('Update Real Application', () => {
   });
 
   test('Invalid update', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: 'AdasdasasdasMale',
@@ -232,7 +228,7 @@ describe('Update Real Application', () => {
   });
 
   test('Character limit exceeded', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -270,7 +266,7 @@ describe('Update Real Application', () => {
   });
 
   test('Said no to swag, but still gave address', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       emailConsent: true,
@@ -330,7 +326,7 @@ describe('Update Real Application', () => {
 
 describe('Submit Real Application', () => {
   test('Enum is falsy', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: '',
@@ -376,7 +372,7 @@ describe('Submit Real Application', () => {
   });
 
   test('Mandatory Fields', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -427,7 +423,7 @@ describe('Submit Real Application', () => {
   });
 
   test('MLH COC Denied', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -472,7 +468,7 @@ describe('Submit Real Application', () => {
   });
 
   test('MLH Data Denied', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -517,7 +513,7 @@ describe('Submit Real Application', () => {
   });
 
   test('Missing Resume', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
@@ -558,7 +554,7 @@ describe('Submit Real Application', () => {
 
   describe('Optional Fields', () => {
     test('No swag', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const hackerApplication = {
         emailConsent: true,
@@ -623,7 +619,7 @@ describe('Submit Real Application', () => {
     });
 
     test('Yes swag', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const hackerApplication = {
         emailConsent: true,
@@ -688,7 +684,7 @@ describe('Submit Real Application', () => {
     });
 
     test('Said yes to swag, but incomplete address', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const hackerApplication = {
         emailConsent: true,
@@ -748,7 +744,7 @@ describe('Submit Real Application', () => {
     });
 
     test('Said no to swag, but still gave address', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const hackerApplication = {
         emailConsent: true,

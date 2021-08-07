@@ -1,8 +1,8 @@
 import { ObjectID } from 'bson';
 import mongoose from 'mongoose';
+import Settings from '../models/settings/Settings';
 import { IUser } from '../models/user/fields';
 import { extractFields } from '../models/util';
-import { UniverseState } from '../types/types';
 import * as dbHandler from './db-handler';
 
 export const adminUser = {
@@ -78,7 +78,7 @@ export const confirmedHackerUser = {
   idpLinkID: 'hackerconfirmed',
   email: 'hackerconfirmed@test.ca',
   status: {
-    confirmed: true
+    confirmed: true,
   },
   groups: {
     hacker: true,
@@ -95,8 +95,8 @@ export const externalUser = {
   _id: new ObjectID('61058ea2185c1e4282509faa'),
   firstName: 'External',
   lastName: 'Last External',
-  email: 'external@test.ca'
-}
+  email: 'external@test.ca',
+};
 
 export const nopermUser = {
   _id: new ObjectID('5f081f878c60690dd9b9fd17'),
@@ -136,9 +136,10 @@ export const generateTestModel = (testFields: any, name: string) => {
   return [Test, models];
 };
 
-export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 200000, waitlistAcceptedConfirmationOffset = 300000, maxAccept = 100, maxWaitlist = 100) => new Promise(
-  (resolve) => resolve({
-      systemTime: new Date().getTime(),
+export const generateMockUniverseState = async (applyOffset = 100000, confirmOffset = 200000, waitlistAcceptedConfirmationOffset = 300000, maxAccept = 100, maxWaitlist = 100) => {
+  return await Settings.findOneAndUpdate({},
+    {
+      universe: {
       public: {
         globalApplicationDeadline: new Date().getTime() + applyOffset,
         globalConfirmationDeadline: new Date().getTime() + confirmOffset,
@@ -148,9 +149,13 @@ export const generateMockUniverseState = (applyOffset = 100000, confirmOffset = 
         maxAccepted: maxAccept,
         maxWaitlist: maxWaitlist,
       },
-    } as UniverseState,
-  ),
-);
+      },
+    }, {
+      upsert: true,
+      setDefaultsOnInsert: true,
+      new: true,
+    });
+};
 
 export const mockDate = (timestamp: number) => {
   const mockDate = new Date(timestamp);
@@ -176,6 +181,10 @@ export const runAfterEach = async () => {
   await dbHandler.clearDatabase();
   // @ts-ignore
   jest.clearAllMocks();
+};
+
+export const runBeforeEach = async () => {
+  await generateMockUniverseState();
 };
 
 export const runAfterAll = async () => await dbHandler.closeDatabase();

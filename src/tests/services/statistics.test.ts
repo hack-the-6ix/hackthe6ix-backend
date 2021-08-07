@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import User from '../../models/user/User';
 import { getStatistics, statisticsLifetime } from '../../services/statistics';
-import * as dbHandler from '../db-handler';
 import {
   hackerUser,
   mockDate,
@@ -9,6 +8,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../test-utils';
 
 /**
@@ -21,6 +21,8 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
@@ -28,7 +30,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../controller/util/resources', () => (
   {
-    fetchUniverseState: jest.fn(),
+    fetchUniverseState: jest.requireActual('../../../controller/util/resources').fetchUniverseState,
     getModels: jest.fn(),
   }
 ));
@@ -109,7 +111,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -128,7 +130,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -145,7 +147,7 @@ describe('Get statistics', () => {
       const statisticsA = await getStatistics();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       const statisticsB = await getStatistics(true);

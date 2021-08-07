@@ -1,7 +1,7 @@
 import { verifyDiscordUser } from '../../../controller/DiscordController';
-import { fetchUniverseState } from '../../../controller/util/resources';
-import User from '../../../models/user/User';
 import ExternalUser from '../../../models/externaluser/ExternalUser';
+import User from '../../../models/user/User';
+import { NotFoundError } from '../../../types/errors';
 import {
   confirmedHackerUser,
   externalUser,
@@ -11,8 +11,8 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
-  } from '../../test-utils';
-import { NotFoundError } from '../../../types/errors';
+  runBeforeEach,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -24,24 +24,19 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-    const { getModels } = jest.requireActual('../../../controller/util/resources');
-    return {
-      fetchUniverseState: jest.fn(),
-      getModels: getModels,
-    };
-  });
 
 const DISCORD_ID = '12345';
 const DISCORD_ID2 = '123456';
-const DISCORD_NAME = 'confirmedhacker'
+const DISCORD_NAME = 'confirmedhacker';
 
-const SIM_TIME = Date.now()
+const SIM_TIME = Date.now();
 
 describe('Verify user in Discord', () => {
   describe('All users', () => {
@@ -50,10 +45,10 @@ describe('Verify user in Discord', () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID, DISCORD_NAME);
       }).rejects.toThrow(NotFoundError);
     })
-  })
+  });
   describe('Internal user', () => {
     test('User not confirmed', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create(hackerUser);
 
@@ -63,7 +58,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('No past verification, no additional roles', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create(confirmedHackerUser);
 
@@ -87,7 +82,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('Matching past verification', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...confirmedHackerUser,
@@ -117,7 +112,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('Not matching past verification', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...confirmedHackerUser,
@@ -132,7 +127,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('With suffix', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...confirmedHackerUser,
@@ -154,7 +149,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('Additional roles', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...confirmedHackerUser,
@@ -174,7 +169,7 @@ describe('Verify user in Discord', () => {
     });
 
     test('Disallow verification with organizer/admin account', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create(organizerUser);
 
@@ -186,7 +181,7 @@ describe('Verify user in Discord', () => {
 
   describe('External user', () => {
     test('No past verification, no additional roles', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
       const eUser = await ExternalUser.create(externalUser);
 
       const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID, DISCORD_NAME, SIM_TIME);
@@ -208,9 +203,9 @@ describe('Verify user in Discord', () => {
     });
 
     test('Matching past verification', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
       const eUser = await ExternalUser.create({
-        ...externalUser, 
+        ...externalUser,
         discord: {
           discordID: DISCORD_ID,
           verifyTime: 0
@@ -236,9 +231,9 @@ describe('Verify user in Discord', () => {
     });
 
     test('Not matching past verification', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
       const eUser = await ExternalUser.create({
-        ...externalUser, 
+        ...externalUser,
         discord: {
           discordID: DISCORD_ID
         }
@@ -250,9 +245,9 @@ describe('Verify user in Discord', () => {
     });
 
     test('With suffix', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
       const eUser = await ExternalUser.create({
-        ...externalUser, 
+        ...externalUser,
         discord: {
           discordID: DISCORD_ID,
           additionalRoles: ['testrole'],
@@ -272,9 +267,9 @@ describe('Verify user in Discord', () => {
     });
 
     test('Additional roles', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
       const eUser = await ExternalUser.create({
-        ...externalUser, 
+        ...externalUser,
         discord: {
           discordID: DISCORD_ID,
           additionalRoles: ['testrole']
@@ -291,4 +286,4 @@ describe('Verify user in Discord', () => {
       });
     });
   })
-})
+});

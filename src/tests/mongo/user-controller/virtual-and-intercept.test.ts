@@ -1,5 +1,6 @@
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
+import Settings from '../../../models/settings/Settings';
 import { enumOptions } from '../../../models/user/enums';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
@@ -19,33 +20,27 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
+
 
 jest.mock('../../../models/validator', () => {
   const validators = jest.requireActual('../../../models/validator');
@@ -230,7 +225,7 @@ describe('Virtual', () => {
     describe('Application', () => {
       describe('Personal Deadline', () => {
         test('Global in the future', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState());
+          await generateMockUniverseState();
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({
@@ -241,7 +236,7 @@ describe('Virtual', () => {
           expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
         });
         test('Global in the Past', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+          await generateMockUniverseState(-10000);
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({
@@ -253,7 +248,7 @@ describe('Virtual', () => {
         });
       });
       test('No Personal Deadline', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+        await generateMockUniverseState();
 
         const user = await User.create(hackerUser);
         const fetchedUser = await fetchUser(user);
@@ -264,7 +259,7 @@ describe('Virtual', () => {
     describe('Confirmation', () => {
       describe('Personal Deadline', () => {
         test('Global in the future', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState());
+          await generateMockUniverseState();
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({
@@ -275,7 +270,7 @@ describe('Virtual', () => {
           expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
         });
         test('Global in the Past', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
+          await generateMockUniverseState(undefined, -10000);
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({
@@ -287,7 +282,7 @@ describe('Virtual', () => {
         });
       });
       test('No Personal Deadline', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+        await generateMockUniverseState();
 
         const user = await User.create(hackerUser);
         const fetchedUser = await fetchUser(user);
@@ -316,8 +311,11 @@ describe('Virtual', () => {
       const mockDate = 12345;
       getApplicationDeadline.mockReturnValue(mockDate);
 
+      await Settings.create({});
+
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
+
       expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
     test('Confirmation Deadline', async () => {
@@ -326,6 +324,7 @@ describe('Virtual', () => {
 
       const user = await User.create(organizerUser);
       const fetchedUser = await fetchUser(user);
+
       expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
   });

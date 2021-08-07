@@ -1,43 +1,33 @@
-import { fetchUniverseState } from '../../controller/util/resources';
 import sendEmail from '../../services/mailer/sendEmail';
 import { sendEmailRequest } from '../../services/mailer/util/external';
 import { InternalServerError } from '../../types/errors';
 import {
-  generateMockUniverseState,
   hackerUser,
   mockErrorResponse,
   mockSuccessResponse,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../test-utils';
 import { mockSubject, mockTags, mockTagsParsed, mockTemplateID } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
-
-jest.mock('../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),

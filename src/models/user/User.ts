@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 import { stringifyUnixTime } from '../../util/date';
+import { ISettings } from '../settings/fields';
 import { extractFields } from '../util';
+import { getApplicationDeadline, getRSVPDeadline } from '../validator';
 import computeApplicationScore from './computeApplicationScore';
 import { fields, IUser } from './fields';
 
@@ -127,16 +130,38 @@ schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
  * Computed Deadlines
  */
 schema.virtual('computedApplicationDeadline', {
-  'ref': 'Settings',
+  ref: 'Setting',
+  localField: 'settingsMapper',
+  foreignField: 'settingsMapper',
   justOne: true,
-}).get(function(setting: any) {
-
-  // TODO: Verify that this actually fails, and it's not just our unit test setup
-
-  console.log(setting);
-
-  return -1;
-
+  autopopulate: true,
+}).get(function(settings: ISettings) {
+  return getApplicationDeadline({
+    submissionObject: {} as IUser,
+    requestUser: this,
+    universeState: settings?.universe,
+    fieldValue: null,
+    targetObject: this,
+  });
 });
+
+schema.virtual('computedConfirmationDeadline', {
+  ref: 'Setting',
+  localField: 'settingsMapper',
+  foreignField: 'settingsMapper',
+  justOne: true,
+  autopopulate: true,
+}).get(function(settings: ISettings) {
+  return getRSVPDeadline({
+    submissionObject: {} as IUser,
+    requestUser: this,
+    universeState: settings?.universe,
+    fieldValue: null,
+    targetObject: this,
+  });
+});
+
+schema.plugin(mongooseAutopopulate);
+
 
 export default mongoose.model<IUser>('User', schema);
