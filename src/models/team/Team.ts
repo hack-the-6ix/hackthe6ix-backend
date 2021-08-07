@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+// @ts-ignore
+// For some reason, the types screwed with our compilation
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { IUser } from '../user/fields';
 import { extractFields } from '../util';

@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+// @ts-ignore
+// For some reason, the types screwed with our compilation
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { stringifyUnixTime } from '../../util/date';
 import { ISettings } from '../settings/fields';
