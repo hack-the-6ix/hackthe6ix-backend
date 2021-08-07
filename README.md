@@ -76,6 +76,8 @@ By default, there are 4 roles:
 This system was designed to handle data as general as possible. As such, validation and access is
 governed through a system of tester functions embedded in the models.
 
+Although this technically works, I'm sure there are better ways of doing things (such as using mongoose hooks).
+
 #### Schema Structure
 ```typescript
 {
