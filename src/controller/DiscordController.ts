@@ -40,7 +40,7 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
 
     const queryFilters = [
         {
-            email: email
+            email: email.toLowerCase()
         },
         {
             $or: [
