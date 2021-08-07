@@ -1,5 +1,4 @@
 import { createTeam } from '../../../controller/TeamController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import { AlreadyInTeamError, DeadlineExpiredError } from '../../../types/errors';
@@ -9,6 +8,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -21,22 +21,18 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
+
 
 describe('Create Team', () => {
   test('No existing team', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create(hackerUser);
     const team = await createTeam(user);
@@ -71,7 +67,7 @@ describe('Create Team', () => {
   });
 
   test('Already in a team', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create({
       ...hackerUser,
@@ -90,7 +86,7 @@ describe('Create Team', () => {
   });
 
   test('Application window elapsed', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+    await generateMockUniverseState(-10000);
 
     const user = await User.create(hackerUser);
     await expect(createTeam(user)).rejects.toThrow(DeadlineExpiredError);

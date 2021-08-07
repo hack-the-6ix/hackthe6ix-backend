@@ -2,12 +2,14 @@ import stream, { Writable } from 'stream';
 import { readGridFSFile, writeGridFSFile } from '../../../controller/GridFSController';
 import { BadRequestError, NotFoundError } from '../../../types/errors';
 import * as dbHandler from '../../db-handler';
-import { runAfterAll, runAfterEach } from '../../test-utils';
+import { runAfterAll, runAfterEach, runBeforeEach } from '../../test-utils';
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
+
+beforeEach(runBeforeEach);
 
 /**
  * Remove and close the db and server.

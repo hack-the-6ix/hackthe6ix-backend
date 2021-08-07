@@ -5,7 +5,13 @@ import Team from '../../../models/team/Team';
 import computeApplicationScore from '../../../models/user/computeApplicationScore';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
-import { hackerUser, runAfterAll, runAfterEach, runBeforeAll } from '../../test-utils';
+import {
+  hackerUser,
+  runAfterAll,
+  runAfterEach,
+  runBeforeAll,
+  runBeforeEach,
+} from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -16,6 +22,8 @@ beforeAll(runBeforeAll);
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
+
+beforeEach(runBeforeEach);
 
 /**
  * Remove and close the db and server.

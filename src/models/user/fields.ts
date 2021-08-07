@@ -11,7 +11,6 @@ import discordShared from '../shared/discordShared';
 import {
   canRSVP,
   canUpdateApplication,
-  getRSVPDeadline,
   inEnum,
   isAdmin,
   isApplicationOpen,
@@ -877,24 +876,11 @@ export const fields = {
       type: Number,
       virtual: true,
       readCheck: true,
-
-      /*
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getApplicationDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      }),*/
     },
     computedConfirmationDeadline: {
       type: Number,
-      default: 0,
-
+      virtual: true,
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getRSVPDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      }),
     },
     discord: discordShared,
     roles: roles,
@@ -903,6 +889,16 @@ export const fields = {
     hackerApplication: hackerApplication,
     internal: internal,
     mailmerge: mailmerge,
+
+    /**
+     * This is a special field used to allow the settings document mapped to every
+     * user for the purposes of populating virtual fields.
+     */
+    settingsMapper: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
 };
 

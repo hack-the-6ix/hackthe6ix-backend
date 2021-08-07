@@ -1,5 +1,4 @@
 import { joinTeam } from '../../../controller/TeamController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import {
@@ -15,6 +14,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -27,22 +27,18 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
+
 
 describe('Join Team', () => {
   test('Success', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     await Team.create({
       code: 'foo',
@@ -64,7 +60,7 @@ describe('Join Team', () => {
   });
 
   test('Invalid team (Blank)', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create(hackerUser);
     await expect(joinTeam(user, undefined)).rejects.toThrow(BadRequestError);
@@ -74,7 +70,7 @@ describe('Join Team', () => {
   });
 
   test('Invalid team (Gibberish)', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create(hackerUser);
     await expect(joinTeam(user, 'ASDASDasdASDASDAS')).rejects.toThrow(UnknownTeamError);
@@ -84,7 +80,7 @@ describe('Join Team', () => {
   });
 
   test('Team is full', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     await Team.create({
       code: 'foo',
@@ -101,7 +97,7 @@ describe('Join Team', () => {
   });
 
   test('Already in a team', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const mockTeam = {
       code: 'foo',
@@ -131,7 +127,7 @@ describe('Join Team', () => {
   });
 
   test('Application window elapsed', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+    await generateMockUniverseState(-10000);
 
     const mockTeam = {
       code: 'foo',

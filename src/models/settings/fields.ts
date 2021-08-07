@@ -134,6 +134,16 @@ export const fields = {
     openID: openID,
 
     universe: universe,
+
+    /**
+     * This is a special field used to allow the settings document mapped to every
+     * user for the purposes of populating virtual fields.
+     */
+    settingsMapper: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
 };
 

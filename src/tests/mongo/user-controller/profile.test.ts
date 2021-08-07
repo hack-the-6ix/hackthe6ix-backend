@@ -17,6 +17,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -29,6 +30,8 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
@@ -36,7 +39,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => (
   {
-    fetchUniverseState: jest.fn(),
+    fetchUniverseState: jest.requireActual('../../../controller/util/resources').fetchUniverseState,
     getModels: jest.fn(),
   }
 ));

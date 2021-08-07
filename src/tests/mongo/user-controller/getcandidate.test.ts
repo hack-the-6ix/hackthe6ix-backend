@@ -1,44 +1,35 @@
 import { mockRandom } from 'jest-mock-random';
 import mongoose from 'mongoose';
 import { getCandidate } from '../../../controller/UserController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import { enumOptions } from '../../../models/user/enums';
 import User from '../../../models/user/User';
 import { NotFoundError } from '../../../types/errors';
 import {
-  generateMockUniverseState,
   hackerUser,
   organizerUser,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../../models/user/fields', () => {
   const actualFields = jest.requireActual('../../../models/user/fields');
