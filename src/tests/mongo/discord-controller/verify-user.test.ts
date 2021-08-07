@@ -49,7 +49,22 @@ describe('Verify user in Discord', () => {
       await expect(async () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID, DISCORD_NAME);
       }).rejects.toThrow(NotFoundError);
-    })
+    });
+
+    test('Disregard email case', async () => {
+      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+
+      const user = await User.create(confirmedHackerUser);
+
+      const userInfo = await verifyDiscordUser(confirmedHackerUser.email.toUpperCase(), DISCORD_ID, DISCORD_NAME, SIM_TIME);
+
+      expect(userInfo).toEqual({
+        firstName: confirmedHackerUser.firstName,
+        lastName: confirmedHackerUser.lastName,
+        email: confirmedHackerUser.email,
+        roles: ['hacker']
+      });
+    });
   })
   describe('Internal user', () => {
     test('User not confirmed', async () => {
