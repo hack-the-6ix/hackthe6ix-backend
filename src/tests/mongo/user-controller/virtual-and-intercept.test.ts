@@ -158,7 +158,7 @@ describe('Virtual', () => {
     beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
 
     test('Success', async () => {
-      canUpdateApplication.mockReturnValue(() => true);
+      canUpdateApplication.mockReturnValue(true);
 
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
@@ -167,7 +167,7 @@ describe('Virtual', () => {
     });
 
     test('Fail', async () => {
-      canUpdateApplication.mockReturnValue(() => false);
+      canUpdateApplication.mockReturnValue(false);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
@@ -179,7 +179,7 @@ describe('Virtual', () => {
     beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
     test('Success', async () => {
-      canRSVP.mockReturnValue(() => true);
+      canRSVP.mockReturnValue(true);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
@@ -187,7 +187,7 @@ describe('Virtual', () => {
     });
 
     test('Fail', async () => {
-      canRSVP.mockReturnValue(() => false);
+      canRSVP.mockReturnValue(false);
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 
@@ -268,7 +268,7 @@ describe('Virtual', () => {
             personalConfirmationDeadline: personalDeadline,
           });
           const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
+          expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
         });
         test('Global in the Past', async () => {
           await generateMockUniverseState(undefined, -10000);
@@ -279,7 +279,7 @@ describe('Virtual', () => {
             personalConfirmationDeadline: personalDeadline,
           });
           const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
+          expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
         });
       });
       test('No Personal Deadline', async () => {
@@ -287,7 +287,7 @@ describe('Virtual', () => {
 
         const user = await User.create(hackerUser);
         const fetchedUser = await fetchUser(user);
-        expect(fetchedUser.computedConfirmationDeadline).toEqual((await fetchUniverseState()).public.globalConfirmationDeadline);
+        expect(fetchedUser.computedRSVPDeadline).toEqual((await fetchUniverseState()).public.globalConfirmationDeadline);
       });
     });
   });

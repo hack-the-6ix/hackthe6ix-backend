@@ -51,7 +51,7 @@ export const getApplicationDeadline = (user: IUser, universeState: UniverseState
 export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => user.personalConfirmationDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalConfirmationDeadline;
 
 export const isApplicationOpen = (user: IUser) => user.computedApplicationDeadline >= new Date().getTime();
-export const isRSVPOpen = (user: IUser) => user.computedConfirmationDeadline >= new Date().getTime();
+export const isRSVPOpen = (user: IUser) => user.computedRSVPDeadline >= new Date().getTime();
 
 export const canUpdateApplication = (user: IUser) => (
   !isApplied(user) &&

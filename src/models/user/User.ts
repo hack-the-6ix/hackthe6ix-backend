@@ -2,11 +2,18 @@ import mongoose from 'mongoose';
 // @ts-ignore
 // For some reason, the types screwed with our compilation
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import { extractUniverse } from '../../controller/util/resources';
 import { stringifyUnixTime } from '../../util/date';
 import { ISettings } from '../settings/fields';
-import Settings from '../settings/Settings';
 import { extractFields } from '../util';
-import { canRSVP, canUpdateApplication, isApplicationOpen, isRSVPOpen } from '../validator';
+import {
+  canRSVP,
+  canUpdateApplication,
+  getApplicationDeadline,
+  getRSVPDeadline,
+  isApplicationOpen,
+  isRSVPOpen,
+} from '../validator';
 import computeApplicationScore from './computeApplicationScore';
 import { fields, IUser } from './fields';
 
@@ -18,8 +25,6 @@ const schema = new mongoose.Schema(extractFields(fields), {
     virtuals: true,
   },
 });
-
-schema.plugin(mongooseAutopopulate);
 
 /**
  * { A: [B, C] }
@@ -144,7 +149,7 @@ schema.virtual('mailmerge.MERGE_APPLICATION_DEADLINE').get(function() {
   return stringifyUnixTime(this.computedApplicationDeadline);
 });
 schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
-  return stringifyUnixTime(this.computedConfirmationDeadline);
+  return stringifyUnixTime(this.computedRSVPDeadline);
 });
 
 /**
@@ -157,19 +162,20 @@ schema.virtual('computedApplicationDeadline', {
   justOne: true,
   autopopulate: true,
 }).get(function(settings: ISettings) {
-  return -1; //getApplicationDeadline(this, settings.universe);
+  return getApplicationDeadline(this, extractUniverse(settings));
 });
 
-schema.virtual('computedConfirmationDeadline', {
+schema.virtual('computedRSVPDeadline', {
   ref: 'Setting',
   localField: 'settingsMapper',
   foreignField: 'settingsMapper',
   justOne: true,
   autopopulate: true,
 }).get(function(settings: ISettings) {
-  Settings.findOne({}).then(s => console.log(s, settings));
-
-  return -1; //getRSVPDeadline(this, settings.universe);
+  return getRSVPDeadline(this, extractUniverse(settings));
 });
+
+schema.plugin(mongooseAutopopulate);
+
 
 export default mongoose.model<IUser>('User', schema);

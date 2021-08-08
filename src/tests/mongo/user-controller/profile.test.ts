@@ -1,12 +1,7 @@
 import { fetchUser } from '../../../controller/UserController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
-import {
-  canUpdateApplication,
-  isOrganizer,
-  isUserOrOrganizer,
-  maxLength,
-} from '../../../models/validator';
+import { isOrganizer, isUserOrOrganizer, maxLength } from '../../../models/validator';
 import { ReadCheckRequest, WriteCheckRequest } from '../../../types/checker';
 import { NotFoundError } from '../../../types/errors';
 import {
@@ -78,7 +73,7 @@ const [userTestModel, mockModels] = generateTestModel({
     },
     application: {
       readCheck: true,
-      writeCheck: canUpdateApplication(),
+      writeCheck: true,
 
       FIELDS: {
         applicationField: {
