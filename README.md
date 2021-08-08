@@ -2,6 +2,9 @@
 
 View [API Documentation](api.md) for a detailed breakdown of the API.
 
+## TODO
+- Currently RSVP and Confirmation are kinda used interchangeably. To be more precise, it should be RSVP.
+
 ## Setup
 
 #### Docker
