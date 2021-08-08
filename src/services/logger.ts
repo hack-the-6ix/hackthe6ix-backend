@@ -27,8 +27,8 @@ export const jsonify = (message: any) => {
 };
 
 const prepareMessage = function(args: any) {
-  const msg = args.map((e:any) => {
-    if(e === undefined || e === null){
+  const msg = args.map((e: any) => {
+    if (e === undefined || e === null) {
       return String(e);
     }
 
@@ -65,7 +65,7 @@ const prepareMessage = function(args: any) {
   return msg;
 };
 
-const cFormat = winston.format.printf(({ level, message, label, timestamp}) => {
+const cFormat = winston.format.printf(({ level, message, label, timestamp }) => {
   return `${timestamp} [${label}] [${level.toUpperCase()}]: ${message}`;
 });
 
@@ -76,10 +76,10 @@ function createWinstonLogger() {
     info: 2,
     verbose: 3,
     debug: 4,
-    silly: 5
+    silly: 5,
   };
 
-  const loggingFormat = winston.format.combine(winston.format.timestamp(), winston.format.label({label: "HT6-BACKEND"}), cFormat);
+  const loggingFormat = winston.format.combine(winston.format.timestamp(), winston.format.label({ label: 'HT6-BACKEND' }), cFormat);
 
   const logger = winston.createLogger({
     level: 'info',
@@ -90,9 +90,13 @@ function createWinstonLogger() {
       // - Write to all logs with level `info` and below to `combined.log`
       // - Write all logs error (and below) to `error.log`.
       //
-      new winston.transports.File({ filename: 'logs/error.log' , level:'error', handleExceptions: true}),
-      new winston.transports.File({ filename: 'logs/combined.log' })
-    ]//,
+      new winston.transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        handleExceptions: true,
+      }),
+      new winston.transports.File({ filename: 'logs/combined.log' }),
+    ],//,
     // exceptionHandlers: [
     //     new winston.transports.File({ filename: 'exceptions.log' }),
     //     loggingWinston
@@ -107,19 +111,19 @@ function createWinstonLogger() {
     logger.add(new winston.transports.Console({
       format: loggingFormat,
       level: 'silly',
-      handleExceptions: true
+      handleExceptions: true,
     }));
   }
 
   // Only log to StackDriver in production
-  if (process.env.NODE_ENV === 'production'){
+  if (process.env.NODE_ENV === 'production') {
     const loggingWinston = new LoggingWinston({
       projectId: process.env.GCP_LOGGING_PROJECTID,
       keyFilename: process.env.GCP_LOGGING_KEYFILEPATH,
       logName: 'hackthe6ix-backend',
       level: 'info',
     });
-    logger.add(loggingWinston)
+    logger.add(loggingWinston);
   }
   return logger;
 }
@@ -193,15 +197,15 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
 
 export const winstonLogger = createWinstonLogger();
 
-const logLevels =  ['error', 'warn', 'info', 'verbose', 'debug', 'silly'];
+const logLevels = ['error', 'warn', 'info', 'verbose', 'debug', 'silly'];
 type logLevels = 'error' | 'warn' | 'info' | 'verbose' | 'debug' | 'silly';
 
-const logFunctions = {} as Record<logLevels, (...args:any) => void>;
+const logFunctions = {} as Record<logLevels, (...args: any) => void>;
 
 for (const logLevel of logLevels) {
-  logFunctions[logLevel as logLevels] = (...args:any) =>{
+  logFunctions[logLevel as logLevels] = (...args: any) => {
     winstonLogger.log(logLevel, prepareMessage(args));
-  }
+  };
 }
 
 export const log = logFunctions;

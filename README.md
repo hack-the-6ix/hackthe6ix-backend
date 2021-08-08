@@ -2,6 +2,9 @@
 
 View [API Documentation](api.md) for a detailed breakdown of the API.
 
+## TODO
+- Currently RSVP and Confirmation are kinda used interchangeably. To be more precise, it should be RSVP.
+
 ## Setup
 
 #### Docker
@@ -71,10 +74,19 @@ By default, there are 4 roles:
 | Organizer   | General organizer stuff like reviewing applications, etc.      |
 | Admin       | Full system access      |
 
+### Settings Mapper
+
+There are some cases where we need to access data from the settings document from a user (e.g. computing
+deadlines, etc.) However, due to limitations with mongoose, it doesn't seem possible to make an arbitrary query.
+Instead, it requires a matching field between the two documents, so we have a `settingsMapper` field, which is a
+dummy field just for this purpose.
+
 ### Object management
 
 This system was designed to handle data as general as possible. As such, validation and access is
 governed through a system of tester functions embedded in the models.
+
+Although this technically works, I'm sure there are better ways of doing things (such as using mongoose hooks).
 
 #### Schema Structure
 ```typescript
@@ -117,6 +129,10 @@ On the other hand, when a `write` or `delete` operation fails, the entire reques
 writing is active.
 
 #### Read/Write Interceptors
+
+### NOTE: It is recommended to use virtual fields rather than read interceptors when possible
+Read interceptors are only applied when using `getObject` whereas virtual fields are almost always
+populated.
 
 ### NOTE: WRITE INTERCEPTORS ARE NOT CURRENTLY IMPLEMENTED!
 

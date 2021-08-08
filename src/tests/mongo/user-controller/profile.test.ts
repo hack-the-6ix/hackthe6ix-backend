@@ -1,12 +1,7 @@
 import { fetchUser } from '../../../controller/UserController';
 import { getModels } from '../../../controller/util/resources';
 import { IUser } from '../../../models/user/fields';
-import {
-  canUpdateApplication,
-  isOrganizer,
-  isUserOrOrganizer,
-  maxLength,
-} from '../../../models/validator';
+import { isOrganizer, isUserOrOrganizer, maxLength } from '../../../models/validator';
 import { ReadCheckRequest, WriteCheckRequest } from '../../../types/checker';
 import { NotFoundError } from '../../../types/errors';
 import {
@@ -17,6 +12,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -29,6 +25,8 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
@@ -36,7 +34,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => (
   {
-    fetchUniverseState: jest.fn(),
+    ...jest.requireActual('../../../controller/util/resources'),
     getModels: jest.fn(),
   }
 ));
@@ -75,7 +73,7 @@ const [userTestModel, mockModels] = generateTestModel({
     },
     application: {
       readCheck: true,
-      writeCheck: canUpdateApplication(),
+      writeCheck: true,
 
       FIELDS: {
         applicationField: {

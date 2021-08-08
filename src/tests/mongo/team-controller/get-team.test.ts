@@ -1,5 +1,4 @@
 import { getTeam } from '../../../controller/TeamController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import { InternalServerError, UnknownTeamError } from '../../../types/errors';
@@ -9,6 +8,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -21,22 +21,17 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 describe('Get team', () => {
   test('No team', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create(hackerUser);
 
@@ -46,7 +41,7 @@ describe('Get team', () => {
 
   test('Multiple teams same code', async () => {
     // This should never happen...
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const mockTeam = {
       code: 'banana',
@@ -66,7 +61,7 @@ describe('Get team', () => {
   });
 
   test('Success', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const mockTeam = {
       code: 'banana',

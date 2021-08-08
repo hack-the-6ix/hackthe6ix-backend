@@ -1,6 +1,3 @@
-import { getObject } from '../../controller/ModelController';
-import { fetchUniverseState } from '../../controller/util/resources';
-import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
 import syncMailingList from '../../services/mailer/syncMailingList';
 import {
@@ -10,14 +7,13 @@ import {
 } from '../../services/mailer/util/external';
 import { InternalServerError } from '../../types/errors';
 import {
-  adminUser,
-  generateMockUniverseState,
   hackerUser,
   mockErrorResponse,
   mockSuccessResponse,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../test-utils';
 import {
   generateGetSubscriptionsResponse,
@@ -30,28 +26,19 @@ import {
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
-
-jest.mock('../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),
@@ -328,12 +315,7 @@ describe('Sync Mailing List', () => {
 
       addSubscriptionRequest.mockReturnValue(mockSuccessResponse());
 
-      await User.create(hackerUser);
-      const user: IUser = (await getObject(adminUser, 'user', {
-        filter: {
-          _id: hackerUser._id,
-        },
-      }))[0] as any;
+      const user = await User.create(hackerUser);
 
       const { added, deleted } = await syncMailingList(
         mockMailingListID,
@@ -346,7 +328,7 @@ describe('Sync Mailing List', () => {
       ]);
 
       expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set([[
-        mockMailingListID, hackerUser.email, user.mailmerge,
+        mockMailingListID, hackerUser.email, user.toJSON().mailmerge,
       ]]));
 
       expect(deleteSubscriptionRequest).not.toHaveBeenCalled();

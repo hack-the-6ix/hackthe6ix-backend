@@ -1,5 +1,4 @@
-import { systemUser } from '../../consts';
-import { getObject } from '../../controller/ModelController';
+import User from '../../models/user/User';
 import { MailTemplate } from '../../types/mailer';
 import sendEmail from './sendEmail';
 import { getTemplate } from './util/external';
@@ -19,14 +18,12 @@ export default async (email: string, templateName: MailTemplate, tags?: { [key: 
   const subject: string = template.subject;
 
   // Go and fetch the user's email
-  const user = (await getObject(systemUser, 'user', {
-    filter: {
-      email: email,
-    },
-  }))[0];
+  const user = await User.findOne({
+    email: email,
+  });
 
   await sendEmail(email, templateID, subject, {
-    ...(user?.mailmerge || {}),
+    ...(user?.toJSON()?.mailmerge || {}),
     ...(tags || {}),
   });
 

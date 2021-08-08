@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import User from '../../models/user/User';
 import { getStatistics, statisticsLifetime } from '../../services/statistics';
-import * as dbHandler from '../db-handler';
 import {
   hackerUser,
   mockDate,
@@ -9,6 +8,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../test-utils';
 
 /**
@@ -21,6 +21,8 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
@@ -28,7 +30,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../controller/util/resources', () => (
   {
-    fetchUniverseState: jest.fn(),
+    ...jest.requireActual('../../controller/util/resources'),
     getModels: jest.fn(),
   }
 ));
@@ -109,7 +111,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -128,7 +130,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -145,7 +147,7 @@ describe('Get statistics', () => {
       const statisticsA = await getStatistics();
 
       // Clear db and start again
-      await dbHandler.clearDatabase();
+      await User.remove({});
       await generateMockusersB();
 
       const statisticsB = await getStatistics(true);
@@ -163,43 +165,66 @@ describe('Get statistics', () => {
       expect(statistics.total).toEqual(2);
     });
 
-    test('Status', async () => {
-      // Okay yes this is a bit sketchy, but it works
-      const statuses = [
-        'applied',
-        'accepted',
-        'rejected',
-        'waitlisted',
-        'confirmed',
-        'declined',
-        'checkedIn',
-      ];
+    describe('Status', () => {
 
-      const expectedStatus: any = {};
-      const promises: any[] = [];
+      test('Main status', async () => {
+        // Okay yes this is a bit sketchy, but it works
+        const statuses = [
+          'applied',
+          'accepted',
+          'rejected',
+          'waitlisted',
+          'confirmed',
+          'declined',
+          'checkedIn',
+        ];
 
-      for (let i = 0; i < statuses.length; i++) {
+        const expectedStatus: any = {
+          rsvpExpired: 0,
+        };
+        const promises: any[] = [];
 
-        const status: any = {};
-        status[statuses[i]] = true;
+        for (let i = 0; i < statuses.length; i++) {
 
-        for (let k = 0; k < i; k++) {
-          promises.push(User.create({
-            ...hackerUser,
-            _id: mongoose.Types.ObjectId(),
-            status: {
-              ...status,
-              statusReleased: true,
-            },
-          }));
+          const status: any = {};
+          status[statuses[i]] = true;
+
+          for (let k = 0; k < i; k++) {
+            promises.push(User.create({
+              ...hackerUser,
+              _id: mongoose.Types.ObjectId(),
+              status: {
+                ...status,
+                statusReleased: true,
+              },
+            }));
+          }
+
+          expectedStatus[statuses[i]] = i;
         }
 
-        expectedStatus[statuses[i]] = i;
-      }
+        await Promise.all(promises);
+        const statistics = await getStatistics(true);
+        expect(statistics.hacker.status).toMatchObject(expectedStatus);
+      });
 
-      await Promise.all(promises);
-      const statistics = await getStatistics(true);
-      expect(statistics.hacker.status).toMatchObject(expectedStatus);
+      test('Expired users', async () => {
+        await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: true,
+          },
+          personalRSVPDeadline: -1,
+        });
+
+        const statistics = await getStatistics(true);
+        expect(statistics.hacker.status).toMatchObject({
+          accepted: 0,
+          rsvpExpired: 1,
+        });
+      });
     });
 
     test('Gender', async () => {

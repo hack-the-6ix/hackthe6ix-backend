@@ -1,5 +1,6 @@
 import { fetchUser } from '../../../controller/UserController';
 import { fetchUniverseState } from '../../../controller/util/resources';
+import Settings from '../../../models/settings/Settings';
 import { enumOptions } from '../../../models/user/enums';
 import { IUser } from '../../../models/user/fields';
 import User from '../../../models/user/User';
@@ -8,7 +9,9 @@ import {
   canUpdateApplication,
   getApplicationDeadline,
   getRSVPDeadline,
+  isApplicationExpired,
   isApplicationOpen,
+  isRSVPExpired,
   isRSVPOpen,
 } from '../../../models/validator';
 import { stringifyUnixTime } from '../../../util/date';
@@ -19,33 +22,25 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
-
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../../models/validator', () => {
   const validators = jest.requireActual('../../../models/validator');
@@ -57,201 +52,13 @@ jest.mock('../../../models/validator', () => {
     getApplicationDeadline: jest.fn(),
     getRSVPDeadline: jest.fn(),
     isApplicationOpen: jest.fn(),
+    isRSVPExpired: jest.fn(),
+    isApplicationExpired: jest.fn(),
   };
 });
 
 describe('Interceptor', () => {
-  describe('Can Amend Team', () => {
-    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
-    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
 
-    test('Success', async () => {
-      isApplicationOpen.mockReturnValue(true);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canAmendTeam).toBeTruthy();
-    });
-
-    test('Fail', async () => {
-      isApplicationOpen.mockReturnValue(false);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canAmendTeam).toBeFalsy();
-    });
-  });
-
-  describe('Can Apply', () => {
-    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
-
-    test('Success', async () => {
-      canUpdateApplication.mockReturnValue(() => true);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canApply).toBeTruthy();
-    });
-
-    test('Fail', async () => {
-      canUpdateApplication.mockReturnValue(() => false);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canApply).toBeFalsy();
-    });
-  });
-
-  describe('Can Confirm', () => {
-    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
-
-    test('Success', async () => {
-      canRSVP.mockReturnValue(() => true);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canRSVP).toBeTruthy();
-    });
-
-    test('Fail', async () => {
-      canRSVP.mockReturnValue(() => false);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.canRSVP).toBeFalsy();
-    });
-  });
-
-  describe('Is Confirmation Open', () => {
-    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
-
-    test('Success', async () => {
-      isRSVPOpen.mockReturnValue(true);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.isRSVPOpen).toBeTruthy();
-    });
-
-    test('Fail', async () => {
-      isRSVPOpen.mockReturnValue(false);
-      const user = await User.create(hackerUser);
-      const fetchedUser = await fetchUser(user);
-
-      expect(fetchedUser.status.isRSVPOpen).toBeFalsy();
-    });
-  });
-
-  describe('Mail Merge', () => {
-    beforeEach(() => {
-      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
-      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
-    });
-
-    test('First Name', async () => {
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.FIRST_NAME).toEqual(user.firstName);
-    });
-    test('Last Name', async () => {
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.LAST_NAME).toEqual(user.lastName);
-    });
-    test('Application Deadline', async () => {
-      const mockDate = 12345;
-      getApplicationDeadline.mockReturnValue(mockDate);
-
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
-    });
-    test('Confirmation Deadline', async () => {
-      const mockDate = 54321;
-      getRSVPDeadline.mockReturnValue(mockDate);
-
-      const user = await User.create(organizerUser);
-      const fetchedUser = await fetchUser(user);
-      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
-    });
-  });
-
-  describe('Computed Deadlines', () => {
-    beforeEach(() => {
-      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
-      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
-      getApplicationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getApplicationDeadline);
-      getRSVPDeadline.mockImplementation(jest.requireActual('../../../models/validator').getRSVPDeadline);
-    });
-
-    describe('Application', () => {
-      describe('Personal Deadline', () => {
-        test('Global in the future', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState());
-          const personalDeadline = new Date().getTime();
-
-          const user = await User.create({
-            ...hackerUser,
-            personalApplicationDeadline: personalDeadline,
-          });
-          const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
-        });
-        test('Global in the Past', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
-          const personalDeadline = new Date().getTime();
-
-          const user = await User.create({
-            ...hackerUser,
-            personalApplicationDeadline: personalDeadline,
-          });
-          const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
-        });
-      });
-      test('No Personal Deadline', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
-
-        const user = await User.create(hackerUser);
-        const fetchedUser = await fetchUser(user);
-        expect(fetchedUser.computedApplicationDeadline).toEqual((await fetchUniverseState()).public.globalApplicationDeadline);
-      });
-
-    });
-    describe('Confirmation', () => {
-      describe('Personal Deadline', () => {
-        test('Global in the future', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState());
-          const personalDeadline = new Date().getTime();
-
-          const user = await User.create({
-            ...hackerUser,
-            personalConfirmationDeadline: personalDeadline,
-          });
-          const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
-        });
-        test('Global in the Past', async () => {
-          fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
-          const personalDeadline = new Date().getTime();
-
-          const user = await User.create({
-            ...hackerUser,
-            personalConfirmationDeadline: personalDeadline,
-          });
-          const fetchedUser = await fetchUser(user);
-          expect(fetchedUser.computedConfirmationDeadline).toEqual(personalDeadline);
-        });
-      });
-      test('No Personal Deadline', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
-
-        const user = await User.create(hackerUser);
-        const fetchedUser = await fetchUser(user);
-        expect(fetchedUser.computedConfirmationDeadline).toEqual((await fetchUniverseState()).public.globalConfirmationDeadline);
-      });
-    });
-  });
 
   describe('Status', () => {
     const baseStatus = {
@@ -328,7 +135,270 @@ describe('Interceptor', () => {
 });
 
 describe('Virtual', () => {
+  describe('Can Amend Team', () => {
+    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+
+    test('Success', async () => {
+      isApplicationOpen.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canAmendTeam).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isApplicationOpen.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canAmendTeam).toBeFalsy();
+    });
+  });
+
+  describe('Can Apply', () => {
+    beforeEach(() => canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP));
+
+    test('Success', async () => {
+      canUpdateApplication.mockReturnValue(true);
+
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canApply).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      canUpdateApplication.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canApply).toBeFalsy();
+    });
+  });
+
+  describe('Can Confirm', () => {
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+
+    test('Success', async () => {
+      canRSVP.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canRSVP).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      canRSVP.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.canRSVP).toBeFalsy();
+    });
+  });
+
+  describe('Is Confirmation Open', () => {
+    beforeEach(() => canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication));
+
+    test('Success', async () => {
+      isRSVPOpen.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.isRSVPOpen).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isRSVPOpen.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.isRSVPOpen).toBeFalsy();
+    });
+  });
+
+  describe('RSVP Expired', () => {
+    beforeEach(() => isRSVPExpired.mockImplementation(jest.requireActual('../../../models/validator').isRSVPExpired));
+
+    test('Success', async () => {
+      isRSVPExpired.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.rsvpExpired).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isRSVPExpired.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.rsvpExpired).toBeFalsy();
+    });
+  });
+
+  describe('Application Expired', () => {
+    beforeEach(() => isApplicationExpired.mockImplementation(jest.requireActual('../../../models/validator').isApplicationExpired));
+
+    test('Success', async () => {
+      isApplicationExpired.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.applicationExpired).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isApplicationExpired.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.applicationExpired).toBeFalsy();
+    });
+  });
+
+  describe('Computed Deadlines', () => {
+    beforeEach(() => {
+      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
+      getApplicationDeadline.mockImplementation(jest.requireActual('../../../models/validator').getApplicationDeadline);
+      getRSVPDeadline.mockImplementation(jest.requireActual('../../../models/validator').getRSVPDeadline);
+    });
+
+    describe('Application', () => {
+      describe('Personal Deadline', () => {
+        test('Global in the future', async () => {
+          await generateMockUniverseState();
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalApplicationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
+        });
+        test('Global in the Past', async () => {
+          await generateMockUniverseState(-10000);
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalApplicationDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
+        });
+      });
+      test('No Personal Deadline', async () => {
+        await generateMockUniverseState();
+
+        const user = await User.create(hackerUser);
+        const fetchedUser = await fetchUser(user);
+        expect(fetchedUser.computedApplicationDeadline).toEqual((await fetchUniverseState()).public.globalApplicationDeadline);
+      });
+
+    });
+    describe('Confirmation', () => {
+      describe('Personal Deadline', () => {
+        test('Global in the future', async () => {
+          await generateMockUniverseState();
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalRSVPDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
+        });
+        test('Global in the Past', async () => {
+          await generateMockUniverseState(undefined, -10000);
+          const personalDeadline = new Date().getTime();
+
+          const user = await User.create({
+            ...hackerUser,
+            personalRSVPDeadline: personalDeadline,
+          });
+          const fetchedUser = await fetchUser(user);
+          expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
+        });
+      });
+      test('No Personal Deadline', async () => {
+        await generateMockUniverseState();
+
+        const user = await User.create(hackerUser);
+        const fetchedUser = await fetchUser(user);
+        expect(fetchedUser.computedRSVPDeadline).toEqual((await fetchUniverseState()).public.globalConfirmationDeadline);
+      });
+    });
+  });
+
+  describe('Mail Merge', () => {
+    beforeEach(() => {
+      canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
+      canRSVP.mockImplementation(jest.requireActual('../../../models/validator').canRSVP);
+    });
+
+    test('First Name', async () => {
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.FIRST_NAME).toEqual(user.firstName);
+    });
+    test('Last Name', async () => {
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+      expect(fetchedUser.mailmerge.LAST_NAME).toEqual(user.lastName);
+    });
+    test('Application Deadline', async () => {
+      const mockDate = 12345;
+      getApplicationDeadline.mockReturnValue(mockDate);
+
+      await Settings.create({});
+
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.mailmerge.MERGE_APPLICATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
+    });
+    test('Confirmation Deadline', async () => {
+      const mockDate = 54321;
+      getRSVPDeadline.mockReturnValue(mockDate);
+
+      const user = await User.create(organizerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
+    });
+  });
+
+
   describe('Text Status', () => {
+
+    beforeEach(() => {
+      isRSVPExpired.mockReturnValue(false);
+      isApplicationExpired.mockReturnValue(false);
+    });
+
+    test('Invitation Expired', async () => {
+      isRSVPExpired.mockReturnValue(true);
+
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.textStatus).toEqual('Invitation Expired');
+    });
+
+    test('Application Expired', async () => {
+      isApplicationExpired.mockReturnValue(true);
+
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.textStatus).toEqual('Application Expired');
+    });
 
     test('Not applied', async () => {
       const user: IUser = await User.create({

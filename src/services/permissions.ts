@@ -52,39 +52,38 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
     if (!token) {
       const apiToken = getAPITokenFromHeader(req);
 
-      if(!apiToken){
+      if (!apiToken) {
         return false;
       }
 
       const apiTokenInfo = await APIToken.findOne({
-        token: apiToken
+        token: apiToken,
       });
 
-      if(!apiTokenInfo){
+      if (!apiTokenInfo) {
         return false;
       }
 
       const user = await User.findOne({
-        _id: apiTokenInfo.internalUserID
+        _id: apiTokenInfo.internalUserID,
       });
 
-      if(!user){
+      if (!user) {
         return false;
       }
 
       req.executor = user;
-    }
-    else {
+    } else {
       const user = await authenticate(token);
 
       if (!user) {
         return false;
       }
-  
+
       req.executor = user;
     }
 
-    
+
   } catch (e) {
     return false;
   }

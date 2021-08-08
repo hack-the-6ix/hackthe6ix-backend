@@ -8,6 +8,7 @@ import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
 import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
+import { initializeSettingsMapper } from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
@@ -262,6 +263,23 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
 /**
  * (Admin)
  *
+ * Iterates through all documents and ensures the settingsMapper field is populated.
+ * We use this field to populate the user object with data from global settings, such as deadlines.
+ * Refer to the README for more information.
+ *
+ * This endpoint should only be needed for migrating old databases.
+ */
+actionRouter.post('/initializeSettingsMapper', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    initializeSettingsMapper(),
+    true,
+  );
+});
+/**
+ * (Admin)
+ *
  * Set application released status to true for all users who have been either waitlisted, accepted, or rejected
  */
 actionRouter.post('/releaseApplicationStatus', isAdmin, (req: Request, res: Response) => {
@@ -284,8 +302,7 @@ actionRouter.get('/getRanks', isOrganizer, (req: Request, res: Response) => {
     res,
     getRanks(
       req.query.usePersonalScore === 'true',
-    ),
-    true,
+    )
   );
 });
 
@@ -344,13 +361,13 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
  *
  * Associate a user on Discord
  */
-actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
     verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername),
     true,
-  )
+  );
 });
 
 /**
@@ -358,13 +375,13 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Associate a user on Discord
  */
- actionRouter.get('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
+actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUserByDiscordID(req.query.discordID as string)
-  )
- });
+    fetchUserByDiscordID(req.query.discordID as string),
+  );
+});
 
 
 /**
@@ -372,13 +389,13 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Create an API token for programmatic access
  */
- actionRouter.post('/createAPIToken', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    createAPIToken(req.executor, req.body.groups, req.body.description)
-  )
- });
+    createAPIToken(req.executor, req.body.groups, req.body.description),
+  );
+});
 
 
 /**
@@ -386,24 +403,24 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Record someone joining a meeting
  */
- actionRouter.post('/recordMeetingJoin', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/recordMeetingJoin', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now())
-  )
- });
+    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now()),
+  );
+});
 
 /**
  * (Organizer)
  *
  * Record someone leaving a meeting
  */
- actionRouter.post('/recordMeetingLeave', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/recordMeetingLeave', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now())
-  )
- });
+    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now()),
+  );
+});
 export default actionRouter;

@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+// @ts-ignore
+// For some reason, the types screwed with our compilation
+import mongooseAutopopulate from 'mongoose-autopopulate';
 import { IUser } from '../user/fields';
 import { extractFields } from '../util';
 import { fields, ITeam } from './fields';
@@ -17,6 +20,7 @@ schema.virtual('memberNames', {
   localField: 'code',
   foreignField: 'hackerApplication.teamCode',
   justOne: false,
+  autopopulate: true,
 }).get(function(members: IUser[]) {
   return members.map((u: IUser) => u.fullName);
 });
@@ -26,6 +30,7 @@ schema.virtual('teamScore', {
   localField: 'code',
   foreignField: 'hackerApplication.teamCode',
   justOne: false,
+  autopopulate: true,
 }).get(function(members: IUser[]) {
   let count = 0;
   let total = 0;
@@ -42,14 +47,6 @@ schema.virtual('teamScore', {
   return total / count;
 });
 
-// Hook to auto populate memberNames
-const autoPopulate = function(next: any) {
-  this.populate('memberNames', 'firstName lastName');
-  this.populate('teamScore', 'internal.applicationScores');
-  next();
-};
-
-schema.pre('findOne', autoPopulate)
-.pre('find', autoPopulate);
+schema.plugin(mongooseAutopopulate);
 
 export default mongoose.model<ITeam>('Team', schema);

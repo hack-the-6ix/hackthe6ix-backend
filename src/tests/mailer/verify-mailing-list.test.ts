@@ -1,43 +1,31 @@
-import { systemUser } from '../../consts';
-import { getObject } from '../../controller/ModelController';
-import { fetchUniverseState } from '../../controller/util/resources';
 import User from '../../models/user/User';
 import { addSubscriptionRequest, getList } from '../../services/mailer/util/external';
 import verifyMailingList from '../../services/mailer/verifyMailingList';
 import {
-  generateMockUniverseState,
   organizerUser,
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../test-utils';
 import { mockGetList, mockMailingLists } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
-
-jest.mock('../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),
@@ -59,13 +47,10 @@ test('Verify lists', async () => {
   getList.mockImplementation((x: string) => (mockGetList as any)[x]);
 
   const user = await User.create(organizerUser);
+
   const listNames = await verifyMailingList(user);
 
-  const mailmerge = (await getObject(systemUser, 'user', {
-    filter: {
-      _id: user._id,
-    },
-  }))[0].mailmerge;
+  const mailmerge = user.mailmerge;
 
   expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set(
     Object.keys(mockMailingLists).map((list: string) => ([

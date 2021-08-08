@@ -1,5 +1,21 @@
 import mongoose from 'mongoose';
+// @ts-ignore
+// For some reason, the types screwed with our compilation
+import mongooseAutopopulate from 'mongoose-autopopulate';
+import { extractUniverse } from '../../controller/util/resources';
+import { stringifyUnixTime } from '../../util/date';
+import { ISettings } from '../settings/fields';
 import { extractFields } from '../util';
+import {
+  canRSVP,
+  canUpdateApplication,
+  getApplicationDeadline,
+  getRSVPDeadline,
+  isApplicationExpired,
+  isApplicationOpen,
+  isRSVPExpired,
+  isRSVPOpen,
+} from '../validator';
 import computeApplicationScore from './computeApplicationScore';
 import { fields, IUser } from './fields';
 
@@ -57,6 +73,9 @@ schema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
+/**
+ * Application Status
+ */
 schema.virtual('status.textStatus').get(function() {
   const textStatus = this?.status?.internalTextStatus || '';
   const maskedStatuses = [
@@ -73,7 +92,11 @@ schema.virtual('status.textStatus').get(function() {
 });
 
 schema.virtual('status.internalTextStatus').get(function() {
-  if (this?.status?.declined) {
+  if (this?.status?.rsvpExpired) {
+    return 'Invitation Expired';
+  } else if (this?.status?.applicationExpired) {
+    return 'Application Expired';
+  } else if (this?.status?.declined) {
     return 'Declined';
   } else if (this.status?.checkedIn) {
     return 'Checked In';
@@ -92,6 +115,81 @@ schema.virtual('status.internalTextStatus').get(function() {
   return 'Not Applied';
 });
 
+schema.virtual('status.canAmendTeam').get(function() {
+  return isApplicationOpen(this);
+});
+
+schema.virtual('status.canApply').get(function() {
+  return canUpdateApplication(this);
+});
+
+schema.virtual('status.canRSVP').get(function() {
+  return canRSVP(this);
+});
+
+schema.virtual('status.isRSVPOpen').get(function() {
+  return isRSVPOpen(this);
+});
+
+schema.virtual('status.rsvpExpired').get(function() {
+  return isRSVPExpired(this);
+});
+
+schema.virtual('status.applicationExpired').get(function() {
+  return isApplicationExpired(this);
+});
+
+/**
+ * Application scores
+ */
 schema.virtual('internal.computedApplicationScore').get(computeApplicationScore);
+
+/**
+ * Mail Merge
+ */
+schema.virtual('mailmerge.FIRST_NAME').get(function() {
+  return this.firstName;
+});
+schema.virtual('mailmerge.LAST_NAME').get(function() {
+  return this.lastName;
+});
+schema.virtual('mailmerge.MERGE_FIRST_NAME').get(function() {
+  return this.firstName;
+});
+schema.virtual('mailmerge.MERGE_LAST_NAME').get(function() {
+  return this.lastName;
+});
+schema.virtual('mailmerge.MERGE_APPLICATION_DEADLINE').get(function() {
+  return stringifyUnixTime(this.computedApplicationDeadline);
+});
+schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
+  return stringifyUnixTime(this.computedRSVPDeadline);
+});
+
+/**
+ * Computed Deadlines
+ */
+schema.virtual('computedApplicationDeadline', {
+  ref: 'Setting',
+  localField: 'settingsMapper',
+  foreignField: 'settingsMapper',
+  justOne: true,
+  autopopulate: true,
+}).get(function(settings: ISettings) {
+  return getApplicationDeadline(this, extractUniverse(settings));
+});
+
+schema.virtual('computedRSVPDeadline', {
+  ref: 'Setting',
+  localField: 'settingsMapper',
+  foreignField: 'settingsMapper',
+  justOne: true,
+  autopopulate: true,
+}).get(function(settings: ISettings) {
+  return getRSVPDeadline(this, extractUniverse(settings));
+});
+
+schema.plugin(mongooseAutopopulate);
+
 
 export default mongoose.model<IUser>('User', schema);

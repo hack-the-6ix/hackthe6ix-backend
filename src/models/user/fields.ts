@@ -2,23 +2,15 @@ import {
   CreateCheckRequest,
   DeleteCheckRequest,
   ReadCheckRequest,
-  ReadInterceptRequest,
   WriteCheckRequest,
 } from '../../types/checker';
 import { BasicUser } from '../../types/types';
-import { stringifyUnixTime } from '../../util/date';
 
 import discordShared from '../shared/discordShared';
 import {
-  canRSVP,
-  canUpdateApplication,
-  getApplicationDeadline,
-  getRSVPDeadline,
   inEnum,
   isAdmin,
-  isApplicationOpen,
   isOrganizer,
-  isRSVPOpen,
   isUserOrOrganizer,
   maxLength,
   minLength,
@@ -30,7 +22,7 @@ import { maskStatus } from './interceptors';
 
 // Main application
 export const hackerApplication = {
-  writeCheck: canUpdateApplication(),
+  writeCheck: true,
   readCheck: true,
 
   FIELDS: {
@@ -563,66 +555,53 @@ const status = {
       readCheck: true,
     },
 
-    // Intercepted fields (virtual fields, but we populate them)
+    // Virtual fields
+    rsvpExpired: {
+      type: Boolean,
+      virtual: true,
+      caption: 'RSVP Expired',
+
+      readCheck: true,
+    },
+
+    applicationExpired: {
+      type: Boolean,
+      virtual: true,
+      caption: 'Application Expired',
+
+      readCheck: true,
+    },
+
     canAmendTeam: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can Amend Team',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isApplicationOpen({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
+
     canApply: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can Apply',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canUpdateApplication()({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
+
     canRSVP: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can RSVP',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canRSVP()({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
+
     isRSVPOpen: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Is Confirmation Open',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isRSVPOpen({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
   },
 };
@@ -635,56 +614,37 @@ const mailmerge = {
   FIELDS: {
     FIRST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+      virtual: true,
     },
     LAST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+      virtual: true,
     },
     // All fields for transactional emails should be prefixed by MERGE
     // For mailing list enrollment, first and last name do not have the prefix, but we'll store a version
     // with it for the template emails
     MERGE_FIRST_NAME: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.firstName,
+      virtual: true,
     },
     MERGE_LAST_NAME: {
       type: String,
       default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.targetObject.lastName,
+      virtual: true,
     },
     MERGE_APPLICATION_DEADLINE: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getApplicationDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      })),
+      virtual: true,
     },
     MERGE_CONFIRMATION_DEADLINE: {
       type: String,
-      default: '',
-
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => stringifyUnixTime(getRSVPDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      })),
+      virtual: true,
     },
   },
 };
@@ -876,7 +836,7 @@ export const fields = {
 
       readCheck: true,
     },
-    personalConfirmationDeadline: {
+    personalRSVPDeadline: {
       type: Number,
       caption: 'RSVP Deadline',
 
@@ -896,25 +856,13 @@ export const fields = {
     // If the user has a personal deadline, it takes precedence over the global deadline
     computedApplicationDeadline: {
       type: Number,
-      default: 0,
-
+      virtual: true,
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getApplicationDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      }),
     },
-    computedConfirmationDeadline: {
+    computedRSVPDeadline: {
       type: Number,
-      default: 0,
-
+      virtual: true,
       readCheck: true,
-      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => getRSVPDeadline({
-        ...request,
-        requestUser: request.targetObject,
-        submissionObject: {} as IUser,
-      }),
     },
     discord: discordShared,
     roles: roles,
@@ -923,6 +871,16 @@ export const fields = {
     hackerApplication: hackerApplication,
     internal: internal,
     mailmerge: mailmerge,
+
+    /**
+     * This is a special field used to allow the settings document mapped to every
+     * user for the purposes of populating virtual fields.
+     */
+    settingsMapper: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
 };
 
@@ -943,11 +901,14 @@ export interface IStatus {
   declined?: boolean,
   checkedIn?: boolean,
 
-  // Intercepted fields (since they require universe state)
+  // Virtual fields
   canAmendTeam?: boolean,
   canApply?: boolean,
   canRSVP?: boolean,
   isRSVPOpen?: boolean,
+
+  rsvpExpired?: boolean,
+  applicationExpired?: boolean,
 
   textStatus: string
   internalTextStatus: string
@@ -958,7 +919,7 @@ export interface IUser extends BasicUser {
   idpLinkID: string,
   fullName: string,
   created: number,
-  personalConfirmationDeadline?: number,
+  personalRSVPDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
   groups: IRoles, // Raw group from KEYCLOAK
@@ -985,7 +946,7 @@ export interface IUser extends BasicUser {
   },
   mailmerge: IMailMerge,
   computedApplicationDeadline: number,
-  computedConfirmationDeadline: number
+  computedRSVPDeadline: number
 }
 
 export interface IMailMerge {

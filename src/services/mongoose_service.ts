@@ -7,7 +7,7 @@ mongoose.connect(database, {
   useNewUrlParser: true,
   useFindAndModify: false,
   useCreateIndex: true,
-}).then(() => {
+}).then(async () => {
   console.log('MongoDB started');
 }).catch((err) => {
   console.log(err);

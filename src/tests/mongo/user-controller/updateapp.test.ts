@@ -22,6 +22,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -34,18 +35,12 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
-
-jest.mock('../../../controller/util/resources', () => {
-  const resources = jest.requireActual('../../../controller/util/resources');
-  return {
-    ...resources,
-    fetchUniverseState: jest.fn(),
-  };
-});
 
 jest.mock('../../../services/mailer/util/external', () => {
   const external = jest.requireActual('../../../services/mailer/util/external');
@@ -71,13 +66,12 @@ jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => 
 
 jest.mock('../../../models/user/fields', () => {
   const actualFields = jest.requireActual('../../../models/user/fields');
-  const canUpdateApplication = jest.requireActual('../../../models/validator').canUpdateApplication;
   const deepcopy = jest.requireActual('deepcopy');
 
   const updatedFields = deepcopy(actualFields.fields);
   updatedFields.FIELDS.hackerApplication = {
     readCheck: true,
-    writeCheck: canUpdateApplication(),
+    writeCheck: true,
 
     FIELDS: {
       submitCheckFallback: { // this should pass because submitCheck > writeCheck
@@ -130,7 +124,7 @@ jest.mock('../../../models/user/fields', () => {
 describe('Update Application', () => {
   describe('Success', () => {
     test('Verify mailing list not synced', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -151,7 +145,7 @@ describe('Update Application', () => {
     });
 
     test('Verify no email sent', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -172,7 +166,7 @@ describe('Update Application', () => {
     });
 
     test('Normal Deadline', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -199,7 +193,7 @@ describe('Update Application', () => {
     });
 
     test('Personal Deadline', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+      await generateMockUniverseState(-10000);
 
       const user = await User.create({
         ...hackerUser,
@@ -228,7 +222,7 @@ describe('Update Application', () => {
 
 
     test('Missing Required Field', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -255,7 +249,7 @@ describe('Update Application', () => {
     });
 
     test('Merge', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -289,7 +283,7 @@ describe('Update Application', () => {
   describe('Fail', () => {
 
     test('Bad Application', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -312,7 +306,7 @@ describe('Update Application', () => {
     });
 
     test('Write violation', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -337,7 +331,7 @@ describe('Update Application', () => {
     });
 
     test('Already submitted', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -363,7 +357,7 @@ describe('Update Application', () => {
 
     describe('Deadline passed', () => {
       test('Global Deadline passed', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+        await generateMockUniverseState(-10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -388,7 +382,7 @@ describe('Update Application', () => {
       });
 
       test('Personal Deadline passed', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+        await generateMockUniverseState(-10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -419,7 +413,7 @@ describe('Update Application', () => {
 describe('Submit Application', () => {
   describe('Success', () => {
     test('Verify email sent', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -459,7 +453,7 @@ describe('Submit Application', () => {
     });
 
     test('Normal Deadline', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -492,7 +486,7 @@ describe('Submit Application', () => {
     });
 
     test('Personal Deadline', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+      await generateMockUniverseState(-10000);
 
       const user = await User.create({
         ...hackerUser,
@@ -534,7 +528,7 @@ describe('Submit Application', () => {
        */
 
       test('Implicit submitCheck', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+        await generateMockUniverseState();
 
         const user = await User.create({
           ...hackerUser,
@@ -562,7 +556,7 @@ describe('Submit Application', () => {
       });
 
       test('Explicit submitCheck', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+        await generateMockUniverseState();
 
         const user = await User.create({
           ...hackerUser,
@@ -591,7 +585,7 @@ describe('Submit Application', () => {
     });
 
     test('Write violation', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -619,7 +613,7 @@ describe('Submit Application', () => {
     });
 
     test('Already submitted', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -646,7 +640,7 @@ describe('Submit Application', () => {
 
     describe('Deadline passed', () => {
       test('Global Deadline passed', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+        await generateMockUniverseState(-10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -672,7 +666,7 @@ describe('Submit Application', () => {
       });
 
       test('Personal Deadline passed', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(-10000));
+        await generateMockUniverseState(-10000);
 
         const user = await User.create({
           ...hackerUser,

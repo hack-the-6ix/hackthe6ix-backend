@@ -1,5 +1,4 @@
 import { rsvp } from '../../../controller/UserController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import User from '../../../models/user/User';
 import { sendEmailRequest } from '../../../services/mailer/util/external';
 import { DeadlineExpiredError, RSVPRejectedError } from '../../../types/errors';
@@ -12,6 +11,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -24,18 +24,13 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../../services/mailer/util/external', () => {
   const external = jest.requireActual('../../../services/mailer/util/external');
@@ -53,7 +48,7 @@ describe('RSVP', () => {
   describe('Deadlines', () => {
     describe('Global Deadline', () => {
       test('Success', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState());
+        await generateMockUniverseState();
 
         const user = await User.create({
           ...hackerUser,
@@ -79,7 +74,7 @@ describe('RSVP', () => {
       });
 
       test('Fail', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
+        await generateMockUniverseState(undefined, -10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -107,7 +102,7 @@ describe('RSVP', () => {
 
     describe('Personal Deadline', () => {
       test('Success', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
+        await generateMockUniverseState(undefined, -10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -115,7 +110,7 @@ describe('RSVP', () => {
             accepted: true,
             statusReleased: true,
           },
-          personalConfirmationDeadline: new Date().getTime() + 10000,
+          personalRSVPDeadline: new Date().getTime() + 10000,
         });
 
         await rsvp(
@@ -134,7 +129,7 @@ describe('RSVP', () => {
       });
 
       test('Fail', async () => {
-        fetchUniverseState.mockReturnValue(generateMockUniverseState(undefined, -10000));
+        await generateMockUniverseState(undefined, -10000);
 
         const user = await User.create({
           ...hackerUser,
@@ -142,7 +137,7 @@ describe('RSVP', () => {
             accepted: true,
             statusReleased: true,
           },
-          personalConfirmationDeadline: new Date().getTime() - 10000,
+          personalRSVPDeadline: new Date().getTime() - 10000,
         });
 
         await expect(rsvp(
@@ -164,7 +159,7 @@ describe('RSVP', () => {
 
   describe('Not eligible', () => {
     test('Not accepted', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -190,7 +185,7 @@ describe('RSVP', () => {
     });
 
     test('Already declined', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -217,7 +212,7 @@ describe('RSVP', () => {
     });
 
     test('Status not released', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -244,7 +239,7 @@ describe('RSVP', () => {
 
   describe('Confirmation State', () => {
     test('Confirm', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,
@@ -283,7 +278,7 @@ describe('RSVP', () => {
     });
 
     test('Decline', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const user = await User.create({
         ...hackerUser,

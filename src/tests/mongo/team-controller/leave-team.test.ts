@@ -1,5 +1,4 @@
 import { leaveTeam } from '../../../controller/TeamController';
-import { fetchUniverseState } from '../../../controller/util/resources';
 import Team from '../../../models/team/Team';
 import User from '../../../models/user/User';
 import { DeadlineExpiredError, UnknownTeamError } from '../../../types/errors';
@@ -9,6 +8,7 @@ import {
   runAfterAll,
   runAfterEach,
   runBeforeAll,
+  runBeforeEach,
 } from '../../test-utils';
 
 /**
@@ -21,29 +21,24 @@ beforeAll(runBeforeAll);
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 describe('Leave Team', () => {
   test('Not in team', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState());
+    await generateMockUniverseState();
 
     const user = await User.create(hackerUser);
     await expect(leaveTeam(user)).rejects.toThrow(UnknownTeamError);
   });
 
   test('Application window elapsed', async () => {
-    fetchUniverseState.mockReturnValue(generateMockUniverseState(-1000));
+    await generateMockUniverseState(-100000);
 
     const mockTeam = {
       code: 'banana',
@@ -74,7 +69,7 @@ describe('Leave Team', () => {
 
   describe('Success', () => {
     test('Last person', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const mockTeam = {
         code: 'banana',
@@ -101,7 +96,7 @@ describe('Leave Team', () => {
     });
 
     test('Not last person', async () => {
-      fetchUniverseState.mockReturnValue(generateMockUniverseState());
+      await generateMockUniverseState();
 
       const mockTeam = {
         code: 'banana',

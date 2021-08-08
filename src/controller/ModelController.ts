@@ -398,7 +398,7 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
-    })
+    }),
   );
 
   // Keep track of IDs that were affected
@@ -474,3 +474,27 @@ export const createObject = async (requestUser: IUser, objectTypeName: string, p
 
   return newObject._id;
 };
+
+/**
+ * Iterates through all documents and ensures the settingsMapper field is populated.
+ *
+ * We use this field to populate the user object with data from global settings, such as deadlines.
+ */
+export const initializeSettingsMapper = async () => {
+  const models: any = getModels();
+
+  for (const name in models) {
+    const mongooseModel = models[name].mongoose;
+
+    console.log('Initializing', name);
+
+    await mongooseModel.updateMany({}, {
+      settingsMapper: 0,
+    }, {
+      upsert: true,
+      setDefaultsOnInsert: true,
+      new: true,
+    });
+  }
+};
+

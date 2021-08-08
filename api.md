@@ -169,6 +169,24 @@ Note that all inputs will be validated using `writeCheck`.
 }
 ```
 
+### POST - Initialize settings mapper (Admin)
+`/api/action/initializeSettingsMapper`
+
+Iterates through all documents and ensures the settingsMapper field is populated.
+We use this field to populate the user object with data from global settings, such as deadlines.
+Refer to the README for more information.
+
+This endpoint should only be needed for migrating old databases.
+
+##### Output Specification
+
+```
+{
+  status: 200,
+  message: "ok"
+}
+```
+
 ### GET - Get file from GridFS (Organizer)
 `/api/gridfs?filename=<filename goes here>`
 

@@ -1,4 +1,4 @@
-import mongoose from "../services/mongoose_service";
+import mongoose from '../services/mongoose_service';
 
 export type ErrorMessage = { status: number, message: string, error?: string };
 

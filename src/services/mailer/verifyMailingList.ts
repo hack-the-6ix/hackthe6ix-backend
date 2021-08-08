@@ -1,5 +1,3 @@
-import { systemUser } from '../../consts';
-import { getObject } from '../../controller/ModelController';
 import { IUser } from '../../models/user/fields';
 import { MailingList } from '../../types/mailer';
 import { addSubscriptionRequest, getList } from './util/external';
@@ -17,11 +15,7 @@ export default async (requestUser: IUser) => {
   const listNames: string[] = [];
 
   // We'll use the requester's mail merge details with the mock emails
-  const mailmerge = (await getObject(systemUser, 'user', {
-    filter: {
-      _id: requestUser._id,
-    },
-  }))[0].mailmerge;
+  const mailmerge = requestUser.mailmerge;
 
   for (const list in MailingList) {
     const listConfig = getList(list);

@@ -22,6 +22,7 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
           confirmed: 0,
           declined: 0,
           checkedIn: 0,
+          rsvpExpired: 0,
           statusReleased: 0,
         },
         submittedApplicationStats: {
@@ -128,7 +129,8 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
 
       // Update status
       for (const s of Object.keys(user.status)) {
-        if ((user.status as any)[s]) {
+        // We won't include expired invitations in the accepted statistics
+        if ((user.status as any)[s] && !(s === 'accepted' && user.status.rsvpExpired)) {
           (statistics.hacker.status as any)[s]++;
         }
       }
@@ -274,6 +276,7 @@ export type IStatistics = {
       confirmed: number,
       declined: number,
       checkedIn: number,
+      rsvpExpired: number,
       statusReleased: number
     },
     submittedApplicationStats: {

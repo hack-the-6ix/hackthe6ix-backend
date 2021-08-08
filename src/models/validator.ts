@@ -1,6 +1,7 @@
 /* Permissions */
 
 import { WriteCheckRequest } from '../types/checker';
+import { UniverseState } from '../types/types';
 // Admins can do anything and bypass validation
 import { IUser } from './user/fields';
 
@@ -35,28 +36,36 @@ export const multiInEnum = (validStates: string[]) => (request: WriteCheckReques
  */
 export const inEnum = (validStates: string[], unstrict?: boolean) => (request: WriteCheckRequest<string, any>) => (unstrict && !request?.fieldValue) || validStates.indexOf(request?.fieldValue) != -1;
 
-export const isApplied = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.applied;
-export const isDeclined = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.declined;
-export const isAccepted = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.accepted;
-export const isStatusReleased = (request: WriteCheckRequest<any, IUser>) => request?.requestUser?.status?.statusReleased;
-
-// NOTE: Personal deadlines will override global deadlines if they are set.
-export const getApplicationDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalApplicationDeadline === undefined ? request.universeState.public.globalApplicationDeadline : request.requestUser.personalApplicationDeadline;
-export const getRSVPDeadline = (request: WriteCheckRequest<any, IUser>) => request.requestUser.personalConfirmationDeadline === undefined ? request.universeState.public.globalConfirmationDeadline : request.requestUser.personalConfirmationDeadline;
-
-export const isApplicationOpen = (request: WriteCheckRequest<any, IUser>) => getApplicationDeadline(request) >= new Date().getTime();
-export const isRSVPOpen = (request: WriteCheckRequest<any, IUser>) => getRSVPDeadline(request) >= new Date().getTime();
-
-export const canUpdateApplication = () => (request: WriteCheckRequest<any, IUser>) => (
-  !isApplied(request) &&
-  isApplicationOpen(request)
-);
-
-export const canRSVP = () => (request: WriteCheckRequest<any, IUser>) => (
-  !isDeclined(request) &&
-  isRSVPOpen(request) &&
-  isAccepted(request) &&
-  isStatusReleased(request)
-);
 
 export const validatePostalCode = () => (request: WriteCheckRequest<string, any>) => !!request.fieldValue?.match(/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i);
+
+/* State validators */
+
+export const isApplied = (user: IUser) => user?.status?.applied;
+export const isDeclined = (user: IUser) => user?.status?.declined;
+export const isAccepted = (user: IUser) => user?.status?.accepted;
+export const isStatusReleased = (user: IUser) => user?.status?.statusReleased;
+export const rsvpDecisionSubmitted = (user: IUser) => user?.status?.confirmed || user?.status?.declined;
+
+// NOTE: Personal deadlines will override global deadlines if they are set.
+export const getApplicationDeadline = (user: IUser, universeState: UniverseState) => user.personalApplicationDeadline === undefined ? universeState.public.globalApplicationDeadline : user.personalApplicationDeadline;
+export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => user.personalRSVPDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalRSVPDeadline;
+
+export const isApplicationOpen = (user: IUser) => user.computedApplicationDeadline >= new Date().getTime();
+export const isRSVPOpen = (user: IUser) => user.computedRSVPDeadline >= new Date().getTime();
+
+export const canUpdateApplication = (user: IUser) => (
+  !isApplied(user) &&
+  !isApplicationExpired(user)
+);
+
+export const canRSVP = (user: IUser) => (
+  !isDeclined(user) &&
+  !isRSVPExpired(user) &&
+  isAccepted(user) &&
+  isStatusReleased(user)
+);
+
+export const isRSVPExpired = (user: IUser) => isStatusReleased(user) && isAccepted(user) && !rsvpDecisionSubmitted(user) && !isRSVPOpen(user);
+
+export const isApplicationExpired = (user: IUser) => !isApplied(user) && !isApplicationOpen(user);

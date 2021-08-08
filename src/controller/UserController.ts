@@ -23,7 +23,7 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
 
-export const createFederatedUser = async(linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix=true):Promise<IUser> => {
+export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
   const groups: any = {};
 
   // Update the groups this user is in in the database
@@ -99,7 +99,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
   };
 
   // We will pass in our own writeRequest, so user can be null
-  await testCanUpdateApplication(null, writeRequest);
+  await testCanUpdateApplication(requestUser);
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
@@ -202,21 +202,11 @@ export const getEnumOptions = async () => enumOptions;
  * @param rsvp
  */
 export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
-
-  const universeState = await fetchUniverseState();
-  const writeRequest = {
-    requestUser: requestUser,
-    targetObject: requestUser,
-    submissionObject: {} as any,
-    universeState: universeState,
-    fieldValue: undefined as any,
-  };
-
-  if (!isRSVPOpen(writeRequest)) {
+  if (!isRSVPOpen(requestUser)) {
     throw new DeadlineExpiredError('The RSVP deadline has passed!');
   }
 
-  if (canRSVP()(writeRequest)) {
+  if (canRSVP(requestUser)) {
 
     const isAttending = !!rsvp.attending;
 

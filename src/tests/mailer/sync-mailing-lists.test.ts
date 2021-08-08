@@ -1,43 +1,28 @@
 import mongoose from 'mongoose';
-import { fetchUniverseState } from '../../controller/util/resources';
 import User from '../../models/user/User';
 import syncMailingList from '../../services/mailer/syncMailingList';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { getList } from '../../services/mailer/util/external';
-import {
-  generateMockUniverseState,
-  hackerUser,
-  runAfterAll,
-  runAfterEach,
-  runBeforeAll,
-} from '../test-utils';
+import { hackerUser, runAfterAll, runAfterEach, runBeforeAll, runBeforeEach } from '../test-utils';
 import { mockGetList, mockMailingLists } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
  */
-beforeAll(async () => {
-  await runBeforeAll();
-  fetchUniverseState.mockReturnValue(generateMockUniverseState());
-});
+beforeAll(runBeforeAll);
 
 /**
  * Clear all test data after every test.
  */
 afterEach(runAfterEach);
 
+beforeEach(runBeforeEach);
+
 /**
  * Remove and close the db and server.
  */
 afterAll(runAfterAll);
 
-jest.mock('../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.fn(),
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),
