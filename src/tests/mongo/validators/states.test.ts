@@ -3,11 +3,14 @@ import {
   canRSVP,
   canUpdateApplication,
   isAccepted,
+  isApplicationExpired,
   isApplicationOpen,
   isApplied,
   isDeclined,
+  isRSVPExpired,
   isRSVPOpen,
   isStatusReleased,
+  rsvpDecisionSubmitted,
 } from '../../../models/validator';
 import { hackerUser } from '../../test-utils';
 
@@ -234,6 +237,177 @@ describe('User States', () => {
             statusReleased: false,
           },
         } as IUser)).toBeFalsy();
+      });
+    });
+  });
+
+  describe('RSVP Decision Submitted', () => {
+
+    describe('True', () => {
+      test('Declined', () => {
+        expect(rsvpDecisionSubmitted({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            declined: true,
+            confirmed: false,
+          },
+        } as IUser)).toBeTruthy();
+      });
+
+      test('Confirmed', () => {
+
+        expect(rsvpDecisionSubmitted({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            declined: false,
+            confirmed: true,
+          },
+        } as IUser)).toBeTruthy();
+      });
+    });
+
+    test('False', () => {
+      expect(rsvpDecisionSubmitted({
+        ...hackerUser,
+        status: {
+          ...hackerUser.status,
+          declined: false,
+          confirmed: false,
+        },
+      } as IUser)).toBeFalsy();
+    });
+  });
+
+  describe('RSVP Expired', () => {
+    test('True', () => {
+      expect(isRSVPExpired({
+        ...hackerUser,
+        status: {
+          ...hackerUser.status,
+          applied: true,
+          declined: false,
+          accepted: true,
+          confirmed: false,
+          statusReleased: true,
+        },
+        computedRSVPDeadline: new Date().getTime() - 1000,
+      } as IUser)).toBeTruthy();
+    });
+
+    describe('False', () => {
+      test('Status not released', () => {
+        expect(isRSVPExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+            declined: false,
+            accepted: true,
+            confirmed: false,
+            statusReleased: false,
+          },
+          computedRSVPDeadline: new Date().getTime() - 1000,
+        } as IUser)).toBeFalsy();
+      });
+
+      test('User not accepted', () => {
+        expect(isRSVPExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+            declined: false,
+            accepted: false,
+            confirmed: false,
+            statusReleased: true,
+          },
+          computedRSVPDeadline: new Date().getTime() - 1000,
+        } as IUser)).toBeFalsy();
+      });
+
+      test('User is confirmed', () => {
+        expect(isRSVPExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+            declined: false,
+            accepted: true,
+            confirmed: true,
+            statusReleased: true,
+          },
+          computedRSVPDeadline: new Date().getTime() - 1000,
+        } as IUser)).toBeFalsy();
+      });
+
+      test('User is declined', () => {
+        expect(isRSVPExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+            declined: true,
+            accepted: true,
+            confirmed: false,
+            statusReleased: true,
+          },
+          computedRSVPDeadline: new Date().getTime() - 1000,
+        } as IUser)).toBeFalsy();
+      });
+
+      test('RSVP window has not passed', () => {
+        expect(isRSVPExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+            declined: false,
+            accepted: true,
+            confirmed: false,
+            statusReleased: true,
+          },
+          computedRSVPDeadline: new Date().getTime() + 1000,
+        } as IUser)).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Application Expired', () => {
+
+    test('True', () => {
+      expect(isApplicationExpired({
+        ...hackerUser,
+        status: {
+          ...hackerUser.status,
+          applied: false,
+        },
+        computedApplicationDeadline: new Date().getTime() - 1000,
+      } as IUser));
+    });
+
+    describe('False', () => {
+      test('Already applied', () => {
+        expect(isApplicationExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: true,
+          },
+          computedApplicationDeadline: new Date().getTime() - 1000,
+        } as IUser));
+      });
+
+      test('Application deadline not expired', () => {
+        expect(isApplicationExpired({
+          ...hackerUser,
+          status: {
+            ...hackerUser.status,
+            applied: false,
+          },
+          computedApplicationDeadline: new Date().getTime() + 1000,
+        } as IUser));
       });
     });
   });

@@ -555,7 +555,23 @@ const status = {
       readCheck: true,
     },
 
-    // Intercepted fields (virtual fields, but we populate them)
+    // Virtual fields
+    rsvpExpired: {
+      type: Boolean,
+      virtual: true,
+      caption: 'RSVP Expired',
+
+      readCheck: true,
+    },
+
+    applicationExpired: {
+      type: Boolean,
+      virtual: true,
+      caption: 'Application Expired',
+
+      readCheck: true,
+    },
+
     canAmendTeam: {
       type: Boolean,
       virtual: true,
@@ -563,6 +579,7 @@ const status = {
 
       readCheck: true,
     },
+
     canApply: {
       type: Boolean,
       virtual: true,
@@ -570,6 +587,7 @@ const status = {
 
       readCheck: true,
     },
+
     canRSVP: {
       type: Boolean,
       virtual: true,
@@ -577,6 +595,7 @@ const status = {
 
       readCheck: true,
     },
+
     isRSVPOpen: {
       type: Boolean,
       virtual: true,
@@ -882,11 +901,14 @@ export interface IStatus {
   declined?: boolean,
   checkedIn?: boolean,
 
-  // Intercepted fields (since they require universe state)
+  // Virtual fields
   canAmendTeam?: boolean,
   canApply?: boolean,
   canRSVP?: boolean,
   isRSVPOpen?: boolean,
+
+  rsvpExpired?: boolean,
+  applicationExpired?: boolean,
 
   textStatus: string
   internalTextStatus: string
