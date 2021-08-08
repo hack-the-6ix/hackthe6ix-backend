@@ -18,6 +18,7 @@ export const fields = {
       required: true,
       readCheck: true,
       writeCheck: true,
+      inTextSearch: true,
     },
     memberIDs: {
       type: [String],

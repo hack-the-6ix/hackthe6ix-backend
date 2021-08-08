@@ -8,11 +8,13 @@ export default {
     index: true,
     readCheck: true,
     writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+    inTextSearch: true,
   },
   username: {
     type: String,
     readCheck: true,
     writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+    inTextSearch: true,
   },
   verifyTime: {
     type: Number,
@@ -28,5 +30,6 @@ export default {
     type: String,
     readCheck: true,
     writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+    inTextSearch: true,
   },
 };

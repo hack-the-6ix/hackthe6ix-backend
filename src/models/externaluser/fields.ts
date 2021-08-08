@@ -19,12 +19,14 @@ export const fields = {
       required: true,
       readCheck: true,
       writeCheck: true,
+      inTextSearch: true,
     },
     lastName: {
       type: String,
       required: true,
       readCheck: true,
       writeCheck: true,
+      inTextSearch: true,
     },
     email: {
       type: String,
@@ -32,11 +34,13 @@ export const fields = {
       index: true,
       readCheck: true,
       writeCheck: true,
+      inTextSearch: true,
     },
     notes: {
       type: String,
       readCheck: true,
       writeCheck: true,
+      inTextSearch: true,
     },
     discord: discordShared,
   },
