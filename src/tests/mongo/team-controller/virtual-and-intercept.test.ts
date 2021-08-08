@@ -86,6 +86,9 @@ describe('Virtual and Intercept', () => {
         _id: mongoose.Types.ObjectId(),
         firstName: 'Foo',
         lastName: 'Bar',
+        status: {
+          applied: true,
+        },
         hackerApplication: {
           teamCode: 'banana',
         },
@@ -96,6 +99,9 @@ describe('Virtual and Intercept', () => {
         _id: mongoose.Types.ObjectId(),
         firstName: 'Smoothie',
         lastName: 'Banana',
+        status: {
+          applied: true,
+        },
         hackerApplication: {
           teamCode: 'banana',
         },
@@ -131,6 +137,9 @@ describe('Virtual and Intercept', () => {
         _id: mongoose.Types.ObjectId(),
         firstName: 'Foo',
         lastName: 'Bar',
+        status: {
+          applied: true,
+        },
         hackerApplication: {
           teamCode: 'banana',
         },
@@ -143,6 +152,9 @@ describe('Virtual and Intercept', () => {
         lastName: 'Banana',
         hackerApplication: {
           teamCode: 'banana',
+        },
+        status: {
+          applied: true,
         },
       });
 
@@ -171,4 +183,72 @@ describe('Virtual and Intercept', () => {
       expect(team.teamScore).toEqual(5.5);
     });
   });
+
+  test('Fully Graded Team, but some unsubmitted', async () => {
+    const userA = await User.create({
+      ...hackerUser,
+      _id: mongoose.Types.ObjectId(),
+      firstName: 'Foo',
+      lastName: 'Bar',
+      status: {
+        applied: true,
+      },
+      hackerApplication: {
+        teamCode: 'banana',
+      },
+    });
+
+    const userB = await User.create({
+      ...hackerUser,
+      _id: mongoose.Types.ObjectId(),
+      firstName: 'Smoothie',
+      lastName: 'Banana',
+      hackerApplication: {
+        teamCode: 'banana',
+      },
+      status: {
+        applied: true,
+      },
+    });
+
+    const userC = await User.create({
+      ...hackerUser,
+      _id: mongoose.Types.ObjectId(),
+      firstName: 'Smoothie',
+      lastName: 'Banana',
+      hackerApplication: {
+        teamCode: 'banana',
+      },
+      status: {
+        applied: false,
+      },
+    });
+
+    await Team.create({
+      code: 'banana',
+      memberIDs: [
+        userA._id,
+        userB._id,
+        userC._id,
+      ],
+    } as ITeam);
+
+    const scoreMap: any = {};
+
+    scoreMap[userA._id] = 11;
+    scoreMap[userB._id] = 0;
+    scoreMap[userC._id] = -1;
+    computeApplicationScore.mockImplementation(function() {
+      return scoreMap[this._id] === undefined ? -1 : scoreMap[this._id];
+    });
+
+    const team = (await getObject(organizerUser, 'team', {
+      filter: {
+        code: 'banana',
+      },
+    }))[0];
+
+    expect(team.teamScore).toEqual(5.5);
+  });
+
 });
