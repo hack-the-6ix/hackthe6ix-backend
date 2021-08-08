@@ -44,8 +44,14 @@ export default async (usePersonalApplicationScore?: boolean) => {
     const diff = (b?.internal || {})[sortCriteria] - (a?.internal || {})[sortCriteria];
 
     if (diff === 0) {
-      // If the scores are the same, the tiebreaker is whoever submitted earlier
-      return a?.hackerApplication?.lastUpdated - b?.hackerApplication?.lastUpdated;
+      const diffPersonal = b?.internal?.computedApplicationScore - a?.internal?.computedApplicationScore;
+
+      if (diffPersonal === 0) {
+        // If the scores are the same, the tiebreaker is whoever submitted earlier
+        return a?.hackerApplication?.lastUpdated - b?.hackerApplication?.lastUpdated;
+      } else {
+        return diffPersonal;
+      }
     } else {
       return diff;
     }

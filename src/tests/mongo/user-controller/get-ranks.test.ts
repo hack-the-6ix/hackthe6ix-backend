@@ -236,6 +236,182 @@ describe('Get ranks', () => {
       expect(outUsers).toMatchObject(expectedUsers);
     });
 
+    test('Sort by personal score first', async () => {
+      const mockTeamCodeA = 'banana';
+      const mockTeamCodeB = 'orange';
+
+      const userA = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeA,
+          lastUpdated: 0,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userB = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeB,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userC = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          lastUpdated: 2,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeA,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userD = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          lastUpdated: 3,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeB,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+
+      await Team.create({
+        code: mockTeamCodeA,
+        memberIDs: [
+          userA._id,
+          userC._id,
+        ],
+      } as ITeam);
+
+      await Team.create({
+        code: mockTeamCodeB,
+        memberIDs: [
+          userB._id,
+          userD._id,
+        ],
+      } as ITeam);
+
+      const scoreMap: any = {};
+
+      scoreMap[userA._id] = 5;
+      scoreMap[userB._id] = 4;
+
+      // C applied before D, but it has a lower personal score, so should be ranked lower than D
+      scoreMap[userC._id] = 1;
+      scoreMap[userD._id] = 2;
+
+      computeApplicationScore.mockImplementation(function() {
+        return scoreMap[this._id] || -1;
+      });
+
+      const expectedUsers = [
+        userA,
+        userB,
+        userD,
+        userC,
+      ].map(user => user.toJSON());
+
+      const outUsers = await getRanks();
+      expect(outUsers).toMatchObject(expectedUsers);
+    });
+
+    test('Sort by time if personal scores are tied', async () => {
+      const mockTeamCodeA = 'banana';
+      const mockTeamCodeB = 'orange';
+
+      const userA = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeA,
+          lastUpdated: 0,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userB = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeB,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userC = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          lastUpdated: 2,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeA,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+      const userD = await User.create({
+        ...hackerUser,
+        status: {
+          applied: true,
+          lastUpdated: 3,
+        },
+        hackerApplication: {
+          teamCode: mockTeamCodeB,
+        },
+        _id: mongoose.Types.ObjectId(),
+      });
+
+      await Team.create({
+        code: mockTeamCodeA,
+        memberIDs: [
+          userA._id,
+          userC._id,
+        ],
+      } as ITeam);
+
+      await Team.create({
+        code: mockTeamCodeB,
+        memberIDs: [
+          userB._id,
+          userD._id,
+        ],
+      } as ITeam);
+
+      const scoreMap: any = {};
+
+      scoreMap[userA._id] = 5;
+      scoreMap[userB._id] = 5;
+
+      // C applied before D, but it has a lower personal score, so should be ranked lower than D
+      scoreMap[userC._id] = 1;
+      scoreMap[userD._id] = 1;
+
+      computeApplicationScore.mockImplementation(function() {
+        return scoreMap[this._id] || -1;
+      });
+
+      const expectedUsers = [
+        userA,
+        userB,
+        userC,
+        userD,
+      ].map(user => user.toJSON());
+
+      const outUsers = await getRanks();
+      expect(outUsers).toMatchObject(expectedUsers);
+    });
+
 
     test('Team score actually made it worse', async () => {
 
