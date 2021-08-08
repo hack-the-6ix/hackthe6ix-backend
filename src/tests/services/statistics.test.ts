@@ -165,43 +165,66 @@ describe('Get statistics', () => {
       expect(statistics.total).toEqual(2);
     });
 
-    test('Status', async () => {
-      // Okay yes this is a bit sketchy, but it works
-      const statuses = [
-        'applied',
-        'accepted',
-        'rejected',
-        'waitlisted',
-        'confirmed',
-        'declined',
-        'checkedIn',
-      ];
+    describe('Status', () => {
 
-      const expectedStatus: any = {};
-      const promises: any[] = [];
+      test('Main status', async () => {
+        // Okay yes this is a bit sketchy, but it works
+        const statuses = [
+          'applied',
+          'accepted',
+          'rejected',
+          'waitlisted',
+          'confirmed',
+          'declined',
+          'checkedIn',
+        ];
 
-      for (let i = 0; i < statuses.length; i++) {
+        const expectedStatus: any = {
+          rsvpExpired: 0,
+        };
+        const promises: any[] = [];
 
-        const status: any = {};
-        status[statuses[i]] = true;
+        for (let i = 0; i < statuses.length; i++) {
 
-        for (let k = 0; k < i; k++) {
-          promises.push(User.create({
-            ...hackerUser,
-            _id: mongoose.Types.ObjectId(),
-            status: {
-              ...status,
-              statusReleased: true,
-            },
-          }));
+          const status: any = {};
+          status[statuses[i]] = true;
+
+          for (let k = 0; k < i; k++) {
+            promises.push(User.create({
+              ...hackerUser,
+              _id: mongoose.Types.ObjectId(),
+              status: {
+                ...status,
+                statusReleased: true,
+              },
+            }));
+          }
+
+          expectedStatus[statuses[i]] = i;
         }
 
-        expectedStatus[statuses[i]] = i;
-      }
+        await Promise.all(promises);
+        const statistics = await getStatistics(true);
+        expect(statistics.hacker.status).toMatchObject(expectedStatus);
+      });
 
-      await Promise.all(promises);
-      const statistics = await getStatistics(true);
-      expect(statistics.hacker.status).toMatchObject(expectedStatus);
+      test('Expired users', async () => {
+        await User.create({
+          ...hackerUser,
+          status: {
+            applied: true,
+            accepted: true,
+            statusReleased: true,
+          },
+          personalRSVPDeadline: -1,
+        });
+
+        const statistics = await getStatistics(true);
+        expect(statistics.hacker.status).toMatchObject({
+          accepted: 0,
+          rsvpExpired: 1,
+        });
+      });
     });
 
     test('Gender', async () => {
