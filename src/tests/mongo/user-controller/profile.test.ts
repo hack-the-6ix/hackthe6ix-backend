@@ -34,7 +34,7 @@ afterAll(runAfterAll);
 
 jest.mock('../../../controller/util/resources', () => (
   {
-    fetchUniverseState: jest.requireActual('../../../controller/util/resources').fetchUniverseState,
+    ...jest.requireActual('../../../controller/util/resources'),
     getModels: jest.fn(),
   }
 ));

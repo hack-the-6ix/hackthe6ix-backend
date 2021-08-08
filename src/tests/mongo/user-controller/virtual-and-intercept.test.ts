@@ -40,8 +40,6 @@ beforeEach(runBeforeEach);
  */
 afterAll(runAfterAll);
 
-
-
 jest.mock('../../../models/validator', () => {
   const validators = jest.requireActual('../../../models/validator');
   return {

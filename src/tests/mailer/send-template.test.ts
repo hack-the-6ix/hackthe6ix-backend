@@ -1,4 +1,3 @@
-import { getObject } from '../../controller/ModelController';
 import User from '../../models/user/User';
 import sendEmail from '../../services/mailer/sendEmail';
 import sendTemplateEmail from '../../services/mailer/sendTemplateEmail';
@@ -6,7 +5,6 @@ import { okResponse } from '../../services/mailer/util/dev';
 import { getTemplate, sendEmailRequest } from '../../services/mailer/util/external';
 import { MailTemplate } from '../../types/mailer';
 import {
-  adminUser,
   hackerUser,
   mockSuccessResponse,
   runAfterAll,
@@ -61,11 +59,7 @@ describe('Send template email', () => {
       mockTags,
     );
 
-    const profileMergeFields = (await getObject(adminUser, 'user', {
-      filter: {
-        _id: hacker._id,
-      },
-    }) as any[])[0].mailmerge;
+    const profileMergeFields = hacker.toJSON().mailmerge;
 
     expect(getTemplate).toHaveBeenCalledWith(mockTemplateName);
     expect(sendEmail).toHaveBeenCalledWith(

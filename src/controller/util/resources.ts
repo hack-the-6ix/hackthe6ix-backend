@@ -19,7 +19,7 @@ import { fields as userFields } from '../../models/user/fields';
 import User from '../../models/user/User';
 import { UniverseState } from '../../types/types';
 
-const models = {
+export const getModels = () => ({
   user: {
     mongoose: User,
     rawFields: userFields,
@@ -48,9 +48,7 @@ const models = {
     mongoose: MeetingAttendance,
     rawFields: meetingAttendanceFields
   }
-};
-
-export const getModels = () => models;
+});
 
 /**
  * Fetch metadata about the universe first that might be necessary for making validation decisions

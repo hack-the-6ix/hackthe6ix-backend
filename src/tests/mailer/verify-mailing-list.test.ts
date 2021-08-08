@@ -1,5 +1,3 @@
-import { systemUser } from '../../consts';
-import { getObject } from '../../controller/ModelController';
 import User from '../../models/user/User';
 import { addSubscriptionRequest, getList } from '../../services/mailer/util/external';
 import verifyMailingList from '../../services/mailer/verifyMailingList';
@@ -49,13 +47,10 @@ test('Verify lists', async () => {
   getList.mockImplementation((x: string) => (mockGetList as any)[x]);
 
   const user = await User.create(organizerUser);
+
   const listNames = await verifyMailingList(user);
 
-  const mailmerge = (await getObject(systemUser, 'user', {
-    filter: {
-      _id: user._id,
-    },
-  }))[0].mailmerge;
+  const mailmerge = user.mailmerge;
 
   expect(new Set(addSubscriptionRequest.mock.calls)).toEqual(new Set(
     Object.keys(mockMailingLists).map((list: string) => ([
