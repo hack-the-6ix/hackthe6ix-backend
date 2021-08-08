@@ -140,15 +140,15 @@ export const generateMockUniverseState = async (applyOffset = 100000, confirmOff
   return await Settings.findOneAndUpdate({},
     {
       universe: {
-      public: {
-        globalApplicationDeadline: new Date().getTime() + applyOffset,
-        globalConfirmationDeadline: new Date().getTime() + confirmOffset,
-        globalWaitlistAcceptedConfirmationDeadline: new Date().getTime() + waitlistAcceptedConfirmationOffset,
-      },
-      private: {
-        maxAccepted: maxAccept,
-        maxWaitlist: maxWaitlist,
-      },
+        public: {
+          globalApplicationDeadline: new Date().getTime() + applyOffset,
+          globalConfirmationDeadline: new Date().getTime() + confirmOffset,
+          globalWaitlistAcceptedConfirmationDeadline: new Date().getTime() + waitlistAcceptedConfirmationOffset,
+        },
+        private: {
+          maxAccepted: maxAccept,
+          maxWaitlist: maxWaitlist,
+        },
       },
     }, {
       upsert: true,

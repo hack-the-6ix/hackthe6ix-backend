@@ -4,8 +4,9 @@ import mongoose from 'mongoose';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { stringifyUnixTime } from '../../util/date';
 import { ISettings } from '../settings/fields';
+import Settings from '../settings/Settings';
 import { extractFields } from '../util';
-import { getApplicationDeadline, getRSVPDeadline } from '../validator';
+import { canRSVP, canUpdateApplication, isApplicationOpen, isRSVPOpen } from '../validator';
 import computeApplicationScore from './computeApplicationScore';
 import { fields, IUser } from './fields';
 
@@ -17,6 +18,8 @@ const schema = new mongoose.Schema(extractFields(fields), {
     virtuals: true,
   },
 });
+
+schema.plugin(mongooseAutopopulate);
 
 /**
  * { A: [B, C] }
@@ -101,6 +104,22 @@ schema.virtual('status.internalTextStatus').get(function() {
   return 'Not Applied';
 });
 
+schema.virtual('status.canAmendTeam').get(function() {
+  return isApplicationOpen(this);
+});
+
+schema.virtual('status.canApply').get(function() {
+  return canUpdateApplication(this);
+});
+
+schema.virtual('status.canRSVP').get(function() {
+  return canRSVP(this);
+});
+
+schema.virtual('status.isRSVPOpen').get(function() {
+  return isRSVPOpen(this);
+});
+
 /**
  * Application scores
  */
@@ -138,13 +157,7 @@ schema.virtual('computedApplicationDeadline', {
   justOne: true,
   autopopulate: true,
 }).get(function(settings: ISettings) {
-  return getApplicationDeadline({
-    submissionObject: {} as IUser,
-    requestUser: this,
-    universeState: settings?.universe,
-    fieldValue: null,
-    targetObject: this,
-  });
+  return -1; //getApplicationDeadline(this, settings.universe);
 });
 
 schema.virtual('computedConfirmationDeadline', {
@@ -154,16 +167,9 @@ schema.virtual('computedConfirmationDeadline', {
   justOne: true,
   autopopulate: true,
 }).get(function(settings: ISettings) {
-  return getRSVPDeadline({
-    submissionObject: {} as IUser,
-    requestUser: this,
-    universeState: settings?.universe,
-    fieldValue: null,
-    targetObject: this,
-  });
+  Settings.findOne({}).then(s => console.log(s, settings));
+
+  return -1; //getRSVPDeadline(this, settings.universe);
 });
-
-schema.plugin(mongooseAutopopulate);
-
 
 export default mongoose.model<IUser>('User', schema);
