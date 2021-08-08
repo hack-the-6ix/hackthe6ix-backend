@@ -12,8 +12,8 @@ const schema = new mongoose.Schema(extractFields(fields), {
 });
 
 schema.index({
-    meetingID: 1,
-    userID: 1
-})
+  meetingID: 1,
+  userID: 1,
+});
 
 export default mongoose.model<IMeetingAttendance>('MeetingAttendance', schema);

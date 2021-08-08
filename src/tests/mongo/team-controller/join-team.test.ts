@@ -35,7 +35,6 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 
-
 describe('Join Team', () => {
   test('Success', async () => {
     await generateMockUniverseState();

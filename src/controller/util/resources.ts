@@ -34,20 +34,20 @@ export const getModels = () => ({
   },
   externaluser: {
     mongoose: ExternalUser,
-    rawFields: externalUserFields
+    rawFields: externalUserFields,
   },
   apitoken: {
     mongoose: APIToken,
-    rawFields: apiTokenFields
+    rawFields: apiTokenFields,
   },
   meeting: {
     mongoose: Meeting,
-    rawFields: meetingFields
+    rawFields: meetingFields,
   },
   meetingattendance: {
     mongoose: MeetingAttendance,
-    rawFields: meetingAttendanceFields
-  }
+    rawFields: meetingAttendanceFields,
+  },
 });
 
 /**

@@ -109,12 +109,12 @@ export const handleCallback = async (providerName: string, code: string, stateTe
     // Trigger a mailing list sync on login
     // We don't really need to wait for this, so we'll run it async
     syncMailingLists(undefined, true, userData.email)
-        .then(() => {
-          log.debug(`Synced mailing list for ${userData.email}`);
-        })
-        .catch((e) => {
-          log.warn(`Unable to sync mailing list for ${userData.email}`, e);
-        });
+    .then(() => {
+      log.debug(`Synced mailing list for ${userData.email}`);
+    })
+    .catch((e) => {
+      log.warn(`Unable to sync mailing list for ${userData.email}`, e);
+    });
 
     // Log the login event
     const logPayload = JSON.stringify({
@@ -126,11 +126,10 @@ export const handleCallback = async (providerName: string, code: string, stateTe
     return {
       token: localToken,
       refreshToken: accesstoken.token.refresh_token,
-      redirectTo: redirectTo
-    }
-  }
-  catch(err) {
-    if(err.output?.statusCode === 400){
+      redirectTo: redirectTo,
+    };
+  } catch (err) {
+    if (err.output?.statusCode === 400) {
       throw new ForbiddenError('Invalid code.', err, false);
     } else {
       throw new InternalServerError('Unable to initialize the login provider.', err, false);
@@ -165,11 +164,10 @@ export const handleLoginRequest = async (providerName: string, redirectTo: strin
     });
 
     return {
-      url: redirectURL
-    }
-  }
-  catch(err) {
-    throw new InternalServerError('Unable to initialize the login provider.', err, false)
+      url: redirectURL,
+    };
+  } catch (err) {
+    throw new InternalServerError('Unable to initialize the login provider.', err, false);
   }
 };
 
@@ -192,7 +190,7 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
       refreshToken: newTokens['refreshToken'],
     };
   } catch (err) {
-    throw new BadRequestError("Unable to refresh token", err, false);
+    throw new BadRequestError('Unable to refresh token', err, false);
   }
 };
 
@@ -225,10 +223,10 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
       data: params,
       auth: {
         username: encodeURIComponent(provider.client_id).replace(/%20/g, '+'),
-        password: provider.client_secret
-      }
+        password: provider.client_secret,
+      },
     });
-  } catch(err) {
+  } catch (err) {
     log.warn(`Unable to log out of IDP session for user with link ID ${tokenInfo.sub}.`, err);
   }
 
@@ -238,13 +236,13 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
 export const createAPIToken = async (requestUser: IUser, groups: string[], description: string): Promise<{
   token: string
 }> => {
-  if(!Array.isArray(groups)){
-    throw new BadRequestError("Groups must be an array of strings.");
+  if (!Array.isArray(groups)) {
+    throw new BadRequestError('Groups must be an array of strings.');
   }
 
-  for(const group of groups){
-    if(!requestUser.roles[group as keyof IRoles]){
-      throw new ForbiddenError("Cannot issue token of higher privilege than the requesting user.");
+  for (const group of groups) {
+    if (!requestUser.roles[group as keyof IRoles]) {
+      throw new ForbiddenError('Cannot issue token of higher privilege than the requesting user.');
     }
   }
 
@@ -255,10 +253,10 @@ export const createAPIToken = async (requestUser: IUser, groups: string[], descr
   await APIToken.create({
     token: tokenString,
     description: description,
-    internalUserID: internalUser._id
+    internalUserID: internalUser._id,
   });
 
   return {
-    token: tokenString
-  }
+    token: tokenString,
+  };
 };

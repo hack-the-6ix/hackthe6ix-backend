@@ -344,13 +344,13 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
  *
  * Associate a user on Discord
  */
-actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
     verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername),
     true,
-  )
+  );
 });
 
 /**
@@ -358,13 +358,13 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Associate a user on Discord
  */
- actionRouter.get('/getUserByDiscordID', isOrganizer, (req:Request, res: Response) => {
+actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUserByDiscordID(req.query.discordID as string)
-  )
- });
+    fetchUserByDiscordID(req.query.discordID as string),
+  );
+});
 
 
 /**
@@ -372,13 +372,13 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Create an API token for programmatic access
  */
- actionRouter.post('/createAPIToken', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    createAPIToken(req.executor, req.body.groups, req.body.description)
-  )
- });
+    createAPIToken(req.executor, req.body.groups, req.body.description),
+  );
+});
 
 
 /**
@@ -386,24 +386,24 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req:Request, res: Response) =>
  *
  * Record someone joining a meeting
  */
- actionRouter.post('/recordMeetingJoin', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/recordMeetingJoin', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now())
-  )
- });
+    recordJoin(req.body.meetingID, req.body.userID, req.body.time || Date.now()),
+  );
+});
 
 /**
  * (Organizer)
  *
  * Record someone leaving a meeting
  */
- actionRouter.post('/recordMeetingLeave', isOrganizer, (req:Request, res: Response) => {
+actionRouter.post('/recordMeetingLeave', isOrganizer, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now())
-  )
- });
+    recordLeave(req.body.meetingID, req.body.userID, req.body.time || Date.now()),
+  );
+});
 export default actionRouter;

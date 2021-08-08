@@ -29,7 +29,6 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 
-
 describe('Get team', () => {
   test('No team', async () => {
     await generateMockUniverseState();
