@@ -1,5 +1,4 @@
-import { systemUser } from '../../consts';
-import { getObject } from '../../controller/ModelController';
+import User from '../../models/user/User';
 import { InternalServerError } from '../../types/errors';
 import {
   addSubscriptionRequest,
@@ -46,13 +45,9 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
 
   const subscribeNewResults = await Promise.all(toBeAdded.map(
     async (userEmail: string) => {
-      const user = (await getObject(systemUser, 'user', {
-        filter: {
-          email: userEmail,
-        },
-      }));
+      const user = await User.findOne({ email: userEmail });
 
-      return addSubscriptionRequest(mailingListID, userEmail, user[0]?.mailmerge || {});
+      return addSubscriptionRequest(mailingListID, userEmail, user?.toJSON()?.mailmerge || {});
     },
   ));
 

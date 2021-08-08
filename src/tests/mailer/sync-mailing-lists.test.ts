@@ -23,13 +23,6 @@ beforeEach(runBeforeEach);
  */
 afterAll(runAfterAll);
 
-jest.mock('../../controller/util/resources', () => {
-  const { getModels } = jest.requireActual('../../controller/util/resources');
-  return {
-    fetchUniverseState: jest.requireActual('../../controller/util/resources').fetchUniverseState,
-    getModels: getModels,
-  };
-});
 
 jest.mock('../../services/mailer/util/external', () => ({
   addSubscriptionRequest: jest.fn(),

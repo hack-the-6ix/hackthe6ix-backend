@@ -66,7 +66,6 @@ jest.mock('../../../services/mailer/syncMailingLists', () => jest.fn((): any => 
 
 jest.mock('../../../models/user/fields', () => {
   const actualFields = jest.requireActual('../../../models/user/fields');
-  const canUpdateApplication = jest.requireActual('../../../models/validator').canUpdateApplication;
   const deepcopy = jest.requireActual('deepcopy');
 
   const updatedFields = deepcopy(actualFields.fields);
