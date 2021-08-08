@@ -1,6 +1,6 @@
 import { IUser } from '../../models/user/fields';
 import User from '../../models/user/User';
-import { isRSVPOpen } from '../../models/validator';
+import { isRSVPExpired, isRSVPOpen } from '../../models/validator';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { BadRequestError } from '../../types/errors';
 import { fetchUniverseState } from '../util/resources';
@@ -33,6 +33,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
 
   // A user is in a "dead state" if this predicate is false
   const userEligible = (user: IUser) =>
+    !isRSVPExpired(user) &&
     (!(user?.status?.accepted || user?.status?.waitlisted) || isRSVPOpen(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
     !user?.status?.rejected && !user?.status?.declined; // If a user is rejected or declined, they're out
 
@@ -67,7 +68,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
     };
 
     if (personalDeadline !== undefined) {
-      update['personalConfirmationDeadline'] = personalDeadline;
+      update['personalRSVPDeadline'] = personalDeadline;
     }
 
     // Write changes to database

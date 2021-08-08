@@ -67,7 +67,7 @@ describe('Assign Application Status', () => {
           accepted: true,
           internalTextStatus: 'Accepted',
         },
-        personalConfirmationDeadline: (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline,
+        personalRSVPDeadline: (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline,
       }]);
       expect(rejected).toEqual([]);
     });
@@ -100,7 +100,7 @@ describe('Assign Application Status', () => {
             accepted: true,
             internalTextStatus: 'Accepted',
           },
-          personalConfirmationDeadline: 696969,
+          personalRSVPDeadline: 696969,
         }]);
         expect(rejected).toEqual([]);
 
@@ -512,7 +512,7 @@ describe('Assign Application Status', () => {
             applied: true,
             accepted: true,
           },
-          personalConfirmationDeadline: -1,
+          personalRSVPDeadline: -1,
         }),
         User.create({ // Accept
           ...hackerUser,
@@ -722,7 +722,7 @@ describe('Assign Application Status', () => {
           internalTextStatus: 'Accepted',
         },
       }));
-      mockAcceptedUsers[3].personalConfirmationDeadline = (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline; // Formerly waitlisted user is now given a week to respond
+      mockAcceptedUsers[3].personalRSVPDeadline = (await fetchUniverseState()).public.globalWaitlistAcceptedConfirmationDeadline; // Formerly waitlisted user is now given a week to respond
       expect(accepted).toEqual(mockAcceptedUsers);
       expect(waitlisted).toEqual([users[5], users[6]].map((u: IUser) => ({
         ...u,
@@ -829,7 +829,7 @@ describe('Assign Application Status', () => {
             applied: true,
             accepted: true,
           },
-          personalConfirmationDeadline: mockTimestamp + 1000,
+          personalRSVPDeadline: mockTimestamp + 1000,
         }),
       ])).map((u: IUser) => u.toJSON());
 

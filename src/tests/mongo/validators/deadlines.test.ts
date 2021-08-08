@@ -31,7 +31,7 @@ describe('Deadlines', () => {
     test('Personal', () => {
       expect(getRSVPDeadline({
         ...hackerUser,
-        personalConfirmationDeadline: 1234,
+        personalRSVPDeadline: 1234,
       } as IUser, {
         public: {
           globalConfirmationDeadline: 4321,

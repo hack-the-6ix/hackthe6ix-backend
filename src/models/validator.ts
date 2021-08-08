@@ -49,7 +49,7 @@ export const rsvpDecisionSubmitted = (user: IUser) => user?.status?.confirmed ||
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
 export const getApplicationDeadline = (user: IUser, universeState: UniverseState) => user.personalApplicationDeadline === undefined ? universeState.public.globalApplicationDeadline : user.personalApplicationDeadline;
-export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => user.personalConfirmationDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalConfirmationDeadline;
+export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => user.personalRSVPDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalRSVPDeadline;
 
 export const isApplicationOpen = (user: IUser) => user.computedApplicationDeadline >= new Date().getTime();
 export const isRSVPOpen = (user: IUser) => user.computedRSVPDeadline >= new Date().getTime();
