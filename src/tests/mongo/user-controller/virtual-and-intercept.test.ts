@@ -307,7 +307,7 @@ describe('Virtual', () => {
 
           const user = await User.create({
             ...hackerUser,
-            personalConfirmationDeadline: personalDeadline,
+            personalRSVPDeadline: personalDeadline,
           });
           const fetchedUser = await fetchUser(user);
           expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
@@ -318,7 +318,7 @@ describe('Virtual', () => {
 
           const user = await User.create({
             ...hackerUser,
-            personalConfirmationDeadline: personalDeadline,
+            personalRSVPDeadline: personalDeadline,
           });
           const fetchedUser = await fetchUser(user);
           expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);

@@ -836,7 +836,7 @@ export const fields = {
 
       readCheck: true,
     },
-    personalConfirmationDeadline: {
+    personalRSVPDeadline: {
       type: Number,
       caption: 'RSVP Deadline',
 
@@ -919,7 +919,7 @@ export interface IUser extends BasicUser {
   idpLinkID: string,
   fullName: string,
   created: number,
-  personalConfirmationDeadline?: number,
+  personalRSVPDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
   groups: IRoles, // Raw group from KEYCLOAK
