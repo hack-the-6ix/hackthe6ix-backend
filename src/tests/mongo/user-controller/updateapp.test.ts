@@ -72,7 +72,7 @@ jest.mock('../../../models/user/fields', () => {
   const updatedFields = deepcopy(actualFields.fields);
   updatedFields.FIELDS.hackerApplication = {
     readCheck: true,
-    writeCheck: canUpdateApplication(),
+    writeCheck: true,
 
     FIELDS: {
       submitCheckFallback: { // this should pass because submitCheck > writeCheck

@@ -840,7 +840,7 @@ export const fields = {
       virtual: true,
       readCheck: true,
     },
-    computedConfirmationDeadline: {
+    computedRSVPDeadline: {
       type: Number,
       virtual: true,
       readCheck: true,
@@ -924,7 +924,7 @@ export interface IUser extends BasicUser {
   },
   mailmerge: IMailMerge,
   computedApplicationDeadline: number,
-  computedConfirmationDeadline: number
+  computedRSVPDeadline: number
 }
 
 export interface IMailMerge {
