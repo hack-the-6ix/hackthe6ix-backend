@@ -45,6 +45,7 @@ export const isApplied = (user: IUser) => user?.status?.applied;
 export const isDeclined = (user: IUser) => user?.status?.declined;
 export const isAccepted = (user: IUser) => user?.status?.accepted;
 export const isStatusReleased = (user: IUser) => user?.status?.statusReleased;
+export const rsvpDecisionSubmitted = (user: IUser) => user?.status?.confirmed || user?.status?.declined;
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
 export const getApplicationDeadline = (user: IUser, universeState: UniverseState) => user.personalApplicationDeadline === undefined ? universeState.public.globalApplicationDeadline : user.personalApplicationDeadline;
@@ -55,12 +56,16 @@ export const isRSVPOpen = (user: IUser) => user.computedRSVPDeadline >= new Date
 
 export const canUpdateApplication = (user: IUser) => (
   !isApplied(user) &&
-  isApplicationOpen(user)
+  !isApplicationExpired(user)
 );
 
 export const canRSVP = (user: IUser) => (
   !isDeclined(user) &&
-  isRSVPOpen(user) &&
+  !isRSVPExpired(user) &&
   isAccepted(user) &&
   isStatusReleased(user)
 );
+
+export const isRSVPExpired = (user: IUser) => isStatusReleased(user) && isAccepted(user) && !rsvpDecisionSubmitted(user) && !isRSVPOpen(user);
+
+export const isApplicationExpired = (user: IUser) => !isApplied(user) && !isApplicationOpen(user);

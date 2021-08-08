@@ -11,7 +11,9 @@ import {
   canUpdateApplication,
   getApplicationDeadline,
   getRSVPDeadline,
+  isApplicationExpired,
   isApplicationOpen,
+  isRSVPExpired,
   isRSVPOpen,
 } from '../validator';
 import computeApplicationScore from './computeApplicationScore';
@@ -90,7 +92,11 @@ schema.virtual('status.textStatus').get(function() {
 });
 
 schema.virtual('status.internalTextStatus').get(function() {
-  if (this?.status?.declined) {
+  if (this?.status?.rsvpExpired) {
+    return 'Invitation Expired';
+  } else if (this?.status?.applicationExpired) {
+    return 'Application Expired';
+  } else if (this?.status?.declined) {
     return 'Declined';
   } else if (this.status?.checkedIn) {
     return 'Checked In';
@@ -123,6 +129,14 @@ schema.virtual('status.canRSVP').get(function() {
 
 schema.virtual('status.isRSVPOpen').get(function() {
   return isRSVPOpen(this);
+});
+
+schema.virtual('status.rsvpExpired').get(function() {
+  return isRSVPExpired(this);
+});
+
+schema.virtual('status.applicationExpired').get(function() {
+  return isApplicationExpired(this);
 });
 
 /**

@@ -9,7 +9,9 @@ import {
   canUpdateApplication,
   getApplicationDeadline,
   getRSVPDeadline,
+  isApplicationExpired,
   isApplicationOpen,
+  isRSVPExpired,
   isRSVPOpen,
 } from '../../../models/validator';
 import { stringifyUnixTime } from '../../../util/date';
@@ -50,6 +52,8 @@ jest.mock('../../../models/validator', () => {
     getApplicationDeadline: jest.fn(),
     getRSVPDeadline: jest.fn(),
     isApplicationOpen: jest.fn(),
+    isRSVPExpired: jest.fn(),
+    isApplicationExpired: jest.fn(),
   };
 });
 
@@ -213,6 +217,46 @@ describe('Virtual', () => {
     });
   });
 
+  describe('RSVP Expired', () => {
+    beforeEach(() => isRSVPExpired.mockImplementation(jest.requireActual('../../../models/validator').isRSVPExpired));
+
+    test('Success', async () => {
+      isRSVPExpired.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.rsvpExpired).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isRSVPExpired.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.rsvpExpired).toBeFalsy();
+    });
+  });
+
+  describe('Application Expired', () => {
+    beforeEach(() => isApplicationExpired.mockImplementation(jest.requireActual('../../../models/validator').isApplicationExpired));
+
+    test('Success', async () => {
+      isApplicationExpired.mockReturnValue(true);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.applicationExpired).toBeTruthy();
+    });
+
+    test('Fail', async () => {
+      isApplicationExpired.mockReturnValue(false);
+      const user = await User.create(hackerUser);
+      const fetchedUser = await fetchUser(user);
+
+      expect(fetchedUser.status.applicationExpired).toBeFalsy();
+    });
+  });
+
   describe('Computed Deadlines', () => {
     beforeEach(() => {
       canUpdateApplication.mockImplementation(jest.requireActual('../../../models/validator').canUpdateApplication);
@@ -330,6 +374,31 @@ describe('Virtual', () => {
 
 
   describe('Text Status', () => {
+
+    beforeEach(() => {
+      isRSVPExpired.mockReturnValue(false);
+      isApplicationExpired.mockReturnValue(false);
+    });
+
+    test('Invitation Expired', async () => {
+      isRSVPExpired.mockReturnValue(true);
+
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.textStatus).toEqual('Invitation Expired');
+    });
+
+    test('Application Expired', async () => {
+      isApplicationExpired.mockReturnValue(true);
+
+      const user: IUser = await User.create({
+        ...hackerUser,
+      });
+
+      expect(user.status.textStatus).toEqual('Application Expired');
+    });
 
     test('Not applied', async () => {
       const user: IUser = await User.create({
