@@ -1,11 +1,11 @@
 import axios from 'axios';
 import short from 'short-uuid';
 import { ArrayElement } from '../../@types/utilitytypes';
+import APIToken from '../models/apitoken/APIToken';
 import { ISettings } from '../models/settings/fields';
 import Settings from '../models/settings/Settings';
 import { IRoles, IUser } from '../models/user/fields';
 import User from '../models/user/User';
-import APIToken from '../models/apitoken/APIToken';
 
 import { getCircularReplacer, log } from '../services/logger';
 
@@ -261,4 +261,4 @@ export const createAPIToken = async (requestUser: IUser, groups: string[], descr
   return {
     token: tokenString
   }
-}
+};

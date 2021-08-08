@@ -7,7 +7,6 @@ import {
   WriteCheckRequest,
 } from '../../types/checker';
 import { AlreadySubmittedError, DeadlineExpiredError, ForbiddenError } from '../../types/errors';
-import { fetchUniverseState } from './resources';
 
 /**
  * Evaluates checkerFunction if it's executable, otherwise returns if it is strictly true.
@@ -91,26 +90,12 @@ export const escapeStringRegexp = (x: string) => {
 
 /**
  * Throws an error if the user cannot update their application.
- *
- * If requestUser is provided, we will handle fetching the universe state and generating the writeRequest automatically
  */
-export const testCanUpdateApplication = async (requestUser: IUser, writeRequest?: WriteCheckRequest<any, any>) => {
-  if (!writeRequest) {
-    const universeState = await fetchUniverseState();
-
-    writeRequest = {
-      requestUser: requestUser,
-      targetObject: requestUser,
-      submissionObject: {},
-      universeState: universeState,
-      fieldValue: undefined,
-    };
-  }
-
-  if (!canUpdateApplication()(writeRequest)) {
-    if (isApplied(writeRequest)) {
+export const testCanUpdateApplication = async (requestUser: IUser) => {
+  if (!canUpdateApplication(requestUser)) {
+    if (isApplied(requestUser)) {
       throw new AlreadySubmittedError('You have already applied!');
-    } else if (!isApplicationOpen(writeRequest)) {
+    } else if (!isApplicationOpen(requestUser)) {
       throw new DeadlineExpiredError('The submission deadline has passed!');
     } else {
       throw new ForbiddenError('User is not eligible to submit');
@@ -120,23 +105,9 @@ export const testCanUpdateApplication = async (requestUser: IUser, writeRequest?
 
 /**
  * Throws an error if the user cannot update their application.
- *
- * If requestUser is provided, we will handle fetching the universe state and generating the writeRequest automatically
  */
-export const testCanUpdateTeam = async (requestUser: IUser, writeRequest?: WriteCheckRequest<any, any>) => {
-  if (!writeRequest) {
-    const universeState = await fetchUniverseState();
-
-    writeRequest = {
-      requestUser: requestUser,
-      targetObject: requestUser,
-      submissionObject: {},
-      universeState: universeState,
-      fieldValue: undefined,
-    };
-  }
-
-  if (!isApplicationOpen(writeRequest)) {
+export const testCanUpdateTeam = async (requestUser: IUser) => {
+  if (!isApplicationOpen(requestUser)) {
     throw new DeadlineExpiredError('The submission deadline has passed!');
   }
 };

@@ -159,6 +159,7 @@ describe('Virtual', () => {
 
     test('Success', async () => {
       canUpdateApplication.mockReturnValue(() => true);
+
       const user = await User.create(hackerUser);
       const fetchedUser = await fetchUser(user);
 

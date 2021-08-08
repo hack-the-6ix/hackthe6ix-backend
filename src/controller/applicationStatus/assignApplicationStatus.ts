@@ -31,17 +31,9 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
 
   const universeState = await fetchUniverseState();
 
-  const userRSVPOpen = (user: IUser) => isRSVPOpen({
-    requestUser: user,
-    targetObject: user,
-    universeState: universeState,
-    fieldValue: undefined,
-    submissionObject: undefined,
-  });
-
   // A user is in a "dead state" if this predicate is false
   const userEligible = (user: IUser) =>
-    (!(user?.status?.accepted || user?.status?.waitlisted) || userRSVPOpen(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    (!(user?.status?.accepted || user?.status?.waitlisted) || isRSVPOpen(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
     !user?.status?.rejected && !user?.status?.declined; // If a user is rejected or declined, they're out
 
   const rawRankedUsers = await getRanks();

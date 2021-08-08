@@ -2,20 +2,15 @@ import {
   CreateCheckRequest,
   DeleteCheckRequest,
   ReadCheckRequest,
-  ReadInterceptRequest,
   WriteCheckRequest,
 } from '../../types/checker';
 import { BasicUser } from '../../types/types';
 
 import discordShared from '../shared/discordShared';
 import {
-  canRSVP,
-  canUpdateApplication,
   inEnum,
   isAdmin,
-  isApplicationOpen,
   isOrganizer,
-  isRSVPOpen,
   isUserOrOrganizer,
   maxLength,
   minLength,
@@ -27,7 +22,7 @@ import { maskStatus } from './interceptors';
 
 // Main application
 export const hackerApplication = {
-  writeCheck: canUpdateApplication(),
+  writeCheck: true,
   readCheck: true,
 
   FIELDS: {
@@ -563,63 +558,31 @@ const status = {
     // Intercepted fields (virtual fields, but we populate them)
     canAmendTeam: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can Amend Team',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isApplicationOpen({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
     canApply: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can Apply',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canUpdateApplication()({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
     canRSVP: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Can RSVP',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => canRSVP()({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
     isRSVPOpen: {
       type: Boolean,
-      required: true,
-      default: false,
+      virtual: true,
       caption: 'Is Confirmation Open',
 
       readCheck: true,
-
-      readInterceptor: (request: ReadInterceptRequest<boolean, IUser>) => isRSVPOpen({
-        ...request,
-        requestUser: request.targetObject,
-        fieldValue: undefined,
-        submissionObject: undefined,
-      }),
     },
   },
 };
