@@ -8,6 +8,7 @@ import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
 import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
+import { initializeSettingsMapper } from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   fetchUser,
@@ -259,6 +260,23 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
   );
 });
 
+/**
+ * (Admin)
+ *
+ * Iterates through all documents and ensures the settingsMapper field is populated.
+ * We use this field to populate the user object with data from global settings, such as deadlines.
+ * Refer to the README for more information.
+ *
+ * This endpoint should only be needed for migrating old databases.
+ */
+actionRouter.post('/initializeSettingsMapper', isAdmin, (req: Request, res: Response) => {
+  logResponse(
+    req,
+    res,
+    initializeSettingsMapper(),
+    true,
+  );
+});
 /**
  * (Admin)
  *
