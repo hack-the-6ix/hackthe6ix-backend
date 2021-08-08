@@ -44,7 +44,7 @@ describe('Verify user in Discord', () => {
       await expect(async () => {
         const userInfo = await verifyDiscordUser(hackerUser.email, DISCORD_ID, DISCORD_NAME);
       }).rejects.toThrow(NotFoundError);
-    })
+    });
   });
   describe('Internal user', () => {
     test('User not confirmed', async () => {
@@ -68,11 +68,11 @@ describe('Verify user in Discord', () => {
         firstName: confirmedHackerUser.firstName,
         lastName: confirmedHackerUser.lastName,
         email: confirmedHackerUser.email,
-        roles: ['hacker']
+        roles: ['hacker'],
       });
 
       const newUser = await User.findOne({
-        _id: confirmedHackerUser._id
+        _id: confirmedHackerUser._id,
       });
 
       expect(newUser.status?.checkedIn).toEqual(true);
@@ -88,8 +88,8 @@ describe('Verify user in Discord', () => {
         ...confirmedHackerUser,
         discord: {
           discordID: DISCORD_ID,
-          verifyTime: 0
-        }
+          verifyTime: 0,
+        },
       });
 
       const userInfo = await verifyDiscordUser(confirmedHackerUser.email, DISCORD_ID, DISCORD_NAME, SIM_TIME);
@@ -98,11 +98,11 @@ describe('Verify user in Discord', () => {
         firstName: confirmedHackerUser.firstName,
         lastName: confirmedHackerUser.lastName,
         email: confirmedHackerUser.email,
-        roles: ['hacker']
+        roles: ['hacker'],
       });
 
       const newUser = await User.findOne({
-        _id: confirmedHackerUser._id
+        _id: confirmedHackerUser._id,
       });
 
       expect(newUser.status?.checkedIn).toEqual(true);
@@ -117,8 +117,8 @@ describe('Verify user in Discord', () => {
       const user = await User.create({
         ...confirmedHackerUser,
         discord: {
-          discordID: DISCORD_ID
-        }
+          discordID: DISCORD_ID,
+        },
       });
 
       await expect(async () => {
@@ -133,8 +133,8 @@ describe('Verify user in Discord', () => {
         ...confirmedHackerUser,
         discord: {
           additionalRoles: ['testrole'],
-          suffix: 'testsuffix'
-        }
+          suffix: 'testsuffix',
+        },
       });
 
       const userInfo = await verifyDiscordUser(confirmedHackerUser.email, DISCORD_ID, DISCORD_NAME);
@@ -144,7 +144,7 @@ describe('Verify user in Discord', () => {
         lastName: confirmedHackerUser.lastName,
         email: confirmedHackerUser.email,
         suffix: 'testsuffix',
-        roles: ['testrole', 'hacker']
+        roles: ['testrole', 'hacker'],
       });
     });
 
@@ -154,8 +154,8 @@ describe('Verify user in Discord', () => {
       const user = await User.create({
         ...confirmedHackerUser,
         discord: {
-          additionalRoles: ['testrole']
-        }
+          additionalRoles: ['testrole'],
+        },
       });
 
       const userInfo = await verifyDiscordUser(confirmedHackerUser.email, DISCORD_ID, DISCORD_NAME);
@@ -164,7 +164,7 @@ describe('Verify user in Discord', () => {
         firstName: confirmedHackerUser.firstName,
         lastName: confirmedHackerUser.lastName,
         email: confirmedHackerUser.email,
-        roles: ['testrole', 'hacker']
+        roles: ['testrole', 'hacker'],
       });
     });
 
@@ -176,7 +176,7 @@ describe('Verify user in Discord', () => {
       await expect(async () => {
         const userInfo = await verifyDiscordUser(organizerUser.email, DISCORD_ID, DISCORD_NAME);
       }).rejects.toThrow(NotFoundError);
-    })
+    });
   });
 
   describe('External user', () => {
@@ -190,11 +190,11 @@ describe('Verify user in Discord', () => {
         firstName: externalUser.firstName,
         lastName: externalUser.lastName,
         email: externalUser.email,
-        roles: []
+        roles: [],
       });
 
       const newUser = await ExternalUser.findOne({
-        _id: externalUser._id
+        _id: externalUser._id,
       });
 
       expect(newUser.discord?.discordID).toEqual(DISCORD_ID);
@@ -208,8 +208,8 @@ describe('Verify user in Discord', () => {
         ...externalUser,
         discord: {
           discordID: DISCORD_ID,
-          verifyTime: 0
-        }
+          verifyTime: 0,
+        },
       });
 
       const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID, DISCORD_NAME, SIM_TIME);
@@ -218,11 +218,11 @@ describe('Verify user in Discord', () => {
         firstName: externalUser.firstName,
         lastName: externalUser.lastName,
         email: externalUser.email,
-        roles: []
+        roles: [],
       });
 
       const newUser = await ExternalUser.findOne({
-        _id: externalUser._id
+        _id: externalUser._id,
       });
 
       expect(newUser.discord?.discordID).toEqual(DISCORD_ID);
@@ -235,8 +235,8 @@ describe('Verify user in Discord', () => {
       const eUser = await ExternalUser.create({
         ...externalUser,
         discord: {
-          discordID: DISCORD_ID
-        }
+          discordID: DISCORD_ID,
+        },
       });
 
       await expect(async () => {
@@ -251,8 +251,8 @@ describe('Verify user in Discord', () => {
         discord: {
           discordID: DISCORD_ID,
           additionalRoles: ['testrole'],
-          suffix: 'testsuffix'
-        }
+          suffix: 'testsuffix',
+        },
       });
 
       const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID, DISCORD_NAME);
@@ -262,7 +262,7 @@ describe('Verify user in Discord', () => {
         lastName: externalUser.lastName,
         email: externalUser.email,
         suffix: 'testsuffix',
-        roles: ['testrole']
+        roles: ['testrole'],
       });
     });
 
@@ -272,8 +272,8 @@ describe('Verify user in Discord', () => {
         ...externalUser,
         discord: {
           discordID: DISCORD_ID,
-          additionalRoles: ['testrole']
-        }
+          additionalRoles: ['testrole'],
+        },
       });
 
       const userInfo = await verifyDiscordUser(externalUser.email, DISCORD_ID, DISCORD_NAME);
@@ -282,8 +282,8 @@ describe('Verify user in Discord', () => {
         firstName: externalUser.firstName,
         lastName: externalUser.lastName,
         email: externalUser.email,
-        roles: ['testrole']
+        roles: ['testrole'],
       });
     });
-  })
+  });
 });

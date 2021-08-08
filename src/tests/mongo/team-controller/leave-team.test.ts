@@ -29,7 +29,6 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 
-
 describe('Leave Team', () => {
   test('Not in team', async () => {
     await generateMockUniverseState();

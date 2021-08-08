@@ -398,7 +398,7 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
       requestUser: requestUser,
       targetObject: result,
       universeState: universeState,
-    })
+    }),
   );
 
   // Keep track of IDs that were affected

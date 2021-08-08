@@ -23,7 +23,7 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 
 
-export const createFederatedUser = async(linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix=true):Promise<IUser> => {
+export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
   const groups: any = {};
 
   // Update the groups this user is in in the database

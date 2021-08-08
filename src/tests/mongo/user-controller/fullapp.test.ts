@@ -33,7 +33,6 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 
-
 jest.mock('../../../services/mailer/util/external', () => {
   const external = jest.requireActual('../../../services/mailer/util/external');
   return {
