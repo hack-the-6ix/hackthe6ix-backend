@@ -104,7 +104,7 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
 };
 
 /**
- * Reads an arbitrary list of files and pipes it to a Writeable as a ZIP
+ * Reads an arbitrary list of files and pipes it to a Writable as a ZIP
  * 
  * @param filesnames
  * @param mongoose
