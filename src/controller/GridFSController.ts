@@ -1,7 +1,9 @@
 import Grid from 'gridfs-stream';
 import { Mongoose } from 'mongoose';
-import stream, { Writable } from 'stream';
+import stream, { Writable, PassThrough } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';
+import {promisify} from 'util';
+import archiver from 'archiver';
 
 /**
  * Reads an arbitrary file from GridFS and pipes it to the express response
@@ -100,3 +102,73 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
     });
   });
 };
+
+/**
+ * Reads an arbitrary list of files and pipes it to a Writeable as a ZIP
+ * 
+ * @param filesnames
+ * @param mongoose
+ * @param outputStream
+ */
+export const exportAsZip = async (filenames: string[], mongoose: Mongoose, outputStream: Writable) => {
+  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
+
+  const gfsExistPromise = promisify(gfs.exist);
+  gfs.exist = gfsExistPromise;
+
+  if (!Array.isArray(filenames) || filenames.length > 1) {
+    throw new BadRequestError('No file names given!');
+  }
+
+  return await new Promise<void>((resolve, reject) => {
+    const allExists:boolean[] = [];
+    for(const filename of filenames){
+      //@ts-expect-error gfs.exist is reassigned to the promisified version
+      allExists.push(gfs.exist({filename: filename}));
+    }
+
+    Promise.all(allExists).then((existsResult) => {
+      for(const result of existsResult){
+        if(!result){
+          return reject(new NotFoundError(`A given file does not exist!`));
+        }
+      }
+
+      const archive = archiver('zip', {
+        zlib: { level: 0 } // Don't compress to save CPU
+      });
+
+      outputStream.on('end', function (){
+        return resolve();
+      });
+
+      archive.on('warning', function(err) {
+        if (err.code === 'ENOENT') {
+          // log warning
+        } else {
+          // throw error
+          return reject(err);
+        }
+      });
+
+      archive.on('error', function(err) {
+        return reject(err);
+      });
+
+      archive.pipe(outputStream);
+
+      for(const filename of filenames){
+        const gfsStream = gfs.createReadStream({ filename: filename });
+        const tStream = new PassThrough();
+
+        archive.append(tStream, {name: filename});
+        gfsStream.pipe(tStream);
+      }
+
+      archive.finalize();
+
+    }).catch((err) => {
+      return reject(err);
+    });
+  });
+}

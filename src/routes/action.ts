@@ -3,6 +3,7 @@
  */
 
 import express, { Request, Response } from 'express';
+import { resumeExport } from '../services/dataexport';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
@@ -424,3 +425,16 @@ actionRouter.post('/recordMeetingLeave', isOrganizer, (req: Request, res: Respon
   );
 });
 export default actionRouter;
+
+/** 
+ * (Organizer)
+ * 
+ * Get a ZIP of all resumes from users who have consented to resume sharing
+ */
+actionRouter.get('/resumeExport', isOrganizer, (req: Request, res:Response) => {
+  logResponse(
+    req,
+    res,
+    resumeExport(res)
+  )
+})
