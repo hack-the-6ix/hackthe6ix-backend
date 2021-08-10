@@ -14,6 +14,10 @@ export const fields = {
   deleteCheck: (request: DeleteCheckRequest<IExternalUser>) => isOrganizer(request.requestUser),
   writeCheck: (request: WriteCheckRequest<any, IExternalUser>) => isOrganizer(request.requestUser),
   FIELDS: {
+    _id: {
+      virtual: true,
+      readCheck: true,
+    },
     firstName: {
       type: String,
       required: true,
