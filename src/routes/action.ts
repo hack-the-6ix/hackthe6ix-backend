@@ -431,7 +431,7 @@ export default actionRouter;
  * 
  * Get a ZIP of all resumes from users who have consented to resume sharing
  */
-actionRouter.get('/resumeExport', isOrganizer, (req: Request, res:Response) => {
+actionRouter.get('/resumeExport', (req: Request, res:Response) => {
   logResponse(
     req,
     res,

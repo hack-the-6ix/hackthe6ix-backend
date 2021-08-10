@@ -110,21 +110,21 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
  * @param mongoose
  * @param outputStream
  */
-export const exportAsZip = async (filenames: string[], mongoose: Mongoose, outputStream: Writable) => {
+export const exportAsZip = async (filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
   const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 
   const gfsExistPromise = promisify(gfs.exist);
   gfs.exist = gfsExistPromise;
 
-  if (!Array.isArray(filenames) || filenames.length > 1) {
+  if (!Array.isArray(filenameData) || filenameData.length > 1) {
     throw new BadRequestError('No file names given!');
   }
 
   return await new Promise<void>((resolve, reject) => {
     const allExists:boolean[] = [];
-    for(const filename of filenames){
+    for(const filenameDatum of filenameData){
       //@ts-expect-error gfs.exist is reassigned to the promisified version
-      allExists.push(gfs.exist({filename: filename}));
+      allExists.push(gfs.exist({filename: filenameDatum.gfsfilename}));
     }
 
     Promise.all(allExists).then((existsResult) => {
@@ -157,11 +157,11 @@ export const exportAsZip = async (filenames: string[], mongoose: Mongoose, outpu
 
       archive.pipe(outputStream);
 
-      for(const filename of filenames){
-        const gfsStream = gfs.createReadStream({ filename: filename });
+      for(const filenameDatum of filenameData){
+        const gfsStream = gfs.createReadStream({ filename: filenameDatum.gfsfilename });
         const tStream = new PassThrough();
 
-        archive.append(tStream, {name: filename});
+        archive.append(tStream, {name: filenameDatum.filename});
         gfsStream.pipe(tStream);
       }
 
