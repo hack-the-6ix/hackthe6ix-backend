@@ -33,7 +33,11 @@ export default async (inputMailingLists?: string[], forceUpdate?: boolean, email
     const listConfig = getList(list);
 
     const query = {
-      ...listConfig.query || {},
+      ...listConfig?.query || {},
+    };
+
+    const filterQuery = {
+      ...listConfig?.filterQuery || {},
     };
 
     // We'll only make queries about this user
@@ -41,10 +45,36 @@ export default async (inputMailingLists?: string[], forceUpdate?: boolean, email
       query.email = email;
     }
 
-    const emails = (await User.find(query)).map((u: IUser) => u.email);
+    const emails = (await User.find(query))
+    .filter((u: IUser) => {
+      // We use filter queries to narrow down the list of emails even further.
+      // In some cases (such as with virtual fields), we cannot rely on mongodb to filter for us.
+      for (const field in filterQuery) {
+        const query = field.split('.');
+
+        if (query.length > 0) {
+          let runner: any = u;
+
+          for (let i = 0; i < query.length; i++) {
+            if (runner !== undefined) {
+              runner = runner[query[i]];
+            } else {
+              return false;
+            }
+          }
+
+          if (runner !== filterQuery[field]) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    })
+    .map((u: IUser) => u.email);
 
     await syncMailingList(
-      listConfig.listID || '',
+      listConfig?.listID || '',
       emails,
       forceUpdate,
       email,

@@ -4,7 +4,7 @@ import syncMailingList from '../../services/mailer/syncMailingList';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { getList } from '../../services/mailer/util/external';
 import { hackerUser, runAfterAll, runAfterEach, runBeforeAll, runBeforeEach } from '../test-utils';
-import { mockGetList, mockMailingLists } from './test-utils';
+import { mockGetList, mockGetListFilterQuery, mockMailingLists } from './test-utils';
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -120,39 +120,75 @@ describe('Sync Mailing Lists', () => {
 
     expect(new Set(lists)).toEqual(new Set(Object.keys(mockMailingLists)));
   });
-  test('Queries', async () => {
-    getList.mockImplementation((x: string) => (mockGetList as any)[x]);
-    const apple = await User.create({
-      ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
-      firstName: mockGetList.list1.query.firstName,
-      email: 'apple@gmail.com',
+  describe('Queries', () => {
+
+    test('Standard', async () => {
+      getList.mockImplementation((x: string) => (mockGetList as any)[x]);
+      const apple = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        firstName: mockGetList.list1.query.firstName,
+        email: 'apple@gmail.com',
+      });
+      const banana = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        firstName: mockGetList.list2.query.firstName,
+        email: 'banana@gmail.com',
+      });
+      const orange = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        firstName: mockGetList.list3.query.firstName,
+        email: 'orange@gmail.com',
+      });
+
+      const lists = await syncMailingLists();
+
+      expect(new Set(syncMailingList.mock.calls)).toEqual(new Set([
+        [mockGetList.list1.listID, [apple.email], undefined, undefined],
+        [mockGetList.list2.listID, [banana.email], undefined, undefined],
+        [mockGetList.list3.listID, [orange.email], undefined, undefined],
+      ]));
+
+      expect(new Set(getList.mock.calls)).toEqual(new Set(Object.keys(mockMailingLists).map((k: string) => (
+        [(mockMailingLists as any)[k]]
+      ))));
+
+      expect(new Set(lists)).toEqual(new Set(Object.keys(mockMailingLists)));
     });
-    const banana = await User.create({
-      ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
-      firstName: mockGetList.list2.query.firstName,
-      email: 'banana@gmail.com',
+
+    test('Filter Query', async () => {
+      getList.mockImplementation((x: string) => (mockGetListFilterQuery as any)[x]);
+      const appleNotExpired = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        firstName: mockGetListFilterQuery.list1.query.firstName,
+        email: 'wtf@gmail.com',
+      });
+      const appleExpired = await User.create({
+        ...hackerUser,
+        _id: mongoose.Types.ObjectId(),
+        firstName: mockGetListFilterQuery.list1.query.firstName,
+        status: {
+          accepted: true,
+          statusReleased: true,
+        },
+        personalRSVPDeadline: -1,
+        email: 'appleExpired@gmail.com',
+      });
+
+      const lists = await syncMailingLists();
+
+      expect(syncMailingList.mock.calls[0]).toEqual([mockGetList.list1.listID, [appleExpired.email], undefined, undefined]);
+
+      expect(getList.mock.calls[0]).toEqual(['list1']);
+
+      expect(lists).toEqual([
+        'list1',
+        'list2',
+        'list3',
+      ]);
     });
-    const orange = await User.create({
-      ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
-      firstName: mockGetList.list3.query.firstName,
-      email: 'orange@gmail.com',
-    });
-
-    const lists = await syncMailingLists();
-
-    expect(new Set(syncMailingList.mock.calls)).toEqual(new Set([
-      [mockGetList.list1.listID, [apple.email], undefined, undefined],
-      [mockGetList.list2.listID, [banana.email], undefined, undefined],
-      [mockGetList.list3.listID, [orange.email], undefined, undefined],
-    ]));
-
-    expect(new Set(getList.mock.calls)).toEqual(new Set(Object.keys(mockMailingLists).map((k: string) => (
-      [(mockMailingLists as any)[k]]
-    ))));
-
-    expect(new Set(lists)).toEqual(new Set(Object.keys(mockMailingLists)));
   });
 });

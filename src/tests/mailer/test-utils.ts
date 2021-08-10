@@ -44,6 +44,18 @@ export const mockGetList = {
   },
 };
 
+export const mockGetListFilterQuery = {
+  list1: {
+    query: {
+      firstName: 'Apple',
+    },
+    filterQuery: {
+      'status.rsvpExpired': true,
+    },
+    listID: 'foo',
+  },
+};
+
 export const mockMailTemplate = {
   template1: {
     subject: 'Subject 1',

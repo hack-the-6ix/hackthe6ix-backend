@@ -78,6 +78,9 @@
         "status.confirmed": false,
         "status.declined": false,
         "status.statusReleased": true
+      },
+      "filterQuery": {
+        "status.rsvpExpired": false
       }
     },
     "rejected": {
