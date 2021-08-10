@@ -673,6 +673,14 @@ Attempt to associate a user with a given Discord account. Will fail if the user 
 
 The user's Discord roles is taken from the user's permission roles as well as any in their `discord.additionalRoles` field.
 
+### GET - Resume Export (Organizer)
+`/api/action/resumeExport`
+
+Returns a ZIP of all the resumes of users who were accepted or waitlisted and consented to their resume being shared.
+
+#### Output Specification
+Binary blob
+
 ## Auth - Authentication related operations
 
 ### POST - Starting point for login
