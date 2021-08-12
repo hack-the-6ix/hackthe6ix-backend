@@ -116,7 +116,7 @@ export const exportAsZip = async (filenameData: {gfsfilename: string, filename:s
   const gfsExistPromise = promisify(gfs.exist);
   gfs.exist = gfsExistPromise;
 
-  if (!Array.isArray(filenameData) || filenameData.length > 1) {
+  if (!Array.isArray(filenameData) || filenameData.length === 0) {
     throw new BadRequestError('No file names given!');
   }
 
