@@ -34,7 +34,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
   // A user is in a "dead state" if this predicate is false
   const userEligible = (user: IUser) =>
     !isRSVPExpired(user) &&
-    (!(user?.status?.accepted || user?.status?.waitlisted) || isRSVPOpen(user) || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
+    (!user?.status?.accepted || isRSVPOpen(user) || user?.status?.waitlisted || user?.status?.confirmed) && // Users who have confirmed, can confirm, or haven't been assigned a state can still potentially attend
     !user?.status?.rejected && !user?.status?.declined; // If a user is rejected or declined, they're out
 
   const rawRankedUsers = await getRanks();
