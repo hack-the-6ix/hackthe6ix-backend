@@ -69,3 +69,7 @@ export const canRSVP = (user: IUser) => (
 export const isRSVPExpired = (user: IUser) => isStatusReleased(user) && isAccepted(user) && !rsvpDecisionSubmitted(user) && !isRSVPOpen(user);
 
 export const isApplicationExpired = (user: IUser) => !isApplied(user) && !isApplicationOpen(user);
+
+// Either the new request has wantSwag enabled, or wantSwag hasn't changed, but it's already truthy
+export const wantSwag = (request: WriteCheckRequest<string | any[], any>) => request.submissionObject.hackerApplication.wantSwag ||
+  (request.submissionObject.hackerApplication.wantSwag === undefined && request.targetObject.hackerApplication.wantSwag);

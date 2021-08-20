@@ -16,6 +16,7 @@ import {
   minLength,
   minWordLength,
   validatePostalCode,
+  wantSwag,
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
@@ -132,7 +133,7 @@ export const hackerApplication = {
       caption: 'Address Line 1',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
         ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
@@ -146,7 +147,7 @@ export const hackerApplication = {
       caption: 'Address Line 2',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
         ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
@@ -160,7 +161,7 @@ export const hackerApplication = {
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
         ? maxLength(256)
         : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
@@ -174,7 +175,7 @@ export const hackerApplication = {
       caption: 'Province',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
         ? inEnum(enumOptions.province, true)(request)
         : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => request.submissionObject.hackerApplication.wantSwag
