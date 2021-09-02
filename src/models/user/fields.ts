@@ -126,6 +126,20 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    shirtSize: {
+      type: String,
+      caption: 'Shirt Size',
+
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
+        ? inEnum(enumOptions.shirt, true)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
+        ? inEnum(enumOptions.shirt)(request)
+        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+      readCheck: true,
+    },
+
+
     /* Address */
 
     addressLine1: {
@@ -970,6 +984,7 @@ export interface IApplication {
   timezone: string,
   country: string,
   wantSwag: boolean,
+  shirtSize: string,
   addressLine1: string,
   addressLine2: string,
   city: string,

@@ -64,6 +64,13 @@ export const enumOptions = {
     'SST - Solomon Standard Time (GMT+11:00)',
     'NST - New Zealand Standard Time (GMT+12:00)',
   ],
+  shirt: [
+    'XS',
+    'S',
+    'M',
+    'L',
+    'XL',
+  ],
   province: [
     'Alberta',
     'British Columbia',
