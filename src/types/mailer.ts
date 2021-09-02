@@ -15,5 +15,6 @@ export enum MailingList {
   declined = 'declined',
   accepted = 'accepted',
   rejected = 'rejected',
-  waitlisted = 'waitlisted'
+  waitlisted = 'waitlisted',
+  swag = 'swag'
 }
