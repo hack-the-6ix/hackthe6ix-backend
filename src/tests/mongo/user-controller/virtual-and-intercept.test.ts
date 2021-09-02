@@ -390,9 +390,9 @@ describe('Virtual', () => {
           const fetchedUser = await fetchUser(user);
 
           expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs\n' +
-            '1234 Street Ave\n' +
-            'Toronto, Ontario 123ABC\n' +
+            'Steve Jobs<br/>' +
+            '1234 Street Ave<br/>' +
+            'Toronto, Ontario 123ABC<br/>' +
             'Canada',
           );
         });
@@ -415,10 +415,10 @@ describe('Virtual', () => {
           const fetchedUser = await fetchUser(user);
 
           expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs\n' +
-            '1234 Street Ave\n' +
-            'Apt 1234\n' +
-            'Toronto, Ontario 123ABC\n' +
+            'Steve Jobs<br/>' +
+            '1234 Street Ave<br/>' +
+            'Apt 1234<br/>' +
+            'Toronto, Ontario 123ABC<br/>' +
             'Canada',
           );
         });

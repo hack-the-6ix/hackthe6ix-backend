@@ -168,10 +168,10 @@ schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
 schema.virtual('mailmerge.MERGE_MAILING_ADDRESS').get(function() {
   return this.hackerApplication?.wantSwag
     ? (
-      `${this.firstName} ${this.lastName}\n` +
-      `${this.hackerApplication.addressLine1}\n` +
-      `${this.hackerApplication.addressLine2 ? this.hackerApplication.addressLine2 + '\n' : ''}` +
-      `${this.hackerApplication.city}, ${this.hackerApplication.province} ${this.hackerApplication.postalCode}\n` +
+      `${this.firstName} ${this.lastName}<br/>` +
+      `${this.hackerApplication.addressLine1}<br/>` +
+      `${this.hackerApplication.addressLine2 ? this.hackerApplication.addressLine2 + '<br/>' : ''}` +
+      `${this.hackerApplication.city}, ${this.hackerApplication.province} ${this.hackerApplication.postalCode}<br/>` +
       `${this.hackerApplication.country}`
     )
     : '';
