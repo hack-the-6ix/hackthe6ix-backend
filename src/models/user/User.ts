@@ -165,7 +165,7 @@ schema.virtual('mailmerge.MERGE_APPLICATION_DEADLINE').get(function() {
 schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
   return stringifyUnixTime(this.computedRSVPDeadline);
 });
-schema.virtual('mailmerge.MAILING_ADDRESS').get(function() {
+schema.virtual('mailmerge.MERGE_MAILING_ADDRESS').get(function() {
   return this.hackerApplication?.wantSwag
     ? (
       `${this.firstName} ${this.lastName}\n` +

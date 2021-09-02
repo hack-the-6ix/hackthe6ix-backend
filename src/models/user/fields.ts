@@ -661,7 +661,7 @@ const mailmerge = {
       readCheck: true,
       virtual: true,
     },
-    MAILING_ADDRESS: {
+    MERGE_MAILING_ADDRESS: {
       type: String,
       readCheck: true,
       virtual: true,
@@ -976,7 +976,7 @@ export interface IMailMerge {
   MERGE_LAST_NAME: string,
   MERGE_APPLICATION_DEADLINE: string,
   MERGE_CONFIRMATION_DEADLINE: string,
-  MAILING_ADDRESS: string
+  MERGE_MAILING_ADDRESS: string
 }
 
 export interface IApplication {

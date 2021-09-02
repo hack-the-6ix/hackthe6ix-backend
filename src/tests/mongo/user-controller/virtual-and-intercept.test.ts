@@ -389,7 +389,7 @@ describe('Virtual', () => {
           });
           const fetchedUser = await fetchUser(user);
 
-          expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual(
+          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
             'Steve Jobs\n' +
             '1234 Street Ave\n' +
             'Toronto, Ontario 123ABC\n' +
@@ -414,7 +414,7 @@ describe('Virtual', () => {
           });
           const fetchedUser = await fetchUser(user);
 
-          expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual(
+          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
             'Steve Jobs\n' +
             '1234 Street Ave\n' +
             'Apt 1234\n' +
@@ -429,7 +429,7 @@ describe('Virtual', () => {
         const user = await User.create(organizerUser);
         const fetchedUser = await fetchUser(user);
 
-        expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual('');
+        expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual('');
       });
     });
   });
