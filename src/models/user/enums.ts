@@ -70,6 +70,7 @@ export const enumOptions = {
     'M',
     'L',
     'XL',
+    'XXL',
   ],
   province: [
     'Alberta',
