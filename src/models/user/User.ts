@@ -165,6 +165,17 @@ schema.virtual('mailmerge.MERGE_APPLICATION_DEADLINE').get(function() {
 schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
   return stringifyUnixTime(this.computedRSVPDeadline);
 });
+schema.virtual('mailmerge.MAILING_ADDRESS').get(function() {
+  return this.hackerApplication?.wantSwag
+    ? (
+      `${this.firstName} ${this.lastName}\n` +
+      `${this.hackerApplication.addressLine1}\n` +
+      `${this.hackerApplication.addressLine2 ? this.hackerApplication.addressLine2 + '\n' : ''}` +
+      `${this.hackerApplication.city}, ${this.hackerApplication.province} ${this.hackerApplication.postalCode}\n` +
+      `${this.hackerApplication.country}`
+    )
+    : '';
+});
 
 /**
  * Computed Deadlines

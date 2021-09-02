@@ -63,6 +63,15 @@
         "status.confirmed": true
       }
     },
+    "swag": {
+      "listID": "euyZVrXSaz",
+      "query": {
+        "groups.hacker": true,
+        "status.confirmed": true,
+        "status.checkedIn": true,
+        "hackerApplication.wantSwag": true
+      }
+    },
     "declined": {
       "listID": "WOJjclXUbL",
       "query": {

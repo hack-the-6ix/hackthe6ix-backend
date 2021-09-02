@@ -370,6 +370,68 @@ describe('Virtual', () => {
 
       expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
+    describe('Mailing Address', () => {
+      describe('Want Swag', () => {
+        test('One line address', async () => {
+          const user = await User.create({
+            ...organizerUser,
+            firstName: 'Steve',
+            lastName: 'Jobs',
+            hackerApplication: {
+              wantSwag: true,
+              addressLine1: '1234 Street Ave',
+              addressLine2: '',
+              city: 'Toronto',
+              province: 'Ontario',
+              postalCode: '123ABC',
+              country: 'Canada',
+            },
+          });
+          const fetchedUser = await fetchUser(user);
+
+          expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual(
+            'Steve Jobs\n' +
+            '1234 Street Ave\n' +
+            'Toronto, Ontario 123ABC\n' +
+            'Canada',
+          );
+        });
+
+        test('Two line address', async () => {
+          const user = await User.create({
+            ...organizerUser,
+            firstName: 'Steve',
+            lastName: 'Jobs',
+            hackerApplication: {
+              wantSwag: true,
+              addressLine1: '1234 Street Ave',
+              addressLine2: 'Apt 1234',
+              city: 'Toronto',
+              province: 'Ontario',
+              postalCode: '123ABC',
+              country: 'Canada',
+            },
+          });
+          const fetchedUser = await fetchUser(user);
+
+          expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual(
+            'Steve Jobs\n' +
+            '1234 Street Ave\n' +
+            'Apt 1234\n' +
+            'Toronto, Ontario 123ABC\n' +
+            'Canada',
+          );
+        });
+      });
+
+      test('No Swag', async () => {
+
+        const user = await User.create(organizerUser);
+        const fetchedUser = await fetchUser(user);
+
+        expect(fetchedUser.mailmerge.MAILING_ADDRESS).toEqual('');
+      });
+    });
   });
 
 
