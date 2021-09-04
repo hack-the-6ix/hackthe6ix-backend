@@ -65,12 +65,12 @@ export const enumOptions = {
     'NST - New Zealand Standard Time (GMT+12:00)',
   ],
   shirt: [
-    'XS',
     'S',
     'M',
     'L',
     'XL',
-    'XXL',
+    '2XL',
+    '3XL'
   ],
   province: [
     'Alberta',
