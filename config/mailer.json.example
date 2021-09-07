@@ -63,6 +63,14 @@
         "status.confirmed": true
       }
     },
+    "checkedIn": {
+      "listID": "NgoUwuwuWw",
+      "query": {
+        "groups.hacker": true,
+        "status.confirmed": true,
+        "status.checkedIn": true
+      }
+    },
     "swag": {
       "listID": "euyZVrXSaz",
       "query": {
