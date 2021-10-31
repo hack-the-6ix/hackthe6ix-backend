@@ -50,7 +50,6 @@ For certificates, you must encode the PEM certificate (with headers) to base64. 
 Note: You must clear the settings collection in the database for the SAML settings to be updated from the bootstrap config.
 
 ### Development
-Note: This is WIP and will definitely need to be updated later on
 ```
 npm install
 npm run build
