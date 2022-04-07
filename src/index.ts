@@ -1,8 +1,12 @@
+import 'dotenv/config';
+import * as OpenTelemetry from './tracing';
+
+OpenTelemetry.init('ht6-backend')
+
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import 'dotenv/config';
 import express, { ErrorRequestHandler } from 'express';
 import 'express-async-errors';
 import fileUpload from 'express-fileupload';
@@ -16,22 +20,7 @@ import { logResponse } from './services/logger';
 import './services/mailer/util/verify_config';
 import './services/mongoose_service';
 import { InternalServerError } from './types/errors';
-
-if (process.env.SENTRY_DSN) {
-  console.log(`Sentry started with DSN: ${process.env.SENTRY_DSN}`);
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-  });
-}
-
-const { init } = require('./tracing')
-init('ot_tracing')
-
+  
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -61,12 +50,6 @@ app.use(function(err: any, req: express.Request, res: express.Response, next: ex
     }
   )());
 } as ErrorRequestHandler);
-
-app.get('/hello', async function (req, res) {
-    // send back hello message
-    res.type('json')
-    res.send(JSON.stringify({hello:"world"}))
-  })
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
