@@ -9,18 +9,13 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter';
 
 export const init = (serviceName: string) => {  
-  // const exporter = process.env.NODE_ENV === 'production' ?
-  //   new TraceExporter({
-  //     projectId: process.env.GCP_TRACING_PROJECTID,
-  //     keyFile: process.env.GCP_TRACING_KEYFILEPATH
-  //   })
-  //   :
-  //   new ConsoleSpanExporter();
-
-  const exporter = new TraceExporter({
-    projectId: process.env.GCP_TRACING_PROJECTID,
-    keyFile: process.env.GCP_TRACING_KEYFILEPATH
-  });
+  const exporter = process.env.NODE_ENV === 'production' ?
+    new TraceExporter({
+      projectId: process.env.GCP_TRACING_PROJECTID,
+      keyFile: process.env.GCP_TRACING_KEYFILEPATH
+    })
+    :
+    new ConsoleSpanExporter();
 
   const spanProcessor = new BatchSpanProcessor(exporter);
 
