@@ -3,8 +3,6 @@ import * as OpenTelemetry from './tracing';
 
 OpenTelemetry.init('ht6-backend')
 
-import * as Sentry from '@sentry/node';
-import '@sentry/tracing';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express, { ErrorRequestHandler } from 'express';
