@@ -1,8 +1,10 @@
-import * as Sentry from '@sentry/node';
-import '@sentry/tracing';
+import 'dotenv/config';
+import * as OpenTelemetry from './tracing';
+
+OpenTelemetry.init('ht6-backend')
+
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import 'dotenv/config';
 import express, { ErrorRequestHandler } from 'express';
 import 'express-async-errors';
 import fileUpload from 'express-fileupload';
@@ -16,18 +18,7 @@ import { logResponse } from './services/logger';
 import './services/mailer/util/verify_config';
 import './services/mongoose_service';
 import { InternalServerError } from './types/errors';
-
-if (process.env.SENTRY_DSN) {
-  console.log(`Sentry started with DSN: ${process.env.SENTRY_DSN}`);
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-  });
-}
+  
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
