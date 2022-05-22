@@ -1,5 +1,5 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import {ConsoleSpanExporter, BatchSpanProcessor, NoopSpanProcessor} from '@opentelemetry/sdk-trace-base';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { MongoDBInstrumentation } from '@opentelemetry/instrumentation-mongodb';
@@ -17,7 +17,10 @@ export const init = (serviceName: string) => {
     :
     new ConsoleSpanExporter();
 
-  const spanProcessor = new BatchSpanProcessor(exporter);
+
+  if(process.env.DISABLE_TRACING !== "true"){}
+
+  const spanProcessor = process.env.DISABLE_TRACING !== "true" ? new BatchSpanProcessor(exporter) : new NoopSpanProcessor()
 
   const provider = new NodeTracerProvider({
     resource: new Resource({

@@ -39,7 +39,23 @@ export const authenticate = async (token: string): Promise<IUser> | null => {
   return userInfo;
 };
 
-export const getTokenFromHeader = (req: Request): string => req['headers']['x-access-token'] || req.body.token;
+export const getBearerToken = (header: string|string[]):string | boolean => {
+  if(!header){
+    return false;
+  }
+
+  if(Array.isArray(header)){
+    header = header[0];
+  }
+
+  if (header.startsWith("Bearer ")){
+    return header.substring(7, header.length);
+  } else {
+    return false;
+  }
+}
+
+export const getTokenFromHeader = (req: Request): string => req['headers']['x-access-token'] || getBearerToken(req['headers']['authorization']) || req.body.token;
 export const getAPITokenFromHeader = (req: Request): string => req['headers']['x-api-token'] as string;
 
 /**

@@ -1,4 +1,5 @@
 import { Mongoose } from 'mongoose';
+import * as qrcode from 'qrcode';
 import { enumOptions } from '../models/user/enums';
 import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
@@ -16,11 +17,13 @@ import {
   SubmissionDeniedError,
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
-import { IRSVP } from '../types/types';
+import {AllUserTypes, IRSVP, QRCodeGenerateRequest} from '../types/types';
 import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
+import {log} from "../services/logger";
+import ExternalUser from "../models/externaluser/ExternalUser";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -373,3 +376,139 @@ export const releaseApplicationStatus = async () => {
 
   return usersModified;
 };
+
+/**
+ * Generate a check in QR given a userID and userType
+ *
+ * @param userID
+ * @param userType
+ */
+const createCheckInQR = (userID:string, userType:"User" | "ExternalUser"):Promise<string> => {
+  return new Promise((resolve, reject) => {
+    qrcode.toDataURL(JSON.stringify({
+      "userID": userID,
+      "userType": userType
+    }), function (err, url) {
+      if(err){
+        return reject(err);
+      }
+      return resolve(url);
+    })
+  });
+}
+
+/**
+ * Retrieve a user's check in QR code, generating if not exists
+ *
+ * @param requestUser
+ */
+
+export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):Promise<string> => {
+  const userID = typeof requestUser === "string" ? requestUser : requestUser._id.toString();
+
+  return new Promise((resolve, reject) => {
+    if(userType === "User") {
+      User.findOne({
+        _id: userID
+      }, 'checkInQR').then((user) => {
+        if(!user){
+          return reject(new NotFoundError(`User with ID ${userID} does not exist!`));
+        }
+        if(user.checkInQR){
+          return resolve(user.checkInQR);
+        }
+        else {
+          // We need to generate the QR code
+          createCheckInQR(userID, "User").then((qrCode) => {
+            User.updateOne({
+              _id: userID
+            }, {
+              checkInQR: qrCode
+            }).then(() => {
+              return resolve(qrCode)
+            }).catch(reject)
+          }).catch(reject)
+        }
+      });
+    }
+    else if(userType === "ExternalUser") {
+      ExternalUser.findOne({
+        _id: userID
+      }, 'checkInQR').then((externalUser) => {
+        if(!externalUser){
+          return reject(new NotFoundError(`ExternalUser with ID ${userID} does not exist!`));
+        }
+        if(externalUser.checkInQR){
+          return resolve(externalUser.checkInQR);
+        }
+        else {
+          // We need to generate the QR code
+          createCheckInQR(userID, "User").then((qrCode) => {
+            ExternalUser.updateOne({
+              _id: userID
+            }, {
+              checkInQR: qrCode
+            }).then(() => {
+              return resolve(qrCode)
+            }).catch(reject)
+          }).catch(reject)
+        }
+      });
+    }
+    else {
+      return reject(new BadRequestError("Invalid user type for request."))
+    }
+  });
+}
+
+/**
+ * Generate a QR Code for a list of (External) Users
+ *
+ * @param requestUser
+ * @param userList
+ */
+export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGenerateRequest[]):Promise<string[]> => {
+  const ret = [] as string[];
+
+  for(const user of userList){
+    if(user.userID && user.userType){
+      try {
+        ret.push(await getCheckInQR(user.userID, user.userType));
+      }
+      catch(err) {
+        throw new InternalServerError(`Error encountered while generating QR code for ${user.userID} and type ${user.userType}.`, err);
+      }
+    }
+  }
+
+  return ret;
+}
+
+/**
+ * Set a User or ExternalUser as checked in
+ *
+ * @param userID
+ * @param userType
+ */
+
+export const checkIn = async (userID: string, userType: AllUserTypes): Promise<string> => {
+  const newStatus = {
+    'status.checkedIn': true,
+    'status.checkInTime': Date.now()
+  };
+
+  if(userType === "User") {
+    await User.updateOne({
+      _id: userID
+    }, newStatus)
+    return "Success"
+  }
+  else if(userType === "ExternalUser"){
+    await ExternalUser.updateOne({
+      _id: userID
+    }, newStatus)
+    return "Success"
+  }
+
+  throw new BadRequestError("Given user type is invalid.")
+}

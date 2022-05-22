@@ -12,8 +12,9 @@ import { recordJoin, recordLeave } from '../controller/MeetingController';
 import { initializeSettingsMapper } from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
-  fetchUser,
-  getCandidate,
+  checkIn,
+  fetchUser, generateCheckInQR,
+  getCandidate, getCheckInQR,
   getEnumOptions,
   gradeCandidate,
   releaseApplicationStatus,
@@ -27,7 +28,7 @@ import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import verifyMailingList from '../services/mailer/verifyMailingList';
 import mongoose from '../services/mongoose_service';
-import { isAdmin, isHacker, isOrganizer } from '../services/permissions';
+import {isAdmin, isHacker, isOrganizer, isVolunteer} from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 
 const actionRouter = express.Router();
@@ -176,6 +177,21 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
     true,
   );
 });
+
+/**
+ * (Hacker)
+ *
+ * Get check in QR code
+ */
+actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
+  logResponse(
+      req,
+      res,
+      getCheckInQR(
+          req.executor, "User"
+      )
+  )
+})
 
 
 // Admin endpoints
@@ -374,6 +390,20 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) =
 /**
  * (Organizer)
  *
+ * Check a user in
+ */
+
+actionRouter.post('/checkin', isVolunteer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      checkIn(req.body.userID, req.body.userType)
+  );
+});
+
+/**
+ * (Organizer)
+ *
  * Associate a user on Discord
  */
 actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Response) => {
@@ -431,10 +461,23 @@ export default actionRouter;
  * 
  * Get a ZIP of all resumes from users who have consented to resume sharing
  */
-actionRouter.get('/resumeExport', (req: Request, res:Response) => {
+actionRouter.get('/resumeExport', isOrganizer, (req: Request, res:Response) => {
   logResponse(
     req,
     res,
     resumeExport(res)
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Generate check in QR codes for a list of (External) User
+ */
+actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) => {
+  logResponse(
+      req,
+      res,
+      generateCheckInQR(req.executor, req.body.userList)
   )
 })
