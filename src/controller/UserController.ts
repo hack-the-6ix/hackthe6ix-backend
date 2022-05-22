@@ -383,7 +383,7 @@ export const releaseApplicationStatus = async () => {
  * @param userID
  * @param userType
  */
-const createCheckInQR = (userID:string, userType:"User" | "ExternalUser"):Promise<string> => {
+const createCheckInQR = (userID:string, userType:AllUserTypes):Promise<string> => {
   return new Promise((resolve, reject) => {
     qrcode.toDataURL(JSON.stringify({
       "userID": userID,
@@ -401,6 +401,7 @@ const createCheckInQR = (userID:string, userType:"User" | "ExternalUser"):Promis
  * Retrieve a user's check in QR code, generating if not exists
  *
  * @param requestUser
+ * @param userType
  */
 
 export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):Promise<string> => {
