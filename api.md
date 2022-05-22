@@ -681,6 +681,69 @@ Returns a ZIP of all the resumes of users who were accepted or waitlisted and co
 #### Output Specification
 Binary blob
 
+### GET - Check in QR Code
+`/api/action/checkInQR`
+
+Returns a data URI with the user's check in code.
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": "<base64-encoded image>"
+}
+```
+
+### POST - Check in user (Volunteer)
+`/api/action/checkIN`
+
+Checks in a (External) User.
+
+##### Input Specification
+
+```
+{
+  "userID": "<userID>",
+  "userType": "<User|ExternalUser>"
+}
+```
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": "<status message>"
+}
+```
+
+### POST - Generate check in QR codes for multiple (External) Users
+`/api/action/multiCheckInQR`
+
+Generates check in QR codes for multiple (external) users.
+
+##### Input Specification
+
+```
+{
+  "userList": [{
+      "userID": "<userID>",
+      "userType: "<User|ExternalUser>"
+    }]
+}
+```
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": [{
+      "userID": "<userID>",
+      "userType": "<User|ExternalUser>"
+      "code": "<base64-encoded image>"
+  }]
+}
+```
+
 ## Auth - Authentication related operations
 
 ### POST - Starting point for login

@@ -201,7 +201,7 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
  * Check a user in
  */
 
-actionRouter.post('/checkin', isVolunteer, (req: Request, res: Response) => {
+actionRouter.post('/checkIn', isVolunteer, (req: Request, res: Response) => {
   logResponse(
       req,
       res,
