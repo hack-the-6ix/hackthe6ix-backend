@@ -17,7 +17,7 @@ import {
   SubmissionDeniedError,
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
-import {AllUserTypes, IRSVP, QRCodeGenerateRequest} from '../types/types';
+import {AllUserTypes, IRSVP, QRCodeGenerateBulkResponse, QRCodeGenerateRequest} from '../types/types';
 import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
@@ -468,13 +468,13 @@ export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):P
  * @param requestUser
  * @param userList
  */
-export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGenerateRequest[]):Promise<string[]> => {
-  const ret = [] as string[];
+export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGenerateRequest[]):Promise<QRCodeGenerateBulkResponse[]> => {
+  const ret = [] as QRCodeGenerateBulkResponse[];
 
   for(const user of userList){
     if(user.userID && user.userType){
       try {
-        ret.push(await getCheckInQR(user.userID, user.userType));
+        ret.push({ ...user, "code": await getCheckInQR(user.userID, user.userType)});
       }
       catch(err) {
         throw new InternalServerError(`Error encountered while generating QR code for ${user.userID} and type ${user.userType}.`, err);

@@ -193,6 +193,21 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
   )
 })
 
+// Volunteer endpoints
+
+/**
+ * (Volunteer)
+ *
+ * Check a user in
+ */
+
+actionRouter.post('/checkin', isVolunteer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      checkIn(req.body.userID, req.body.userType)
+  );
+});
 
 // Admin endpoints
 
@@ -384,20 +399,6 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) =
     res,
     verifyDiscordUser(req.body.email, req.body.discordID, req.body.discordUsername),
     true,
-  );
-});
-
-/**
- * (Organizer)
- *
- * Check a user in
- */
-
-actionRouter.post('/checkin', isVolunteer, (req: Request, res: Response) => {
-  logResponse(
-      req,
-      res,
-      checkIn(req.body.userID, req.body.userType)
   );
 });
 

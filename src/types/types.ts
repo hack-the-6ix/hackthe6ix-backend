@@ -53,3 +53,9 @@ export interface QRCodeGenerateRequest {
   userID: string,
   userType: AllUserTypes
 }
+
+export interface QRCodeGenerateBulkResponse {
+  userID: string,
+  userType: AllUserTypes,
+  code: string
+}
