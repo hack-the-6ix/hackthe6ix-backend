@@ -490,7 +490,6 @@ const status = {
       default: false,
       caption: 'Status Released',
 
-      writeCheck: true,
       readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
     },
 
@@ -565,9 +564,13 @@ const status = {
       required: true,
       default: false,
       caption: 'Checked In',
+      readCheck: true
+    },
 
-      writeCheck: true,
-      readCheck: true,
+    checkInTime: {
+      type: Number,
+      caption: 'Check In Time',
+      readCheck: true
     },
 
     // Virtual fields
@@ -863,6 +866,10 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true,
     },
+    checkInQR: {
+      type: String,
+      readCheck: true
+    },
 
     // Some hackers are special and want to apply after the global deadline
     personalApplicationDeadline: {
@@ -920,6 +927,7 @@ export interface IStatus {
   confirmed?: boolean,
   declined?: boolean,
   checkedIn?: boolean,
+  checkInTime?: number,
 
   // Virtual fields
   canAmendTeam?: boolean,

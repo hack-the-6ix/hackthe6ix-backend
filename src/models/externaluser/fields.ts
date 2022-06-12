@@ -18,6 +18,18 @@ export const fields = {
       virtual: true,
       readCheck: true,
     },
+    status: {
+      checkedIn: {
+        type: Boolean,
+        required: true,
+        default: false,
+        readCheck: true
+      },
+      checkInTime: {
+        type: Number,
+        readCheck: true
+      }
+    },
     firstName: {
       type: String,
       required: true,
@@ -46,10 +58,18 @@ export const fields = {
       writeCheck: true,
       inTextSearch: true,
     },
+    checkInQR: {
+      type: String,
+      readCheck: true,
+    },
     discord: discordShared,
   },
 };
 
 export interface IExternalUser extends BasicUser {
-  notes: string
+  notes: string,
+  status?: {
+    checkedIn?: boolean,
+    checkInTime?: number
+  }
 }
