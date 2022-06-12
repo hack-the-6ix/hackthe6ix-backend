@@ -597,6 +597,24 @@ Once a user has declined, they cannot retract this decision.
 }
 ```
 
+### POST - Submit COVID-19 Vaccine QR
+`/api/action/submitVaccineQR`
+
+Submits a COVID-19 vaccine QR code for verification. Accepts PDF (max. 2 pages) and PNG files.
+The QR code is discarded immediately after verification.
+
+##### Input Specification
+
+Send the PDF or PNG as a file in the `qrCode` field.
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": true|false
+}
+```
+
 ### GET - Get candidate (Organizer)
 `/api/action/getCandidate?category=<category goes here>`
 
@@ -712,11 +730,11 @@ Checks in a (External) User.
 ```
 {
   "status": 200,
-  "message": "<status message>"
+  "message": true|false
 }
 ```
 
-### POST - Generate check in QR codes for multiple (External) Users
+### POST - Generate check in QR codes for multiple (External) Users (Organizer)
 `/api/action/multiCheckInQR`
 
 Generates check in QR codes for multiple (external) users.

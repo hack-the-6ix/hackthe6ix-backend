@@ -891,6 +891,12 @@ export const fields = {
       virtual: true,
       readCheck: true,
     },
+    checkInNotes: {
+      type: [String],
+      default: ["MUST_SUBMIT_COVID19_VACCINE_QR", "MUST_PRESENT_COVID19_VACCINE_QR"],
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      readCheck: true
+    },
     discord: discordShared,
     roles: roles,
     groups: groups,

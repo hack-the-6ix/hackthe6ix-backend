@@ -35,7 +35,8 @@ export interface BasicUser extends mongoose.Document {
     verifyTime?: number,
     additionalRoles?: string[],
     suffix?: string
-  }
+  },
+  checkInNotes: string[]
 }
 
 export interface DiscordVerifyInfo {

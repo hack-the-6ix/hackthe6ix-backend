@@ -7,6 +7,7 @@ import {
 import { BasicUser } from '../../types/types';
 import discordShared from '../shared/discordShared';
 import { isOrganizer } from '../validator';
+import {IUser} from "../user/fields";
 
 export const fields = {
   createCheck: (request: CreateCheckRequest<any, IExternalUser>) => isOrganizer(request.requestUser),
@@ -61,6 +62,12 @@ export const fields = {
     checkInQR: {
       type: String,
       readCheck: true,
+    },
+    checkInNotes: {
+      type: [String],
+      default: ["MUST_SUBMIT_COVID19_VACCINE_QR", "MUST_PRESENT_COVID19_VACCINE_QR"],
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      readCheck: true
     },
     discord: discordShared,
   },

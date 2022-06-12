@@ -21,7 +21,7 @@ import {
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID
+  fetchUserByDiscordID, submitCOVID19VaccineQR
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -483,3 +483,16 @@ actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) =
       generateCheckInQR(req.executor, req.body.userList)
   )
 })
+
+/**
+ * (Hacker)
+ *
+ * Submit COVID-19 vaccine QR
+ */
+actionRouter.post('/submitVaccineQR', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      submitCOVID19VaccineQR(req.executor, (req as any)?.files?.qrCode?.data, (req as any)?.files?.qrCode?.mimetype)
+  );
+});
