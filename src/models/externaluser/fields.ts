@@ -67,5 +67,9 @@ export const fields = {
 };
 
 export interface IExternalUser extends BasicUser {
-  notes: string
+  notes: string,
+  status?: {
+    checkedIn?: boolean,
+    checkInTime?: number
+  }
 }

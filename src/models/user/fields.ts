@@ -927,6 +927,7 @@ export interface IStatus {
   confirmed?: boolean,
   declined?: boolean,
   checkedIn?: boolean,
+  checkInTime?: number,
 
   // Virtual fields
   canAmendTeam?: boolean,

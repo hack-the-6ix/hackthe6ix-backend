@@ -47,6 +47,7 @@ export interface DiscordVerifyInfo {
 }
 
 export type AllUserTypes = "User" | "ExternalUser"
+export type AllUserTypeInterfaces = IUser | IExternalUser
 export type AllUserTypeModels = Model<IUser> | Model<IExternalUser>
 
 export interface QRCodeGenerateRequest {

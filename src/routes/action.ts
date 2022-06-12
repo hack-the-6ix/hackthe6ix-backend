@@ -7,7 +7,7 @@ import { resumeExport } from '../services/dataexport';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
-import { fetchUserByDiscordID, verifyDiscordUser } from '../controller/DiscordController';
+import { verifyDiscordUser } from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
 import { initializeSettingsMapper } from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
@@ -21,6 +21,7 @@ import {
   rsvp,
   updateApplication,
   updateResume,
+  fetchUserByDiscordID
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -188,7 +189,7 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
       req,
       res,
       getCheckInQR(
-          req.executor, "User"
+          req.executor._id, "User"
       )
   )
 })

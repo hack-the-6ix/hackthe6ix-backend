@@ -17,7 +17,13 @@ import {
   SubmissionDeniedError,
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
-import {AllUserTypes, IRSVP, QRCodeGenerateBulkResponse, QRCodeGenerateRequest} from '../types/types';
+import {
+  AllUserTypeInterfaces,
+  AllUserTypes, BasicUser,
+  IRSVP,
+  QRCodeGenerateBulkResponse,
+  QRCodeGenerateRequest
+} from '../types/types';
 import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
@@ -378,6 +384,33 @@ export const releaseApplicationStatus = async () => {
 };
 
 /**
+ * Retrieves a user from their Discord ID
+ *
+ * @param discordID
+ */
+export const fetchUserByDiscordID = async (discordID: string): Promise<BasicUser> => {
+  if (!discordID) {
+    throw new BadRequestError('No discordID given.');
+  }
+  let userInfo: BasicUser = await User.findOne({
+    'discord.discordID': discordID,
+  });
+
+  if (!userInfo) {
+    userInfo = await ExternalUser.findOne({
+      'discord.discordID': discordID,
+    });
+  }
+
+  if (!userInfo) {
+    throw new NotFoundError('No user found with the given Discord ID.');
+  }
+
+  return userInfo;
+};
+
+
+/**
  * Generate a check in QR given a userID and userType
  *
  * @param userID
@@ -404,8 +437,8 @@ const createCheckInQR = (userID:string, userType:AllUserTypes):Promise<string> =
  * @param userType
  */
 
-export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):Promise<string> => {
-  const userID = typeof requestUser === "string" ? requestUser : requestUser._id.toString();
+export const getCheckInQR = (requestUser: string, userType:AllUserTypes):Promise<string> => {
+  const userID = String(requestUser);
 
   return new Promise((resolve, reject) => {
     if(userType === "User") {
@@ -420,7 +453,7 @@ export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):P
         }
         else {
           // We need to generate the QR code
-          createCheckInQR(userID, "User").then((qrCode) => {
+          createCheckInQR(userID, userType).then((qrCode) => {
             User.updateOne({
               _id: userID
             }, {
@@ -444,7 +477,7 @@ export const getCheckInQR = (requestUser: IUser|string, userType:AllUserTypes):P
         }
         else {
           // We need to generate the QR code
-          createCheckInQR(userID, "User").then((qrCode) => {
+          createCheckInQR(userID, userType).then((qrCode) => {
             ExternalUser.updateOne({
               _id: userID
             }, {
@@ -490,25 +523,33 @@ export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGene
  *
  * @param userID
  * @param userType
+ * @param checkInTime
  */
 
-export const checkIn = async (userID: string, userType: AllUserTypes): Promise<string> => {
+export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<AllUserTypeInterfaces> => {
   const newStatus = {
     'status.checkedIn': true,
-    'status.checkInTime': Date.now()
+    'status.checkInTime': checkInTime
   };
 
   if(userType === "User") {
-    await User.updateOne({
-      _id: userID
-    }, newStatus)
-    return "Success"
+    const user = await User.findOneAndUpdate({
+      _id: userID,
+      'status.confirmed': true
+    }, newStatus, {
+      new: true
+    })
+    if(!user){
+      throw new NotFoundError("Unable to find RSVP'd user with given ID. Ensure they have RSVP'd and that the user ID/QR matches!");
+    }
+    return user;
   }
   else if(userType === "ExternalUser"){
-    await ExternalUser.updateOne({
+    return ExternalUser.findOneAndUpdate({
       _id: userID
-    }, newStatus)
-    return "Success"
+    }, newStatus, {
+        new: true
+      })
   }
 
   throw new BadRequestError("Given user type is invalid.")
