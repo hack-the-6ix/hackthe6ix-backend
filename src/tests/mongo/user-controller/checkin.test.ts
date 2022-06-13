@@ -39,9 +39,15 @@ describe('Check in user', () => {
 
             const user = await User.create(confirmedHackerUser);
 
-            const userInfo = await checkIn(user._id, "User", SIM_TIME);
-            expect(userInfo.status?.checkedIn).toEqual(true);
-            expect(userInfo.status?.checkInTime).toEqual(SIM_TIME);
+            const checkInResult = await checkIn(user._id, "User", SIM_TIME);
+
+            const newUser = await User.findOne({
+                _id: user._id
+            })
+
+            expect(checkInResult).toEqual(true);
+            expect(newUser.status?.checkedIn).toEqual(true);
+            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });
         test('User not confirmed', async () => {
             await generateMockUniverseState();
@@ -60,9 +66,15 @@ describe('Check in user', () => {
             await generateMockUniverseState();
             const eUser = await ExternalUser.create(externalUser);
 
-            const userInfo = await checkIn(eUser._id, "ExternalUser", SIM_TIME);
-            expect(userInfo.status?.checkedIn).toEqual(true);
-            expect(userInfo.status?.checkInTime).toEqual(SIM_TIME);
+            const checkInResult = await checkIn(eUser._id, "ExternalUser", SIM_TIME);
+
+            const newUser = await ExternalUser.findOne({
+                _id: eUser._id
+            })
+
+            expect(checkInResult).toEqual(true);
+            expect(newUser.status?.checkedIn).toEqual(true);
+            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });
 
     });
