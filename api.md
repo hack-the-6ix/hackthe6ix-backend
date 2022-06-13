@@ -730,7 +730,7 @@ Checks in a (External) User.
 ```
 {
   "status": 200,
-  "message": true|false
+  "message": false|[<Check-In Notes>]
 }
 ```
 

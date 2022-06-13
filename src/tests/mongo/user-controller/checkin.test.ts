@@ -31,13 +31,17 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 const SIM_TIME = Date.now();
+const CHECK_IN_NOTES = ["TEST_NOTE"]
 
 describe('Check in user', () => {
     describe('Internal user', () => {
         test('User confirmed', async () => {
             await generateMockUniverseState();
 
-            const user = await User.create(confirmedHackerUser);
+            const user = await User.create({
+                ...confirmedHackerUser,
+                checkInNotes: CHECK_IN_NOTES
+            });
 
             const checkInResult = await checkIn(user._id, "User", SIM_TIME);
 
@@ -45,7 +49,9 @@ describe('Check in user', () => {
                 _id: user._id
             })
 
-            expect(checkInResult).toEqual(true);
+            expect(checkInResult).toEqual(
+                expect.arrayContaining(CHECK_IN_NOTES)
+            )
             expect(newUser.status?.checkedIn).toEqual(true);
             expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });
@@ -64,7 +70,10 @@ describe('Check in user', () => {
     describe('External user', () => {
         test('Check in external user', async () => {
             await generateMockUniverseState();
-            const eUser = await ExternalUser.create(externalUser);
+            const eUser = await ExternalUser.create({
+                ...externalUser,
+                checkInNotes: CHECK_IN_NOTES
+            });
 
             const checkInResult = await checkIn(eUser._id, "ExternalUser", SIM_TIME);
 
@@ -72,7 +81,9 @@ describe('Check in user', () => {
                 _id: eUser._id
             })
 
-            expect(checkInResult).toEqual(true);
+            expect(checkInResult).toEqual(
+                expect.arrayContaining(CHECK_IN_NOTES)
+            )
             expect(newUser.status?.checkedIn).toEqual(true);
             expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });

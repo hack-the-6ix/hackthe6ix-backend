@@ -526,7 +526,7 @@ export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGene
  * @param checkInTime
  */
 
-export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<boolean> => {
+export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<string[]> => {
   const newStatus = {
     'status.checkedIn': true,
     'status.checkInTime': checkInTime
@@ -542,15 +542,18 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
     if(!user){
       throw new NotFoundError("Unable to find RSVP'd user with given ID. Ensure they have RSVP'd and that the user ID/QR matches!");
     }
-    return true;
+    return user.checkInNotes;
   }
   else if(userType === "ExternalUser"){
-    await ExternalUser.findOneAndUpdate({
+    const user = await ExternalUser.findOneAndUpdate({
       _id: userID
     }, newStatus, {
       new: true
     })
-    return true;
+    if(!user){
+      throw new NotFoundError("Unable to find external user with given ID. Ensure that the user ID/QR matches!");
+    }
+    return user.checkInNotes;
   }
 
   throw new BadRequestError("Given user type is invalid.")
