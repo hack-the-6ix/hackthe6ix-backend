@@ -1,8 +1,9 @@
-import {pdfToPng, PngPageOutput} from "pdf-to-png-converter";
+import {pdfToPng} from "pdf-to-png-converter";
 import { PNG } from 'pngjs';
 import jsQR from "jsqr";
 import {COVIDQRVerifyResult, parseShc} from "./parsers";
 import {BadRequestError, InternalServerError} from "../../types/errors";
+import {prod as keys} from './keys';
 
 const _parsePNG = (png:Buffer):Promise<PNG> => {
     return new Promise((resolve, reject) => {
@@ -17,7 +18,7 @@ const _parsePNG = (png:Buffer):Promise<PNG> => {
 }
 
 
-export const parseQRCode = async (file: Buffer, mimeType: string):Promise<COVIDQRVerifyResult> => {
+export const parseQRCode = async (file: Buffer, mimeType: string, keySet = keys, minDoses?: number):Promise<COVIDQRVerifyResult> => {
     if(!["application/pdf", "image/png"].includes(mimeType)){
         throw new BadRequestError("Only PDFs and PNG images are supported.");
     }
@@ -52,7 +53,7 @@ export const parseQRCode = async (file: Buffer, mimeType: string):Promise<COVIDQ
 
             if (code) {
                 const rawSHC = code.data;
-                return await parseShc(rawSHC);
+                return await parseShc(rawSHC, keySet, minDoses);
 
             }
             else {

@@ -1,5 +1,4 @@
 import * as jose from 'node-jose';
-import keys from './keys';
 
 /**
  * Adapted from code by obrassard at https://github.com/obrassard/shc-extractor
@@ -47,7 +46,7 @@ export interface COVIDQRVerifyResult {
     hasRequiredDoses: boolean
 }
 
-export const hasRequiredDoses = (fhirBundle: Record<string, any>):boolean=> {
+export const hasRequiredDoses = (fhirBundle: Record<string, any>, requiredDoses: number):boolean=> {
     let doseCount = 0;
     if(Array.isArray(fhirBundle?.entry)){
         for(const entry of fhirBundle.entry){
@@ -58,23 +57,23 @@ export const hasRequiredDoses = (fhirBundle: Record<string, any>):boolean=> {
             }
         }
     }
-    return doseCount >= REQUIRED_DOSES;
+    return doseCount >= requiredDoses;
 }
 
-export const parseShc = async (rawSHC:string):Promise<COVIDQRVerifyResult> => {
+export const parseShc = async (rawSHC:string, keySet: Record<string, any>, requiredDoses = REQUIRED_DOSES):Promise<COVIDQRVerifyResult> => {
     const jwt = numericShcToJwt(rawSHC);
     const splitJwt = jwt.split(".")
     const header = parseJwtHeader(splitJwt[0])
-    const payload = parseJwtPayload(splitJwt[1]);
+    const payload = parseJwtPayload(splitJwt[1], header["zip"] === "DEF");
 
-    const verification = await verifySignature(jwt, payload.iss)
+    const verification = await verifySignature(jwt, payload.iss, keySet)
 
     return {
         header,
         payload,
         verification,
         trusted: verification?.trustable ?? false,
-        hasRequiredDoses: hasRequiredDoses(payload?.vc?.credentialSubject?.fhirBundle)
+        hasRequiredDoses: hasRequiredDoses(payload?.vc?.credentialSubject?.fhirBundle, requiredDoses)
     }
 }
 
@@ -110,9 +109,10 @@ function parseJwtHeader(header: string):Record<string, any> {
  * @param {string} payload Base64 encoded + zlib compressed jwt payload
  * @return {object} The decoded payload
  */
-function parseJwtPayload(payload: string):Record<string, any> {
+function parseJwtPayload(payload: string, compressed=true):Record<string, any> {
     const buffer = Buffer.from(payload, "base64");
-    const payloadJson = zlib.inflateRawSync(buffer)
+
+    const payloadJson = compressed ? zlib.inflateRawSync(buffer) : buffer;
     return JSON.parse(payloadJson.toString('utf-8'));
 }
 
@@ -122,25 +122,36 @@ function parseJwtPayload(payload: string):Record<string, any> {
  *
  * @param {string} jwt JWT to verify
  * @param {string} issuer The expected issuer of the JWT
+ * @param {object} keySet Set of accepted issuer keys
  * @return The verification result
  */
-async function verifySignature(jwt:string, issuer:string) {
-    const keys = await getKeys(issuer)
-    try {
-        const result = await jose.JWS.createVerify(keys.keys).verify(jwt)
+async function verifySignature(jwt:string, issuer:string, keySet: Record<string, any>) {
+    const keys = await getKeys(issuer, keySet);
 
-        return {
-            trustable: true,
-            verifiedBy: result.key.kid,
-            origin: issuer,
-            isFromCache: keys.isFromCache
-        }
-    } catch (err) {
-        return {
-            trustable: false,
-            isFromCache: keys.isFromCache
+    if(keys) {
+        try {
+            const result = await jose.JWS.createVerify(keys.keys).verify(jwt)
+
+            return {
+                trustable: true,
+                verifiedBy: result.key.kid,
+                origin: issuer,
+                isFromCache: keys.isFromCache
+            }
+        } catch (err) {
+            return {
+                trustable: false,
+                isFromCache: keys.isFromCache
+            }
         }
     }
+    else {
+        return {
+            trustable: false,
+            isFromCache: false
+        }
+    }
+
 }
 
 /**
@@ -149,11 +160,12 @@ async function verifySignature(jwt:string, issuer:string) {
  * if not found, we fetch them from the issuer.
  *
  * @param {string} issuer Issuer of the JWT to verify
+ * @param {object} keySet Set of accepted issuer keys
  * @return {{keys: jose.JWK.Key | jose.JWK.KeyStore, isFromCache: boolean}} Key or keystore from the issuer
  */
-async function getKeys(issuer: string) {
-    if (keys[issuer]) {
-        const key = keys[issuer];
+async function getKeys(issuer: string, keySet: Record<string, any>) {
+    if (keySet[issuer]) {
+        const key = keySet[issuer];
         return {
             keys: await jose.JWK.asKey(key),
             isFromCache: true

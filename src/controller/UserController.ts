@@ -560,8 +560,8 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
  * Submit COVID-19 Vaccine QR
  */
 
-export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string):Promise<boolean> => {
-  const verifyResult = await parseQRCode(data, mimeType);
+export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string, keySet?: Record<string, any>, minDoses?: number):Promise<boolean> => {
+  const verifyResult = await parseQRCode(data, mimeType, keySet, minDoses);
 
   if(verifyResult.trusted && verifyResult.hasRequiredDoses){
     await User.updateOne({

@@ -1,4 +1,4 @@
-export default {
+export const prod = {
     // Québec
     "https://covid19.quebec.ca/PreuveVaccinaleApi/issuer": {
         kid: "Nqa1zvChOkoA46B5ZM_oK3MDhL3-mnLERV_30vkHQIc",
@@ -135,4 +135,16 @@ export default {
         "x": "ViKBgZ0f3pQKv-tSz653HUtIzCS8TVSNu1Hwi0tKpSk",
         "y": "01177apKXH2HgGfkn71ZPEljWk0Q2fcEzY2_XOfL_Zc"
     },
-} as Record<string, any>
+} as Record<string, any>;
+
+export const testing = {
+    "https://spec.smarthealth.cards/examples/issuer": {
+        "kty": "EC",
+        "kid": "3Kfdg-XwP-7gXyywtUfUADwBumDOPKMQx-iELL11W9s",
+        "use": "sig",
+        "alg": "ES256",
+        "crv": "P-256",
+        "x": "11XvRWy1I2S0EyJlyf_bWfw_TQ5CJJNLw78bHXNxcgw",
+        "y": "eZXwxvO1hvCY0KucrPfKo7yAyMT6Ajc3N7OkAB6VYy8"
+    }
+} as Record<string, any>;
