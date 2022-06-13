@@ -18,7 +18,6 @@ import {
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
 import {
-  AllUserTypeInterfaces,
   AllUserTypes, BasicUser,
   IRSVP,
   QRCodeGenerateBulkResponse,
@@ -30,6 +29,7 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 import {log} from "../services/logger";
 import ExternalUser from "../models/externaluser/ExternalUser";
+import {parseQRCode} from "../services/covid-qr-verify/verify";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -526,7 +526,7 @@ export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGene
  * @param checkInTime
  */
 
-export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<AllUserTypeInterfaces> => {
+export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<string[]> => {
   const newStatus = {
     'status.checkedIn': true,
     'status.checkInTime': checkInTime
@@ -542,15 +542,40 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
     if(!user){
       throw new NotFoundError("Unable to find RSVP'd user with given ID. Ensure they have RSVP'd and that the user ID/QR matches!");
     }
-    return user;
+    return user.checkInNotes;
   }
   else if(userType === "ExternalUser"){
-    return ExternalUser.findOneAndUpdate({
+    const user = await ExternalUser.findOneAndUpdate({
       _id: userID
     }, newStatus, {
-        new: true
-      })
+      new: true
+    })
+    if(!user){
+      throw new NotFoundError("Unable to find external user with given ID. Ensure that the user ID/QR matches!");
+    }
+    return user.checkInNotes;
   }
 
   throw new BadRequestError("Given user type is invalid.")
+}
+
+/**
+ * Submit COVID-19 Vaccine QR
+ */
+
+export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string, keySet?: Record<string, any>, minDoses?: number):Promise<boolean> => {
+  const verifyResult = await parseQRCode(data, mimeType, keySet, minDoses);
+
+  if(verifyResult.trusted && verifyResult.hasRequiredDoses){
+    await User.updateOne({
+      _id: requestUser._id
+    }, {
+      $pull: {
+        checkInNotes: "MUST_SUBMIT_COVID19_VACCINE_QR"
+      }
+    });
+
+    return true;
+  }
+  return false;
 }

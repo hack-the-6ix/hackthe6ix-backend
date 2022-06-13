@@ -31,17 +31,29 @@ beforeEach(runBeforeEach);
 afterAll(runAfterAll);
 
 const SIM_TIME = Date.now();
+const CHECK_IN_NOTES = ["TEST_NOTE"]
 
 describe('Check in user', () => {
     describe('Internal user', () => {
         test('User confirmed', async () => {
             await generateMockUniverseState();
 
-            const user = await User.create(confirmedHackerUser);
+            const user = await User.create({
+                ...confirmedHackerUser,
+                checkInNotes: CHECK_IN_NOTES
+            });
 
-            const userInfo = await checkIn(user._id, "User", SIM_TIME);
-            expect(userInfo.status?.checkedIn).toEqual(true);
-            expect(userInfo.status?.checkInTime).toEqual(SIM_TIME);
+            const checkInResult = await checkIn(user._id, "User", SIM_TIME);
+
+            const newUser = await User.findOne({
+                _id: user._id
+            })
+
+            expect(checkInResult).toEqual(
+                expect.arrayContaining(CHECK_IN_NOTES)
+            )
+            expect(newUser.status?.checkedIn).toEqual(true);
+            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });
         test('User not confirmed', async () => {
             await generateMockUniverseState();
@@ -58,11 +70,22 @@ describe('Check in user', () => {
     describe('External user', () => {
         test('Check in external user', async () => {
             await generateMockUniverseState();
-            const eUser = await ExternalUser.create(externalUser);
+            const eUser = await ExternalUser.create({
+                ...externalUser,
+                checkInNotes: CHECK_IN_NOTES
+            });
 
-            const userInfo = await checkIn(eUser._id, "ExternalUser", SIM_TIME);
-            expect(userInfo.status?.checkedIn).toEqual(true);
-            expect(userInfo.status?.checkInTime).toEqual(SIM_TIME);
+            const checkInResult = await checkIn(eUser._id, "ExternalUser", SIM_TIME);
+
+            const newUser = await ExternalUser.findOne({
+                _id: eUser._id
+            })
+
+            expect(checkInResult).toEqual(
+                expect.arrayContaining(CHECK_IN_NOTES)
+            )
+            expect(newUser.status?.checkedIn).toEqual(true);
+            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
         });
 
     });
