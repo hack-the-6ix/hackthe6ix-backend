@@ -224,6 +224,7 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     }, {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
+      'rsvpForm': rsvp.form
     });
 
     await syncMailingLists(undefined, true, requestUser.email);

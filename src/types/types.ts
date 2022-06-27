@@ -21,7 +21,8 @@ export type UniverseState = {
 }
 
 export interface IRSVP {
-  attending: boolean
+  attending: boolean,
+  form: Record<string, any>
 }
 
 export interface BasicUser extends mongoose.Document {

@@ -62,6 +62,7 @@ describe('RSVP', () => {
           user,
           {
             attending: true,
+            form: {}
           },
         );
 
@@ -88,6 +89,7 @@ describe('RSVP', () => {
           user,
           {
             attending: true,
+            form: {}
           },
         )).rejects.toThrow(DeadlineExpiredError);
 
@@ -117,6 +119,7 @@ describe('RSVP', () => {
           user,
           {
             attending: true,
+            form: {}
           },
         );
 
@@ -144,6 +147,7 @@ describe('RSVP', () => {
           user,
           {
             attending: true,
+            form: {}
           },
         )).rejects.toThrow(DeadlineExpiredError);
 
@@ -173,6 +177,7 @@ describe('RSVP', () => {
         user,
         {
           attending: true,
+          form: {}
         },
       )).rejects.toThrow(RSVPRejectedError);
 
@@ -200,6 +205,7 @@ describe('RSVP', () => {
         user,
         {
           attending: true,
+          form: {}
         },
       )).rejects.toThrow(RSVPRejectedError);
 
@@ -226,6 +232,7 @@ describe('RSVP', () => {
         user,
         {
           attending: true,
+          form: {}
         },
       )).rejects.toThrow(RSVPRejectedError);
 
@@ -253,6 +260,7 @@ describe('RSVP', () => {
         user,
         {
           attending: true,
+          form: {}
         },
       );
 
@@ -292,6 +300,7 @@ describe('RSVP', () => {
         user,
         {
           attending: false,
+          form: {}
         },
       );
 
@@ -316,4 +325,51 @@ describe('RSVP', () => {
       );
     });
   });
+
+  describe('Update RSVP form', () => {
+    test('Update RSVP form', async () => {
+      await generateMockUniverseState();
+
+      const user = await User.create({
+        ...hackerUser,
+        status: {
+          accepted: true,
+          statusReleased: true,
+        },
+      });
+
+      await rsvp(
+          user,
+          {
+            attending: true,
+            form: {
+              selectedCompanies: ["TEST"]
+            }
+          },
+      );
+
+      const resultObject = await User.findOne({
+        _id: user._id,
+      });
+
+      expect(resultObject.toJSON().status.confirmed).toEqual(true);
+      expect(resultObject.toJSON().status.declined).toEqual(false);
+      expect(resultObject.toJSON().rsvpForm.selectedCompanies).toEqual(
+          expect.arrayContaining(["TEST"])
+      )
+
+      // Verify confirmation email sent
+      const template = mockGetMailTemplate(MailTemplate.confirmed);
+
+      expect(sendEmailRequest).toHaveBeenCalledWith(
+          user.email,
+          template.templateID,
+          template.subject,
+          expect.objectContaining({
+            'TAGS[FIRST_NAME]': user.firstName,
+            'TAGS[LAST_NAME]': user.lastName,
+          }),
+      );
+    })
+  })
 });

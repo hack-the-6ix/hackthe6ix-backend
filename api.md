@@ -585,7 +585,10 @@ Once a user has declined, they cannot retract this decision.
 #### Input Specification
 ```
 {
-  "attending": true // false if they are not attending... duh
+  "attending": true // false if they are not attending... duh,
+  "form": {
+    // RSVP form responses go here
+  }
 }
 ```
 

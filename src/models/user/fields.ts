@@ -367,6 +367,17 @@ export const hackerApplication = {
   },
 };
 
+const rsvpForm = {
+  selectedCompanies: {
+    type: [String],
+    default: [] as string[],
+    caption: 'Selected companies',
+
+    writeCheck: true,
+    readCheck: true
+  }
+}
+
 // Internal FIELDS; Only organizers can access them
 const internal = {
   writeCheck: (request: WriteCheckRequest<any, IUser>) => isOrganizer(request.requestUser),
@@ -897,6 +908,7 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true
     },
+    rsvpForm: rsvpForm,
     discord: discordShared,
     roles: roles,
     groups: groups,
@@ -959,6 +971,7 @@ export interface IUser extends BasicUser {
   groups: IRoles, // Raw group from KEYCLOAK
   status: IStatus,
   hackerApplication: IApplication,
+  rsvpForm: IRSVPForm,
   internal: {
     notes?: string,
     computedApplicationScore?: number,
@@ -1026,4 +1039,8 @@ export interface IApplication {
   mlhEmail: boolean,
   mlhData: boolean,
   preEventWorkshops: string
+}
+
+export interface IRSVPForm {
+  selectedCompanies: string[]
 }
