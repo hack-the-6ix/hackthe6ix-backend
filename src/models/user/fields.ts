@@ -1042,5 +1042,5 @@ export interface IApplication {
 }
 
 export interface IRSVPForm {
-  selectedCompanies: string[]
+  selectedCompanies?: string[]
 }
