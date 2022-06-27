@@ -12,7 +12,7 @@ import {
   isAdmin,
   isOrganizer,
   isUserOrOrganizer,
-  maxLength,
+  maxLength, maxWordLength,
   minLength,
   minWordLength,
   validatePostalCode,
@@ -95,16 +95,6 @@ export const hackerApplication = {
 
       writeCheck: inEnum(enumOptions.ethnicity, true),
       submitCheck: inEnum(enumOptions.ethnicity),
-      readCheck: true,
-    },
-
-    timezone: {
-      type: String,
-      caption: 'Timezone',
-      inTextSearch: true,
-
-      writeCheck: inEnum(enumOptions.timezone, true),
-      submitCheck: inEnum(enumOptions.timezone),
       readCheck: true,
     },
 
@@ -243,16 +233,6 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    hackathonsAttended: {
-      type: String,
-      caption: 'Hackathons attended',
-      inTextSearch: true,
-
-      writeCheck: inEnum(enumOptions.hackathonsAttended, true),
-      submitCheck: inEnum(enumOptions.hackathonsAttended),
-      readCheck: true,
-    },
-
     // The user cannot directly edit this field, but they can view it
     // We will set this when the user updates their application
     resumeFileName: {
@@ -306,7 +286,27 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      readCheck: true,
+    },
+
+    whyHT6Essay: {
+      type: String,
+      caption: 'Why HT6 Essay',
+      inTextSearch: true,
+
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      readCheck: true,
+    },
+
+    techInnovationEssay: {
+      type: String,
+      caption: 'Technology/Innovation Essay',
+      inTextSearch: true,
+
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
       readCheck: true,
     },
 
@@ -320,22 +320,12 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    preEventWorkshops: {
+    inPersonHacking: {
       type: String,
-      caption: 'Would you be interested in attending introductory workshops the week prior to the hackathon?',
-      inTextSearch: true,
+      caption: "Can attend in person hacking session",
 
-      writeCheck: maxLength(10),
-      readCheck: true,
-    },
-
-    accomplishEssay: {
-      type: String,
-      caption: 'Accomplishment Essay',
-      inTextSearch: true,
-
-      writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
+      writeCheck: inEnum(enumOptions.inPersonHacking, true),
+      submitCheck: inEnum(enumOptions.inPersonHacking),
       readCheck: true,
     },
 
@@ -1014,7 +1004,6 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
-  timezone: string,
   country: string,
   wantSwag: boolean,
   shirtSize: string,
@@ -1026,19 +1015,19 @@ export interface IApplication {
   school: string,
   program: string,
   yearsOfStudy: string,
-  hackathonsAttended: string,
   resumeFileName: string,
   resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,
   linkedinLink: string,
   projectEssay: string,
+  whyHT6Essay: string,
+  techInnovationEssay: string,
+  inPersonHacking: string,
   requestedWorkshops: string,
-  accomplishEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean,
-  preEventWorkshops: string
 }
 
 export interface IRSVPForm {

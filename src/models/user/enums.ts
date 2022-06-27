@@ -16,6 +16,7 @@ export const enumOptions = {
     'UX design',
     'Sciences',
   ],
+  inPersonHacking: ['Yes', 'No', 'Unsure'],
   gender: ['Male', 'Female', 'Non-Binary', 'Other', 'Prefer not to say'],
   pronouns: ['He/Him', 'She/Her', 'They/Them', 'Other', 'Prefer not to say'],
   ethnicity: [
