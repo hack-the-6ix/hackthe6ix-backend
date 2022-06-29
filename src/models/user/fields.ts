@@ -98,6 +98,16 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    timezone: {
+      type: String,
+      caption: 'Timezone',
+      inTextSearch: true,
+
+      writeCheck: inEnum(enumOptions.timezone, true),
+      submitCheck: inEnum(enumOptions.timezone),
+      readCheck: true,
+    },
+
     country: {
       type: String,
       caption: 'Country',
@@ -1005,6 +1015,7 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
+  timezone: string,
   country: string,
   wantSwag: boolean,
   shirtSize: string,
