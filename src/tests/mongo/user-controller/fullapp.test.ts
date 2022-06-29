@@ -73,7 +73,9 @@ describe('Update Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
     } as IApplication;
 
@@ -117,7 +119,9 @@ describe('Update Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
     } as IApplication;
 
@@ -161,7 +165,9 @@ describe('Update Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       teamCode: '1234',
     } as IApplication;
@@ -201,7 +207,9 @@ describe('Update Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
     } as IApplication;
 
@@ -239,7 +247,9 @@ describe('Update Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X'.repeat(3000),
+      whyHT6Essay: 'X '.repeat(3000),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
     } as IApplication;
 
@@ -290,7 +300,8 @@ describe('Update Real Application', () => {
       linkedinLink: 'LinkedIn',
       projectEssay: 'X '.repeat(50),
       requestedWorkshops: 'blah blah',
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
       mlhCOC: true,
       mlhEmail: true,
       mlhData: true,
@@ -339,7 +350,9 @@ describe('Submit Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
       country: 'Canada',
@@ -385,7 +398,9 @@ describe('Submit Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
       country: 'Canada',
@@ -435,7 +450,9 @@ describe('Submit Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: false,
       mlhData: true,
       country: 'Canada',
@@ -480,7 +497,9 @@ describe('Submit Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: false,
       country: 'Canada',
@@ -525,7 +544,9 @@ describe('Submit Real Application', () => {
       yearsOfStudy: enumOptions['yearsOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
-      accomplishEssay: 'X '.repeat(50),
+      whyHT6Essay: 'X '.repeat(50),
+      techInnovationEssay: 'X '.repeat(50),
+      requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
       country: 'Canada',
@@ -580,12 +601,12 @@ describe('Submit Real Application', () => {
         linkedinLink: 'LinkedIn',
         projectEssay: 'X '.repeat(50),
         requestedWorkshops: 'blah blah',
-        accomplishEssay: 'X '.repeat(50),
+        whyHT6Essay: 'X '.repeat(50),
+        techInnovationEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
-        country: 'Canada',
-        preEventWorkshops: enumOptions['preEventWorkshops'][0],
+        country: 'Canada'
       } as IApplication;
 
       const user = await User.create({
@@ -646,12 +667,12 @@ describe('Submit Real Application', () => {
         linkedinLink: 'LinkedIn',
         projectEssay: 'X '.repeat(50),
         requestedWorkshops: 'blah blah',
-        accomplishEssay: 'X '.repeat(50),
+        whyHT6Essay: 'X '.repeat(50),
+        techInnovationEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
-        country: 'Canada',
-        preEventWorkshops: enumOptions['preEventWorkshops'][0],
+        country: 'Canada'
       } as IApplication;
 
       const user = await User.create({
@@ -712,12 +733,12 @@ describe('Submit Real Application', () => {
         linkedinLink: 'LinkedIn',
         projectEssay: 'X '.repeat(50),
         requestedWorkshops: 'blah blah',
-        accomplishEssay: 'X '.repeat(50),
+        whyHT6Essay: 'X '.repeat(50),
+        techInnovationEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
-        country: 'Canada',
-        preEventWorkshops: enumOptions['preEventWorkshops'][0],
+        country: 'Canada'
       } as IApplication;
 
       const user = await User.create({
@@ -772,12 +793,12 @@ describe('Submit Real Application', () => {
         linkedinLink: 'LinkedIn',
         projectEssay: 'X '.repeat(50),
         requestedWorkshops: 'blah blah',
-        accomplishEssay: 'X '.repeat(50),
+        whyHT6Essay: 'X '.repeat(50),
+        techInnovationEssay: 'X '.repeat(50),
         mlhCOC: true,
         mlhEmail: true,
         mlhData: true,
-        country: 'Canada',
-        preEventWorkshops: enumOptions['preEventWorkshops'][0],
+        country: 'Canada'
       } as IApplication;
 
       const user = await User.create({
