@@ -12,7 +12,7 @@ import {
   isAdmin,
   isOrganizer,
   isUserOrOrganizer,
-  maxLength,
+  maxLength, maxWordLength,
   minLength,
   minWordLength,
   validatePostalCode,
@@ -306,7 +306,27 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      readCheck: true,
+    },
+
+    whyHT6Essay: {
+      type: String,
+      caption: 'Why HT6 Essay',
+      inTextSearch: true,
+
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      readCheck: true,
+    },
+
+    techInnovationEssay: {
+      type: String,
+      caption: 'Technology/Innovation Essay',
+      inTextSearch: true,
+
+      writeCheck: maxLength(2056),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
       readCheck: true,
     },
 
@@ -317,25 +337,6 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      readCheck: true,
-    },
-
-    preEventWorkshops: {
-      type: String,
-      caption: 'Would you be interested in attending introductory workshops the week prior to the hackathon?',
-      inTextSearch: true,
-
-      writeCheck: maxLength(10),
-      readCheck: true,
-    },
-
-    accomplishEssay: {
-      type: String,
-      caption: 'Accomplishment Essay',
-      inTextSearch: true,
-
-      writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxLength(2056)(request),
       readCheck: true,
     },
 
@@ -1033,12 +1034,12 @@ export interface IApplication {
   portfolioLink: string,
   linkedinLink: string,
   projectEssay: string,
+  whyHT6Essay: string,
+  techInnovationEssay: string,
   requestedWorkshops: string,
-  accomplishEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean,
-  preEventWorkshops: string
 }
 
 export interface IRSVPForm {
