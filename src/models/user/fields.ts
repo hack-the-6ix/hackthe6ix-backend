@@ -233,6 +233,16 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    hackathonsAttended: {
+      type: String,
+      caption: 'Hackathons attended',
+      inTextSearch: true,
+
+      writeCheck: inEnum(enumOptions.hackathonsAttended, true),
+      submitCheck: inEnum(enumOptions.hackathonsAttended),
+      readCheck: true,
+    },
+
     // The user cannot directly edit this field, but they can view it
     // We will set this when the user updates their application
     resumeFileName: {
@@ -317,15 +327,6 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      readCheck: true,
-    },
-
-    inPersonHacking: {
-      type: String,
-      caption: "Can attend in person hacking session",
-
-      writeCheck: inEnum(enumOptions.inPersonHacking, true),
-      submitCheck: inEnum(enumOptions.inPersonHacking),
       readCheck: true,
     },
 
@@ -1015,6 +1016,7 @@ export interface IApplication {
   school: string,
   program: string,
   yearsOfStudy: string,
+  hackathonsAttended: string,
   resumeFileName: string,
   resumeSharePermission: boolean,
   githubLink: string,
@@ -1023,7 +1025,6 @@ export interface IApplication {
   projectEssay: string,
   whyHT6Essay: string,
   techInnovationEssay: string,
-  inPersonHacking: string,
   requestedWorkshops: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
