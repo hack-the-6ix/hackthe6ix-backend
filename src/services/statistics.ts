@@ -37,7 +37,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             wantSwag: 0,
             noSwag: 0,
           },
-          preEventWorkshops: {},
           review: {
             reviewed: 0,
             notReviewed: 0,
@@ -153,18 +152,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
           default:
             statistics.hacker.submittedApplicationStats.gender.other++;
             break;
-        }
-
-        // Preevent workshops
-        if (user?.hackerApplication?.preEventWorkshops) {
-
-          const wsOption = user?.hackerApplication?.preEventWorkshops;
-
-          if (statistics.hacker.submittedApplicationStats.preEventWorkshops[wsOption] === undefined) {
-            statistics.hacker.submittedApplicationStats.preEventWorkshops[wsOption] = 0;
-          }
-
-          statistics.hacker.submittedApplicationStats.preEventWorkshops[wsOption]++;
         }
 
         // Swag
@@ -291,7 +278,6 @@ export type IStatistics = {
         wantSwag: number,
         noSwag: number
       },
-      preEventWorkshops: any,
       review: {
         reviewed: number,
         notReviewed: number,

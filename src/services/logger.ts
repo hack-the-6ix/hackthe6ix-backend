@@ -110,7 +110,7 @@ function createWinstonLogger() {
   if (process.env.NODE_ENV !== 'production') {
     logger.add(new winston.transports.Console({
       format: loggingFormat,
-      level: 'silly',
+      level: process.env.LOG_LEVEL || 'silly',
       handleExceptions: true,
     }));
   }

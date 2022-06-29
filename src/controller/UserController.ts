@@ -1,4 +1,5 @@
 import { Mongoose } from 'mongoose';
+import * as qrcode from 'qrcode';
 import { enumOptions } from '../models/user/enums';
 import { fields, IApplication, IUser } from '../models/user/fields';
 import User from '../models/user/User';
@@ -16,11 +17,19 @@ import {
   SubmissionDeniedError,
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
-import { IRSVP } from '../types/types';
+import {
+  AllUserTypes, BasicUser,
+  IRSVP,
+  QRCodeGenerateBulkResponse,
+  QRCodeGenerateRequest
+} from '../types/types';
 import { writeGridFSFile } from './GridFSController';
 import { editObject, getObject } from './ModelController';
 import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
+import {log} from "../services/logger";
+import ExternalUser from "../models/externaluser/ExternalUser";
+import {parseQRCode} from "../services/covid-qr-verify/verify";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -215,6 +224,7 @@ export const rsvp = async (requestUser: IUser, rsvp: IRSVP) => {
     }, {
       'status.confirmed': isAttending,
       'status.declined': !isAttending,
+      'rsvpForm': rsvp.form
     });
 
     await syncMailingLists(undefined, true, requestUser.email);
@@ -373,3 +383,200 @@ export const releaseApplicationStatus = async () => {
 
   return usersModified;
 };
+
+/**
+ * Retrieves a user from their Discord ID
+ *
+ * @param discordID
+ */
+export const fetchUserByDiscordID = async (discordID: string): Promise<BasicUser> => {
+  if (!discordID) {
+    throw new BadRequestError('No discordID given.');
+  }
+  let userInfo: BasicUser = await User.findOne({
+    'discord.discordID': discordID,
+  });
+
+  if (!userInfo) {
+    userInfo = await ExternalUser.findOne({
+      'discord.discordID': discordID,
+    });
+  }
+
+  if (!userInfo) {
+    throw new NotFoundError('No user found with the given Discord ID.');
+  }
+
+  return userInfo;
+};
+
+
+/**
+ * Generate a check in QR given a userID and userType
+ *
+ * @param userID
+ * @param userType
+ */
+const createCheckInQR = (userID:string, userType:AllUserTypes):Promise<string> => {
+  return new Promise((resolve, reject) => {
+    qrcode.toDataURL(JSON.stringify({
+      "userID": userID,
+      "userType": userType
+    }), function (err, url) {
+      if(err){
+        return reject(err);
+      }
+      return resolve(url);
+    })
+  });
+}
+
+/**
+ * Retrieve a user's check in QR code, generating if not exists
+ *
+ * @param requestUser
+ * @param userType
+ */
+
+export const getCheckInQR = (requestUser: string, userType:AllUserTypes):Promise<string> => {
+  const userID = String(requestUser);
+
+  return new Promise((resolve, reject) => {
+    if(userType === "User") {
+      User.findOne({
+        _id: userID
+      }, 'checkInQR').then((user) => {
+        if(!user){
+          return reject(new NotFoundError(`User with ID ${userID} does not exist!`));
+        }
+        if(user.checkInQR){
+          return resolve(user.checkInQR);
+        }
+        else {
+          // We need to generate the QR code
+          createCheckInQR(userID, userType).then((qrCode) => {
+            User.updateOne({
+              _id: userID
+            }, {
+              checkInQR: qrCode
+            }).then(() => {
+              return resolve(qrCode)
+            }).catch(reject)
+          }).catch(reject)
+        }
+      });
+    }
+    else if(userType === "ExternalUser") {
+      ExternalUser.findOne({
+        _id: userID
+      }, 'checkInQR').then((externalUser) => {
+        if(!externalUser){
+          return reject(new NotFoundError(`ExternalUser with ID ${userID} does not exist!`));
+        }
+        if(externalUser.checkInQR){
+          return resolve(externalUser.checkInQR);
+        }
+        else {
+          // We need to generate the QR code
+          createCheckInQR(userID, userType).then((qrCode) => {
+            ExternalUser.updateOne({
+              _id: userID
+            }, {
+              checkInQR: qrCode
+            }).then(() => {
+              return resolve(qrCode)
+            }).catch(reject)
+          }).catch(reject)
+        }
+      });
+    }
+    else {
+      return reject(new BadRequestError("Invalid user type for request."))
+    }
+  });
+}
+
+/**
+ * Generate a QR Code for a list of (External) Users
+ *
+ * @param requestUser
+ * @param userList
+ */
+export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGenerateRequest[]):Promise<QRCodeGenerateBulkResponse[]> => {
+  const ret = [] as QRCodeGenerateBulkResponse[];
+
+  for(const user of userList){
+    if(user.userID && user.userType){
+      try {
+        ret.push({ ...user, "code": await getCheckInQR(user.userID, user.userType)});
+      }
+      catch(err) {
+        throw new InternalServerError(`Error encountered while generating QR code for ${user.userID} and type ${user.userType}.`, err);
+      }
+    }
+  }
+
+  return ret;
+}
+
+/**
+ * Set a User or ExternalUser as checked in
+ *
+ * @param userID
+ * @param userType
+ * @param checkInTime
+ */
+
+export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<string[]> => {
+  const newStatus = {
+    'status.checkedIn': true,
+    'status.checkInTime': checkInTime
+  };
+
+  if(userType === "User") {
+    const user = await User.findOneAndUpdate({
+      _id: userID,
+      'status.confirmed': true
+    }, newStatus, {
+      new: true
+    })
+    if(!user){
+      throw new NotFoundError("Unable to find RSVP'd user with given ID. Ensure they have RSVP'd and that the user ID/QR matches!");
+    }
+    return user.checkInNotes;
+  }
+  else if(userType === "ExternalUser"){
+    const user = await ExternalUser.findOneAndUpdate({
+      _id: userID
+    }, newStatus, {
+      new: true
+    })
+    if(!user){
+      throw new NotFoundError("Unable to find external user with given ID. Ensure that the user ID/QR matches!");
+    }
+    return user.checkInNotes;
+  }
+
+  throw new BadRequestError("Given user type is invalid.")
+}
+
+/**
+ * Submit COVID-19 Vaccine QR
+ */
+
+export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string, keySet?: Record<string, any>, minDoses?: number):Promise<boolean> => {
+  const verifyResult = await parseQRCode(data, mimeType, keySet, minDoses);
+
+  if(verifyResult.trusted && verifyResult.hasRequiredDoses){
+    await User.updateOne({
+      _id: requestUser._id
+    }, {
+      $pull: {
+        checkInNotes: "MUST_SUBMIT_COVID19_VACCINE_QR"
+      }
+    });
+
+    return true;
+  }
+  return false;
+}

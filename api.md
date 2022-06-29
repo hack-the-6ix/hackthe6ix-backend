@@ -585,7 +585,10 @@ Once a user has declined, they cannot retract this decision.
 #### Input Specification
 ```
 {
-  "attending": true // false if they are not attending... duh
+  "attending": true // false if they are not attending... duh,
+  "form": {
+    // RSVP form responses go here
+  }
 }
 ```
 
@@ -594,6 +597,24 @@ Once a user has declined, they cannot retract this decision.
 {
   status: 200,
   message: "Success"
+}
+```
+
+### POST - Submit COVID-19 Vaccine QR
+`/api/action/submitVaccineQR`
+
+Submits a COVID-19 vaccine QR code for verification. Accepts PDF (max. 2 pages) and PNG files.
+The QR code is discarded immediately after verification.
+
+##### Input Specification
+
+Send the PDF or PNG as a file in the `qrCode` field.
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": true|false
 }
 ```
 
@@ -680,6 +701,69 @@ Returns a ZIP of all the resumes of users who were accepted or waitlisted and co
 
 #### Output Specification
 Binary blob
+
+### GET - Check in QR Code
+`/api/action/checkInQR`
+
+Returns a data URI with the user's check in code.
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": "<base64-encoded image>"
+}
+```
+
+### POST - Check in user (Volunteer)
+`/api/action/checkIN`
+
+Checks in a (External) User.
+
+##### Input Specification
+
+```
+{
+  "userID": "<userID>",
+  "userType": "<User|ExternalUser>"
+}
+```
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": false|[<Check-In Notes>]
+}
+```
+
+### POST - Generate check in QR codes for multiple (External) Users (Organizer)
+`/api/action/multiCheckInQR`
+
+Generates check in QR codes for multiple (external) users.
+
+##### Input Specification
+
+```
+{
+  "userList": [{
+      "userID": "<userID>",
+      "userType: "<User|ExternalUser>"
+    }]
+}
+```
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": [{
+      "userID": "<userID>",
+      "userType": "<User|ExternalUser>"
+      "code": "<base64-encoded image>"
+  }]
+}
+```
 
 ## Auth - Authentication related operations
 
