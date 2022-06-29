@@ -2,11 +2,6 @@ import schools from './schools';
 
 export const enumOptions = {
   school: schools,
-  preEventWorkshops: [
-    'Yes',
-    'No',
-    'Maybe',
-  ],
   programOfStudy: [
     'High School',
     'Engineering',
