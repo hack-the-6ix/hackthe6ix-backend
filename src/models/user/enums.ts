@@ -349,4 +349,22 @@ export const enumOptions = {
     '4-5',
     '6+',
   ],
+  requestedWorkshops: [
+    'APIs 101',
+    'Basics of Python',
+    'Building a Cloud-Connected AR/VR App',
+    'Communicating Tech to Executives and Diverse Stakeholders',
+    'Crafting the Perfect Pitch',
+    'Data and Analytics',
+    'Getting your Dream Job',
+    'Introduction to Computer Vision',
+    'Intro to Git/GitHub',
+    'Intro to React',
+    'Networking 101 For Students',
+    'Resume Review',
+    'Starting your Startup',
+    'SQL for Absolute Beginners',
+    'UI/UX for Beginners',
+    'What is a Single-page Application (SPA)?'
+  ]
 };
