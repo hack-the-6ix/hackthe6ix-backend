@@ -407,7 +407,27 @@ const internal = {
       readCheck: true,
 
       FIELDS: {
-        accomplish: {
+        whyHT6: {
+          writeCheck: true,
+          readCheck: true,
+
+          FIELDS: {
+            score: {
+              type: Number,
+              default: -1,
+              writeCheck: true,
+              readCheck: true,
+            },
+
+            reviewer: {
+              type: String,
+              writeCheck: true,
+              readCheck: true,
+            },
+          },
+        },
+
+        techInnovation: {
           writeCheck: true,
           readCheck: true,
 
@@ -978,7 +998,11 @@ export interface IUser extends BasicUser {
     computedApplicationScore?: number,
     computedFinalApplicationScore?: number, // This value is added by get-rank and usually isn't populated
     applicationScores?: {
-      accomplish: {
+      techInnovation: {
+        score: number
+        reviewer: string
+      },
+      whyHT6: {
         score: number
         reviewer: string
       },

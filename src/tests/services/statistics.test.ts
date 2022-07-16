@@ -95,7 +95,6 @@ const generateUsersFromTestCase = async (cases: any[]) => {
       }));
     }
   }
-
   await Promise.all(promises);
 };
 
@@ -302,7 +301,10 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: -1,
+              },
+              whyHT6: {
                 score: 100,
               },
               project: {
@@ -316,7 +318,10 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 100,
+              },
+              whyHT6: {
                 score: 100,
               },
               project: {
@@ -334,7 +339,10 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: -1,
+              },
+              whyHT6: {
                 score: -1,
               },
               project: {
@@ -349,7 +357,11 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
 
       expect(statistics.gradeDistribution).toEqual({
-        accomplish: {
+        techInnovation: {
+          100: 2,
+          '-1': 4,
+        },
+        whyHT6: {
           100: 3,
           '-1': 3,
         },
@@ -363,7 +375,7 @@ describe('Get statistics', () => {
         },
         overall: {
           '-1': 4,
-          2745: 2,
+          2680: 2,
         },
       });
 
@@ -505,7 +517,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              whyHT6: {
                 score: 100,
                 reviewer: organizer._id,
               },
@@ -520,7 +532,11 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 100,
+                reviewer: organizer._id,
+              },
+              whyHT6: {
                 score: 100,
                 reviewer: organizer._id,
               },
@@ -539,7 +555,11 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: -1,
+                reviewer: organizer._id,
+              },
+              whyHT6: {
                 score: -1,
                 reviewer: organizer._id,
               },
@@ -558,9 +578,10 @@ describe('Get statistics', () => {
         reviewed: 2,
         notReviewed: 4,
         applicationScores: {
-          accomplish: 3,
           portfolio: 2,
           project: 3,
+          techInnovation: 2,
+          whyHT6: 3
         },
         reviewers: {
           barfoo: {
@@ -571,7 +592,7 @@ describe('Get statistics', () => {
       };
       expectedReviewStats.reviewers[organizer._id] = {
         name: organizer.fullName,
-        total: 6,
+        total: 11,
       };
 
       expect(statistics.hacker.submittedApplicationStats.review).toEqual(expectedReviewStats);

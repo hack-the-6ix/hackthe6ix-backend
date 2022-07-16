@@ -41,7 +41,8 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             reviewed: 0,
             notReviewed: 0,
             applicationScores: {
-              accomplish: 0,
+              techInnovation: 0,
+              whyHT6: 0,
               project: 0,
               portfolio: 0,
             },
@@ -169,8 +170,11 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         }
 
         // Individual questions
-        if (user?.internal?.applicationScores?.accomplish?.score >= 0) {
-          statistics.hacker.submittedApplicationStats.review.applicationScores.accomplish++;
+        if (user?.internal?.applicationScores?.techInnovation?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.techInnovation++;
+        }
+        if (user?.internal?.applicationScores?.whyHT6?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.whyHT6++;
         }
         if (user?.internal?.applicationScores?.project?.score >= 0) {
           statistics.hacker.submittedApplicationStats.review.applicationScores.project++;
@@ -201,7 +205,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
                 name: name,
               };
             }
-
             statistics.hacker.submittedApplicationStats.review.reviewers[reviewerID].total++;
           }
 
@@ -282,7 +285,8 @@ export type IStatistics = {
         reviewed: number,
         notReviewed: number,
         applicationScores: {
-          accomplish: number,
+          techInnovation: number,
+          whyHT6: number,
           project: number,
           portfolio: number
         },

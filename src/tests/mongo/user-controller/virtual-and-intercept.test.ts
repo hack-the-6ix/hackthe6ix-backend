@@ -786,7 +786,7 @@ describe('Virtual', () => {
         ...hackerUser,
         internal: {
           applicationScores: {
-            accomplish: {
+            whyHT6: {
               score: 100,
               reviewer: 'foobar',
             },
@@ -810,7 +810,11 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              whyHT6: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -826,7 +830,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(7 / 11 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(8 / 15 * 100);
       });
 
       test('Perfect score', async () => {
@@ -837,7 +841,11 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 4,
+                reviewer: 'foobar',
+              },
+              whyHT6: {
                 score: 4,
                 reviewer: 'foobar',
               },
@@ -861,7 +869,11 @@ describe('Virtual', () => {
           ...hackerUser,
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              whyHT6: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -877,7 +889,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(6 / 11 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(7 / 15 * 100);
       });
 
       test('Noob haxxor', async () => {
@@ -888,7 +900,11 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              whyHT6: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -900,7 +916,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(3 / 9 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
       });
 
       test('Noob haxxor but they somehow also get their portfolio graded', async () => {
@@ -911,7 +927,11 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              accomplish: {
+              techInnovation: {
+                score: 1,
+                reviewer: 'foobar',
+              },
+              whyHT6: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -927,7 +947,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(3 / 9 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
       });
     });
   });
