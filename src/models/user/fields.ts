@@ -376,6 +376,13 @@ const rsvpForm = {
 
     writeCheck: true,
     readCheck: true
+  },
+  remindInPersonRSVP: {
+    type: Boolean,
+    default: false,
+    caption: 'In person RSVP reminder',
+    writeCheck: true,
+    readCheck: true
   }
 }
 
