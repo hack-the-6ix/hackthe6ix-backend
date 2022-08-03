@@ -369,20 +369,24 @@ export const hackerApplication = {
 };
 
 const rsvpForm = {
-  selectedCompanies: {
-    type: [String],
-    default: [] as string[],
-    caption: 'Selected companies',
+  writeCheck: true,
+  readCheck: true,
+  FIELDS: {
+    selectedCompanies: {
+      type: [String],
+      default: [] as string[],
+      caption: 'Selected companies',
 
-    writeCheck: true,
-    readCheck: true
-  },
-  remindInPersonRSVP: {
-    type: Boolean,
-    default: false,
-    caption: 'In person RSVP reminder',
-    writeCheck: true,
-    readCheck: true
+      writeCheck: true,
+      readCheck: true
+    },
+    remindInPersonRSVP: {
+      type: Boolean,
+      default: false,
+      caption: 'In person RSVP reminder',
+      writeCheck: true,
+      readCheck: true
+    }
   }
 }
 
@@ -1074,5 +1078,6 @@ export interface IApplication {
 }
 
 export interface IRSVPForm {
-  selectedCompanies?: string[]
+  selectedCompanies?: string[],
+  remindInPersonRSVP?: boolean
 }
