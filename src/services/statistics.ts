@@ -51,6 +51,9 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         },
         questionBreakdown: {},
       },
+      rsvpStats: {
+        remindInPersonRSVP: 0
+      },
       groups: {
         hacker: 0,
         admin: 0,
@@ -232,6 +235,11 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
           (statistics.groups as any)[r]++;
         }
       }
+
+      // RSVP Form
+      if(user.status.confirmed && user.rsvpForm?.remindInPersonRSVP){
+        statistics.rsvpStats.remindInPersonRSVP++;
+      }
     }
 
     // Compute cumulative statistics
@@ -294,6 +302,9 @@ export type IStatistics = {
       },
     },
     questionBreakdown: any
+  },
+  rsvpStats: {
+    remindInPersonRSVP: number
   },
   groups: {
     hacker: number,

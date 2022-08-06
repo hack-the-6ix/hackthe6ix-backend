@@ -24,20 +24,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Do testing
-      - name: Build testing container
-        uses: docker/build-push-action@v2
-        with:
-          tags: hackthe6ix/${{ secrets.DOCKERHUB_REPOSITORY }}:testing
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          cache-from: type=local,src=/tmp/.buildx-cache
-          target: testing
-          push: false
-          load: true
-
-      - name: Run tests
-        run: /usr/bin/docker run -v ${{ github.workspace }}/static:/usr/var/app/static -v ${{ github.workspace }}/src:/usr/var/app/src hackthe6ix/${{ secrets.DOCKERHUB_REPOSITORY }}:testing;
-
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:

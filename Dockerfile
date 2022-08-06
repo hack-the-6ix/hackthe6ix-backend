@@ -12,10 +12,6 @@ COPY . ./build/
 RUN cd build && npm install
 RUN cd build && npm run build
 
-FROM base as testing
-WORKDIR /usr/ht6/server/build
-CMD ["npm", "run", "test"]
-
 FROM base as deploy
 RUN mv ./build/dist/ .
 RUN mv ./build/node_modules/ .

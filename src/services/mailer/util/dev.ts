@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { InternalServerError } from '../../../types/errors';
+import {log} from "../../logger";
 
 export const okResponse = { status: 200, data: {} as any };
 const devLogPath = '../../../../dev_logs';
@@ -8,6 +9,24 @@ const defaultSubscriptions = {
   emails: [] as string[],
   mailmerges: [] as string[],
 };
+
+if(process.env.NODE_ENV === 'development'){
+  try {
+    const absDevLogPath = path.resolve(path.join(__dirname, devLogPath));
+    if (!fs.existsSync(absDevLogPath)) {
+      fs.mkdirSync(absDevLogPath, {recursive: true});
+
+      const mailPath = path.join(absDevLogPath, 'mailing_lists');
+      if (!fs.existsSync(mailPath)) {
+        fs.mkdirSync(mailPath);
+      }
+    }
+    log.info("Successfully initialized development mailing logging.")
+  }
+  catch (err) {
+    log.error("Unable to initialize development mailing logging.", err);
+  }
+}
 
 /**
  * Sends a mock email, which just gets added to a log file
