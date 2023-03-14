@@ -159,7 +159,7 @@ export const handleLoginRequest = async (providerName: string, redirectTo: strin
 
     const redirectURL = client.authorizeURL({
       redirect_uri: callbackURL,
-      scope: 'profile',
+      scope: 'openid profile',
       state: JSON.stringify(state),
     });
 
