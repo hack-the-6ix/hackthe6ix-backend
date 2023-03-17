@@ -90,12 +90,12 @@ function createWinstonLogger() {
       // - Write to all logs with level `info` and below to `combined.log`
       // - Write all logs error (and below) to `error.log`.
       //
-      new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        handleExceptions: true,
-      }),
-      new winston.transports.File({ filename: 'logs/combined.log' }),
+      // new winston.transports.File({
+      //   filename: 'logs/error.log',
+      //   level: 'error',
+      //   handleExceptions: true,
+      // }),
+      // new winston.transports.File({ filename: 'logs/combined.log' }),
     ],//,
     // exceptionHandlers: [
     //     new winston.transports.File({ filename: 'exceptions.log' }),
@@ -115,7 +115,7 @@ function createWinstonLogger() {
     }));
   }
 
-  // Only log to StackDriver in production
+  // Log to StackDriver in production and well as
   if (process.env.NODE_ENV === 'production') {
     const loggingWinston = new LoggingWinston({
       projectId: process.env.GCP_LOGGING_PROJECTID,
@@ -123,6 +123,13 @@ function createWinstonLogger() {
       logName: 'hackthe6ix-backend',
       level: 'info',
     });
+
+    logger.add(new winston.transports.Console({
+      format: loggingFormat,
+      level: process.env.LOG_LEVEL || 'info',
+      handleExceptions: true,
+    }));
+
     logger.add(loggingWinston);
   }
   return logger;

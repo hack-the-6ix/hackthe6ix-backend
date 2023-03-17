@@ -1,4 +1,4 @@
-FROM node:14 as base
+FROM node:16 as base
 WORKDIR /usr/ht6/server
 
 ENV TZ=America/Toronto
