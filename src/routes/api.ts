@@ -8,7 +8,7 @@ import express, { Request, Response } from 'express';
 import { deleteGridFSFile, readGridFSFile, writeGridFSFile } from '../controller/GridFSController';
 import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
 import { logResponse } from '../services/logger';
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import { isAdmin, isOrganizer } from '../services/permissions';
 
 const apiRouter = express.Router();

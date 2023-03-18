@@ -5,6 +5,7 @@ import * as util from 'util';
 
 import winston from 'winston';
 import { HTTPError } from '../types/errors';
+import * as process from "process";
 
 const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
@@ -117,12 +118,16 @@ function createWinstonLogger() {
 
   // Log to StackDriver in production and well as
   if (process.env.NODE_ENV === 'production') {
-    const loggingWinston = new LoggingWinston({
-      projectId: process.env.GCP_LOGGING_PROJECTID,
-      keyFilename: process.env.GCP_LOGGING_KEYFILEPATH,
-      logName: 'hackthe6ix-backend',
-      level: 'info',
-    });
+    if(process.env.DISABLE_CLOUD_LOGGING?.toLowerCase() !== "true") {
+      const loggingWinston = new LoggingWinston({
+        projectId: process.env.GCP_LOGGING_PROJECTID,
+        keyFilename: process.env.GCP_LOGGING_KEYFILEPATH,
+        logName: 'hackthe6ix-backend',
+        level: 'info',
+      });
+
+      logger.add(loggingWinston);
+    }
 
     logger.add(new winston.transports.Console({
       format: loggingFormat,
@@ -130,7 +135,7 @@ function createWinstonLogger() {
       handleExceptions: true,
     }));
 
-    logger.add(loggingWinston);
+
   }
   return logger;
 }

@@ -1,5 +1,5 @@
 import { exportAsZip } from '../controller/GridFSController';
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {Writable} from 'stream';
 import User from '../models/user/User';
 import {extname} from 'path';

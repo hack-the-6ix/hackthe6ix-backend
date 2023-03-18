@@ -28,7 +28,7 @@ import sendAllTemplates from '../services/mailer/sendAllTemplates';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import verifyMailingList from '../services/mailer/verifyMailingList';
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {isAdmin, isHacker, isOrganizer, isVolunteer} from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 

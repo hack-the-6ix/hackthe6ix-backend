@@ -1,4 +1,4 @@
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {IUser} from "../models/user/fields";
 import {IExternalUser} from "../models/externaluser/fields";
 import {Model} from "mongoose";
