@@ -46,7 +46,7 @@ describe('Assign Application Status', () => {
 
       const user = (await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: true,
           waitlisted: true,
@@ -79,7 +79,7 @@ describe('Assign Application Status', () => {
 
         const user = (await User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -120,7 +120,7 @@ describe('Assign Application Status', () => {
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: true,
         },
@@ -129,7 +129,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -189,7 +189,7 @@ describe('Assign Application Status', () => {
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: true,
         },
@@ -198,7 +198,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -261,7 +261,7 @@ describe('Assign Application Status', () => {
 
       const users = (await Promise.all([...new Array(10)].map(() => User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: true,
         },
@@ -270,7 +270,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -320,22 +320,14 @@ describe('Assign Application Status', () => {
       const users = (await Promise.all([
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
-          status: {
-            applied: true,
-            accepted: true,
-          },
-        }),
-        User.create({
-          ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -343,7 +335,15 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -351,14 +351,14 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
@@ -368,7 +368,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -418,7 +418,7 @@ describe('Assign Application Status', () => {
       const users = (await Promise.all([
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -426,7 +426,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -434,7 +434,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -442,7 +442,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             rejected: true,
@@ -453,7 +453,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -500,14 +500,14 @@ describe('Assign Application Status', () => {
       const users = (await Promise.all([
         User.create({ // Accept
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({ // Expired, skip
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -516,7 +516,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({ // Accept
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -524,7 +524,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({ // Declined, Skip
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -533,14 +533,14 @@ describe('Assign Application Status', () => {
         }),
         User.create({ // Waitlist -- we reached acceptance cap
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({ // rejected, Skip
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             rejected: true,
@@ -548,7 +548,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({ // Waitlist
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -556,21 +556,21 @@ describe('Assign Application Status', () => {
         }),
         User.create({ // Reject
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({ // Reject
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({ // Accept - was already accepted
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -582,7 +582,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -635,22 +635,14 @@ describe('Assign Application Status', () => {
       const users = (await Promise.all([
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
-          status: {
-            applied: true,
-            accepted: true,
-          },
-        }),
-        User.create({
-          ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -658,7 +650,15 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
+          status: {
+            applied: true,
+            accepted: true,
+          },
+        }),
+        User.create({
+          ...hackerUser,
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -666,28 +666,28 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
@@ -697,7 +697,7 @@ describe('Assign Application Status', () => {
       // Some other rando user that should not have their status updated
       const rando = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: {
           applied: false,
         },
@@ -755,28 +755,28 @@ describe('Assign Application Status', () => {
       const users = (await Promise.all([
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             waitlisted: true,
@@ -784,14 +784,14 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -800,7 +800,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             rejected: true,
@@ -808,14 +808,14 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
           },
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,
@@ -824,7 +824,7 @@ describe('Assign Application Status', () => {
         }),
         User.create({
           ...hackerUser,
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           status: {
             applied: true,
             accepted: true,

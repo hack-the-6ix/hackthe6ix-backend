@@ -38,7 +38,7 @@ jest.mock('../../controller/util/resources', () => (
 const generateMockusersA = async () => {
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -46,7 +46,7 @@ const generateMockusersA = async () => {
 
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       accepted: true,
     },
@@ -56,7 +56,7 @@ const generateMockusersA = async () => {
 const generateMockusersB = async () => {
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -64,7 +64,7 @@ const generateMockusersB = async () => {
 
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -90,7 +90,7 @@ const generateUsersFromTestCase = async (cases: any[]) => {
     for (let i = 0; i <= j; i++) {
       promises.push(User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         ...payload,
       }));
     }
@@ -110,7 +110,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -129,7 +129,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -146,7 +146,7 @@ describe('Get statistics', () => {
       const statisticsA = await getStatistics();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       const statisticsB = await getStatistics(true);
@@ -191,7 +191,7 @@ describe('Get statistics', () => {
           for (let k = 0; k < i; k++) {
             promises.push(User.create({
               ...hackerUser,
-              _id: mongoose.Types.ObjectId(),
+              _id: new mongoose.Types.ObjectId(),
               status: {
                 ...status,
                 statusReleased: true,

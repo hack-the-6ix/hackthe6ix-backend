@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import short from 'short-uuid';
 import { ITeam } from '../models/team/fields';
 import Team from '../models/team/Team';
 import { IUser } from '../models/user/fields';
@@ -42,7 +42,7 @@ export const createTeam = async (requestUser: IUser) => {
     throw new AlreadyInTeamError();
   }
 
-  const code = uuidv4().substring(0, 8);
+  const code = short.uuid().substring(0, 8);
 
   const newTeam = await Team.create({
     code: code,
@@ -126,7 +126,9 @@ export const leaveTeam = async (requestUser: IUser) => {
   await User.findOneAndUpdate({
     _id: requestUser._id,
   }, {
-    'hackerApplication.teamCode': undefined,
+    $unset: {
+      'hackerApplication.teamCode': 1
+    }
   });
 
   // Update team object

@@ -126,19 +126,19 @@ describe('Sync Mailing Lists', () => {
       getList.mockImplementation((x: string) => (mockGetList as any)[x]);
       const apple = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: mockGetList.list1.query.firstName,
         email: 'apple@gmail.com',
       });
       const banana = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: mockGetList.list2.query.firstName,
         email: 'banana@gmail.com',
       });
       const orange = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: mockGetList.list3.query.firstName,
         email: 'orange@gmail.com',
       });
@@ -162,13 +162,13 @@ describe('Sync Mailing Lists', () => {
       getList.mockImplementation((x: string) => (mockGetListFilterQuery as any)[x]);
       const appleNotExpired = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: mockGetListFilterQuery.list1.query.firstName,
         email: 'wtf@gmail.com',
       });
       const appleExpired = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: mockGetListFilterQuery.list1.query.firstName,
         status: {
           accepted: true,

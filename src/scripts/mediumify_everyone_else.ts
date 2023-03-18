@@ -23,11 +23,8 @@ const main = async () => {
 
 };
 
-mongoose.connect(database, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-}).then(async () => {
+mongoose.set('strictQuery', false);
+mongoose.connect(database).then(async () => {
   console.log('MongoDB started');
   main();
 }).catch((err) => {
