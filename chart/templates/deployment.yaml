@@ -47,11 +47,11 @@ spec:
             - name: PORT
               value: {{ .Values.service.port }}
             - name: MAILTRAIN_PUBLIC_ROOT_PATH
-              value: k
+              value: {{ .Values.hackthe6ixBackend.mailer.publicRoot }}
             - name: IDP_GROUP_PREFIX
-              value: f
+              value: {{ .Values.hackthe6ixBackend.auth.idpGroupPrefix }}
             - name: AUTH_SETTINGS_CACHE_EVICT
-              value: f
+              value: {{ .Values.hackthe6ixBackend.auth.settingsCacheEviction }}
             - name: LOG_LEVEL
               value: {{ .Values.hackthe6ixBackend.logging.level }}
             # Cloud logging configuration
@@ -61,7 +61,7 @@ spec:
             - name: GCP_LOGGING_PROJECTID
               value: {{ .Values.hackthe6ixBackend.logging.export.projectId }}
             - name: GCP_LOGGING_KEYFILEPATH
-              value: /secretes/logging/logging-export-key.json
+              value: /secrets/logging/logging-export-key.json
             {{- end }}
             # Tracing configuration
             - name: ENABLE_TRACING
@@ -73,14 +73,17 @@ spec:
               values: /secrets/tracing/tracing-export-key.json
             {{- end }}
           volumeMounts:
+            - name: initialization
+              readOnly: true
+              mountPath: /usr/ht6/server/config
             {{- if .Values.hackthe6ixBackend.logging.export.enabled -}}
             - name: logging-export-key
-              readyOnly: true
-              mountPath: /secrets/loggin
+              readOnly: true
+              mountPath: /secrets/logging
             {{- end }}
             {{- if .Values.hackthe6ixBackend.tracing.enabled -}}
             - name: tracing-export-key
-              readyOnly: true
+              readOnly: true
               mountPath: /secrets/tracing
             {{- end }}
           resources:
@@ -101,6 +104,14 @@ spec:
             items:
               - key: {{ .Values.hackthe6ixBackend.tracing.keyfile.secretKey }}
                 path: tracing-export-key.json
+        - name: initialization
+          secret:
+            secretName: {{ .Values.hackthe6ixBackend.initialization.secretName }}
+            items:
+              - key: {{ .Values.hackthe6ixBackend.initialization.settings.secretKey }}
+                path: settings.json
+              - key: {{ .Values.hackthe6ixBackend.initialization.mailer.secretKey }}
+                path: mailer.json
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

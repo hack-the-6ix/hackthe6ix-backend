@@ -87,11 +87,11 @@ hackthe6ixBackend:
   mongoUrl: mongodb://localhost:27017/test
   initialization:
     secretName: test-secret
-    secretKey: settings.json
-  mailer:
-    templates:
-      secretName: test-secret
+    settings:
+      secretKey: settings.json
+    mailer:
       secretKey: mailer.json
+  mailer:
     publicRoot: https://mailtrain.example.com
     apiKey: changeme
   auth:
