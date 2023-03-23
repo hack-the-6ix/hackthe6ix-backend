@@ -83,7 +83,7 @@ tolerations: []
 
 affinity: {}
 
-hackthe6ix-backend:
+hackthe6ixBackend:
   mongoUrl: mongodb://localhost:27017/test
   initialization:
     secretName: test-secret
@@ -94,7 +94,7 @@ hackthe6ix-backend:
       secretKey: mailer.json
     publicRoot: https://mailtrain.example.com
     apiKey: changeme
-  authentication:
+  auth:
     jwtSecret: changeme
     idpGroupPrefix: /
     settingsCacheEviction: 30000ms
@@ -105,6 +105,7 @@ hackthe6ix-backend:
       secretName: test-secret
       secretKey: google.json
   logging:
+    # One of error, warn, info, verbose, debug, silly
     level: info
     export:
       enabled: true

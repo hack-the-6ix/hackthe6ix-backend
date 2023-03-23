@@ -37,14 +37,71 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health/live
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /health/ready
               port: http
+          env:
+            - name: PORT
+              value: {{ .Values.service.port }}
+            - name: MAILTRAIN_PUBLIC_ROOT_PATH
+              value: k
+            - name: IDP_GROUP_PREFIX
+              value: f
+            - name: AUTH_SETTINGS_CACHE_EVICT
+              value: f
+            - name: LOG_LEVEL
+              value: {{ .Values.hackthe6ixBackend.logging.level }}
+            # Cloud logging configuration
+            - name: ENABLE_CLOUD_LOGGING
+              value: {{ .Values.hackthe6ixBackend.logging.export.enabled }}
+            {{- if .Values.hackthe6ixBackend.logging.export.enabled -}}
+            - name: GCP_LOGGING_PROJECTID
+              value: {{ .Values.hackthe6ixBackend.logging.export.projectId }}
+            - name: GCP_LOGGING_KEYFILEPATH
+              value: /secretes/logging/logging-export-key.json
+            {{- end }}
+            # Tracing configuration
+            - name: ENABLE_TRACING
+              value: {{ .Values.hackthe6ixBackend.tracing.enabled }}
+            {{- if .Values.hackthe6ixBackend.tracing.enabled -}}
+            - name: GCP_TRACING_PROJECTID
+              value: {{ .Values.hackthe6ixBackend.tracing.projectId }}
+            - name: GCP_TRACING_KEYFILEPATH
+              values: /secrets/tracing/tracing-export-key.json
+            {{- end }}
+          volumeMounts:
+            {{- if .Values.hackthe6ixBackend.logging.export.enabled -}}
+            - name: logging-export-key
+              readyOnly: true
+              mountPath: /secrets/loggin
+            {{- end }}
+            {{- if .Values.hackthe6ixBackend.tracing.enabled -}}
+            - name: tracing-export-key
+              readyOnly: true
+              mountPath: /secrets/tracing
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- if .Values.hackthe6ixBackend.logging.export.enabled -}}
+        - name: logging-export-key
+          secret:
+            secretName: {{ .Values.hackthe6ixBackend.logging.export.keyfile.secretName }}
+            items:
+              - key: {{ .Values.hackthe6ixBackend.logging.export.keyfile.secretKey }}
+                path: logging-export-key.json
+        {{- end }}
+        {{- if .Values.hackthe6ixBackend.tracing.enabled -}}
+        - name: tracing-export-key
+          secret:
+            secretName: {{ .Values.hackthe6ixBackend.tracing.keyfile.secretName }}
+            items:
+              - key: {{ .Values.hackthe6ixBackend.tracing.keyfile.secretKey }}
+                path: tracing-export-key.json
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
