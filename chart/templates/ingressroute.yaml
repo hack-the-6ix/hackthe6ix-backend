@@ -2,7 +2,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: {{ include "dashboard-oidc.fullname" . }}
+  name: {{ include "hackthe6ix-backend.fullname" . }}
   namespace: webgtwy
 spec:
   entryPoints:
@@ -13,7 +13,7 @@ spec:
     - match: Host(`{{ .Values.ingressRoute.host }}`)
       kind: Rule
       services:
-        - name: {{ include "dashboard-oidc.fullname" . }}  # Requests will be forwarded to this service
+        - name: {{ include "hackthe6ix-backend.fullname" . }}  # Requests will be forwarded to this service
           namespace: {{ .Release.Namespace }}
           port: {{ .Values.service.port }}
   {{- with .Values.ingressRoute.tls }}
