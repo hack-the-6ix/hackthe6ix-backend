@@ -29,7 +29,6 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 import {log} from "../services/logger";
 import ExternalUser from "../models/externaluser/ExternalUser";
-import {parseQRCode} from "../services/covid-qr-verify/verify";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -558,25 +557,4 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
   }
 
   throw new BadRequestError("Given user type is invalid.")
-}
-
-/**
- * Submit COVID-19 Vaccine QR
- */
-
-export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string, keySet?: Record<string, any>, minDoses?: number):Promise<boolean> => {
-  const verifyResult = await parseQRCode(data, mimeType, keySet, minDoses);
-
-  if(verifyResult.trusted && verifyResult.hasRequiredDoses){
-    await User.updateOne({
-      _id: requestUser._id
-    }, {
-      $pull: {
-        checkInNotes: "MUST_SUBMIT_COVID19_VACCINE_QR"
-      }
-    });
-
-    return true;
-  }
-  return false;
 }

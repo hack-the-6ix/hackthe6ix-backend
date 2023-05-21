@@ -936,7 +936,7 @@ export const fields = {
     },
     checkInNotes: {
       type: [String],
-      default: ["MUST_SUBMIT_COVID19_VACCINE_QR", "MUST_PRESENT_COVID19_VACCINE_QR"],
+      default: [] as any,
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true
     },
