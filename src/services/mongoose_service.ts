@@ -24,5 +24,5 @@ function isConnected():boolean {
 }
 
 export {
-  mongoose, isConnected
+  mongoose, isConnected, dbEvents
 };

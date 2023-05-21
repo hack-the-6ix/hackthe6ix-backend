@@ -13,10 +13,15 @@ export const fields = {
             type: String,
             index: true,
             required: true
+        },
+        version: {
+            type: Number,
+            required: true
         }
     }
 }
 
 export interface IInitializationRecord extends mongoose.Document {
-    key: string
+    key: string,
+    version: number
 }

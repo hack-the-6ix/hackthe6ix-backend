@@ -4,6 +4,7 @@
   "description": "The best hackathon backend",
   "main": "dist/index.js",
   "scripts": {
+    "start:bootstrap": "NODE_ENV=production node ./dist/bootstrap/bootstrap.js",
     "start": "NODE_ENV=production node ./dist/index.js",
     "dev": "NODE_ENV=development nodemon --ext ts --exec 'ts-node' src/index.ts",
     "build": "tsc",
@@ -53,6 +54,7 @@
     "lodash.clonedeep": "^4.5.0",
     "mongoose": "^6.10.3",
     "mongoose-autopopulate": "^1.0.0",
+    "node-cache": "^5.1.2",
     "node-jose": "^2.2.0",
     "pdf-to-png-converter": "^2.7.1",
     "pngjs": "^6.0.0",

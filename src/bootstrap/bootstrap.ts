@@ -1,7 +1,11 @@
+import 'dotenv/config';
+
 import * as fs from 'fs';
 import * as path from 'path';
 
 import "../services/mongoose_service";
+
+import {log} from "../services/logger";
 
 import InitializationRecord from "../models/initializationrecord/InitializationRecord";
 import Settings from '../models/settings/Settings';
@@ -9,6 +13,7 @@ import MailerList from "../models/mailerlist/MailerList";
 import MailerTemplate from "../models/mailertemplate/MailerTemplate";
 import {MailingList, MailTemplate} from "../types/mailer";
 import {verifyConfigEntity} from "../services/mailer/util/verify_config";
+import {dbEvents, mongoose} from "../services/mongoose_service";
 
 // TODO: ADd this script to run first before all npm scripts and Docker container!
 
@@ -20,17 +25,23 @@ async function initializeSettings() {
   })
 
   if(!initCheck) {
+    log.info("Initializing settings.");
     const settingsData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'settings.json')).toString('utf8'));
     await Settings.findOneAndUpdate({}, settingsData, {
       upsert: true
     })
 
     await InitializationRecord.create({
-      key: initKey
+      key: initKey,
+      version: 1
     });
+
+    log.info("Finished initializing settings.");
 
     return true;
   }
+
+  log.info("Skipping initialization of settings.");
 
   return false;
 }
@@ -43,6 +54,7 @@ async function initializeTemplates() {
   })
 
   if(!initCheck) {
+    log.info("Initializing mail templates.");
     const mailerData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
     // Verify templates
@@ -58,11 +70,16 @@ async function initializeTemplates() {
     }));
 
     await InitializationRecord.create({
-      key: initKey
+      key: initKey,
+      version: 1
     });
+
+    log.info("Finished initializing mail templates.");
 
     return true;
   }
+
+  log.info("Skipping initialization of mail templates.");
 
   return false;
 }
@@ -75,6 +92,7 @@ async function initializeLists() {
   })
 
   if(!initCheck) {
+    log.info("Initializing mailing lists.");
     const mailerData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'mailer.json')).toString('utf8'));
 
     // Verify lists
@@ -85,16 +103,22 @@ async function initializeLists() {
       return {
         name,
         listID: dataRoot[name]["listID"],
-        query: dataRoot[name]["query"]
+        query: dataRoot[name]["query"],
+        filterQuery: dataRoot[name]["filterQuery"]
       }
     }));
 
     await InitializationRecord.create({
-      key: initKey
+      key: initKey,
+      version: 1
     });
+
+    log.info("Finished initializing mailing lists.");
 
     return true;
   }
+
+  log.info("Skipping initialization of mailing lists.");
 
   return false;
 }
@@ -102,7 +126,8 @@ async function initializeLists() {
 async function ensureInit():Promise<void> {
   const promises = [
       initializeSettings(), initializeTemplates(), initializeLists()
-  ]
+  ];
+
   const results = await Promise.allSettled(promises);
   for(const result of results){
     if(result.status === "rejected") {
@@ -111,8 +136,16 @@ async function ensureInit():Promise<void> {
   }
 }
 
-ensureInit().then(() => {
-  console.log("Finished database initialization. Starting backend.")
-}).catch((err) => {
-  console.error("Encountered error during database initialization.", err);
+log.info("Waiting for MongoDB...");
+dbEvents.on('connected', () => {
+  ensureInit().then(() => {
+    log.info("Finished database initialization.");
+    mongoose.disconnect().then(() => {
+      log.info("Closed all connections. Exiting.");
+      process.exit(0);
+    })
+  }).catch((err) => {
+    log.error("Encountered error during database initialization.", err);
+  })
 })
+

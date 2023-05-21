@@ -21,6 +21,9 @@ export const fields = {
         query: {
             type: Object,
             required: true
+        },
+        filterQuery: {
+            type: Object
         }
     }
 }
@@ -29,4 +32,5 @@ export interface IMailerList extends mongoose.Document {
     name: string,
     listID: string,
     query: Record<string, any>
+    filterQuery?: Record<string, any>
 }
