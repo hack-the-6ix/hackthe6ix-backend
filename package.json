@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/hack-the-6ix/hackthe6ix-backend#readme",
   "dependencies": {
-    "@google-cloud/logging-winston": "^5.3.0",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.0.0",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/instrumentation": "^0.36.0",

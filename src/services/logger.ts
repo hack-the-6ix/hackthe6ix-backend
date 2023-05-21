@@ -1,4 +1,3 @@
-import { LoggingWinston } from '@google-cloud/logging-winston';
 import { Request, Response } from 'express';
 import fs from 'fs';
 import * as util from 'util';
@@ -118,17 +117,6 @@ function createWinstonLogger() {
 
   // Log to StackDriver in production and well as
   if (process.env.NODE_ENV === 'production') {
-    if(process.env.DISABLE_CLOUD_LOGGING?.toLowerCase() !== "true") {
-      const loggingWinston = new LoggingWinston({
-        projectId: process.env.GCP_LOGGING_PROJECTID,
-        keyFilename: process.env.GCP_LOGGING_KEYFILEPATH,
-        logName: 'hackthe6ix-backend',
-        level: 'info',
-      });
-
-      logger.add(loggingWinston);
-    }
-
     logger.add(new winston.transports.Console({
       format: loggingFormat,
       level: process.env.LOG_LEVEL || 'info',

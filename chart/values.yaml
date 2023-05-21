@@ -107,9 +107,3 @@ hackthe6ixBackend:
   logging:
     # One of error, warn, info, verbose, debug, silly
     level: info
-    export:
-      enabled: true
-      projectId: testing
-      keyfile:
-        secretName: test-secret
-        secretKey: google.json
