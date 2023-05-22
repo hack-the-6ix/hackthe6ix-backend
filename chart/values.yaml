@@ -84,6 +84,7 @@ tolerations: []
 affinity: {}
 
 hackthe6ixBackend:
+  nodeEnv: production
   mongoUrl: mongodb://localhost:27017/test
   initialization:
     secretName: test-secret
@@ -92,6 +93,7 @@ hackthe6ixBackend:
     mailer:
       secretKey: mailer.json
   mailer:
+    enabled: true
     publicRoot: https://mailtrain.example.com
     apiKey: changeme
   auth:
