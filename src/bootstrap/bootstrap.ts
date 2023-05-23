@@ -14,6 +14,7 @@ import MailerTemplate from "../models/mailertemplate/MailerTemplate";
 import {MailingList, MailTemplate} from "../types/mailer";
 import {verifyConfigEntity} from "../services/mailer/util/verify_config";
 import {dbEvents, mongoose} from "../services/mongoose_service";
+import FormConfiguration from "../models/formconfiguration/FormConfiguration";
 
 // TODO: ADd this script to run first before all npm scripts and Docker container!
 
@@ -123,9 +124,14 @@ async function initializeLists() {
   return false;
 }
 
+async function initializeFormConfigurations() {
+  await FormConfiguration.create(JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config', 'forms', 'Application2023.json')).toString('utf8')))
+}
+
+
 async function ensureInit():Promise<void> {
   const promises = [
-      initializeSettings(), initializeTemplates(), initializeLists()
+      initializeSettings(), initializeTemplates(), initializeLists(), initializeFormConfigurations()
   ];
 
   const results = await Promise.allSettled(promises);
