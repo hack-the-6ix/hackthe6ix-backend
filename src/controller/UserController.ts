@@ -1,7 +1,7 @@
 import { Mongoose } from 'mongoose';
 import * as qrcode from 'qrcode';
 import { enumOptions } from '../models/user/enums';
-import { fields, IApplication, IUser } from '../models/user/fields';
+import {fields, IPartialApplication, IUser} from '../models/user/fields';
 import User from '../models/user/User';
 import { canRSVP, isRSVPOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -86,7 +86,7 @@ export const fetchUser = async (requestUser: IUser) => {
  * @param submit
  * @param hackerApplication
  */
-export const updateApplication = async (requestUser: IUser, submit: boolean, hackerApplication: IApplication) => {
+export const updateApplication = async (requestUser: IUser, submit: boolean, hackerApplication: IPartialApplication) => {
 
   const hackerApplicationFields = getModels()['user'].rawFields.FIELDS.hackerApplication;
 

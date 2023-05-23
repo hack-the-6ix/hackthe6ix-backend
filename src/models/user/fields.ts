@@ -98,16 +98,6 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    timezone: {
-      type: String,
-      caption: 'Timezone',
-      inTextSearch: true,
-
-      writeCheck: inEnum(enumOptions.timezone, true),
-      submitCheck: inEnum(enumOptions.timezone),
-      readCheck: true,
-    },
-
     country: {
       type: String,
       caption: 'Country',
@@ -115,14 +105,6 @@ export const hackerApplication = {
 
       writeCheck: maxLength(256),
       submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
-      readCheck: true,
-    },
-
-    wantSwag: {
-      type: Boolean,
-      caption: 'I live in Canada and want to receive HT6 swag',
-
-      writeCheck: true,
       readCheck: true,
     },
 
@@ -142,34 +124,6 @@ export const hackerApplication = {
 
     /* Address */
 
-    addressLine1: {
-      type: String,
-      caption: 'Address Line 1',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? minLength(1)(request) && maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
-      readCheck: true,
-    },
-
-    addressLine2: {
-      type: String,
-      caption: 'Address Line 2',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
-      readCheck: true,
-    },
-
     city: {
       type: String,
       caption: 'City',
@@ -186,29 +140,15 @@ export const hackerApplication = {
 
     province: {
       type: String,
-      caption: 'Province',
+      caption: 'Province/State',
       inTextSearch: true,
 
       writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.province, true)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+          ? maxLength(256)
+          : !request.fieldValue,
       submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.province)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      readCheck: true,
-    },
-
-    postalCode: {
-      type: String,
-      caption: 'Postal Code',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(6)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? validatePostalCode()(request)
-        : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
+          ? minLength(1)(request) && maxLength(256)(request)
+          : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
       readCheck: true,
     },
 
@@ -233,13 +173,13 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    yearsOfStudy: {
+    levelOfStudy: {
       type: String,
-      caption: 'Years of study',
+      caption: 'Level of study',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.yearsOfStudy, true),
-      submitCheck: inEnum(enumOptions.yearsOfStudy),
+      writeCheck: inEnum(enumOptions.levelOfStudy, true),
+      submitCheck: inEnum(enumOptions.levelOfStudy),
       readCheck: true,
     },
 
@@ -320,7 +260,7 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    techInnovationEssay: {
+    creativeResponseEssay: {
       type: String,
       caption: 'Technology/Innovation Essay',
       inTextSearch: true,
@@ -438,7 +378,7 @@ const internal = {
           },
         },
 
-        techInnovation: {
+        creativeResponse: {
           writeCheck: true,
           readCheck: true,
 
@@ -706,12 +646,7 @@ const mailmerge = {
       type: String,
       readCheck: true,
       virtual: true,
-    },
-    MERGE_MAILING_ADDRESS: {
-      type: String,
-      readCheck: true,
-      virtual: true,
-    },
+    }
   },
 };
 
@@ -1009,7 +944,7 @@ export interface IUser extends BasicUser {
     computedApplicationScore?: number,
     computedFinalApplicationScore?: number, // This value is added by get-rank and usually isn't populated
     applicationScores?: {
-      techInnovation: {
+      creativeResponse: {
         score: number
         reviewer: string
       },
@@ -1038,8 +973,7 @@ export interface IMailMerge {
   MERGE_FIRST_NAME: string,
   MERGE_LAST_NAME: string,
   MERGE_APPLICATION_DEADLINE: string,
-  MERGE_CONFIRMATION_DEADLINE: string,
-  MERGE_MAILING_ADDRESS: string
+  MERGE_CONFIRMATION_DEADLINE: string
 }
 
 export interface IApplication {
@@ -1050,18 +984,13 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
-  timezone: string,
   country: string,
-  wantSwag: boolean,
   shirtSize: string,
-  addressLine1: string,
-  addressLine2: string,
   city: string,
   province: string,
-  postalCode: string,
   school: string,
   program: string,
-  yearsOfStudy: string,
+  levelOfStudy: string,
   hackathonsAttended: string,
   resumeFileName: string,
   resumeSharePermission: boolean,
@@ -1070,12 +999,13 @@ export interface IApplication {
   linkedinLink: string,
   projectEssay: string,
   whyHT6Essay: string,
-  techInnovationEssay: string,
-  requestedWorkshops: string,
+  creativeResponseEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean,
 }
+
+export type IPartialApplication = Partial<IApplication>;
 
 export interface IRSVPForm {
   selectedCompanies?: string[],

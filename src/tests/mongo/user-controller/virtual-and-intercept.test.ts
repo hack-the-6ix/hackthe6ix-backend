@@ -370,68 +370,6 @@ describe('Virtual', () => {
 
       expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
     });
-    describe('Mailing Address', () => {
-      describe('Want Swag', () => {
-        test('One line address', async () => {
-          const user = await User.create({
-            ...organizerUser,
-            firstName: 'Steve',
-            lastName: 'Jobs',
-            hackerApplication: {
-              wantSwag: true,
-              addressLine1: '1234 Street Ave',
-              addressLine2: '',
-              city: 'Toronto',
-              province: 'Ontario',
-              postalCode: '123ABC',
-              country: 'Canada',
-            },
-          });
-          const fetchedUser = await fetchUser(user);
-
-          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs<br/>' +
-            '1234 Street Ave<br/>' +
-            'Toronto, Ontario 123ABC<br/>' +
-            'Canada',
-          );
-        });
-
-        test('Two line address', async () => {
-          const user = await User.create({
-            ...organizerUser,
-            firstName: 'Steve',
-            lastName: 'Jobs',
-            hackerApplication: {
-              wantSwag: true,
-              addressLine1: '1234 Street Ave',
-              addressLine2: 'Apt 1234',
-              city: 'Toronto',
-              province: 'Ontario',
-              postalCode: '123ABC',
-              country: 'Canada',
-            },
-          });
-          const fetchedUser = await fetchUser(user);
-
-          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs<br/>' +
-            '1234 Street Ave<br/>' +
-            'Apt 1234<br/>' +
-            'Toronto, Ontario 123ABC<br/>' +
-            'Canada',
-          );
-        });
-      });
-
-      test('No Swag', async () => {
-
-        const user = await User.create(organizerUser);
-        const fetchedUser = await fetchUser(user);
-
-        expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual('');
-      });
-    });
   });
 
 
@@ -810,7 +748,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -841,7 +779,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 4,
                 reviewer: 'foobar',
               },
@@ -869,7 +807,7 @@ describe('Virtual', () => {
           ...hackerUser,
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -900,7 +838,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -927,7 +865,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },

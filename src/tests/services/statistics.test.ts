@@ -301,7 +301,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
               },
               whyHT6: {
@@ -318,7 +318,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 100,
               },
               whyHT6: {
@@ -339,7 +339,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
               },
               whyHT6: {
@@ -357,7 +357,7 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
 
       expect(statistics.gradeDistribution).toEqual({
-        techInnovation: {
+        creativeResponse: {
           100: 2,
           '-1': 4,
         },
@@ -532,7 +532,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 100,
                 reviewer: organizer._id,
               },
@@ -555,7 +555,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
                 reviewer: organizer._id,
               },
@@ -580,7 +580,7 @@ describe('Get statistics', () => {
         applicationScores: {
           portfolio: 2,
           project: 3,
-          techInnovation: 2,
+          creativeResponse: 2,
           whyHT6: 3
         },
         reviewers: {
