@@ -1,0 +1,202 @@
+{
+  "description": "Hack the 6ix 2023 hacker application",
+  "locked": false,
+  "scoringImplementation": "Application2023",
+  "fields": [
+    {
+      "id": "phoneNumber",
+      "description": "Phone number",
+      "type": "string",
+      "required": true,
+      "rules": {
+        "maxLength": 50
+      }
+    },
+    {
+      "id": "teamCode",
+      "description": "Team code",
+      "type": "string",
+      "systemField": true
+    },
+    {
+      "id": "emailConsent",
+      "description": "Email consent",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "gender",
+      "description": "Gender",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "Male", "Female", "Non-Binary", "Other", "Prefer not to say"
+      ]
+    },
+    {
+      "id": "pronouns",
+      "description": "Pronouns",
+      "type": "enum",
+      "required": true,
+      "enumValues":[
+        "He/Him", "She/Her", "They/Them", "Other", "Prefer not to say"
+      ]
+    },
+    {
+      "id": "ethnicity",
+      "description": "Ethnicity",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "Black/People of African Descent",
+        "Arab / Middle Eastern",
+        "East Asian (e.g. China, Japan, Korea)",
+        "Indigenous Person of Canada",
+        "Latinx",
+        "Southeast Asian (e.g. Cambodia, Indonesia, Singapore)",
+        "South Asian (e.g. India, Pakistan, Sri Lanka)",
+        "West Asian (e.g. Afghanistan, Iran)",
+        "White / People of European Descent",
+        "Other",
+        "Prefer not to answer"
+      ]
+    },
+    {
+      "id": "city",
+      "description": "City",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "province",
+      "description": "Province/State",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "country",
+      "description": "Country",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "shirtSize",
+      "description": "Shirt size",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ]
+    },
+    {
+      "id": "school",
+      "description": "School",
+      "type": "enum",
+      "required": true,
+      "enumValuesSource": "Schools"
+    },
+    {
+      "id": "program",
+      "description": "Program",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "High School",
+        "Engineering",
+        "Computer Science",
+        "Business",
+        "Liberal Arts",
+        "UX design",
+        "Sciences"
+      ]
+    },
+    {
+      "id": "levelOfStudy",
+      "description": "Level of study",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "Secondary / High School",
+        "Undergraduate University (Year 1)",
+        "Undergraduate University (Year 2)",
+        "Undergraduate University (Year 3)",
+        "Undergraduate University (Year 4+)",
+        "Graduate University (Masters, Professional, Doctoral, etc)",
+        "Other Vocational / Trade Program or Apprenticeship",
+        "Post Doctorate",
+        "Recent Graduate"
+      ]
+    },
+    {
+      "id": "hackathonsAttended",
+      "description": "Hackathons attended",
+      "type": "enum",
+      "required": true,
+      "enumValues": [
+        "This is my first one",
+        "1",
+        "2-3",
+        "4-5",
+        "6+"
+      ]
+    },
+    {
+      "id": "resumeFileName",
+      "description": "Resume file name (internal)",
+      "type": "string",
+      "required": true,
+      "systemField": true
+    },
+    {
+      "id": "resumeSharePermission",
+      "description": "I allow Hack the 6ix to distribute my resume with its event sponsors",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "githubLink",
+      "description": "Github",
+      "type": "string"
+    },
+    {
+      "id": "portfolioLink",
+      "description": "Portfolio",
+      "type": "string"
+    },
+    {
+      "id": "linkedinLink",
+      "description": "LinkedIn",
+      "type": "string"
+    },
+    {
+      "id": "requestedWorkshops",
+      "description": "Requested workshops",
+      "type": "string"
+    },
+    {
+      "id": "mlhCOC",
+      "description": "MLH Code of Conduct",
+      "type": "boolean",
+      "required": true,
+      "validators": ["isTrue"]
+    },
+    {
+      "id": "mlhData",
+      "description": "MLH data sharing",
+      "type": "boolean",
+      "required": true,
+      "validators": ["isTrue"]
+    },
+    {
+      "id": "mlhEmail",
+      "description": "MLH email permissions",
+      "type": "boolean",
+      "required": true
+    }
+  ]
+}
