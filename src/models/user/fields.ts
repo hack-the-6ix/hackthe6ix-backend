@@ -351,7 +351,7 @@ export const hackerApplication = {
 
     mlhEmail: {
       type: Boolean,
-      caption: 'MLH COC',
+      caption: 'MLH Email',
 
       writeCheck: true,
       readCheck: true,

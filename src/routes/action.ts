@@ -9,7 +9,7 @@ import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
 import { verifyDiscordUser } from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
-import { initializeSettingsMapper } from '../controller/ModelController';
+import {getObject, initializeSettingsMapper} from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   checkIn,
@@ -48,6 +48,19 @@ actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
     fetchUser(req.executor),
   );
 });
+
+/**
+ * (Hacker)
+ *
+ * Get application settings
+ */
+actionRouter.get('/applicationSettings', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      getObject(req.executor, 'settings', {})
+  )
+})
 
 /**
  * (Hacker)
