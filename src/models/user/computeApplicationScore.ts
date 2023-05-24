@@ -1,9 +1,15 @@
 import { enumOptions } from './enums';
 import { IUser } from './fields';
+import {totalAvailablePoints} from "../../consts";
 
-export default function() {
-  const user = this as IUser;
+export default function(this: IUser):number {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
   const applicationScores: typeof user.internal.applicationScores = user.internal.applicationScores;
+
+  if(!applicationScores) {
+    return 0;
+  }
 
   // Calculate score in accordance to the agreed on formula
   const firstHackathon = user.hackerApplication?.hackathonsAttended === enumOptions.hackathonsAttended[0];
@@ -23,5 +29,5 @@ export default function() {
     applicationScores.project?.score +
     (!firstHackathon ? applicationScores.portfolio?.score : 0);
 
-  return (total / (firstHackathon ? 12 : 14)) * 100;
+  return (total / (firstHackathon ? totalAvailablePoints.first : totalAvailablePoints.normal)) * 100;
 }

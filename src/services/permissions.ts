@@ -7,7 +7,7 @@ import { ErrorMessage } from '../types/types';
 import { jsonify, log } from './logger';
 
 export const verifyToken = (token: string): Record<string, any> => {
-  return jwt.verify(token, process.env.JWT_SECRET, {
+  return jwt.verify(token, process.env.JWT_SECRET!, {
     algorithms: ['HS256'],
     issuer: 'hackthe6ix-backend',
   }) as Record<string, any>;
@@ -18,7 +18,7 @@ export const decodeToken = (token: string): Record<string, any> => {
 };
 
 export const createJwt = (data: Record<string, unknown>): string => {
-  return jwt.sign(data, process.env.JWT_SECRET, {
+  return jwt.sign(data, process.env.JWT_SECRET!, {
     algorithm: 'HS256',
     expiresIn: '1 day',
     issuer: 'hackthe6ix-backend',
@@ -26,7 +26,7 @@ export const createJwt = (data: Record<string, unknown>): string => {
   });
 };
 
-export const authenticate = async (token: string): Promise<IUser> | null => {
+export const authenticate = async (token: string): Promise<IUser | null> => {
   const tokenData = verifyToken(token);
   const userInfo = await User.findOne({
     idpLinkID: tokenData.idpLinkID,
@@ -39,7 +39,7 @@ export const authenticate = async (token: string): Promise<IUser> | null => {
   return userInfo;
 };
 
-export const getBearerToken = (header: string|string[]):string | boolean => {
+export const getBearerToken = (header?: string|string[]):string | boolean => {
   if(!header){
     return false;
   }
@@ -107,7 +107,7 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
   return true;
 };
 
-const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response> => {
+const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response | void> => {
   if (!await injectExecutor(req)) {
     log.error(`[INVALID TOKEN]`, jsonify({
       requestURL: req.url,
@@ -125,7 +125,7 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
     } as ErrorMessage);
   }
 
-  if (!req.executor.roles[role]) {
+  if (!req.executor?.roles[role]) {
     log.error(`[INSUFFICIENT PERMISSIONS]`, jsonify({
       requestURL: req.url,
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
@@ -145,18 +145,18 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
   next();
 };
 
-export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   return isRole(req, res, next, 'admin');
 };
 
-export const isOrganizer = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+export const isOrganizer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   return isRole(req, res, next, 'organizer');
 };
 
-export const isVolunteer = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+export const isVolunteer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   return isRole(req, res, next, 'volunteer');
 };
 
-export const isHacker = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+export const isHacker = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   return isRole(req, res, next, 'hacker');
 };

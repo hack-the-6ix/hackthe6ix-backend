@@ -143,7 +143,7 @@ export const leaveTeam = async (requestUser: IUser) => {
   });
 
   // Delete team if no users are left
-  if (updatedTeam.memberIDs.length === 0) {
+  if (updatedTeam!.memberIDs.length === 0) {
     await Team.findOneAndRemove({
       code: requestUser.hackerApplication.teamCode,
     });

@@ -42,7 +42,7 @@ export interface BasicUser extends mongoose.Document {
 
 export interface DiscordVerifyInfo {
   suffix?: string,
-  roles?: string[],
+  roles: string[],
   firstName: string,
   lastName: string,
   email: string

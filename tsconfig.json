@@ -8,6 +8,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strict": true,
+    "alwaysStrict": true,
     "outDir": "dist",
     "baseUrl": "./src",
     "paths": {

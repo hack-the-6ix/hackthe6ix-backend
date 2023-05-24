@@ -19,3 +19,8 @@ export const systemUser = {
     hacker: true,
   },
 } as IUser;
+
+export const totalAvailablePoints = {
+  normal: 14,
+  first: 12
+}

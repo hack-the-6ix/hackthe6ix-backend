@@ -111,7 +111,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    const invalidFields: string[][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
+    const invalidFields: [string, string | undefined][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
 
     if (invalidFields.length > 0) {
       throw new SubmissionDeniedError(invalidFields);
@@ -313,7 +313,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new BadRequestError('Invalid grade');
   }
 
-  const user: IUser = await User.findOne({
+  const user: IUser | null = await User.findOne({
     _id: targetUserID,
   });
 
@@ -329,7 +329,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
 
   for (const category in grade) {
 
-    if (category in user.internal.applicationScores) {
+    if (user.internal.applicationScores && category in user.internal.applicationScores) {
       const score = parseInt(grade[category]);
 
       if (!isNaN(score)) {
@@ -378,7 +378,7 @@ export const releaseApplicationStatus = async () => {
     'status.statusReleased': true,
   });
 
-  await syncMailingLists(null, true);
+  await syncMailingLists(undefined, true);
 
   return usersModified;
 };
@@ -392,7 +392,7 @@ export const fetchUserByDiscordID = async (discordID: string): Promise<BasicUser
   if (!discordID) {
     throw new BadRequestError('No discordID given.');
   }
-  let userInfo: BasicUser = await User.findOne({
+  let userInfo: BasicUser | null = await User.findOne({
     'discord.discordID': discordID,
   });
 

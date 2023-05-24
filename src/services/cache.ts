@@ -21,7 +21,13 @@ export default class DynamicCacheProvider<ValueType> {
     }
 
     set(key:string, value:ValueType, ttl?:number|string):boolean {
-        return this._cache.set(key, value, ttl);
+        if(ttl !== undefined) {
+            return this._cache.set(key, value, ttl);
+        }
+        else {
+            return this._cache.set(key, value);
+        }
+
     }
 
     getNodeCache():NodeCache {

@@ -24,7 +24,7 @@ apiRouter.post('/get/:objectType', isOrganizer, (req: Request, res: Response) =>
   logResponse(
     req,
     res,
-    getObject(req.executor,
+    getObject(req.executor!,
       req.params.objectType,
       req.body,
     ),
@@ -40,7 +40,7 @@ apiRouter.post('/edit/:objectType', isOrganizer, (req: Request, res: Response) =
   logResponse(
     req,
     res,
-    editObject(req.executor,
+    editObject(req.executor!,
       req.params.objectType,
       req.body.filter,
       req.body.changes,
@@ -60,7 +60,7 @@ apiRouter.post('/delete/:objectType', isAdmin, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    deleteObject(req.executor,
+    deleteObject(req.executor!,
       req.params.objectType,
       req.body,
     ),
@@ -77,7 +77,7 @@ apiRouter.post('/create/:objectType', isAdmin, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    createObject(req.executor,
+    createObject(req.executor!,
       req.params.objectType,
       req.body,
     ),

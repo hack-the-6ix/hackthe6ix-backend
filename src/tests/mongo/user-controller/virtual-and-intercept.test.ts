@@ -24,6 +24,7 @@ import {
   runBeforeAll,
   runBeforeEach,
 } from '../../test-utils';
+import {totalAvailablePoints} from "../../../consts";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -768,7 +769,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(8 / 15 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(7 / totalAvailablePoints.normal * 100);
       });
 
       test('Perfect score', async () => {
@@ -827,7 +828,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(7 / 15 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(7 / totalAvailablePoints.normal * 100);
       });
 
       test('Noob haxxor', async () => {
@@ -854,7 +855,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / totalAvailablePoints.first * 100);
       });
 
       test('Noob haxxor but they somehow also get their portfolio graded', async () => {
@@ -885,7 +886,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / totalAvailablePoints.first * 100);
       });
     });
   });

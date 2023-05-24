@@ -14,6 +14,7 @@ import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import healthRouter from './routes/health';
 import { logResponse, log } from './services/logger';
+import './services/environmentValidator';
 import './services/mailer/util/verify_config';
 import './services/mongoose_service';
 import { InternalServerError } from './types/errors';

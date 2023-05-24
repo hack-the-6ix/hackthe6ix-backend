@@ -45,7 +45,7 @@ actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUser(req.executor),
+    fetchUser(req.executor!),
   );
 });
 
@@ -58,7 +58,7 @@ actionRouter.get('/applicationSettings', isHacker, (req: Request, res: Response)
   logResponse(
       req,
       res,
-      getObject(req.executor, 'settings', {})
+      getObject(req.executor!, 'settings', {})
   )
 })
 
@@ -72,7 +72,7 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
     req,
     res,
     updateApplication(
-      req.executor,
+      req.executor!,
       req.body.submit,
       req.body.application,
     ),
@@ -90,7 +90,7 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
     req,
     res,
     updateResume(
-      req.executor,
+      req.executor!,
       (req as any)?.files?.resume,
       mongoose,
     ),
@@ -121,7 +121,7 @@ actionRouter.post('/createTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     createTeam(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -137,7 +137,7 @@ actionRouter.post('/joinTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     joinTeam(
-      req.executor,
+      req.executor!,
       req.body.teamCode,
     ),
     true,
@@ -154,7 +154,7 @@ actionRouter.post('/leaveTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     leaveTeam(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -170,7 +170,7 @@ actionRouter.get('/getTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     getTeam(
-      req.executor,
+      req.executor!,
     ),
   );
 });
@@ -185,7 +185,7 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
     req,
     res,
     rsvp(
-      req.executor,
+      req.executor!,
       req.body.rsvp,
     ),
     true,
@@ -202,7 +202,7 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
       req,
       res,
       getCheckInQR(
-          req.executor._id, "User"
+          req.executor!._id, "User"
       )
   )
 })
@@ -266,7 +266,7 @@ actionRouter.post('/verifyMailingList', isOrganizer, (req: Request, res: Respons
     req,
     res,
     verifyMailingList(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -300,7 +300,7 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
     req,
     res,
     sendAllTemplates(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -379,7 +379,7 @@ actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    getCandidate(req.executor, req.query.category as string),
+    getCandidate(req.executor!, req.query.category as string),
   );
 });
 
@@ -393,7 +393,7 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
     req,
     res,
     gradeCandidate(
-      req.executor,
+      req.executor!,
       req.body.candidateID,
       req.body.grade,
     ),
@@ -439,7 +439,7 @@ actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) 
   logResponse(
     req,
     res,
-    createAPIToken(req.executor, req.body.groups, req.body.description),
+    createAPIToken(req.executor!, req.body.groups, req.body.description),
   );
 });
 
@@ -493,6 +493,6 @@ actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) =
   logResponse(
       req,
       res,
-      generateCheckInQR(req.executor, req.body.userList)
+      generateCheckInQR(req.executor!, req.body.userList)
   )
 })

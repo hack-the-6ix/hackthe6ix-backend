@@ -33,10 +33,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             nonBinary: 0,
             chooseNotToSay: 0,
           },
-          swag: {
-            wantSwag: 0,
-            noSwag: 0,
-          },
           review: {
             reviewed: 0,
             notReviewed: 0,
@@ -158,13 +154,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             break;
         }
 
-        // Swag
-        if (user?.hackerApplication?.wantSwag) {
-          statistics.hacker.submittedApplicationStats.swag.wantSwag++;
-        } else {
-          statistics.hacker.submittedApplicationStats.swag.noSwag++;
-        }
-
         // Review state
         if (user?.internal?.computedApplicationScore >= 0) {
           statistics.hacker.submittedApplicationStats.review.reviewed++;
@@ -284,10 +273,6 @@ export type IStatistics = {
         nonBinary: number,
         other: number,
         chooseNotToSay: number
-      },
-      swag: {
-        wantSwag: number,
-        noSwag: number
       },
       review: {
         reviewed: number,

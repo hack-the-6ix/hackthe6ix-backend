@@ -10,6 +10,7 @@ import {
   runBeforeAll,
   runBeforeEach,
 } from '../test-utils';
+import {totalAvailablePoints} from "../../consts";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -259,41 +260,6 @@ describe('Get statistics', () => {
       });
     });
 
-    test('Swag', async () => {
-      const cases = [
-        {
-          hackerApplication: {
-            wantSwag: true,
-          },
-          status: {
-            applied: false,
-          },
-        },
-        {
-          hackerApplication: {
-            wantSwag: true,
-          },
-          status: {
-            applied: true,
-          },
-        },
-        {
-          hackerApplication: {
-            wantSwag: false,
-          },
-          status: {
-            applied: true,
-          },
-        },
-      ];
-
-      await generateUsersFromTestCase(cases);
-      const statistics = await getStatistics(true);
-      expect(statistics.hacker.submittedApplicationStats.swag).toEqual({
-        wantSwag: 2,
-        noSwag: 3,
-      });
-    });
     test('Grade Distribution', async () => {
 
       const cases = [
@@ -375,7 +341,7 @@ describe('Get statistics', () => {
         },
         overall: {
           '-1': 4,
-          2680: 2,
+          [Math.round(402/totalAvailablePoints.normal * 100)]: 2,
         },
       });
 
@@ -482,7 +448,6 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
       expect(statistics.hacker.questionBreakdown).toEqual({
         githubLink: 3,
-        wantSwag: 3,
         linkedinLink: 2,
       });
     });
