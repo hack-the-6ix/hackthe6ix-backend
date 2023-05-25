@@ -14,9 +14,7 @@ import {
   isUserOrOrganizer,
   maxLength, maxWordLength,
   minLength,
-  minWordLength,
-  validatePostalCode,
-  wantSwag,
+  minWordLength
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
@@ -112,13 +110,9 @@ export const hackerApplication = {
       type: String,
       caption: 'Shirt Size',
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.shirt, true)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.shirt)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      readCheck: true,
+      writeCheck: inEnum(enumOptions.shirt, true),
+      submitCheck: inEnum(enumOptions.shirt, true),
+      readCheck: true
     },
 
 
@@ -129,12 +123,8 @@ export const hackerApplication = {
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? minLength(1)(request) && maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -143,12 +133,8 @@ export const hackerApplication = {
       caption: 'Province/State',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-          ? maxLength(256)
-          : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-          ? minLength(1)(request) && maxLength(256)(request)
-          : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 

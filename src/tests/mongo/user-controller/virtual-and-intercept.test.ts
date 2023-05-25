@@ -741,42 +741,10 @@ describe('Virtual', () => {
     });
 
     describe('Fully graded', () => {
-      test('Workshop point', async () => {
-        const user = await User.create({
-          ...hackerUser,
-          hackerApplication: {
-            requestedWorkshops: 'i want free swag thanks',
-          },
-          internal: {
-            applicationScores: {
-              creativeResponse: {
-                score: 1,
-                reviewer: 'foobar',
-              },
-              whyHT6: {
-                score: 1,
-                reviewer: 'foobar',
-              },
-              project: {
-                score: 2,
-                reviewer: 'barfoo',
-              },
-              portfolio: {
-                score: 3,
-                reviewer: 'barfoo',
-              },
-            },
-          },
-        });
-
-        expect(user.internal.computedApplicationScore).toEqual(7 / totalAvailablePoints.normal * 100);
-      });
-
       test('Perfect score', async () => {
         const user = await User.create({
           ...hackerUser,
           hackerApplication: {
-            requestedWorkshops: 'i want free swag thanks',
           },
           internal: {
             applicationScores: {

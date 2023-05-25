@@ -49,7 +49,6 @@ const main = async () => {
           'hackerApplication.city': entry.address.city,
           'hackerApplication.province': entry.address.province,
           'hackerApplication.postalCode': entry.address.postalCode,
-          'hackerApplication.wantSwag': true,
         };
       }
 

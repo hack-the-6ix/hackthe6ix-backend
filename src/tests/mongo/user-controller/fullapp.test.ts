@@ -110,8 +110,8 @@ describe('Update Real Application', () => {
 
     const hackerApplication = {
       gender: '',
-      pronouns: null,
-      ethnicity: null,
+      pronouns: null as unknown as string, // just force this so we can test falsy enum
+      ethnicity: null as unknown as string,
       school: 'University of Toronto',
       program: 'Computer Science',
       levelOfStudy: enumOptions['levelOfStudy'][0],
@@ -276,8 +276,6 @@ describe('Submit Real Application', () => {
 
     const hackerApplication = {
       gender: '',
-      pronouns: null,
-      ethnicity: null,
       school: 'University of Toronto',
       program: 'Computer Science',
       phoneNumber: '123123123',
@@ -336,6 +334,8 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
     } as IPartialApplication;
 
@@ -387,6 +387,8 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: false,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
     } as IPartialApplication;
 
@@ -433,6 +435,8 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: false,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
     } as IPartialApplication;
 
@@ -479,6 +483,8 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
     } as IPartialApplication;
 

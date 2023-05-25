@@ -11,7 +11,6 @@ const main = async () => {
   const otherRequirements: any = {
     'status.checkedIn': true,
     'status.confirmed': true,
-    'hackerApplication.wantSwag': true,
     'hackerApplication.shirtSize': null,
   };
 

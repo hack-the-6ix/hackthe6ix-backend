@@ -417,7 +417,6 @@ describe('Get statistics', () => {
       const cases = [
         {
           hackerApplication: {
-            wantSwag: true,
             githubLink: 'asdasiojasoidjsa',
           },
           status: {
@@ -426,7 +425,6 @@ describe('Get statistics', () => {
         },
         {
           hackerApplication: {
-            wantSwag: true,
             githubLink: 'asdasiojasoidjsa',
             linkedinLink: 'asdasda',
           },
@@ -436,7 +434,6 @@ describe('Get statistics', () => {
         },
         {
           hackerApplication: {
-            wantSwag: false,
           },
           status: {
             applied: true,
