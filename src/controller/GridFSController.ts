@@ -1,15 +1,13 @@
-import {mongo, Mongoose} from 'mongoose';
+import mongoose, {Mongoose} from 'mongoose';
+import GridFSFile from "mongoose/node_modules/mongodb";
 import { pipeline } from 'node:stream/promises';
 import stream, { Writable, PassThrough } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';
 import archiver from 'archiver';
-import {resumeBucket} from "../services/mongoose_service";
+import {getBucket, SystemGridFSBucket} from "../services/gridfs";
 
-
-// TODO: Fix the resumeBucket and _getFile types to be correct
-
-const _getFile = async (filename: string): Promise<any> => {
-  const cursor = resumeBucket.find({ filename: filename }, {
+const _getFile = async (bucket: SystemGridFSBucket, filename: string): Promise<GridFSFile.GridFSFile> => {
+  const cursor = getBucket(bucket, mongoose.connection.db).find({ filename: filename }, {
     limit: 1
   });
 
@@ -30,13 +28,13 @@ const _getFile = async (filename: string): Promise<any> => {
  * @param mongoose
  * @param outputStream
  */
-export const readGridFSFile = async (filename: string, mongoose: Mongoose, outputStream: Writable) => {
+export const readGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose, outputStream: Writable) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  const resume = await _getFile(filename);
-  await pipeline(resumeBucket.openDownloadStream(resume._id), outputStream);
+  const resume = await _getFile(bucket, filename);
+  await pipeline(getBucket(bucket, mongoose.connection.db).openDownloadStream(resume._id), outputStream);
 
   return 'Success';
 };
@@ -48,14 +46,14 @@ export const readGridFSFile = async (filename: string, mongoose: Mongoose, outpu
  * @param mongoose
  * @param expressFile
  */
-export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expressFile: any) => {
+export const writeGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose, expressFile: any) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
   // Delete existing file
   try {
-    await deleteGridFSFile(filename, mongoose);
+    await deleteGridFSFile(bucket, filename, mongoose);
   } catch (e) {
     if (!(e instanceof NotFoundError)) {
       throw e;
@@ -66,7 +64,7 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
   const fileReadStream = new stream.PassThrough();
   fileReadStream.end(Buffer.from(expressFile.data));
 
-  await pipeline(fileReadStream, resumeBucket.openUploadStream(filename));
+  await pipeline(fileReadStream, getBucket(bucket, mongoose.connection.db).openUploadStream(filename));
 
   return 'Success';
 };
@@ -77,14 +75,14 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
  * @param filename
  * @param mongoose
  */
-export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => {
+export const deleteGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  const resume = await _getFile(filename);
+  const resume = await _getFile(bucket, filename);
 
-  await resumeBucket.delete(resume._id);
+  await getBucket(bucket, mongoose.connection.db).delete(resume._id);
 
   return 'Success';
 };
@@ -96,21 +94,14 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
  * @param mongoose
  * @param outputStream
  */
-export const exportAsZip = async (filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
+export const exportAsZip = async (bucket: SystemGridFSBucket, filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
 
-  // TODO: fix change to proper type when _getFile type is fixed
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allExists:any[] = [];
+  const allExists:Promise<GridFSFile.GridFSFile>[] = [];
   for(const {filename} of filenameData) {
-    allExists.push(_getFile(filename))
+    allExists.push(_getFile(bucket, filename))
   }
 
   const existsResult = await Promise.all(allExists);
-  for(const result of existsResult){
-    if(result.state === "rejected"){
-      throw new NotFoundError(result.reason);
-    }
-  }
 
   return await new Promise<void> ((resolve, reject) => {
     const archive = archiver('zip', {
@@ -138,9 +129,9 @@ export const exportAsZip = async (filenameData: {gfsfilename: string, filename:s
 
     for(const result of existsResult) {
       const tStream = new PassThrough();
-      archive.append(tStream, {name: result.value.filename});
+      archive.append(tStream, {name: result.filename});
 
-      resumeBucket.openDownloadStream(result.value._id)
+      getBucket(bucket, mongoose.connection.db).openDownloadStream(result._id)
           .pipe(tStream);
     }
 

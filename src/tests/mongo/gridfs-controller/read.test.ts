@@ -34,10 +34,10 @@ xdescribe('GridFS Read', () => {
     writeStream.write(mockPayload);
     //writeStream.end();*/
 
-    await writeGridFSFile(mockFilename, mongoose, { 'data': mockPayload });
+    await writeGridFSFile('resumes', mockFilename, mongoose, { 'data': mockPayload });
 
     const readStream: Writable = new stream.Writable();
-    await readGridFSFile(mockFilename, mongoose, readStream);
+    await readGridFSFile('resumes', mockFilename, mongoose, readStream);
 
     readStream.on('data', (chunk: any) => {
       expect(chunk).toEqual(mockPayload);
@@ -48,12 +48,12 @@ xdescribe('GridFS Read', () => {
   test('File doesn\'t exist', async () => {
     const mongoose = await dbHandler.connect();
 
-    await expect(readGridFSFile('foofoobar', mongoose, null)).rejects.toThrow(NotFoundError);
+    await expect(readGridFSFile('resumes', 'foofoobar', mongoose, null)).rejects.toThrow(NotFoundError);
   });
 
   test('File name not specified', async () => {
     const mongoose = await dbHandler.connect();
 
-    await expect(readGridFSFile('', mongoose, null)).rejects.toThrow(BadRequestError);
+    await expect(readGridFSFile('resumes', '', mongoose, null)).rejects.toThrow(BadRequestError);
   });
 });
