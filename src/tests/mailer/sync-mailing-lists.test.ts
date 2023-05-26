@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import User from '../../models/user/User';
+import DynamicCacheProvider from "../../services/cache";
 import syncMailingList from '../../services/mailer/syncMailingList';
 import syncMailingLists from '../../services/mailer/syncMailingLists';
 import { getList } from '../../services/mailer/util/external';
@@ -40,6 +41,14 @@ jest.mock('../../types/mailer', () => {
     MailingList: mockMailingLists,
   };
 });
+
+// this effectively disables the cache so that
+// the list config can be changed between tests without
+// needing to make up new list names
+jest.spyOn(DynamicCacheProvider.prototype, 'get')
+    .mockImplementation(async function (key){
+      return await this._provider(key);
+    });
 
 describe('Sync Mailing Lists', () => {
   test('Sync specific mailing lists', async () => {

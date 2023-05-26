@@ -1,5 +1,5 @@
 import NodeCache from "node-cache";
-export type CacheProvider<ValueType> = (key: string) => Promise<ValueType>;
+export type CacheProvider<ValueType> = (key: string) => Promise<ValueType> | ValueType;
 
 export default class DynamicCacheProvider<ValueType> {
     private readonly _cache:NodeCache;
@@ -10,11 +10,20 @@ export default class DynamicCacheProvider<ValueType> {
         this._provider = provider;
     }
 
-    async get(key: string):Promise<ValueType> {
+    async get(key: string, ttl?:number|string):Promise<ValueType> {
         let value = this._cache.get(key) as ValueType;
 
         if(value === undefined) {
             value = await this._provider(key);
+        }
+
+        if(value !== undefined && ttl !== -1) {
+            if(ttl !== undefined) {
+                this._cache.set(key, value, ttl);
+            }
+            else {
+                this._cache.set(key, value);
+            }
         }
 
         return value;
