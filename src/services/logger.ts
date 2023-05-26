@@ -149,9 +149,9 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
     });
 
     if (process.env.NODE_ENV === 'development') {
-      log.debug(`[${req.url}]`, logPayload);
+      log.debug(`[${req.method} ${req.url}]`, logPayload);
     } else if (alwaysLog) {
-      log.info(`[${req.url}]`, logPayload);
+      log.info(`[${req.method} ${req.url}]`, logPayload);
     }
 
     return res.json({
@@ -188,7 +188,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       executorUser: req.executor,
     });
 
-    log.error(`[${req.url}]`, logPayload);
+    log.error(`[${req.method} ${req.url}]`, logPayload);
 
     return res.status(status).json(body);
   });

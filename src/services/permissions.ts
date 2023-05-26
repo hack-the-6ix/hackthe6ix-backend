@@ -109,7 +109,7 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
 
 const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response | void> => {
   if (!await injectExecutor(req)) {
-    log.error(`[INVALID TOKEN]`, jsonify({
+    log.error(`[${req.method} ${req.url}] [INVALID TOKEN]`, jsonify({
       requestURL: req.url,
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       uid: req.executor?._id || 'N/A',
