@@ -193,6 +193,7 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
     _id: requestUser._id,
   }, {
     'hackerApplication.resumeFileName': filename,
+    'hackerApplication.friendlyResumeFileName': expressFile.name
   });
 
   return 'Success';

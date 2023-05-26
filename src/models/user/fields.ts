@@ -191,6 +191,18 @@ export const hackerApplication = {
       submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
     },
 
+    // The user cannot directly edit this field, but they can view it
+    // We will set this when the user updates their application
+    friendlyResumeFileName: {
+      type: String,
+      caption: 'Resume Name',
+      inTextSearch: true,
+
+      readCheck: true,
+      writeCheck: false,
+      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
+    },
+
     resumeSharePermission: {
       type: Boolean,
       caption: 'I allow Hack the 6ix to distribute my resume to its event sponsors',
@@ -979,6 +991,7 @@ export interface IApplication {
   levelOfStudy: string,
   hackathonsAttended: string,
   resumeFileName: string,
+  friendlyResumeFileName: string,
   resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,

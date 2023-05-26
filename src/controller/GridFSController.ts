@@ -1,9 +1,27 @@
-import Grid from 'gridfs-stream';
-import { Mongoose } from 'mongoose';
+import {mongo, Mongoose} from 'mongoose';
+import { pipeline } from 'node:stream/promises';
 import stream, { Writable, PassThrough } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';
-import {promisify} from 'util';
 import archiver from 'archiver';
+import {resumeBucket} from "../services/mongoose_service";
+
+
+// TODO: Fix the resumeBucket and _getFile types to be correct
+
+const _getFile = async (filename: string): Promise<any> => {
+  const cursor = resumeBucket.find({ filename: filename }, {
+    limit: 1
+  });
+
+  const {done, value} = await cursor[Symbol.asyncIterator]().next();
+
+  if(done) {
+    throw new NotFoundError(`File ${filename} not found`);
+  }
+
+  return value;
+}
+
 
 /**
  * Reads an arbitrary file from GridFS and pipes it to the express response
@@ -13,25 +31,14 @@ import archiver from 'archiver';
  * @param outputStream
  */
 export const readGridFSFile = async (filename: string, mongoose: Mongoose, outputStream: Writable) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  return await new Promise((resolve, reject) => {
-    gfs.exist({ filename: filename }, (err: any, found: any) => {
-      if (err) {
-        return reject(err);
-      }
+  const resume = await _getFile(filename);
+  await pipeline(resumeBucket.openDownloadStream(resume._id), outputStream);
 
-      if (found) {
-        return resolve(gfs.createReadStream({ filename: filename }).pipe(outputStream));
-      } else {
-        return reject(new NotFoundError(`File ${filename} not found`));
-      }
-    });
-  });
+  return 'Success';
 };
 
 /**
@@ -42,8 +49,6 @@ export const readGridFSFile = async (filename: string, mongoose: Mongoose, outpu
  * @param expressFile
  */
 export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expressFile: any) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
@@ -57,14 +62,11 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
     }
   }
 
-  // Save new resume
+    // Save new resume
   const fileReadStream = new stream.PassThrough();
   fileReadStream.end(Buffer.from(expressFile.data));
 
-  const gridWriteStream = gfs.createWriteStream({
-    filename: filename,
-  });
-  await fileReadStream.pipe(gridWriteStream);
+  await pipeline(fileReadStream, resumeBucket.openUploadStream(filename));
 
   return 'Success';
 };
@@ -76,31 +78,15 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
  * @param mongoose
  */
 export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  return await new Promise((resolve, reject) => {
-    gfs.exist({ filename: filename }, (err: any, found: any) => {
-      if (err) {
-        return reject(err);
-      }
+  const resume = await _getFile(filename);
 
-      if (found) {
-        gfs.remove({ filename: filename }, (err: any) => {
-          if (err) {
-            return reject(err);
-          }
+  await resumeBucket.delete(resume._id);
 
-          resolve('Success!');
-        });
-      } else {
-        reject(new NotFoundError(`File ${filename} not found`));
-      }
-    });
-  });
+  return 'Success';
 };
 
 /**
@@ -111,64 +97,54 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
  * @param outputStream
  */
 export const exportAsZip = async (filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 
-  const gfsExistPromise = promisify(gfs.exist);
-  gfs.exist = gfsExistPromise;
-
-  if (!Array.isArray(filenameData) || filenameData.length === 0) {
-    throw new BadRequestError('No file names given!');
+  // TODO: fix change to proper type when _getFile type is fixed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allExists:any[] = [];
+  for(const {filename} of filenameData) {
+    allExists.push(_getFile(filename))
   }
 
-  return await new Promise<void>((resolve, reject) => {
-    const allExists:boolean[] = [];
-    for(const filenameDatum of filenameData){
-      //@ts-expect-error gfs.exist is reassigned to the promisified version
-      allExists.push(gfs.exist({filename: filenameDatum.gfsfilename}));
+  const existsResult = await Promise.all(allExists);
+  for(const result of existsResult){
+    if(result.state === "rejected"){
+      throw new NotFoundError(result.reason);
     }
+  }
 
-    Promise.all(allExists).then((existsResult) => {
-      for(const result of existsResult){
-        if(!result){
-          return reject(new NotFoundError(`A given file does not exist!`));
-        }
-      }
+  return await new Promise<void> ((resolve, reject) => {
+    const archive = archiver('zip', {
+      zlib: { level: 0 } // Don't compress to save CPU
+    });
 
-      const archive = archiver('zip', {
-        zlib: { level: 0 } // Don't compress to save CPU
-      });
+    outputStream.on('end', function (){
+      return resolve();
+    });
 
-      outputStream.on('end', function (){
-        return resolve();
-      });
-
-      archive.on('warning', function(err) {
-        if (err.code === 'ENOENT') {
-          // log warning
-        } else {
-          // throw error
-          return reject(err);
-        }
-      });
-
-      archive.on('error', function(err) {
+    archive.on('warning', function(err) {
+      if (err.code === 'ENOENT') {
+        // log warning
+      } else {
+        // throw error
         return reject(err);
-      });
-
-      archive.pipe(outputStream);
-
-      for(const filenameDatum of filenameData){
-        const gfsStream = gfs.createReadStream({ filename: filenameDatum.gfsfilename });
-        const tStream = new PassThrough();
-
-        archive.append(tStream, {name: filenameDatum.filename});
-        gfsStream.pipe(tStream);
       }
+    });
 
-      archive.finalize();
-
-    }).catch((err) => {
+    archive.on('error', function(err) {
       return reject(err);
     });
-  });
+
+    archive.pipe(outputStream);
+
+    for(const result of existsResult) {
+      const tStream = new PassThrough();
+      archive.append(tStream, {name: result.value.filename});
+
+      resumeBucket.openDownloadStream(result.value._id)
+          .pipe(tStream);
+    }
+
+    archive.finalize();
+  })
+
 }
