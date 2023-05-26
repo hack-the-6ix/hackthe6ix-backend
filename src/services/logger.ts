@@ -128,6 +128,23 @@ function createWinstonLogger() {
   return logger;
 }
 
+export function logRequest(req: Request, alwaysLog?: boolean, additional?: any):void {
+  const logPayload = jsonify({
+    requestURL: req.url,
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+    uid: req.executor?._id || 'N/A',
+    requestBody: req.body,
+    executorUser: req.executor,
+    ...(additional !== undefined ? additional : {})
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    log.debug(`[${req.method} ${req.url}]`, logPayload);
+  } else if (alwaysLog) {
+    log.info(`[${req.method} ${req.url}]`, logPayload);
+  }
+}
+
 /**
  * Handles the promise from APIs calls and handles errors, or forwards data for a successful req.
  *
@@ -136,23 +153,13 @@ function createWinstonLogger() {
  * @param promise
  * @param alwaysLog - when enabled, this event will trigger an info level log in production
  */
-export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean) => {
+export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean, excludeData?: boolean) => {
   promise
   .then((data) => {
-    const logPayload = jsonify({
-      requestURL: req.url,
-      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-      uid: req.executor?._id || 'N/A',
-      requestBody: req.body,
-      responseBody: data,
-      executorUser: req.executor,
-    });
 
-    if (process.env.NODE_ENV === 'development') {
-      log.debug(`[${req.method} ${req.url}]`, logPayload);
-    } else if (alwaysLog) {
-      log.info(`[${req.method} ${req.url}]`, logPayload);
-    }
+    logRequest(req, alwaysLog, {
+      responseBody: data,
+    });
 
     return res.json({
       status: 200,

@@ -176,8 +176,18 @@ export const mockGetMailTemplate = (templateName: string) => ({
 export const mockSuccessResponse = () => ({ status: 200, data: {} as any });
 export const mockErrorResponse = () => ({ status: 500, data: {} as any });
 
+export interface SystemTestContext {
+  mongoose: typeof mongoose
+}
+
+export const runBeforeAllAndInject = (context: SystemTestContext): () => Promise<void> => {
+  return async () => {
+    context.mongoose = await dbHandler.connect();
+  }
+}
+
 export const runBeforeAll = async () => {
-  await dbHandler.connect();
+  await (runBeforeAllAndInject({} as SystemTestContext))();
 };
 
 export const runAfterEach = async () => {

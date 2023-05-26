@@ -30,7 +30,7 @@ export const resumeExport = async (outputStream: Writable) => {
         };
     });
 
-    await exportAsZip(filenames, mongoose, outputStream);
+    await exportAsZip('resumes', filenames, mongoose, outputStream);
 
     return;
 }

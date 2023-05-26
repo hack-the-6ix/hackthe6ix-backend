@@ -1,5 +1,5 @@
 import mongoose, {Mongoose} from 'mongoose';
-import GridFSFile from "mongoose/node_modules/mongodb";
+import type GridFSFile from "mongoose/node_modules/mongodb";
 import { pipeline } from 'node:stream/promises';
 import stream, { Writable, PassThrough } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';

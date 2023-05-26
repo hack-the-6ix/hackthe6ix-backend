@@ -1,9 +1,18 @@
-import stream, { Writable } from 'stream';
+import {PassThrough, Writable} from 'stream';
 import { readGridFSFile, writeGridFSFile } from '../../../controller/GridFSController';
 import { BadRequestError, NotFoundError } from '../../../types/errors';
-import * as dbHandler from '../../db-handler';
-import { runAfterAll, runAfterEach, runBeforeEach } from '../../test-utils';
 
+import {
+  runAfterAll,
+  runAfterEach,
+  runBeforeAllAndInject,
+  runBeforeEach,
+  SystemTestContext
+} from '../../test-utils';
+
+const context: SystemTestContext = {} as SystemTestContext;
+
+beforeAll(runBeforeAllAndInject(context))
 /**
  * Clear all test data after every test.
  */
@@ -19,41 +28,34 @@ afterAll(runAfterAll);
 /**
  * Skipping GridFS unit tests as we aren't able to read from GridFS using the mock DB for some reason????
  */
-xdescribe('GridFS Read', () => {
-  test('File exists', async (done) => {
-    const mongoose = await dbHandler.connect();
+describe('GridFS Read', () => {
+  test('File exists', (done) => {
+    // const mongoose = await dbHandler.connect();
 
     const mockPayload = 'foobar';
     const mockFilename = 'foobar.txt';
 
-    // Write mock file
-    /*const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-    const writeStream = gfs.createWriteStream({
-      filename: mockFilename,
-    });
-    writeStream.write(mockPayload);
-    //writeStream.end();*/
+    writeGridFSFile('resumes', mockFilename, context.mongoose, { 'data': mockPayload })
+        .then(() => {
+          const passThrough = new PassThrough();
+          passThrough.on('data', (chunk: any) => {
+            expect(chunk.toString()).toEqual(mockPayload);
+            done();
+          });
 
-    await writeGridFSFile('resumes', mockFilename, mongoose, { 'data': mockPayload });
-
-    const readStream: Writable = new stream.Writable();
-    await readGridFSFile('resumes', mockFilename, mongoose, readStream);
-
-    readStream.on('data', (chunk: any) => {
-      expect(chunk).toEqual(mockPayload);
-      done();
-    });
-  });
+          readGridFSFile('resumes', mockFilename, context.mongoose, passThrough).catch((err) => done(err))
+        }).catch((err) => done(err));
+  })
 
   test('File doesn\'t exist', async () => {
-    const mongoose = await dbHandler.connect();
+    // const mongoose = await dbHandler.connect();
 
-    await expect(readGridFSFile('resumes', 'foofoobar', mongoose, null)).rejects.toThrow(NotFoundError);
+    await expect(readGridFSFile('resumes', 'foofoobar', context.mongoose, new Writable())).rejects.toThrow(NotFoundError);
   });
 
   test('File name not specified', async () => {
-    const mongoose = await dbHandler.connect();
+    // const mongoose = await dbHandler.connect();
 
-    await expect(readGridFSFile('resumes', '', mongoose, null)).rejects.toThrow(BadRequestError);
+    await expect(readGridFSFile('resumes', '', context.mongoose, new Writable())).rejects.toThrow(BadRequestError);
   });
 });
