@@ -95,10 +95,11 @@ export const deleteGridFSFile = async (bucket: SystemGridFSBucket, filename: str
  * @param outputStream
  */
 export const exportAsZip = async (bucket: SystemGridFSBucket, filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
+  const gfsFilenameToFilename = Object.fromEntries(filenameData.map(entry => [entry.gfsfilename, entry.filename]));
 
   const allExists:Promise<GridFSFile.GridFSFile>[] = [];
-  for(const {filename} of filenameData) {
-    allExists.push(_getFile(bucket, filename))
+  for(const {gfsfilename} of filenameData) {
+    allExists.push(_getFile(bucket, gfsfilename))
   }
 
   const existsResult = await Promise.all(allExists);
@@ -129,7 +130,7 @@ export const exportAsZip = async (bucket: SystemGridFSBucket, filenameData: {gfs
 
     for(const result of existsResult) {
       const tStream = new PassThrough();
-      archive.append(tStream, {name: result.filename});
+      archive.append(tStream, {name: gfsFilenameToFilename[result.filename]});
 
       getBucket(bucket, mongoose.connection.db).openDownloadStream(result._id)
           .pipe(tStream);
