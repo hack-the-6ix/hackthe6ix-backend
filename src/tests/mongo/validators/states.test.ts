@@ -104,16 +104,26 @@ describe('User States', () => {
   });
 
   describe('Applications Open', () => {
+    test('Not yet open', () => {
+      expect(isApplicationOpen({
+        ...hackerUser,
+        computedApplicationOpen: new Date().getTime() + 500,
+        computedApplicationDeadline: new Date().getTime() + 1000,
+      } as IUser)).toBeFalsy();
+    });
+
     test('Open', () => {
       expect(isApplicationOpen({
         ...hackerUser,
-        computedApplicationDeadline: new Date().getTime() + 1000,
+        computedApplicationOpen: new Date().getTime(),
+        computedApplicationDeadline: new Date().getTime() + 1000
       } as IUser)).toBeTruthy();
     });
 
     test('Closed', () => {
       expect(isApplicationOpen({
         ...hackerUser,
+        computedApplicationOpen: new Date().getTime(),
         computedApplicationDeadline: new Date().getTime() - 1000,
       } as IUser)).toBeFalsy();
     });
@@ -139,6 +149,7 @@ describe('User States', () => {
     test('True', () => {
       expect(canUpdateApplication({
         ...hackerUser,
+        computedApplicationOpen: new Date().getTime(),
         computedApplicationDeadline: new Date().getTime() + 1000,
         status: {
           ...hackerUser.status,
@@ -148,6 +159,18 @@ describe('User States', () => {
     });
 
     describe('False', () => {
+      test('Application Not Yet Open', () => {
+        expect(canUpdateApplication({
+          ...hackerUser,
+          computedApplicationOpen: new Date().getTime() + 500,
+          computedApplicationDeadline: new Date().getTime() + 1000,
+          status: {
+            ...hackerUser.status,
+            applied: false,
+          },
+        } as IUser)).toBeFalsy();
+      });
+
       test('Application Closed', () => {
         expect(canUpdateApplication({
           ...hackerUser,

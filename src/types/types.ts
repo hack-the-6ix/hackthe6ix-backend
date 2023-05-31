@@ -10,9 +10,10 @@ export type ErrorMessage = { status: number, message: string, error?: string };
  */
 export type UniverseState = {
   public: {
+    globalApplicationOpen: number,
     globalApplicationDeadline: number,
     globalConfirmationDeadline: number,
-    globalWaitlistAcceptedConfirmationDeadline: number,
+    globalWaitlistAcceptedConfirmationDeadline: number
   },
   private: {
     maxAccepted: number,

@@ -9,7 +9,7 @@ import { extractFields } from '../util';
 import {
   canRSVP,
   canUpdateApplication,
-  getApplicationDeadline,
+  getApplicationDeadline, getApplicationOpen,
   getRSVPDeadline,
   isApplicationExpired,
   isApplicationOpen,
@@ -169,6 +169,16 @@ schema.virtual('mailmerge.MERGE_CONFIRMATION_DEADLINE').get(function() {
 /**
  * Computed Deadlines
  */
+schema.virtual('computedApplicationOpen', {
+  ref: 'Setting',
+  localField: 'settingsMapper',
+  foreignField: 'settingsMapper',
+  justOne: true,
+  autopopulate: true,
+}).get(function(settings: ISettings) {
+  return getApplicationOpen(this, extractUniverse(settings));
+});
+
 schema.virtual('computedApplicationDeadline', {
   ref: 'Setting',
   localField: 'settingsMapper',

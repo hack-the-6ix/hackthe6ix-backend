@@ -42,7 +42,10 @@ describe('Assign Application Status', () => {
 
   describe('Waitlist deadline', () => {
     test('Default', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 1, 0);
+      await generateMockUniverseState({
+        maxAccept: 1,
+        maxWaitlist: 0
+      });
 
       const user = (await User.create({
         ...hackerUser,
@@ -75,7 +78,10 @@ describe('Assign Application Status', () => {
     describe('Override', () => {
 
       test('Success', async () => {
-        await generateMockUniverseState(undefined, undefined, undefined, 1, 0);
+        await generateMockUniverseState({
+          maxAccept: 1,
+          maxWaitlist: 0
+        });
 
         const user = (await User.create({
           ...hackerUser,
@@ -116,7 +122,10 @@ describe('Assign Application Status', () => {
   describe('Legitness', () => {
 
     test('Legit mode', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 1, 1);
+      await generateMockUniverseState({
+        maxAccept: 1,
+        maxWaitlist: 1
+      });
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
@@ -185,7 +194,10 @@ describe('Assign Application Status', () => {
 
 
     test('Not Legit mode', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 1, 1);
+      await generateMockUniverseState({
+        maxAccept: 1,
+        maxWaitlist: 1
+      });
 
       const users = (await Promise.all([...new Array(3)].map(() => User.create({
         ...hackerUser,
@@ -257,7 +269,10 @@ describe('Assign Application Status', () => {
 
   describe('Functionality', () => {
     test('Fresh slate', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
+      await generateMockUniverseState({
+        maxAccept: 3,
+        maxWaitlist: 2
+      });
 
       const users = (await Promise.all([...new Array(10)].map(() => User.create({
         ...hackerUser,
@@ -315,7 +330,10 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing accepted and waitlisted users', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
+      await generateMockUniverseState({
+        maxAccept: 3,
+        maxWaitlist: 2
+      });
 
       const users = (await Promise.all([
         User.create({
@@ -413,7 +431,10 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing accepted and waitlisted users -- No changes', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 0, 0);
+      await generateMockUniverseState({
+        maxAccept: 0,
+        maxWaitlist: 0
+      });
 
       const users = (await Promise.all([
         User.create({
@@ -495,7 +516,10 @@ describe('Assign Application Status', () => {
     });
 
     test('Existing rejected and declined users', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 3, 2);
+      await generateMockUniverseState({
+        maxAccept: 3,
+        maxWaitlist: 2
+      });
 
       const users = (await Promise.all([
         User.create({ // Accept
@@ -630,7 +654,10 @@ describe('Assign Application Status', () => {
     });
 
     test('Accept waitlisted people', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 5, 2);
+      await generateMockUniverseState({
+        maxAccept: 5,
+        maxWaitlist: 2
+      });
 
       const users = (await Promise.all([
         User.create({
@@ -748,7 +775,10 @@ describe('Assign Application Status', () => {
     });
 
     test('Waitlist Over', async () => {
-      await generateMockUniverseState(undefined, undefined, undefined, 3, 3);
+      await generateMockUniverseState({
+        maxAccept: 3,
+        maxWaitlist: 3
+      });
 
       const mockTimestamp = 69696969;
 
