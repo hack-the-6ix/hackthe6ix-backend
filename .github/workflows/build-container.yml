@@ -34,11 +34,13 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          tags: ${{ vars.REGISTRY_REPO_PATH }}:latest
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           cache-from: type=local,src=/tmp/.buildx-cache
           target: deploy
           push: true
+          tags: |
+            ${{ vars.REGISTRY_REPO_PATH }}:latest
+            ${{ vars.REGISTRY_REPO_PATH }}:${{ github.sha }}
 
       # Clean up cache
       - name: Move cache
@@ -47,10 +49,10 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       # Trigger deployment
-      - uses: convictional/trigger-workflow-and-wait@v1.3.0
-        with:
-          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
-          workflow_file_name: deploy-container.yml
-          inputs: '{ "tag": "latest", "dockerrepo": "${{ secrets.DOCKERHUB_REPOSITORY }}" }'
-          repo: ${{ github.event.repository.name }}
-          owner: hack-the-6ix
+#      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+#        with:
+#          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
+#          workflow_file_name: deploy-container.yml
+#          inputs: '{ "tag": "latest", "dockerrepo": "${{ secrets.DOCKERHUB_REPOSITORY }}" }'
+#          repo: ${{ github.event.repository.name }}
+#          owner: hack-the-6ix
