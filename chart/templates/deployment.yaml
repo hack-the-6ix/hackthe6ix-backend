@@ -15,7 +15,7 @@ spec:
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- if .Values.hackthe6ixBackend.secrets.vault.enabled -}}
+        {{- if .Values.hackthe6ixBackend.secrets.vault.enabled }}
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/tls-skip-verify: 'true'
         vault.hashicorp.com/role: '{{ .Values.hackthe6ixBackend.secrets.vault.role }}'
