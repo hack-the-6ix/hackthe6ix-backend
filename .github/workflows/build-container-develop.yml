@@ -1,4 +1,4 @@
-name: Build and develop container
+name: Build and deploy container
 
 on:
   push:
