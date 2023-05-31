@@ -55,7 +55,7 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
     },
   ];
 
-  let userInfo: BasicUser = await User.findOneAndUpdate({
+  let userInfo: BasicUser | null = await User.findOneAndUpdate({
     $and: [{
       'groups.admin': false,
     }, {

@@ -1,9 +1,25 @@
-import Grid from 'gridfs-stream';
-import { Mongoose } from 'mongoose';
+import mongoose, {Mongoose} from 'mongoose';
+import type GridFSFile from "mongoose/node_modules/mongodb";
+import { pipeline } from 'node:stream/promises';
 import stream, { Writable, PassThrough } from 'stream';
 import { BadRequestError, NotFoundError } from '../types/errors';
-import {promisify} from 'util';
 import archiver from 'archiver';
+import {getBucket, SystemGridFSBucket} from "../services/gridfs";
+
+const _getFile = async (bucket: SystemGridFSBucket, filename: string): Promise<GridFSFile.GridFSFile> => {
+  const cursor = getBucket(bucket, mongoose.connection.db).find({ filename: filename }, {
+    limit: 1
+  });
+
+  const {done, value} = await cursor[Symbol.asyncIterator]().next();
+
+  if(done) {
+    throw new NotFoundError(`File ${filename} not found`);
+  }
+
+  return value;
+}
+
 
 /**
  * Reads an arbitrary file from GridFS and pipes it to the express response
@@ -12,26 +28,15 @@ import archiver from 'archiver';
  * @param mongoose
  * @param outputStream
  */
-export const readGridFSFile = async (filename: string, mongoose: Mongoose, outputStream: Writable) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
+export const readGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose, outputStream: Writable) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  return await new Promise((resolve, reject) => {
-    gfs.exist({ filename: filename }, (err: any, found: any) => {
-      if (err) {
-        return reject(err);
-      }
+  const resume = await _getFile(bucket, filename);
+  await pipeline(getBucket(bucket, mongoose.connection.db).openDownloadStream(resume._id), outputStream);
 
-      if (found) {
-        return resolve(gfs.createReadStream({ filename: filename }).pipe(outputStream));
-      } else {
-        return reject(new NotFoundError(`File ${filename} not found`));
-      }
-    });
-  });
+  return 'Success';
 };
 
 /**
@@ -41,30 +46,25 @@ export const readGridFSFile = async (filename: string, mongoose: Mongoose, outpu
  * @param mongoose
  * @param expressFile
  */
-export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expressFile: any) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
+export const writeGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose, expressFile: any) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
   // Delete existing file
   try {
-    await deleteGridFSFile(filename, mongoose);
+    await deleteGridFSFile(bucket, filename, mongoose);
   } catch (e) {
     if (!(e instanceof NotFoundError)) {
       throw e;
     }
   }
 
-  // Save new resume
+    // Save new resume
   const fileReadStream = new stream.PassThrough();
   fileReadStream.end(Buffer.from(expressFile.data));
 
-  const gridWriteStream = gfs.createWriteStream({
-    filename: filename,
-  });
-  await fileReadStream.pipe(gridWriteStream);
+  await pipeline(fileReadStream, getBucket(bucket, mongoose.connection.db).openUploadStream(filename));
 
   return 'Success';
 };
@@ -75,32 +75,16 @@ export const writeGridFSFile = async (filename: string, mongoose: Mongoose, expr
  * @param filename
  * @param mongoose
  */
-export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-
+export const deleteGridFSFile = async (bucket: SystemGridFSBucket, filename: string, mongoose: Mongoose) => {
   if (!filename || filename.length === 0) {
     throw new BadRequestError('Invalid file name!');
   }
 
-  return await new Promise((resolve, reject) => {
-    gfs.exist({ filename: filename }, (err: any, found: any) => {
-      if (err) {
-        return reject(err);
-      }
+  const resume = await _getFile(bucket, filename);
 
-      if (found) {
-        gfs.remove({ filename: filename }, (err: any) => {
-          if (err) {
-            return reject(err);
-          }
+  await getBucket(bucket, mongoose.connection.db).delete(resume._id);
 
-          resolve('Success!');
-        });
-      } else {
-        reject(new NotFoundError(`File ${filename} not found`));
-      }
-    });
-  });
+  return 'Success';
 };
 
 /**
@@ -110,65 +94,49 @@ export const deleteGridFSFile = async (filename: string, mongoose: Mongoose) => 
  * @param mongoose
  * @param outputStream
  */
-export const exportAsZip = async (filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
-  const gfs = Grid(mongoose.connection.db, mongoose.mongo);
+export const exportAsZip = async (bucket: SystemGridFSBucket, filenameData: {gfsfilename: string, filename:string}[], mongoose: Mongoose, outputStream: Writable) => {
+  const gfsFilenameToFilename = Object.fromEntries(filenameData.map(entry => [entry.gfsfilename, entry.filename]));
 
-  const gfsExistPromise = promisify(gfs.exist);
-  gfs.exist = gfsExistPromise;
-
-  if (!Array.isArray(filenameData) || filenameData.length === 0) {
-    throw new BadRequestError('No file names given!');
+  const allExists:Promise<GridFSFile.GridFSFile>[] = [];
+  for(const {gfsfilename} of filenameData) {
+    allExists.push(_getFile(bucket, gfsfilename))
   }
 
-  return await new Promise<void>((resolve, reject) => {
-    const allExists:boolean[] = [];
-    for(const filenameDatum of filenameData){
-      //@ts-expect-error gfs.exist is reassigned to the promisified version
-      allExists.push(gfs.exist({filename: filenameDatum.gfsfilename}));
-    }
+  const existsResult = await Promise.all(allExists);
 
-    Promise.all(allExists).then((existsResult) => {
-      for(const result of existsResult){
-        if(!result){
-          return reject(new NotFoundError(`A given file does not exist!`));
-        }
-      }
+  return await new Promise<void> ((resolve, reject) => {
+    const archive = archiver('zip', {
+      zlib: { level: 0 } // Don't compress to save CPU
+    });
 
-      const archive = archiver('zip', {
-        zlib: { level: 0 } // Don't compress to save CPU
-      });
+    outputStream.on('end', function (){
+      return resolve();
+    });
 
-      outputStream.on('end', function (){
-        return resolve();
-      });
-
-      archive.on('warning', function(err) {
-        if (err.code === 'ENOENT') {
-          // log warning
-        } else {
-          // throw error
-          return reject(err);
-        }
-      });
-
-      archive.on('error', function(err) {
+    archive.on('warning', function(err) {
+      if (err.code === 'ENOENT') {
+        // log warning
+      } else {
+        // throw error
         return reject(err);
-      });
-
-      archive.pipe(outputStream);
-
-      for(const filenameDatum of filenameData){
-        const gfsStream = gfs.createReadStream({ filename: filenameDatum.gfsfilename });
-        const tStream = new PassThrough();
-
-        archive.append(tStream, {name: filenameDatum.filename});
-        gfsStream.pipe(tStream);
       }
+    });
 
-      archive.finalize();
-
-    }).catch((err) => {
+    archive.on('error', function(err) {
       return reject(err);
     });
-  });
+
+    archive.pipe(outputStream);
+
+    for(const result of existsResult) {
+      const tStream = new PassThrough();
+      archive.append(tStream, {name: gfsFilenameToFilename[result.filename]});
+
+      getBucket(bucket, mongoose.connection.db).openDownloadStream(result._id)
+          .pipe(tStream);
+    }
+
+    archive.finalize();
+  })
+
 }

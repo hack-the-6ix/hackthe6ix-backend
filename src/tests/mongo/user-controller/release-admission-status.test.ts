@@ -113,7 +113,7 @@ describe('Release Admission Status', () => {
   test('Lots of stuff', async () => {
     const hackerRejected = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       status: {
         statusReleased: false,
         rejected: true,
@@ -121,7 +121,7 @@ describe('Release Admission Status', () => {
     });
     const hackerAccepted = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       status: {
         statusReleased: false,
         accepted: true,
@@ -129,7 +129,7 @@ describe('Release Admission Status', () => {
     });
     const hackerWaitlisted = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       status: {
         statusReleased: false,
         waitlisted: true,
@@ -137,7 +137,7 @@ describe('Release Admission Status', () => {
     });
     const hackerNoStatus = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       status: {
         statusReleased: false,
       },
@@ -156,6 +156,6 @@ describe('Release Admission Status', () => {
     expect((await User.findOne({ _id: hackerWaitlisted._id })).toJSON().status.statusReleased).toBeTruthy();
     expect((await User.findOne({ _id: hackerNoStatus._id })).toJSON().status.statusReleased).toBeFalsy();
 
-    expect(syncMailingLists).toHaveBeenCalledWith(null, true);
+    expect(syncMailingLists).toHaveBeenCalledWith(undefined, true);
   });
 });

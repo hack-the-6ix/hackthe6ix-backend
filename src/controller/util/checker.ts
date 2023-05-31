@@ -14,7 +14,7 @@ import { AlreadySubmittedError, DeadlineExpiredError, ForbiddenError } from '../
 export const evaluateChecker = (checkerFunction: any, request: ReadCheckRequest<any> | WriteCheckRequest<any, any> | CreateCheckRequest<any, any> | DeleteCheckRequest<any>) => {
   try {
     return checkerFunction(request);
-  } catch (e) {
+  } catch (e: any) {
     if (e.toString().includes('is not a function')) {
       return checkerFunction === true;
     }
@@ -42,9 +42,9 @@ const submissionChecker = (context: any, request: WriteCheckRequest<any, any>) =
  * @param name - optionally specify the name of the current level (most useful for nested dictionaries)
  * @return array of errors
  */
-export const validateSubmission = (submission: any, submissionFields: any, request: WriteCheckRequest<any, any>, path: string, name?: string): string[][] => {
+export const validateSubmission = (submission: any, submissionFields: any, request: WriteCheckRequest<any, any>, path: string, name?: string): [string, string | undefined][] => {
 
-  let errors: string[][] = [];
+  let errors: [string, string | undefined][] = [];
 
   if (submissionChecker(submissionFields, request)) {
 

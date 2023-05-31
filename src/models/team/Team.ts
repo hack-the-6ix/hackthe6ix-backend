@@ -37,9 +37,9 @@ schema.virtual('teamScore', {
 
   for (const user of members) {
     if (user.status.applied) {
-      if (user?.internal?.computedApplicationScore > -1) {
+      if ((user?.internal?.computedApplicationScore ?? -1) > -1) {
         count++;
-        total += user?.internal?.computedApplicationScore;
+        total += user.internal.computedApplicationScore!;
       } else {
         return -1; // Everyone needs to be graded
       }

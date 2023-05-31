@@ -19,7 +19,7 @@ import getRanks from './getRanks';
  */
 export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWaitlistRSVPDeadline?: any) => {
 
-  let acceptedFromWaitlistRSVPDeadline: number;
+  let acceptedFromWaitlistRSVPDeadline: number | undefined = undefined;
 
   if (rawAcceptedFromWaitlistRSVPDeadline) {
     acceptedFromWaitlistRSVPDeadline = parseInt(rawAcceptedFromWaitlistRSVPDeadline);
@@ -180,7 +180,7 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
     }
   }
 
-  await syncMailingLists(null, true);
+  await syncMailingLists(undefined, true);
 
   return { dead, accepted, rejected, waitlisted };
 };

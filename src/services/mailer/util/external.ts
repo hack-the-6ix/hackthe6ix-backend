@@ -14,10 +14,17 @@ import {
   mockSendEmail,
 } from './dev';
 
-export const mailerConfig = process.env.NODE_ENV === 'test' ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', '..', 'config', 'mailer.json')).toString('utf8'));
+import MailerTemplate from "../../../models/mailertemplate/MailerTemplate";
+import MailerList from "../../../models/mailerlist/MailerList";
+import {IMailerTemplate} from "../../../models/mailertemplate/fields";
+import {IMailerList} from "../../../models/mailerlist/fields";
 
-export const getTemplate = (templateName: string) => {
-  const template = mailerConfig.templates[templateName];
+// TODO: Update all usages of getTemplate and getList to use async version!
+
+export const getTemplate = async (templateName: string):Promise<IMailerTemplate> => {
+  const template = await MailerTemplate.findOne({
+    name: templateName
+  });
 
   if (template) {
     return template;
@@ -26,8 +33,10 @@ export const getTemplate = (templateName: string) => {
   }
 };
 
-export const getList = (listName: string) => {
-  const list = mailerConfig.lists[listName];
+export const getList = async (listName: string):Promise<IMailerList> => {
+  const list = await MailerList.findOne({
+    name: listName
+  });
 
   if (list) {
     return list;

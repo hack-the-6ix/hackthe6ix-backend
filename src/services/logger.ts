@@ -1,10 +1,10 @@
-import { LoggingWinston } from '@google-cloud/logging-winston';
 import { Request, Response } from 'express';
 import fs from 'fs';
 import * as util from 'util';
 
 import winston from 'winston';
 import { HTTPError } from '../types/errors';
+import * as process from "process";
 
 const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
@@ -117,22 +117,32 @@ function createWinstonLogger() {
 
   // Log to StackDriver in production and well as
   if (process.env.NODE_ENV === 'production') {
-    const loggingWinston = new LoggingWinston({
-      projectId: process.env.GCP_LOGGING_PROJECTID,
-      keyFilename: process.env.GCP_LOGGING_KEYFILEPATH,
-      logName: 'hackthe6ix-backend',
-      level: 'info',
-    });
-
     logger.add(new winston.transports.Console({
       format: loggingFormat,
       level: process.env.LOG_LEVEL || 'info',
       handleExceptions: true,
     }));
 
-    logger.add(loggingWinston);
+
   }
   return logger;
+}
+
+export function logRequest(req: Request, alwaysLog?: boolean, additional?: any):void {
+  const logPayload = jsonify({
+    requestURL: req.url,
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+    uid: req.executor?._id || 'N/A',
+    requestBody: req.body,
+    executorUser: req.executor,
+    ...(additional !== undefined ? additional : {})
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    log.debug(`[${req.method} ${req.url}]`, logPayload);
+  } else if (alwaysLog) {
+    log.info(`[${req.method} ${req.url}]`, logPayload);
+  }
 }
 
 /**
@@ -143,23 +153,13 @@ function createWinstonLogger() {
  * @param promise
  * @param alwaysLog - when enabled, this event will trigger an info level log in production
  */
-export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean) => {
+export const logResponse = (req: Request, res: Response, promise: Promise<any>, alwaysLog?: boolean, excludeData?: boolean) => {
   promise
   .then((data) => {
-    const logPayload = jsonify({
-      requestURL: req.url,
-      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-      uid: req.executor?._id || 'N/A',
-      requestBody: req.body,
-      responseBody: data,
-      executorUser: req.executor,
-    });
 
-    if (process.env.NODE_ENV === 'development') {
-      log.debug(`[${req.url}]`, logPayload);
-    } else if (alwaysLog) {
-      log.info(`[${req.url}]`, logPayload);
-    }
+    logRequest(req, alwaysLog, {
+      responseBody: data,
+    });
 
     return res.json({
       status: 200,
@@ -195,7 +195,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       executorUser: req.executor,
     });
 
-    log.error(`[${req.url}]`, logPayload);
+    log.error(`[${req.method} ${req.url}]`, logPayload);
 
     return res.status(status).json(body);
   });

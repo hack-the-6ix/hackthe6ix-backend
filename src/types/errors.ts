@@ -6,17 +6,17 @@ import { CreateCheckRequest, DeleteCheckRequest, WriteCheckRequest } from './che
 export class HTTPError extends Error {
   status: number;
   error: any;
-  publicMessage: string;
+  publicMessage?: string;
   name: string;
   errorIsPublic: boolean;
 
-  constructor(name: string, status: number, message: string, error?: any, errorIsPublic?: boolean) {
+  constructor(name: string, status: number, message?: string, error?: any, errorIsPublic?: boolean) {
     super(`${message || 'An error occurred'}\n${error}`);
     this.status = status;
     this.error = error || '';
     this.publicMessage = message;
     this.name = name;
-    this.errorIsPublic = errorIsPublic;
+    this.errorIsPublic = errorIsPublic ?? false;
   }
 }
 

@@ -38,7 +38,7 @@ describe('Virtual and Intercept', () => {
   test('Member Names', async () => {
     const userA = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       firstName: 'Foo',
       lastName: 'Bar',
       hackerApplication: {
@@ -48,7 +48,7 @@ describe('Virtual and Intercept', () => {
 
     const userB = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       firstName: 'Smoothie',
       lastName: 'Banana',
       hackerApplication: {
@@ -83,7 +83,7 @@ describe('Virtual and Intercept', () => {
     test('Partially Graded Team', async () => {
       const userA = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: 'Foo',
         lastName: 'Bar',
         status: {
@@ -96,7 +96,7 @@ describe('Virtual and Intercept', () => {
 
       const userB = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: 'Smoothie',
         lastName: 'Banana',
         status: {
@@ -134,7 +134,7 @@ describe('Virtual and Intercept', () => {
     test('Fully Graded Team', async () => {
       const userA = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: 'Foo',
         lastName: 'Bar',
         status: {
@@ -147,7 +147,7 @@ describe('Virtual and Intercept', () => {
 
       const userB = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         firstName: 'Smoothie',
         lastName: 'Banana',
         hackerApplication: {
@@ -187,7 +187,7 @@ describe('Virtual and Intercept', () => {
   test('Fully Graded Team, but some unsubmitted', async () => {
     const userA = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       firstName: 'Foo',
       lastName: 'Bar',
       status: {
@@ -200,7 +200,7 @@ describe('Virtual and Intercept', () => {
 
     const userB = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       firstName: 'Smoothie',
       lastName: 'Banana',
       hackerApplication: {
@@ -213,7 +213,7 @@ describe('Virtual and Intercept', () => {
 
     const userC = await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       firstName: 'Smoothie',
       lastName: 'Banana',
       hackerApplication: {

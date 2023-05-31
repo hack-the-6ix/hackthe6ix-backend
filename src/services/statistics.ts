@@ -33,15 +33,11 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             nonBinary: 0,
             chooseNotToSay: 0,
           },
-          swag: {
-            wantSwag: 0,
-            noSwag: 0,
-          },
           review: {
             reviewed: 0,
             notReviewed: 0,
             applicationScores: {
-              techInnovation: 0,
+              creativeResponse: 0,
               whyHT6: 0,
               project: 0,
               portfolio: 0,
@@ -158,13 +154,6 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
             break;
         }
 
-        // Swag
-        if (user?.hackerApplication?.wantSwag) {
-          statistics.hacker.submittedApplicationStats.swag.wantSwag++;
-        } else {
-          statistics.hacker.submittedApplicationStats.swag.noSwag++;
-        }
-
         // Review state
         if (user?.internal?.computedApplicationScore >= 0) {
           statistics.hacker.submittedApplicationStats.review.reviewed++;
@@ -173,8 +162,8 @@ export const getStatistics = async (update?: boolean): Promise<IStatistics> => {
         }
 
         // Individual questions
-        if (user?.internal?.applicationScores?.techInnovation?.score >= 0) {
-          statistics.hacker.submittedApplicationStats.review.applicationScores.techInnovation++;
+        if (user?.internal?.applicationScores?.creativeResponse?.score >= 0) {
+          statistics.hacker.submittedApplicationStats.review.applicationScores.creativeResponse++;
         }
         if (user?.internal?.applicationScores?.whyHT6?.score >= 0) {
           statistics.hacker.submittedApplicationStats.review.applicationScores.whyHT6++;
@@ -285,15 +274,11 @@ export type IStatistics = {
         other: number,
         chooseNotToSay: number
       },
-      swag: {
-        wantSwag: number,
-        noSwag: number
-      },
       review: {
         reviewed: number,
         notReviewed: number,
         applicationScores: {
-          techInnovation: number,
+          creativeResponse: number,
           whyHT6: number,
           project: number,
           portfolio: number

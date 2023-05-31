@@ -1,7 +1,7 @@
 import { Mongoose } from 'mongoose';
 import * as qrcode from 'qrcode';
 import { enumOptions } from '../models/user/enums';
-import { fields, IApplication, IUser } from '../models/user/fields';
+import {fields, IPartialApplication, IUser} from '../models/user/fields';
 import User from '../models/user/User';
 import { canRSVP, isRSVPOpen } from '../models/validator';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
@@ -29,7 +29,6 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 import {log} from "../services/logger";
 import ExternalUser from "../models/externaluser/ExternalUser";
-import {parseQRCode} from "../services/covid-qr-verify/verify";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -87,7 +86,7 @@ export const fetchUser = async (requestUser: IUser) => {
  * @param submit
  * @param hackerApplication
  */
-export const updateApplication = async (requestUser: IUser, submit: boolean, hackerApplication: IApplication) => {
+export const updateApplication = async (requestUser: IUser, submit: boolean, hackerApplication: IPartialApplication) => {
 
   const hackerApplicationFields = getModels()['user'].rawFields.FIELDS.hackerApplication;
 
@@ -112,7 +111,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
 
   // If the user intends to submit, we will verify that all required fields are correctly filled
   if (submit) {
-    const invalidFields: string[][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
+    const invalidFields: [string, string | undefined][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
 
     if (invalidFields.length > 0) {
       throw new SubmissionDeniedError(invalidFields);
@@ -187,13 +186,14 @@ export const updateResume = async (requestUser: IUser, expressFile: any, mongoos
 
   const filename = `${requestUser._id}-resume.pdf`;
 
-  await writeGridFSFile(filename, mongoose, expressFile);
+  await writeGridFSFile('resumes', filename, mongoose, expressFile);
 
   // Save new resume id to DB
   await User.findOneAndUpdate({
     _id: requestUser._id,
   }, {
     'hackerApplication.resumeFileName': filename,
+    'hackerApplication.friendlyResumeFileName': expressFile.name
   });
 
   return 'Success';
@@ -314,7 +314,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
     throw new BadRequestError('Invalid grade');
   }
 
-  const user: IUser = await User.findOne({
+  const user: IUser | null = await User.findOne({
     _id: targetUserID,
   });
 
@@ -330,7 +330,7 @@ export const gradeCandidate = async (requestUser: IUser, targetUserID: string, g
 
   for (const category in grade) {
 
-    if (category in user.internal.applicationScores) {
+    if (user.internal.applicationScores && category in user.internal.applicationScores) {
       const score = parseInt(grade[category]);
 
       if (!isNaN(score)) {
@@ -379,7 +379,7 @@ export const releaseApplicationStatus = async () => {
     'status.statusReleased': true,
   });
 
-  await syncMailingLists(null, true);
+  await syncMailingLists(undefined, true);
 
   return usersModified;
 };
@@ -393,7 +393,7 @@ export const fetchUserByDiscordID = async (discordID: string): Promise<BasicUser
   if (!discordID) {
     throw new BadRequestError('No discordID given.');
   }
-  let userInfo: BasicUser = await User.findOne({
+  let userInfo: BasicUser | null = await User.findOne({
     'discord.discordID': discordID,
   });
 
@@ -558,25 +558,4 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
   }
 
   throw new BadRequestError("Given user type is invalid.")
-}
-
-/**
- * Submit COVID-19 Vaccine QR
- */
-
-export const submitCOVID19VaccineQR = async (requestUser: IUser, data: Buffer, mimeType: string, keySet?: Record<string, any>, minDoses?: number):Promise<boolean> => {
-  const verifyResult = await parseQRCode(data, mimeType, keySet, minDoses);
-
-  if(verifyResult.trusted && verifyResult.hasRequiredDoses){
-    await User.updateOne({
-      _id: requestUser._id
-    }, {
-      $pull: {
-        checkInNotes: "MUST_SUBMIT_COVID19_VACCINE_QR"
-      }
-    });
-
-    return true;
-  }
-  return false;
 }

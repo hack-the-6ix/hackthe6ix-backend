@@ -17,10 +17,7 @@ export const init = (serviceName: string) => {
     :
     new ConsoleSpanExporter();
 
-
-  if(process.env.DISABLE_TRACING !== "true"){}
-
-  const spanProcessor = process.env.DISABLE_TRACING !== "true" ? new BatchSpanProcessor(exporter) : new NoopSpanProcessor()
+  const spanProcessor = process.env.ENABLE_TRACING?.toLowerCase() === "true" ? new BatchSpanProcessor(exporter) : new NoopSpanProcessor()
 
   const provider = new NodeTracerProvider({
     resource: new Resource({

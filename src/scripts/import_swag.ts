@@ -49,7 +49,6 @@ const main = async () => {
           'hackerApplication.city': entry.address.city,
           'hackerApplication.province': entry.address.province,
           'hackerApplication.postalCode': entry.address.postalCode,
-          'hackerApplication.wantSwag': true,
         };
       }
 
@@ -62,11 +61,8 @@ const main = async () => {
   console.log('Done!');
 };
 
-mongoose.connect(database, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-}).then(async () => {
+mongoose.set('strictQuery', false);
+mongoose.connect(database).then(async () => {
   console.log('MongoDB started');
   main();
 }).catch((err) => {

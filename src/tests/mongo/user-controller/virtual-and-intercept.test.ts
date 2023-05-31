@@ -24,6 +24,7 @@ import {
   runBeforeAll,
   runBeforeEach,
 } from '../../test-utils';
+import {totalAvailablePoints} from "../../../consts";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -369,68 +370,6 @@ describe('Virtual', () => {
       const fetchedUser = await fetchUser(user);
 
       expect(fetchedUser.mailmerge.MERGE_CONFIRMATION_DEADLINE).toEqual(stringifyUnixTime(mockDate));
-    });
-    describe('Mailing Address', () => {
-      describe('Want Swag', () => {
-        test('One line address', async () => {
-          const user = await User.create({
-            ...organizerUser,
-            firstName: 'Steve',
-            lastName: 'Jobs',
-            hackerApplication: {
-              wantSwag: true,
-              addressLine1: '1234 Street Ave',
-              addressLine2: '',
-              city: 'Toronto',
-              province: 'Ontario',
-              postalCode: '123ABC',
-              country: 'Canada',
-            },
-          });
-          const fetchedUser = await fetchUser(user);
-
-          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs<br/>' +
-            '1234 Street Ave<br/>' +
-            'Toronto, Ontario 123ABC<br/>' +
-            'Canada',
-          );
-        });
-
-        test('Two line address', async () => {
-          const user = await User.create({
-            ...organizerUser,
-            firstName: 'Steve',
-            lastName: 'Jobs',
-            hackerApplication: {
-              wantSwag: true,
-              addressLine1: '1234 Street Ave',
-              addressLine2: 'Apt 1234',
-              city: 'Toronto',
-              province: 'Ontario',
-              postalCode: '123ABC',
-              country: 'Canada',
-            },
-          });
-          const fetchedUser = await fetchUser(user);
-
-          expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual(
-            'Steve Jobs<br/>' +
-            '1234 Street Ave<br/>' +
-            'Apt 1234<br/>' +
-            'Toronto, Ontario 123ABC<br/>' +
-            'Canada',
-          );
-        });
-      });
-
-      test('No Swag', async () => {
-
-        const user = await User.create(organizerUser);
-        const fetchedUser = await fetchUser(user);
-
-        expect(fetchedUser.mailmerge.MERGE_MAILING_ADDRESS).toEqual('');
-      });
     });
   });
 
@@ -802,46 +741,14 @@ describe('Virtual', () => {
     });
 
     describe('Fully graded', () => {
-      test('Workshop point', async () => {
-        const user = await User.create({
-          ...hackerUser,
-          hackerApplication: {
-            requestedWorkshops: 'i want free swag thanks',
-          },
-          internal: {
-            applicationScores: {
-              techInnovation: {
-                score: 1,
-                reviewer: 'foobar',
-              },
-              whyHT6: {
-                score: 1,
-                reviewer: 'foobar',
-              },
-              project: {
-                score: 2,
-                reviewer: 'barfoo',
-              },
-              portfolio: {
-                score: 3,
-                reviewer: 'barfoo',
-              },
-            },
-          },
-        });
-
-        expect(user.internal.computedApplicationScore).toEqual(8 / 15 * 100);
-      });
-
       test('Perfect score', async () => {
         const user = await User.create({
           ...hackerUser,
           hackerApplication: {
-            requestedWorkshops: 'i want free swag thanks',
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 4,
                 reviewer: 'foobar',
               },
@@ -869,7 +776,7 @@ describe('Virtual', () => {
           ...hackerUser,
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -889,7 +796,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(7 / 15 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(7 / totalAvailablePoints.normal * 100);
       });
 
       test('Noob haxxor', async () => {
@@ -900,7 +807,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -916,7 +823,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / totalAvailablePoints.first * 100);
       });
 
       test('Noob haxxor but they somehow also get their portfolio graded', async () => {
@@ -927,7 +834,7 @@ describe('Virtual', () => {
           },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 1,
                 reviewer: 'foobar',
               },
@@ -947,7 +854,7 @@ describe('Virtual', () => {
           },
         });
 
-        expect(user.internal.computedApplicationScore).toEqual(4 / 13 * 100);
+        expect(user.internal.computedApplicationScore).toEqual(4 / totalAvailablePoints.first * 100);
       });
     });
   });
