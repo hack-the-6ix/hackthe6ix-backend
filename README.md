@@ -63,7 +63,7 @@ In development mode, all emails will be written to disk instead of actually sent
 
 ### Permission System
 
-Users are assigned groups (which are embedded in the SAML assertion) which determine what they can do.
+Users are assigned groups (which are embedded in OIDC token) which determine what they can do.
 By default, there are 4 roles:
 
 | Role        | Description     |

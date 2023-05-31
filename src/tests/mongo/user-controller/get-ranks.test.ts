@@ -39,7 +39,7 @@ const createUsers = async (num: number, lastUpdated?: number[]) => {
   for (let i = 0; i < num; i++) {
     out.push(await User.create({
       ...hackerUser,
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       status: {
         applied: true,
       },
@@ -123,14 +123,14 @@ describe('Get ranks', () => {
       hackerApplication: {
         teamCode: mockTeamCode,
       },
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
     });
     const userB = await User.create({
       ...hackerUser,
       status: {
         applied: true,
       },
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
     });
     const userC = await User.create({
       ...hackerUser,
@@ -140,7 +140,7 @@ describe('Get ranks', () => {
       hackerApplication: {
         teamCode: mockTeamCode,
       },
-      _id: mongoose.Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
     });
 
     await Team.create({
@@ -186,14 +186,14 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCode,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userB = await User.create({
         ...hackerUser,
         status: {
           applied: true,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userC = await User.create({
         ...hackerUser,
@@ -203,7 +203,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCode,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
 
       await Team.create({
@@ -249,7 +249,7 @@ describe('Get ranks', () => {
           teamCode: mockTeamCodeA,
           lastUpdated: 0,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userB = await User.create({
         ...hackerUser,
@@ -259,7 +259,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeB,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userC = await User.create({
         ...hackerUser,
@@ -270,7 +270,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeA,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userD = await User.create({
         ...hackerUser,
@@ -281,7 +281,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeB,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
 
       await Team.create({
@@ -337,7 +337,7 @@ describe('Get ranks', () => {
           teamCode: mockTeamCodeA,
           lastUpdated: 0,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userB = await User.create({
         ...hackerUser,
@@ -347,7 +347,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeB,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userC = await User.create({
         ...hackerUser,
@@ -358,7 +358,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeA,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userD = await User.create({
         ...hackerUser,
@@ -369,7 +369,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCodeB,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
 
       await Team.create({
@@ -425,14 +425,14 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCode,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userB = await User.create({
         ...hackerUser,
         status: {
           applied: true,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       const userC = await User.create({
         ...hackerUser,
@@ -442,7 +442,7 @@ describe('Get ranks', () => {
         hackerApplication: {
           teamCode: mockTeamCode,
         },
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
       });
       await Team.create({
         code: mockTeamCode,

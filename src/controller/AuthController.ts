@@ -20,25 +20,25 @@ let settingsCache = {} as ISettings;
 let settingsTime = 0;
 
 const _getCachedSettings = async (): Promise<ISettings> => {
-  if (settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT) > Date.now()) {
+  if (settingsTime + parseInt(process.env.AUTH_SETTINGS_CACHE_EVICT ?? "0") > Date.now()) {
     return settingsCache;
   }
 
   const settings = await Settings.findOne({}, 'openID');
 
-  settingsCache = settings;
+  settingsCache = settings!;
   settingsTime = Date.now();
 
-  return settings;
+  return settingsCache;
 };
 
-const _getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> | undefined => {
+const _getProviderByName = (settings: ISettings, providerName: string): ArrayElement<ISettings['openID']['providers']> => {
   for (const provider of settings['openID']['providers']) {
     if (provider['name'] === providerName) {
       return provider;
     }
   }
-  return;
+  throw new Error(`Unable to retrieve provider ${providerName}!`);
 };
 
 const _getUserData = async (url: string, token: string): Promise<Record<string, any>> => {
@@ -92,7 +92,7 @@ export const handleCallback = async (providerName: string, code: string, stateTe
     const client = await fetchClient(providerName);
     const settings = await _getCachedSettings();
 
-    const provider = _getProviderByName(settings, providerName);
+    const provider = _getProviderByName(settings, providerName); // fetchClient will fail if client doesn't exist
 
     const state = JSON.parse(stateText);
     const redirectTo = state.redirectTo;
@@ -109,12 +109,12 @@ export const handleCallback = async (providerName: string, code: string, stateTe
     // Trigger a mailing list sync on login
     // We don't really need to wait for this, so we'll run it async
     syncMailingLists(undefined, true, userData.email)
-    .then(() => {
-      log.debug(`Synced mailing list for ${userData.email}`);
-    })
-    .catch((e) => {
-      log.warn(`Unable to sync mailing list for ${userData.email}`, e);
-    });
+        .then(() => {
+          log.debug(`Synced mailing list for ${userData.email}`);
+        })
+        .catch((e) => {
+          log.warn(`Unable to sync mailing list for ${userData.email}`, e);
+        });
 
     // Log the login event
     const logPayload = JSON.stringify({
@@ -128,7 +128,7 @@ export const handleCallback = async (providerName: string, code: string, stateTe
       refreshToken: accesstoken.token.refresh_token,
       redirectTo: redirectTo,
     };
-  } catch (err) {
+  } catch (err: any) {
     if (err.output?.statusCode === 400) {
       throw new ForbiddenError('Invalid code.', err, false);
     } else {

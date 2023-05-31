@@ -1,12 +1,13 @@
-import { ObjectID } from 'bson';
+import { ObjectId } from 'bson';
 import mongoose from 'mongoose';
 import Settings from '../models/settings/Settings';
 import { IUser } from '../models/user/fields';
 import { extractFields } from '../models/util';
 import * as dbHandler from './db-handler';
+import * as MockDate from "mockdate";
 
 export const adminUser = {
-  _id: new ObjectID('5f081f878c60690dd9b9fd50'),
+  _id: new ObjectId('5f081f878c60690dd9b9fd50'),
   firstName: 'Admin',
   lastName: 'Last Admin',
   idpLinkID: 'admin',
@@ -26,7 +27,7 @@ export const adminUser = {
 } as IUser;
 
 export const organizerUser = {
-  _id: new ObjectID('5f081f878c60690dd9b9fd59'),
+  _id: new ObjectId('5f081f878c60690dd9b9fd59'),
   firstName: 'Organizer',
   lastName: 'Last Organizer',
   idpLinkID: 'organizer',
@@ -41,7 +42,7 @@ export const organizerUser = {
 } as IUser;
 
 export const voluteerUser = {
-  _id: new ObjectID('5f081f878c60690dd9b9fd58'),
+  _id: new ObjectId('5f081f878c60690dd9b9fd58'),
   firstName: 'Volunteer',
   lastName: 'Last Volunteer',
   idpLinkID: 'volunteer',
@@ -55,7 +56,7 @@ export const voluteerUser = {
 } as IUser;
 
 export const hackerUser = {
-  _id: new ObjectID('5f081f878c60690dd9b9fd57'),
+  _id: new ObjectId('5f081f878c60690dd9b9fd57'),
   firstName: 'Hacker',
   lastName: 'Last Hacker',
   idpLinkID: 'hacker',
@@ -72,7 +73,7 @@ export const hackerUser = {
 } as IUser;
 
 export const confirmedHackerUser = {
-  _id: new ObjectID('610590f06b11d739a107c636'),
+  _id: new ObjectId('610590f06b11d739a107c636'),
   firstName: 'Confirmed',
   lastName: 'Last Hacker',
   idpLinkID: 'hackerconfirmed',
@@ -92,14 +93,14 @@ export const confirmedHackerUser = {
 } as IUser;
 
 export const externalUser = {
-  _id: new ObjectID('61058ea2185c1e4282509faa'),
+  _id: new ObjectId('61058ea2185c1e4282509faa'),
   firstName: 'External',
   lastName: 'Last External',
   email: 'external@test.ca',
 };
 
 export const nopermUser = {
-  _id: new ObjectID('5f081f878c60690dd9b9fd17'),
+  _id: new ObjectId('5f081f878c60690dd9b9fd17'),
   firstName: 'Noperm',
   lastName: 'Last Noperm',
   idpLinkID: 'noperm',
@@ -158,11 +159,13 @@ export const generateMockUniverseState = async (applyOffset = 100000, confirmOff
 };
 
 export const mockDate = (timestamp: number) => {
-  const mockDate = new Date(timestamp);
-  // @ts-ignore
-  const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+  // const mockDate = new Date(timestamp);
+  // // @ts-ignore
+  // const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+  // console.debug("HELLO")
+  MockDate.set(new Date(timestamp))
 
-  return () => spy.mockRestore();
+  return () => MockDate.reset()
 };
 
 export const mockGetMailTemplate = (templateName: string) => ({
@@ -173,8 +176,18 @@ export const mockGetMailTemplate = (templateName: string) => ({
 export const mockSuccessResponse = () => ({ status: 200, data: {} as any });
 export const mockErrorResponse = () => ({ status: 500, data: {} as any });
 
+export interface SystemTestContext {
+  mongoose: typeof mongoose
+}
+
+export const runBeforeAllAndInject = (context: SystemTestContext): () => Promise<void> => {
+  return async () => {
+    context.mongoose = await dbHandler.connect();
+  }
+}
+
 export const runBeforeAll = async () => {
-  await dbHandler.connect();
+  await (runBeforeAllAndInject({} as SystemTestContext))();
 };
 
 export const runAfterEach = async () => {

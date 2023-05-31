@@ -10,6 +10,7 @@ import {
   runBeforeAll,
   runBeforeEach,
 } from '../test-utils';
+import {totalAvailablePoints} from "../../consts";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -38,7 +39,7 @@ jest.mock('../../controller/util/resources', () => (
 const generateMockusersA = async () => {
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -46,7 +47,7 @@ const generateMockusersA = async () => {
 
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       accepted: true,
     },
@@ -56,7 +57,7 @@ const generateMockusersA = async () => {
 const generateMockusersB = async () => {
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -64,7 +65,7 @@ const generateMockusersB = async () => {
 
   await User.create({
     ...hackerUser,
-    _id: mongoose.Types.ObjectId(),
+    _id: new mongoose.Types.ObjectId(),
     status: {
       applied: true,
     },
@@ -90,7 +91,7 @@ const generateUsersFromTestCase = async (cases: any[]) => {
     for (let i = 0; i <= j; i++) {
       promises.push(User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         ...payload,
       }));
     }
@@ -110,7 +111,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -129,7 +130,7 @@ describe('Get statistics', () => {
       restoreDateMock();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       // Fast forward 4:59:99 into the future
@@ -146,7 +147,7 @@ describe('Get statistics', () => {
       const statisticsA = await getStatistics();
 
       // Clear db and start again
-      await User.remove({});
+      await User.deleteMany({});
       await generateMockusersB();
 
       const statisticsB = await getStatistics(true);
@@ -191,7 +192,7 @@ describe('Get statistics', () => {
           for (let k = 0; k < i; k++) {
             promises.push(User.create({
               ...hackerUser,
-              _id: mongoose.Types.ObjectId(),
+              _id: new mongoose.Types.ObjectId(),
               status: {
                 ...status,
                 statusReleased: true,
@@ -259,41 +260,6 @@ describe('Get statistics', () => {
       });
     });
 
-    test('Swag', async () => {
-      const cases = [
-        {
-          hackerApplication: {
-            wantSwag: true,
-          },
-          status: {
-            applied: false,
-          },
-        },
-        {
-          hackerApplication: {
-            wantSwag: true,
-          },
-          status: {
-            applied: true,
-          },
-        },
-        {
-          hackerApplication: {
-            wantSwag: false,
-          },
-          status: {
-            applied: true,
-          },
-        },
-      ];
-
-      await generateUsersFromTestCase(cases);
-      const statistics = await getStatistics(true);
-      expect(statistics.hacker.submittedApplicationStats.swag).toEqual({
-        wantSwag: 2,
-        noSwag: 3,
-      });
-    });
     test('Grade Distribution', async () => {
 
       const cases = [
@@ -301,7 +267,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
               },
               whyHT6: {
@@ -318,7 +284,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 100,
               },
               whyHT6: {
@@ -339,7 +305,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
               },
               whyHT6: {
@@ -357,7 +323,7 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
 
       expect(statistics.gradeDistribution).toEqual({
-        techInnovation: {
+        creativeResponse: {
           100: 2,
           '-1': 4,
         },
@@ -375,7 +341,7 @@ describe('Get statistics', () => {
         },
         overall: {
           '-1': 4,
-          2680: 2,
+          [Math.round(402/totalAvailablePoints.normal * 100)]: 2,
         },
       });
 
@@ -451,7 +417,6 @@ describe('Get statistics', () => {
       const cases = [
         {
           hackerApplication: {
-            wantSwag: true,
             githubLink: 'asdasiojasoidjsa',
           },
           status: {
@@ -460,7 +425,6 @@ describe('Get statistics', () => {
         },
         {
           hackerApplication: {
-            wantSwag: true,
             githubLink: 'asdasiojasoidjsa',
             linkedinLink: 'asdasda',
           },
@@ -470,7 +434,6 @@ describe('Get statistics', () => {
         },
         {
           hackerApplication: {
-            wantSwag: false,
           },
           status: {
             applied: true,
@@ -482,7 +445,6 @@ describe('Get statistics', () => {
       const statistics = await getStatistics(true);
       expect(statistics.hacker.questionBreakdown).toEqual({
         githubLink: 3,
-        wantSwag: 3,
         linkedinLink: 2,
       });
     });
@@ -532,7 +494,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: 100,
                 reviewer: organizer._id,
               },
@@ -555,7 +517,7 @@ describe('Get statistics', () => {
           status: { applied: true },
           internal: {
             applicationScores: {
-              techInnovation: {
+              creativeResponse: {
                 score: -1,
                 reviewer: organizer._id,
               },
@@ -580,7 +542,7 @@ describe('Get statistics', () => {
         applicationScores: {
           portfolio: 2,
           project: 3,
-          techInnovation: 2,
+          creativeResponse: 2,
           whyHT6: 3
         },
         reviewers: {

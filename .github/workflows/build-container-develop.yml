@@ -34,11 +34,13 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          tags: ${{ vars.REGISTRY_REPO_PATH }}:develop
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           cache-from: type=local,src=/tmp/.buildx-cache
           target: deploy
           push: true
+          tags: |
+            ${{ vars.REGISTRY_REPO_PATH }}:develop
+            ${{ vars.REGISTRY_REPO_PATH }}:${{ github.sha }}
 
       # Clean up cache
       - name: Move cache

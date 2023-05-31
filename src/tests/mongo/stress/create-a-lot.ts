@@ -5,13 +5,11 @@ import User from '../../../models/user/User';
 
 dotenv.config();
 
+mongoose.set('strictQuery', false);
+
 (async () => {
 
-  await mongoose.connect('mongodb://localhost:27017/ht6backend', {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  });
+  await mongoose.connect('mongodb://localhost:27017/ht6backend');
 
   console.log('Connected');
 

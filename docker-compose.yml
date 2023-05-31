@@ -2,7 +2,7 @@ version: '3'
 
 services:
   backend:
-    image: hackthe6ix/backend:latest
+    image: quay.io/hackthe6ix/hackthe6ix-backend:latest
     restart: always
     ports:
       - "6971:6971"
@@ -12,7 +12,7 @@ services:
       - ./data/backend-files/config:/usr/ht6/server/config
       - ./data/backend-files/logs:/usr/ht6/server/logs
   mongo:
-    image: mongo:4-xenial
+    image: mongo:6-xenial
     restart: always
     volumes:
       - ./data/mongo-data:/data/db

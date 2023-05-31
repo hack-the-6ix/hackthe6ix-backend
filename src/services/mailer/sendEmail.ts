@@ -12,8 +12,10 @@ import { sendEmailRequest } from './util/external';
 export default async (recipientEmail: string, templateID: string, subject: string, tags?: { [key: string]: string }) => {
   const parsedTags: any = {};
 
-  for (const t of Object.keys(tags || {})) {
-    parsedTags[`TAGS[${t}]`] = tags[t];
+  if(tags) {
+    for (const t of Object.keys(tags)) {
+      parsedTags[`TAGS[${t}]`] = tags[t];
+    }
   }
 
   const result = await sendEmailRequest(recipientEmail, templateID, subject, parsedTags);

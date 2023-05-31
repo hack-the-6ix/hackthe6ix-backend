@@ -9,7 +9,7 @@ import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
 import { verifyDiscordUser } from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
-import { initializeSettingsMapper } from '../controller/ModelController';
+import {getObject, initializeSettingsMapper} from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   checkIn,
@@ -21,14 +21,14 @@ import {
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID, submitCOVID19VaccineQR
+  fetchUserByDiscordID
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
 import sendTemplateEmail from '../services/mailer/sendTemplateEmail';
 import syncMailingLists from '../services/mailer/syncMailingLists';
 import verifyMailingList from '../services/mailer/verifyMailingList';
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {isAdmin, isHacker, isOrganizer, isVolunteer} from '../services/permissions';
 import { getStatistics } from '../services/statistics';
 
@@ -45,9 +45,22 @@ actionRouter.get('/profile', isHacker, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
-    fetchUser(req.executor),
+    fetchUser(req.executor!),
   );
 });
+
+/**
+ * (Hacker)
+ *
+ * Get application settings
+ */
+actionRouter.get('/applicationSettings', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      getObject(req.executor!, 'settings', {})
+  )
+})
 
 /**
  * (Hacker)
@@ -59,7 +72,7 @@ actionRouter.post('/updateapp', isHacker, (req: Request, res: Response) => {
     req,
     res,
     updateApplication(
-      req.executor,
+      req.executor!,
       req.body.submit,
       req.body.application,
     ),
@@ -77,7 +90,7 @@ actionRouter.put('/updateResume', isHacker, (req: Request, res: Response) => {
     req,
     res,
     updateResume(
-      req.executor,
+      req.executor!,
       (req as any)?.files?.resume,
       mongoose,
     ),
@@ -108,7 +121,7 @@ actionRouter.post('/createTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     createTeam(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -124,7 +137,7 @@ actionRouter.post('/joinTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     joinTeam(
-      req.executor,
+      req.executor!,
       req.body.teamCode,
     ),
     true,
@@ -141,7 +154,7 @@ actionRouter.post('/leaveTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     leaveTeam(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -157,7 +170,7 @@ actionRouter.get('/getTeam', isHacker, (req: Request, res: Response) => {
     req,
     res,
     getTeam(
-      req.executor,
+      req.executor!,
     ),
   );
 });
@@ -172,7 +185,7 @@ actionRouter.post('/rsvp', isHacker, (req: Request, res: Response) => {
     req,
     res,
     rsvp(
-      req.executor,
+      req.executor!,
       req.body.rsvp,
     ),
     true,
@@ -189,7 +202,7 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
       req,
       res,
       getCheckInQR(
-          req.executor._id, "User"
+          req.executor!._id, "User"
       )
   )
 })
@@ -253,7 +266,7 @@ actionRouter.post('/verifyMailingList', isOrganizer, (req: Request, res: Respons
     req,
     res,
     verifyMailingList(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -287,7 +300,7 @@ actionRouter.post('/templateTest', isOrganizer, (req: Request, res: Response) =>
     req,
     res,
     sendAllTemplates(
-      req.executor,
+      req.executor!,
     ),
     true,
   );
@@ -366,7 +379,7 @@ actionRouter.get('/getCandidate', isOrganizer, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    getCandidate(req.executor, req.query.category as string),
+    getCandidate(req.executor!, req.query.category as string),
   );
 });
 
@@ -380,7 +393,7 @@ actionRouter.post('/gradeCandidate', isOrganizer, (req: Request, res: Response) 
     req,
     res,
     gradeCandidate(
-      req.executor,
+      req.executor!,
       req.body.candidateID,
       req.body.grade,
     ),
@@ -426,7 +439,7 @@ actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) 
   logResponse(
     req,
     res,
-    createAPIToken(req.executor, req.body.groups, req.body.description),
+    createAPIToken(req.executor!, req.body.groups, req.body.description),
   );
 });
 
@@ -480,19 +493,6 @@ actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) =
   logResponse(
       req,
       res,
-      generateCheckInQR(req.executor, req.body.userList)
+      generateCheckInQR(req.executor!, req.body.userList)
   )
 })
-
-/**
- * (Hacker)
- *
- * Submit COVID-19 vaccine QR
- */
-actionRouter.post('/submitVaccineQR', isHacker, (req: Request, res: Response) => {
-  logResponse(
-      req,
-      res,
-      submitCOVID19VaccineQR(req.executor, (req as any)?.files?.qrCode?.data, (req as any)?.files?.qrCode?.mimetype)
-  );
-});
