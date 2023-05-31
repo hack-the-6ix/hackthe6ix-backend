@@ -8,7 +8,7 @@ RUN npm ci --include=dev
 RUN npm run build
 RUN npm prune
 
-FROM node:16-alpine3.17
+FROM node:16-alpine3.17 as deploy
 WORKDIR /app
 ENV NODE_ENV=production
 ENV TZ=America/Toronto
