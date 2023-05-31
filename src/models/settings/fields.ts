@@ -68,6 +68,14 @@ const universe = {
       writeCheck: true,
 
       FIELDS: {
+        globalApplicationOpen: {
+          type: Number,
+          default: Date.now(),
+          required: true,
+
+          readCheck: true,
+          writeCheck: true,
+        },
         globalApplicationDeadline: {
           type: Number,
           default: Date.now() + 31104000000,

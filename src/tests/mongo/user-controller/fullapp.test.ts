@@ -61,6 +61,9 @@ jest.mock('../../../services/logger', () => {
  */
 describe('Update Real Application', () => {
   test('Valid update', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
+
     await generateMockUniverseState();
 
     const hackerApplication = {
@@ -85,8 +88,6 @@ describe('Update Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
@@ -106,6 +107,8 @@ describe('Update Real Application', () => {
   });
 
   test('Enum is falsy', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
     await generateMockUniverseState();
 
     const hackerApplication = {
@@ -130,8 +133,6 @@ describe('Update Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
@@ -317,6 +318,9 @@ describe('Submit Real Application', () => {
   });
 
   test('Mandatory Fields', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
+
     await generateMockUniverseState();
 
     const hackerApplication = {
@@ -349,13 +353,12 @@ describe('Submit Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       true,
       hackerApplication,
     );
+
     restoreDateMock();
 
     const resultObject = await User.findOne({

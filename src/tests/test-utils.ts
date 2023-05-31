@@ -137,11 +137,12 @@ export const generateTestModel = (testFields: any, name: string) => {
   return [Test, models];
 };
 
-export const generateMockUniverseState = async (applyOffset = 100000, confirmOffset = 200000, waitlistAcceptedConfirmationOffset = 300000, maxAccept = 100, maxWaitlist = 100) => {
+export const generateMockUniverseState = async ({openOffset = -100000, applyOffset = 100000, confirmOffset = 200000, waitlistAcceptedConfirmationOffset = 300000, maxAccept = 100, maxWaitlist = 100} = {}) => {
   return await Settings.findOneAndUpdate({},
     {
       universe: {
         public: {
+          globalApplicationOpen: new Date().getTime() + openOffset,
           globalApplicationDeadline: new Date().getTime() + applyOffset,
           globalConfirmationDeadline: new Date().getTime() + confirmOffset,
           globalWaitlistAcceptedConfirmationDeadline: new Date().getTime() + waitlistAcceptedConfirmationOffset,

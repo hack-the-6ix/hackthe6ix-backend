@@ -280,7 +280,9 @@ describe('Virtual', () => {
           expect(fetchedUser.computedApplicationDeadline).toEqual(personalDeadline);
         });
         test('Global in the Past', async () => {
-          await generateMockUniverseState(-10000);
+          await generateMockUniverseState({
+            applyOffset: -10000
+          });
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({
@@ -314,7 +316,9 @@ describe('Virtual', () => {
           expect(fetchedUser.computedRSVPDeadline).toEqual(personalDeadline);
         });
         test('Global in the Past', async () => {
-          await generateMockUniverseState(undefined, -10000);
+          await generateMockUniverseState({
+            confirmOffset: -10000
+          });
           const personalDeadline = new Date().getTime();
 
           const user = await User.create({

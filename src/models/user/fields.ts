@@ -847,6 +847,15 @@ export const fields = {
       readCheck: true
     },
 
+    // Some users (mostly for testing/won admission) are special and should be allowed to apply before everyone else
+    personalApplicationOpen: {
+      type: Number,
+      caption: 'Personal Application Open',
+
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      readCheck: true,
+    },
+
     // Some hackers are special and want to apply after the global deadline
     personalApplicationDeadline: {
       type: Number,
@@ -857,6 +866,11 @@ export const fields = {
     },
 
     // If the user has a personal deadline, it takes precedence over the global deadline
+    computedApplicationOpen: {
+      type: Number,
+      virtual: true,
+      readCheck: true,
+    },
     computedApplicationDeadline: {
       type: Number,
       virtual: true,
@@ -930,6 +944,7 @@ export interface IUser extends BasicUser {
   idpLinkID: string,
   fullName: string,
   created: number,
+  personalApplicationOpen?: number,
   personalRSVPDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
@@ -961,6 +976,7 @@ export interface IUser extends BasicUser {
     }
   },
   mailmerge: IMailMerge,
+  computedApplicationOpen: number,
   computedApplicationDeadline: number,
   computedRSVPDeadline: number
 }

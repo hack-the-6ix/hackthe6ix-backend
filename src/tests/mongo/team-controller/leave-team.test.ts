@@ -38,7 +38,9 @@ describe('Leave Team', () => {
   });
 
   test('Application window elapsed', async () => {
-    await generateMockUniverseState(-100000);
+    await generateMockUniverseState({
+      applyOffset: -100000
+    });
 
     const mockTeam = {
       code: 'banana',

@@ -193,7 +193,9 @@ describe('Update Application', () => {
     });
 
     test('Personal Deadline', async () => {
-      await generateMockUniverseState(-10000);
+      await generateMockUniverseState({
+        applyOffset: -10000
+      });
 
       const user = await User.create({
         ...hackerUser,
@@ -357,7 +359,9 @@ describe('Update Application', () => {
 
     describe('Deadline passed', () => {
       test('Global Deadline passed', async () => {
-        await generateMockUniverseState(-10000);
+        await generateMockUniverseState({
+          applyOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
@@ -382,7 +386,9 @@ describe('Update Application', () => {
       });
 
       test('Personal Deadline passed', async () => {
-        await generateMockUniverseState(-10000);
+        await generateMockUniverseState({
+          applyOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
@@ -486,7 +492,9 @@ describe('Submit Application', () => {
     });
 
     test('Personal Deadline', async () => {
-      await generateMockUniverseState(-10000);
+      await generateMockUniverseState({
+        applyOffset: -10000
+      });
 
       const user = await User.create({
         ...hackerUser,
@@ -640,7 +648,9 @@ describe('Submit Application', () => {
 
     describe('Deadline passed', () => {
       test('Global Deadline passed', async () => {
-        await generateMockUniverseState(-10000);
+        await generateMockUniverseState({
+          applyOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
@@ -666,7 +676,9 @@ describe('Submit Application', () => {
       });
 
       test('Personal Deadline passed', async () => {
-        await generateMockUniverseState(-10000);
+        await generateMockUniverseState({
+          applyOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
