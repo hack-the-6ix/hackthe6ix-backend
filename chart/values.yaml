@@ -89,7 +89,7 @@ hackthe6ixBackend:
     vault:
       enabled: false
       role: hackthe6ix-backend-production
-      secretPath: deploy/production/backend/env
+      secretPath: deploy/production/backend
     local:
       mongoUrl: mongodb://localhost:27017/test
       mailerApiKey: changeme
