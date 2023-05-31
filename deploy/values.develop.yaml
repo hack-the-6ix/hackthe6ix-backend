@@ -13,6 +13,7 @@ hackthe6ixBackend:
     vault:
       enabled: true
       role: hackthe6ix-backend-staging
+      secretPath: deploy/staging/backend
   tracing:
     enabled: false
   mailer:
