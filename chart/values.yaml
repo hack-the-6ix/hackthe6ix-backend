@@ -85,7 +85,15 @@ affinity: {}
 
 hackthe6ixBackend:
   nodeEnv: production
-  mongoUrl: mongodb://localhost:27017/test
+  secrets:
+    vault:
+      enabled: false
+      role: hackthe6ix-backend-production
+      secretPath: deploy/production/backend
+    local:
+      mongoUrl: mongodb://localhost:27017/test
+      mailerApiKey: changeme
+      jwtSecret: changeme
   initialization:
     secretName: test-secret
     settings:
@@ -95,9 +103,7 @@ hackthe6ixBackend:
   mailer:
     enabled: true
     publicRoot: https://mailtrain.example.com
-    apiKey: changeme
   auth:
-    jwtSecret: changeme
     idpGroupPrefix: /
     settingsCacheEviction: 30000ms
   tracing:

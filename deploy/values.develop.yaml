@@ -1,0 +1,25 @@
+image:
+  pullPolicy: Always
+#  tag: Set by the GitHub action
+
+ingressRoute:
+  host: stagingapi.hackthe6ix.com
+  tls:
+    secretName: ht6-cforigin
+
+hackthe6ixBackend:
+  nodeEnv: development
+  secrets:
+    vault:
+      enabled: true
+  tracing:
+    enabled: false
+  mailer:
+    enabled: true
+    publicRoot: https://mailtrain-staging.hackthe6ix.com
+  initialization:
+    secretName: ht6-backend-2023-staging-init
+    settings:
+      secretKey: settings.json
+    mailer:
+      secretKey: mailer.json
