@@ -3,10 +3,8 @@
  */
 
 import { InternalServerError } from '../../../types/errors';
-import { MailingList, MailTemplate } from '../../../types/mailer';
-import { mailerConfig } from './external';
 
-const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: string, expectedFields: string[]) => {
+export const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: string, expectedFields: string[]) => {
   if (configObj[entityName]) {
     for (const entry in configObjEnum) {
       if (!configObj[entityName][entry]) {
@@ -23,15 +21,3 @@ const verifyConfigEntity = (configObj: any, configObjEnum: any, entityName: stri
     throw new InternalServerError('MailTemplate is falsy!\nPlease check README.md for information about setting up config');
   }
 };
-
-if (mailerConfig) {
-
-  // Verify templates
-  verifyConfigEntity(mailerConfig, MailTemplate, 'templates', ['subject', 'templateID']);
-
-  // Verify mailing lists
-  verifyConfigEntity(mailerConfig, MailingList, 'lists', ['listID', 'query']);
-
-} else {
-  throw new InternalServerError('Mailer Config is falsy!');
-}

@@ -85,7 +85,9 @@ describe('Create Team', () => {
   });
 
   test('Application window elapsed', async () => {
-    await generateMockUniverseState(-10000);
+    await generateMockUniverseState({
+      applyOffset: -10000
+    });
 
     const user = await User.create(hackerUser);
     await expect(createTeam(user)).rejects.toThrow(DeadlineExpiredError);

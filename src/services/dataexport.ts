@@ -1,5 +1,5 @@
 import { exportAsZip } from '../controller/GridFSController';
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {Writable} from 'stream';
 import User from '../models/user/User';
 import {extname} from 'path';
@@ -30,7 +30,7 @@ export const resumeExport = async (outputStream: Writable) => {
         };
     });
 
-    await exportAsZip(filenames, mongoose, outputStream);
+    await exportAsZip('resumes', filenames, mongoose, outputStream);
 
     return;
 }

@@ -1,10 +1,10 @@
 import { updateApplication } from '../../../controller/UserController';
 import { enumOptions } from '../../../models/user/enums';
-import { IApplication, IUser } from '../../../models/user/fields';
+import {IPartialApplication, IUser} from '../../../models/user/fields';
 import User from '../../../models/user/User';
-import { SubmissionDeniedError, WriteDeniedError } from '../../../types/errors';
+import {NoErrorThrownError, SubmissionDeniedError, WriteDeniedError} from '../../../types/errors';
 import {
-  generateMockUniverseState,
+  generateMockUniverseState, getError,
   hackerUser,
   mockDate,
   mockGetMailTemplate,
@@ -61,23 +61,25 @@ jest.mock('../../../services/logger', () => {
  */
 describe('Update Real Application', () => {
   test('Valid update', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
+
     await generateMockUniverseState();
 
     const hackerApplication = {
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
-    } as IApplication;
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -86,8 +88,6 @@ describe('Update Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
@@ -107,23 +107,24 @@ describe('Update Real Application', () => {
   });
 
   test('Enum is falsy', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
     await generateMockUniverseState();
 
     const hackerApplication = {
       gender: '',
-      pronouns: null,
-      ethnicity: null,
-      timezone: enumOptions['timezone'][0],
+      pronouns: null as unknown as string, // just force this so we can test falsy enum
+      ethnicity: null as unknown as string,
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
-    } as IApplication;
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -132,8 +133,6 @@ describe('Update Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       false,
@@ -159,18 +158,17 @@ describe('Update Real Application', () => {
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       teamCode: '1234',
-    } as IApplication;
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -200,18 +198,17 @@ describe('Update Real Application', () => {
       gender: 'AdasdasasdasMale',
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
       phoneNumber: '123123123',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
-    } as IApplication;
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -241,17 +238,16 @@ describe('Update Real Application', () => {
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(3000),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
-    } as IApplication;
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -273,66 +269,6 @@ describe('Update Real Application', () => {
     expect(resultObject.toJSON().hackerApplication).toEqual(undefined);
     expect(resultObject.status.applied).toBeFalsy();
   });
-
-  test('Said no to swag, but still gave address', async () => {
-    await generateMockUniverseState();
-
-    const hackerApplication = {
-      emailConsent: true,
-      gender: enumOptions['gender'][0],
-      pronouns: enumOptions['pronouns'][0],
-      ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
-      wantSwag: false,
-      addressLine1: 'ASDASSADAS',
-      addressLine2: '',
-      city: 'asdasdas',
-      shirtSize: enumOptions['shirt'][0],
-      province: enumOptions['province'][0],
-      postalCode: 'N0B4V3',
-      school: 'University of Toronto',
-      program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
-      hackathonsAttended: enumOptions['hackathonsAttended'][0],
-      resumeSharePermission: true,
-      githubLink: 'GitHub',
-      portfolioLink: 'Portfolio',
-      linkedinLink: 'LinkedIn',
-      projectEssay: 'X '.repeat(50),
-      requestedWorkshops: 'blah blah',
-      whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
-      mlhCOC: true,
-      mlhEmail: true,
-      mlhData: true,
-      country: 'Canada',
-    } as IApplication;
-
-    const user = await User.create({
-      ...hackerUser,
-      status: {
-        applied: false,
-      },
-      hackerApplication: {
-        resumeFileName: 'wtf.exe',
-      },
-    });
-
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      false,
-      hackerApplication,
-    )).rejects.toThrow(WriteDeniedError);
-
-    const resultObject = await User.findOne({
-      _id: hackerUser._id,
-    });
-
-    expect(resultObject.toJSON().hackerApplication).toEqual({
-      resumeFileName: 'wtf.exe',
-    });
-    expect(resultObject.status.applied).toBeFalsy();
-  });
 });
 
 describe('Submit Real Application', () => {
@@ -341,22 +277,27 @@ describe('Submit Real Application', () => {
 
     const hackerApplication = {
       gender: '',
-      pronouns: null,
-      ethnicity: null,
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
       phoneNumber: '123123123',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
-    } as IApplication;
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -368,11 +309,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields().sort()).toEqual(["/gender", "/pronouns", "/ethnicity"].sort());
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -385,26 +329,37 @@ describe('Submit Real Application', () => {
   });
 
   test('Mandatory Fields', async () => {
+    const mockTS = 696969;
+    let restoreDateMock = mockDate(mockTS);
+
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
       phoneNumber: '123123123',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
-    } as IApplication;
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -416,13 +371,12 @@ describe('Submit Real Application', () => {
       },
     });
 
-    const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
     await updateApplication(
       user.toJSON() as IUser,
       true,
       hackerApplication,
     );
+
     restoreDateMock();
 
     const resultObject = await User.findOne({
@@ -441,22 +395,30 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: false,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
-    } as IApplication;
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -468,11 +430,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields()).toEqual(["/mlhCOC"]);
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -488,22 +453,30 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: false,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
-    } as IApplication;
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -515,11 +488,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields()).toEqual(["/mlhData"]);
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -535,22 +511,30 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
-      timezone: enumOptions['timezone'][0],
       school: 'University of Toronto',
       program: 'Computer Science',
-      yearsOfStudy: enumOptions['yearsOfStudy'][0],
+      levelOfStudy: enumOptions['levelOfStudy'][0],
       hackathonsAttended: enumOptions['hackathonsAttended'][0],
       projectEssay: 'X '.repeat(50),
       whyHT6Essay: 'X '.repeat(50),
-      techInnovationEssay: 'X '.repeat(50),
+      creativeResponseEssay: 'X '.repeat(50),
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
-    } as IApplication;
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
+    } as IPartialApplication;
 
     const user = await User.create({
       ...hackerUser,
@@ -559,11 +543,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields().sort()).toEqual(["/resumeFileName", "/friendlyResumeFileName"].sort());
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -573,258 +560,4 @@ describe('Submit Real Application', () => {
     expect(resultObject.status.applied).toBeFalsy();
   });
 
-  describe('Optional Fields', () => {
-    test('No swag', async () => {
-      await generateMockUniverseState();
-
-      const hackerApplication = {
-        emailConsent: true,
-        gender: enumOptions['gender'][0],
-        pronouns: enumOptions['pronouns'][0],
-        ethnicity: enumOptions['ethnicity'][0],
-        timezone: enumOptions['timezone'][0],
-        wantSwag: false,
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        province: '',
-        postalCode: '',
-        shirtSize: '',
-        school: 'University of Toronto',
-        program: 'Computer Science',
-        yearsOfStudy: enumOptions['yearsOfStudy'][0],
-        hackathonsAttended: enumOptions['hackathonsAttended'][0],
-        resumeSharePermission: true,
-        githubLink: 'GitHub',
-        phoneNumber: '123123123',
-        portfolioLink: 'Portfolio',
-        linkedinLink: 'LinkedIn',
-        projectEssay: 'X '.repeat(50),
-        requestedWorkshops: 'blah blah',
-        whyHT6Essay: 'X '.repeat(50),
-        techInnovationEssay: 'X '.repeat(50),
-        mlhCOC: true,
-        mlhEmail: true,
-        mlhData: true,
-        country: 'Canada'
-      } as IApplication;
-
-      const user = await User.create({
-        ...hackerUser,
-        status: {
-          applied: false,
-        },
-        hackerApplication: {
-          resumeFileName: 'wtf.exe',
-        },
-      });
-
-      const mockTS = 696969;
-      let restoreDateMock = mockDate(mockTS);
-      await updateApplication(
-        user.toJSON() as IUser,
-        true,
-        hackerApplication,
-      );
-      restoreDateMock();
-
-      const resultObject = await User.findOne({
-        _id: hackerUser._id,
-      });
-
-      expect(resultObject.toJSON().hackerApplication).toEqual({
-        ...hackerApplication,
-        lastUpdated: mockTS,
-        resumeFileName: 'wtf.exe',
-      });
-      expect(resultObject.status.applied).toBeTruthy();
-    });
-
-    test('Yes swag', async () => {
-      await generateMockUniverseState();
-
-      const hackerApplication = {
-        emailConsent: true,
-        gender: enumOptions['gender'][0],
-        pronouns: enumOptions['pronouns'][0],
-        ethnicity: enumOptions['ethnicity'][0],
-        timezone: enumOptions['timezone'][0],
-        wantSwag: true,
-        phoneNumber: '123123123',
-        addressLine1: 'asdasdsdasdsa',
-        addressLine2: '',
-        city: 'asdasdas',
-        province: enumOptions['province'][0],
-        postalCode: 'N0B4V3',
-        shirtSize: enumOptions['shirt'][0],
-        school: 'University of Toronto',
-        program: 'Computer Science',
-        yearsOfStudy: enumOptions['yearsOfStudy'][0],
-        hackathonsAttended: enumOptions['hackathonsAttended'][0],
-        resumeSharePermission: true,
-        githubLink: 'GitHub',
-        portfolioLink: 'Portfolio',
-        linkedinLink: 'LinkedIn',
-        projectEssay: 'X '.repeat(50),
-        requestedWorkshops: 'blah blah',
-        whyHT6Essay: 'X '.repeat(50),
-        techInnovationEssay: 'X '.repeat(50),
-        mlhCOC: true,
-        mlhEmail: true,
-        mlhData: true,
-        country: 'Canada'
-      } as IApplication;
-
-      const user = await User.create({
-        ...hackerUser,
-        status: {
-          applied: false,
-        },
-        hackerApplication: {
-          resumeFileName: 'wtf.exe',
-        },
-      });
-
-      const mockTS = 696969;
-      let restoreDateMock = mockDate(mockTS);
-      await updateApplication(
-        user.toJSON() as IUser,
-        true,
-        hackerApplication,
-      );
-      restoreDateMock();
-
-      const resultObject = await User.findOne({
-        _id: hackerUser._id,
-      });
-
-      expect(resultObject.toJSON().hackerApplication).toEqual({
-        ...hackerApplication,
-        lastUpdated: mockTS,
-        resumeFileName: 'wtf.exe',
-      });
-      expect(resultObject.status.applied).toBeTruthy();
-    });
-
-    test('Said yes to swag, but incomplete address', async () => {
-      await generateMockUniverseState();
-
-      const hackerApplication = {
-        emailConsent: true,
-        gender: enumOptions['gender'][0],
-        pronouns: enumOptions['pronouns'][0],
-        ethnicity: enumOptions['ethnicity'][0],
-        timezone: enumOptions['timezone'][0],
-        wantSwag: true,
-        addressLine1: '',
-        addressLine2: '',
-        city: 'asdasdas',
-        phoneNumber: '123123123',
-        province: enumOptions['province'][0],
-        postalCode: 'N0B4V3',
-        school: 'University of Toronto',
-        program: 'Computer Science',
-        shirtSize: enumOptions['shirt'][0],
-        yearsOfStudy: enumOptions['yearsOfStudy'][0],
-        hackathonsAttended: enumOptions['hackathonsAttended'][0],
-        resumeSharePermission: true,
-        githubLink: 'GitHub',
-        portfolioLink: 'Portfolio',
-        linkedinLink: 'LinkedIn',
-        projectEssay: 'X '.repeat(50),
-        requestedWorkshops: 'blah blah',
-        whyHT6Essay: 'X '.repeat(50),
-        techInnovationEssay: 'X '.repeat(50),
-        mlhCOC: true,
-        mlhEmail: true,
-        mlhData: true,
-        country: 'Canada'
-      } as IApplication;
-
-      const user = await User.create({
-        ...hackerUser,
-        status: {
-          applied: false,
-        },
-        hackerApplication: {
-          resumeFileName: 'wtf.exe',
-        },
-      });
-
-      await expect(updateApplication(
-        user.toJSON() as IUser,
-        true,
-        hackerApplication,
-      )).rejects.toThrow(SubmissionDeniedError);
-
-      const resultObject = await User.findOne({
-        _id: hackerUser._id,
-      });
-
-      expect(resultObject.toJSON().hackerApplication).toEqual({
-        resumeFileName: 'wtf.exe',
-      });
-      expect(resultObject.status.applied).toBeFalsy();
-    });
-
-    test('Said no to swag, but still gave address', async () => {
-      await generateMockUniverseState();
-
-      const hackerApplication = {
-        emailConsent: true,
-        gender: enumOptions['gender'][0],
-        pronouns: enumOptions['pronouns'][0],
-        ethnicity: enumOptions['ethnicity'][0],
-        timezone: enumOptions['timezone'][0],
-        wantSwag: false,
-        shirtSize: enumOptions['shirt'][0],
-        addressLine1: 'ASDASSADAS',
-        addressLine2: '',
-        city: 'asdasdas',
-        province: enumOptions['province'][0],
-        postalCode: 'N0B4V3',
-        school: 'University of Toronto',
-        program: 'Computer Science',
-        yearsOfStudy: enumOptions['yearsOfStudy'][0],
-        hackathonsAttended: enumOptions['hackathonsAttended'][0],
-        resumeSharePermission: true,
-        githubLink: 'GitHub',
-        portfolioLink: 'Portfolio',
-        linkedinLink: 'LinkedIn',
-        projectEssay: 'X '.repeat(50),
-        requestedWorkshops: 'blah blah',
-        whyHT6Essay: 'X '.repeat(50),
-        techInnovationEssay: 'X '.repeat(50),
-        mlhCOC: true,
-        mlhEmail: true,
-        mlhData: true,
-        country: 'Canada'
-      } as IApplication;
-
-      const user = await User.create({
-        ...hackerUser,
-        status: {
-          applied: false,
-        },
-        hackerApplication: {
-          resumeFileName: 'wtf.exe',
-        },
-      });
-
-      await expect(updateApplication(
-        user.toJSON() as IUser,
-        true,
-        hackerApplication,
-      )).rejects.toThrow(SubmissionDeniedError);
-
-      const resultObject = await User.findOne({
-        _id: hackerUser._id,
-      });
-
-      expect(resultObject.toJSON().hackerApplication).toEqual({
-        resumeFileName: 'wtf.exe',
-      });
-      expect(resultObject.status.applied).toBeFalsy();
-    });
-  });
 });

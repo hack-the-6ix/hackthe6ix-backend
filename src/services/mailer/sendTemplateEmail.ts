@@ -12,7 +12,7 @@ import { getTemplate } from './util/external';
  * @param tags - data to be substituted into the email (they take precedence over the automatically generated mailmerge fields)
  */
 export default async (email: string, templateName: MailTemplate, tags?: { [key: string]: string }) => {
-  const template = getTemplate(templateName);
+  const template = await getTemplate(templateName);
 
   const templateID: string = template.templateID;
   const subject: string = template.subject;

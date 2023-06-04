@@ -75,7 +75,9 @@ describe('RSVP', () => {
       });
 
       test('Fail', async () => {
-        await generateMockUniverseState(undefined, -10000);
+        await generateMockUniverseState({
+          confirmOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
@@ -104,7 +106,9 @@ describe('RSVP', () => {
 
     describe('Personal Deadline', () => {
       test('Success', async () => {
-        await generateMockUniverseState(undefined, -10000);
+        await generateMockUniverseState({
+          confirmOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,
@@ -132,7 +136,9 @@ describe('RSVP', () => {
       });
 
       test('Fail', async () => {
-        await generateMockUniverseState(undefined, -10000);
+        await generateMockUniverseState({
+          confirmOffset: -10000
+        });
 
         const user = await User.create({
           ...hackerUser,

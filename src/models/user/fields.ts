@@ -14,12 +14,49 @@ import {
   isUserOrOrganizer,
   maxLength, maxWordLength,
   minLength,
-  minWordLength,
-  validatePostalCode,
-  wantSwag,
+  minWordLength
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
+
+// Hacker emergency contact info
+export const emergencyContact = {
+  writeCheck: true,
+  readCheck: true,
+  FIELDS: {
+    firstName: {
+      type: String,
+      caption: 'Emergency Contact First Name',
+      writeCheck: maxLength(256),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      readCheck: true
+    },
+    lastName: {
+      type: String,
+      caption: 'Emergency Contact Last Name',
+      writeCheck: maxLength(256),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      readCheck: true
+    },
+    phoneNumber: {
+      type: String,
+      caption: 'Emergency Contact Phone Number',
+      inTextSearch: true,
+
+      writeCheck: maxLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
+      readCheck: true,
+    },
+    relationship: {
+      type: String,
+      caption: 'Emergency Contact Relationship',
+
+      writeCheck: inEnum(enumOptions.emergencyContactRelationship, true),
+      submitCheck: inEnum(enumOptions.emergencyContactRelationship),
+      readCheck: true
+    }
+  }
+}
 
 // Main application
 export const hackerApplication = {
@@ -98,16 +135,6 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    timezone: {
-      type: String,
-      caption: 'Timezone',
-      inTextSearch: true,
-
-      writeCheck: inEnum(enumOptions.timezone, true),
-      submitCheck: inEnum(enumOptions.timezone),
-      readCheck: true,
-    },
-
     country: {
       type: String,
       caption: 'Country',
@@ -118,99 +145,48 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    wantSwag: {
-      type: Boolean,
-      caption: 'I live in Canada and want to receive HT6 swag',
-
-      writeCheck: true,
-      readCheck: true,
-    },
-
     shirtSize: {
       type: String,
       caption: 'Shirt Size',
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.shirt, true)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.shirt)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      readCheck: true,
+      writeCheck: inEnum(enumOptions.shirt, true),
+      submitCheck: inEnum(enumOptions.shirt, true),
+      readCheck: true
+    },
+
+    healthWarnings: {
+      type: String,
+      captions: 'Allergies/Dietary Restrictions',
+      writeCheck: maxLength(256),
+      submitCheck: maxLength(256),
+      readCheck: true
     },
 
 
     /* Address */
-
-    addressLine1: {
-      type: String,
-      caption: 'Address Line 1',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? minLength(1)(request) && maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
-      readCheck: true,
-    },
-
-    addressLine2: {
-      type: String,
-      caption: 'Address Line 2',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they can do whatever they want, otherwise it should be falsy
-      readCheck: true,
-    },
 
     city: {
       type: String,
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(256)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? minLength(1)(request) && maxLength(256)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
     province: {
       type: String,
-      caption: 'Province',
+      caption: 'Province/State',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.province, true)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? inEnum(enumOptions.province)(request)
-        : !request.fieldValue, // If they want swag they gotta fill the field, otherwise it should be falsy,
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
-    postalCode: {
-      type: String,
-      caption: 'Postal Code',
-      inTextSearch: true,
-
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? maxLength(6)
-        : !request.fieldValue,
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => wantSwag(request)
-        ? validatePostalCode()(request)
-        : !request.fieldValue, // If they want swag they gotta have a valid postal code, otherwise it should be falsy
-      readCheck: true,
-    },
+    /* Emergency Contact Info */
+    emergencyContact: emergencyContact,
 
     /* Your experience */
     school: {
@@ -233,13 +209,13 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    yearsOfStudy: {
+    levelOfStudy: {
       type: String,
-      caption: 'Years of study',
+      caption: 'Level of study',
       inTextSearch: true,
 
-      writeCheck: inEnum(enumOptions.yearsOfStudy, true),
-      submitCheck: inEnum(enumOptions.yearsOfStudy),
+      writeCheck: inEnum(enumOptions.levelOfStudy, true),
+      submitCheck: inEnum(enumOptions.levelOfStudy),
       readCheck: true,
     },
 
@@ -258,6 +234,18 @@ export const hackerApplication = {
     resumeFileName: {
       type: String,
       caption: 'Resume',
+      inTextSearch: true,
+
+      readCheck: true,
+      writeCheck: false,
+      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
+    },
+
+    // The user cannot directly edit this field, but they can view it
+    // We will set this when the user updates their application
+    friendlyResumeFileName: {
+      type: String,
+      caption: 'Resume Name',
       inTextSearch: true,
 
       readCheck: true,
@@ -320,7 +308,7 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    techInnovationEssay: {
+    creativeResponseEssay: {
       type: String,
       caption: 'Technology/Innovation Essay',
       inTextSearch: true,
@@ -351,7 +339,7 @@ export const hackerApplication = {
 
     mlhEmail: {
       type: Boolean,
-      caption: 'MLH COC',
+      caption: 'MLH Email',
 
       writeCheck: true,
       readCheck: true,
@@ -438,7 +426,7 @@ const internal = {
           },
         },
 
-        techInnovation: {
+        creativeResponse: {
           writeCheck: true,
           readCheck: true,
 
@@ -706,12 +694,7 @@ const mailmerge = {
       type: String,
       readCheck: true,
       virtual: true,
-    },
-    MERGE_MAILING_ADDRESS: {
-      type: String,
-      readCheck: true,
-      virtual: true,
-    },
+    }
   },
 };
 
@@ -914,6 +897,15 @@ export const fields = {
       readCheck: true
     },
 
+    // Some users (mostly for testing/won admission) are special and should be allowed to apply before everyone else
+    personalApplicationOpen: {
+      type: Number,
+      caption: 'Personal Application Open',
+
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      readCheck: true,
+    },
+
     // Some hackers are special and want to apply after the global deadline
     personalApplicationDeadline: {
       type: Number,
@@ -924,6 +916,11 @@ export const fields = {
     },
 
     // If the user has a personal deadline, it takes precedence over the global deadline
+    computedApplicationOpen: {
+      type: Number,
+      virtual: true,
+      readCheck: true,
+    },
     computedApplicationDeadline: {
       type: Number,
       virtual: true,
@@ -936,7 +933,7 @@ export const fields = {
     },
     checkInNotes: {
       type: [String],
-      default: ["MUST_SUBMIT_COVID19_VACCINE_QR", "MUST_PRESENT_COVID19_VACCINE_QR"],
+      default: [] as any,
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true
     },
@@ -997,6 +994,7 @@ export interface IUser extends BasicUser {
   idpLinkID: string,
   fullName: string,
   created: number,
+  personalApplicationOpen?: number,
   personalRSVPDeadline?: number,
   personalApplicationDeadline?: number,
   roles: IRoles,
@@ -1009,7 +1007,7 @@ export interface IUser extends BasicUser {
     computedApplicationScore?: number,
     computedFinalApplicationScore?: number, // This value is added by get-rank and usually isn't populated
     applicationScores?: {
-      techInnovation: {
+      creativeResponse: {
         score: number
         reviewer: string
       },
@@ -1028,6 +1026,7 @@ export interface IUser extends BasicUser {
     }
   },
   mailmerge: IMailMerge,
+  computedApplicationOpen: number,
   computedApplicationDeadline: number,
   computedRSVPDeadline: number
 }
@@ -1038,8 +1037,7 @@ export interface IMailMerge {
   MERGE_FIRST_NAME: string,
   MERGE_LAST_NAME: string,
   MERGE_APPLICATION_DEADLINE: string,
-  MERGE_CONFIRMATION_DEADLINE: string,
-  MERGE_MAILING_ADDRESS: string
+  MERGE_CONFIRMATION_DEADLINE: string
 }
 
 export interface IApplication {
@@ -1050,32 +1048,35 @@ export interface IApplication {
   gender: string,
   pronouns: string,
   ethnicity: string,
-  timezone: string,
   country: string,
-  wantSwag: boolean,
   shirtSize: string,
-  addressLine1: string,
-  addressLine2: string,
   city: string,
   province: string,
-  postalCode: string,
   school: string,
   program: string,
-  yearsOfStudy: string,
+  levelOfStudy: string,
   hackathonsAttended: string,
   resumeFileName: string,
+  friendlyResumeFileName: string,
   resumeSharePermission: boolean,
   githubLink: string,
   portfolioLink: string,
   linkedinLink: string,
   projectEssay: string,
   whyHT6Essay: string,
-  techInnovationEssay: string,
-  requestedWorkshops: string,
+  creativeResponseEssay: string,
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean,
+  emergencyContact: {
+    firstName: string,
+    lastName: string,
+    phoneNumber: string,
+    relationship: string
+  }
 }
+
+export type IPartialApplication = Partial<IApplication>;
 
 export interface IRSVPForm {
   selectedCompanies?: string[],

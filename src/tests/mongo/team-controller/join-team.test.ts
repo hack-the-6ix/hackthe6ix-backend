@@ -126,7 +126,9 @@ describe('Join Team', () => {
   });
 
   test('Application window elapsed', async () => {
-    await generateMockUniverseState(-10000);
+    await generateMockUniverseState({
+      applyOffset: -10000
+    });
 
     const mockTeam = {
       code: 'foo',

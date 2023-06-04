@@ -1,4 +1,4 @@
-import mongoose from '../services/mongoose_service';
+import {mongoose} from '../services/mongoose_service';
 import {IUser} from "../models/user/fields";
 import {IExternalUser} from "../models/externaluser/fields";
 import {Model} from "mongoose";
@@ -10,9 +10,10 @@ export type ErrorMessage = { status: number, message: string, error?: string };
  */
 export type UniverseState = {
   public: {
+    globalApplicationOpen: number,
     globalApplicationDeadline: number,
     globalConfirmationDeadline: number,
-    globalWaitlistAcceptedConfirmationDeadline: number,
+    globalWaitlistAcceptedConfirmationDeadline: number
   },
   private: {
     maxAccepted: number,
@@ -42,7 +43,7 @@ export interface BasicUser extends mongoose.Document {
 
 export interface DiscordVerifyInfo {
   suffix?: string,
-  roles?: string[],
+  roles: string[],
   firstName: string,
   lastName: string,
   email: string

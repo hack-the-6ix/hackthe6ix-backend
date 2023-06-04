@@ -1,21 +1,29 @@
-FROM node:14 as base
-WORKDIR /usr/ht6/server
+FROM node:16-alpine3.17 as builder
+WORKDIR /build
+ENV NODE_ENV=production
 
+COPY package*.json .
+COPY . .
+RUN npm ci --include=dev
+RUN npm run build
+RUN npm prune
+
+FROM node:16-alpine3.17 as deploy
+WORKDIR /app
+ENV NODE_ENV=production
 ENV TZ=America/Toronto
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+RUN mkdir -p /local && touch /local/env
+ENV HT6_ENV_SOURCE=/local/env
+
 EXPOSE 6971
 
-RUN mkdir build
-COPY package*.json ./build/
-COPY . ./build/
-RUN cd build && npm install
-RUN cd build && npm run build
+RUN apk add dumb-init
 
-FROM base as deploy
-RUN mv ./build/dist/ .
-RUN mv ./build/node_modules/ .
-RUN rm -r ./build
-RUN ls -la dist
-ENV NODE_ENV=production
-CMD ["node", "./dist/index.js"]
+COPY package*.json .
+COPY --from=builder /build/node_modules node_modules
+COPY --from=builder /build/dist dist
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/bin/sh", "-c", "source $HT6_ENV_SOURCE && exec node ./dist/index.js"]

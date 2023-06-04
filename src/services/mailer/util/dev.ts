@@ -110,7 +110,7 @@ export const mockAddSubscription = async (mailingListID: string, email: string, 
   try {
     fs.writeFileSync(getMailingListLogFileName(mailingListID), message);
   } catch (err) {
-    throw new InternalServerError('Unable to mock sync mailing lists email: ' + err.toString());
+    throw new InternalServerError('Unable to mock sync mailing lists email: ' + err);
   }
 
   return okResponse;
@@ -143,7 +143,7 @@ export const mockDeleteSubscription = async (mailingListID: string, email: strin
   try {
     fs.writeFileSync(getMailingListLogFileName(mailingListID), message);
   } catch (err) {
-    throw new InternalServerError('Unable to mock sync mailing lists email: ' + err.toString());
+    throw new InternalServerError('Unable to mock sync mailing lists email: ' + err);
   }
 
   return okResponse;

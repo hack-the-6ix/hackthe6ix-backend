@@ -7,9 +7,10 @@
 import express, { Request, Response } from 'express';
 import { deleteGridFSFile, readGridFSFile, writeGridFSFile } from '../controller/GridFSController';
 import { createObject, deleteObject, editObject, getObject } from '../controller/ModelController';
-import { logResponse } from '../services/logger';
-import mongoose from '../services/mongoose_service';
+import {logRequest, logResponse} from '../services/logger';
+import {mongoose} from '../services/mongoose_service';
 import { isAdmin, isOrganizer } from '../services/permissions';
+import {SystemGridFSBucket} from "../services/gridfs";
 
 const apiRouter = express.Router();
 
@@ -24,7 +25,7 @@ apiRouter.post('/get/:objectType', isOrganizer, (req: Request, res: Response) =>
   logResponse(
     req,
     res,
-    getObject(req.executor,
+    getObject(req.executor!,
       req.params.objectType,
       req.body,
     ),
@@ -40,7 +41,7 @@ apiRouter.post('/edit/:objectType', isOrganizer, (req: Request, res: Response) =
   logResponse(
     req,
     res,
-    editObject(req.executor,
+    editObject(req.executor!,
       req.params.objectType,
       req.body.filter,
       req.body.changes,
@@ -60,7 +61,7 @@ apiRouter.post('/delete/:objectType', isAdmin, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    deleteObject(req.executor,
+    deleteObject(req.executor!,
       req.params.objectType,
       req.body,
     ),
@@ -77,7 +78,7 @@ apiRouter.post('/create/:objectType', isAdmin, (req: Request, res: Response) => 
   logResponse(
     req,
     res,
-    createObject(req.executor,
+    createObject(req.executor!,
       req.params.objectType,
       req.body,
     ),
@@ -92,11 +93,15 @@ apiRouter.post('/create/:objectType', isAdmin, (req: Request, res: Response) => 
  */
 apiRouter.get('/gridfs', isOrganizer, async (req: Request, res: Response) => {
   try {
+    // since we're returning a binary, don't log it direc
     await readGridFSFile(
+      req.query.bucket as SystemGridFSBucket,
       req.query.filename as string,
       mongoose,
       res,
     );
+
+    logRequest(req);
   } catch (e) {
     logResponse(
       req,
@@ -118,6 +123,7 @@ apiRouter.put('/gridfs', isOrganizer, (req: Request, res: Response) => {
     req,
     res,
     writeGridFSFile(
+      req.query.bucket as SystemGridFSBucket,
       req.query.filename as string,
       mongoose,
       (req as any)?.files?.file,
@@ -136,6 +142,7 @@ apiRouter.delete('/gridfs', isOrganizer, (req: Request, res: Response) => {
     req,
     res,
     deleteGridFSFile(
+      req.query.bucket as SystemGridFSBucket,
       req.query.filename as string,
       mongoose,
     ),

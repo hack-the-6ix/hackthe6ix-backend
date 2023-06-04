@@ -11,7 +11,6 @@ const main = async () => {
   const otherRequirements: any = {
     'status.checkedIn': true,
     'status.confirmed': true,
-    'hackerApplication.wantSwag': true,
     'hackerApplication.shirtSize': null,
   };
 
@@ -23,11 +22,8 @@ const main = async () => {
 
 };
 
-mongoose.connect(database, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-}).then(async () => {
+mongoose.set('strictQuery', false);
+mongoose.connect(database).then(async () => {
   console.log('MongoDB started');
   main();
 }).catch((err) => {

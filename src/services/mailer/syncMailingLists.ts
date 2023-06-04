@@ -3,6 +3,13 @@ import User from '../../models/user/User';
 import { MailingList } from '../../types/mailer';
 import syncMailingList from './syncMailingList';
 import { getList } from './util/external';
+import DynamicCacheProvider from "../cache";
+
+const mailingListCache = new DynamicCacheProvider(async (list: string) => {
+  return await getList(list)
+}, {
+  stdTTL: 60
+});
 
 /**
  * Given a MailingList name, search for the relevant users that should be in the list and
@@ -18,6 +25,8 @@ import { getList } from './util/external';
  * @param email - when specified, only changes involving this user will be performed (i.e. all other users
  *                will be untouched during the sync)
  */
+
+
 export default async (inputMailingLists?: string[], forceUpdate?: boolean, email?: string) => {
   let mailingLists: string[] = [];
 
@@ -30,7 +39,7 @@ export default async (inputMailingLists?: string[], forceUpdate?: boolean, email
   }
 
   for (const list of mailingLists) {
-    const listConfig = getList(list);
+    const listConfig = await mailingListCache.get(list);
 
     const query = {
       ...listConfig?.query || {},

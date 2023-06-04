@@ -85,7 +85,7 @@ describe('Grade candidate', () => {
       await expect(gradeCandidate(organizerUser, null, {})).rejects.toThrow(BadRequestError);
     });
     test('Invalid target ID', async () => {
-      await expect(gradeCandidate(organizerUser, mongoose.Types.ObjectId(), {})).rejects.toThrow(NotFoundError);
+      await expect(gradeCandidate(organizerUser, new mongoose.Types.ObjectId(), {})).rejects.toThrow(NotFoundError);
     });
 
     test('No grade', async () => {
@@ -194,7 +194,7 @@ describe('Grade candidate', () => {
 
   describe('Success', () => {
     test('Already graded by other reviewer', async () => {
-      const otherGrader = mongoose.Types.ObjectId().toString();
+      const otherGrader = (new mongoose.Types.ObjectId()).toString();
       const hacker = await User.create({
         ...hackerUser,
         status: {
@@ -261,7 +261,7 @@ describe('Grade candidate', () => {
     });
 
     test('Edit partial scores', async () => {
-      const otherGrader = mongoose.Types.ObjectId().toString();
+      const otherGrader = (new mongoose.Types.ObjectId()).toString();
       const hacker = await User.create({
         ...hackerUser,
         status: {

@@ -139,7 +139,7 @@ describe('Get candidate', () => {
       const organizer = await User.create(organizerUser);
       const hacker1 = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: { applied: true },
         internal: {
           applicationScores: {
@@ -246,17 +246,17 @@ describe('Get candidate', () => {
       const organizer = await User.create(organizerUser);
       const hacker1 = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: { applied: true },
       });
       const hacker2 = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: { applied: true },
       });
       const hacker3 = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: { applied: true },
       });
 
@@ -276,7 +276,7 @@ describe('Get candidate', () => {
       const organizer = await User.create(organizerUser);
       const hacker1 = await User.create({
         ...hackerUser,
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         status: { applied: true },
         internal: {
           applicationScores: {

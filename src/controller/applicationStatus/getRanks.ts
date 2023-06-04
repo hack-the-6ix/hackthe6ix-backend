@@ -26,7 +26,9 @@ export default async (usePersonalApplicationScore?: boolean) => {
 
     if (teamCode) {
       const team = await Team.findOne({ code: teamCode });
-      teamScore = team.teamScore;
+      if(team) {
+        teamScore = team.teamScore;
+      }
     }
 
     jsonUser.internal.computedFinalApplicationScore = Math.max(
@@ -41,10 +43,10 @@ export default async (usePersonalApplicationScore?: boolean) => {
 
   return users
   .sort((a: IUser, b: IUser) => {
-    const diff = (b?.internal || {})[sortCriteria] - (a?.internal || {})[sortCriteria];
+    const diff = (b?.internal[sortCriteria] ?? -1) - (a?.internal[sortCriteria] ?? -1);
 
     if (diff === 0) {
-      const diffPersonal = b?.internal?.computedApplicationScore - a?.internal?.computedApplicationScore;
+      const diffPersonal = (b?.internal?.computedApplicationScore ?? -1) - (a?.internal?.computedApplicationScore ?? -1);
 
       if (diffPersonal === 0) {
         // If the scores are the same, the tiebreaker is whoever submitted earlier

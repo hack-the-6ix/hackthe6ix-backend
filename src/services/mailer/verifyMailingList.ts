@@ -1,6 +1,13 @@
 import { IUser } from '../../models/user/fields';
 import { MailingList } from '../../types/mailer';
 import { addSubscriptionRequest, getList } from './util/external';
+import DynamicCacheProvider from "../cache";
+
+const mailingListCache = new DynamicCacheProvider(async (list: string) => {
+  return await getList(list)
+}, {
+  stdTTL: 60
+});
 
 /**
  * This will add a user to every registered mailing list with the (expected)
@@ -18,7 +25,7 @@ export default async (requestUser: IUser) => {
   const mailmerge = requestUser.mailmerge;
 
   for (const list in MailingList) {
-    const listConfig = getList(list);
+    const listConfig = await mailingListCache.get(list);
 
     await addSubscriptionRequest(
       listConfig.listID,
