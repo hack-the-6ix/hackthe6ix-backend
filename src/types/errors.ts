@@ -70,9 +70,15 @@ export class WriteDeniedError extends ForbiddenError {
 }
 
 export class SubmissionDeniedError extends ForbiddenError {
-  constructor(errors: any) {
+  private fields = [] as string[];
+  constructor(errors: any, fields: string[]) {
     super('Submission Denied', errors, true);
+    this.fields = fields;
     Object.setPrototypeOf(this, SubmissionDeniedError.prototype);
+  }
+
+  getFields() {
+    return this.fields;
   }
 }
 
@@ -124,3 +130,5 @@ export class RSVPRejectedError extends ForbiddenError {
     Object.setPrototypeOf(this, RSVPRejectedError.prototype);
   }
 }
+
+export class NoErrorThrownError extends Error {}

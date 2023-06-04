@@ -15,7 +15,7 @@ import {
 import { MailTemplate } from '../../../types/mailer';
 import { stringifyUnixTime } from '../../../util/date';
 import {
-  generateMockUniverseState,
+  generateMockUniverseState, getError,
   hackerUser,
   mockGetMailTemplate,
   mockSuccessResponse,
@@ -24,6 +24,7 @@ import {
   runBeforeAll,
   runBeforeEach,
 } from '../../test-utils';
+import {IUser} from "../../../models/user/fields";
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -530,11 +531,6 @@ describe('Submit Application', () => {
 
   describe('Fail', () => {
     describe('Submit condition', () => {
-
-      /**
-       * TODO: Verify the correct field is returned when submit violation occurs
-       */
-
       test('Implicit submitCheck', async () => {
         await generateMockUniverseState();
 
@@ -545,14 +541,18 @@ describe('Submit Application', () => {
           },
         });
 
-        await expect(updateApplication(
-          user.toJSON(),
-          true,
-          {
-            requiredFieldImplicit: 'this is not a foobar',
-            requiredFieldExplicit: 'foobar',
-          } as any,
-        )).rejects.toThrow(SubmissionDeniedError);
+        // @ts-ignore
+        const error = await getError<SubmissionDeniedError>(() => updateApplication(
+            user.toJSON() as IUser,
+            true,
+            {
+              requiredFieldImplicit: 'this is not a foobar',
+              requiredFieldExplicit: 'foobar',
+            } as any,
+        ));
+
+        expect(error).toBeInstanceOf(SubmissionDeniedError);
+        expect(error.getFields()).toEqual(["/requiredFieldImplicit"]);
 
         const resultObject = await User.findOne({
           _id: hackerUser._id,
@@ -573,14 +573,17 @@ describe('Submit Application', () => {
           },
         });
 
-        await expect(updateApplication(
-          user.toJSON(),
-          true,
-          {
-            requiredFieldImplicit: 'foobar',
-            requiredFieldExplicit: 'this is not a foobar',
-          } as any,
-        )).rejects.toThrow(SubmissionDeniedError);
+        const error = await getError<SubmissionDeniedError>(() => updateApplication(
+            user.toJSON() as IUser,
+            true,
+            {
+              requiredFieldImplicit: 'foobar',
+              requiredFieldExplicit: 'this is not a foobar',
+            } as any,
+        ));
+
+        expect(error).toBeInstanceOf(SubmissionDeniedError);
+        expect(error.getFields()).toEqual(["/requiredFieldExplicit"]);
 
         const resultObject = await User.findOne({
           _id: hackerUser._id,
@@ -602,15 +605,18 @@ describe('Submit Application', () => {
         },
       });
 
-      await expect(updateApplication(
-        user.toJSON(),
-        true,
-        {
-          requiredFieldImplicit: 'foobar',
-          requiredFieldExplicit: 'foobar',
-          conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
-        } as any,
-      )).rejects.toThrow(SubmissionDeniedError);
+      const error = await getError<SubmissionDeniedError>(() => updateApplication(
+          user.toJSON() as IUser,
+          true,
+          {
+            requiredFieldImplicit: 'foobar',
+            requiredFieldExplicit: 'foobar',
+            conditionalField: 'XXXXXXXXXXXXXXXXXXXXXXXX',
+          } as any,
+      ));
+
+      expect(error).toBeInstanceOf(SubmissionDeniedError);
+      expect(error.getFields()).toEqual(["/conditionalField"]);
 
       const resultObject = await User.findOne({
         _id: hackerUser._id,

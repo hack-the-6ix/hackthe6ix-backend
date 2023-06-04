@@ -114,7 +114,7 @@ export const updateApplication = async (requestUser: IUser, submit: boolean, hac
     const invalidFields: [string, string | undefined][] = validateSubmission(hackerApplication, hackerApplicationFields, writeRequest, '');
 
     if (invalidFields.length > 0) {
-      throw new SubmissionDeniedError(invalidFields);
+      throw new SubmissionDeniedError(invalidFields, invalidFields.map((ele) => ele[0]));
     }
   }
 

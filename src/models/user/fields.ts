@@ -1068,6 +1068,12 @@ export interface IApplication {
   mlhCOC: boolean,
   mlhEmail: boolean,
   mlhData: boolean,
+  emergencyContact: {
+    firstName: string,
+    lastName: string,
+    phoneNumber: string,
+    relationship: string
+  }
 }
 
 export type IPartialApplication = Partial<IApplication>;

@@ -5,6 +5,7 @@ import { IUser } from '../models/user/fields';
 import { extractFields } from '../models/util';
 import * as dbHandler from './db-handler';
 import * as MockDate from "mockdate";
+import {NoErrorThrownError} from "../types/errors";
 
 export const adminUser = {
   _id: new ObjectId('5f081f878c60690dd9b9fd50'),
@@ -202,3 +203,18 @@ export const runBeforeEach = async () => {
 };
 
 export const runAfterAll = async () => await dbHandler.closeDatabase();
+
+/*
+ * Return error from call
+ * Source: https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-conditional-expect.md#how-to-catch-a-thrown-error-for-testing-without-violating-this-rule
+ */
+export const getError = async <TError>(call: () => unknown): Promise<TError> => {
+  try {
+    await call();
+
+    throw new NoErrorThrownError();
+  } catch (error: unknown) {
+    return error as TError;
+  }
+};
+

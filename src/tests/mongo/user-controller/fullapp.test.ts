@@ -2,9 +2,9 @@ import { updateApplication } from '../../../controller/UserController';
 import { enumOptions } from '../../../models/user/enums';
 import {IPartialApplication, IUser} from '../../../models/user/fields';
 import User from '../../../models/user/User';
-import { SubmissionDeniedError, WriteDeniedError } from '../../../types/errors';
+import {NoErrorThrownError, SubmissionDeniedError, WriteDeniedError} from '../../../types/errors';
 import {
-  generateMockUniverseState,
+  generateMockUniverseState, getError,
   hackerUser,
   mockDate,
   mockGetMailTemplate,
@@ -288,7 +288,15 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      city: 'Toronto',
+      province: 'Ontario',
       country: 'Canada',
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
     } as IPartialApplication;
 
     const user = await User.create({
@@ -301,11 +309,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields().sort()).toEqual(["/gender", "/pronouns", "/ethnicity"].sort());
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -324,6 +335,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -341,6 +353,12 @@ describe('Submit Real Application', () => {
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
     } as IPartialApplication;
 
     const user = await User.create({
@@ -377,6 +395,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -393,6 +412,12 @@ describe('Submit Real Application', () => {
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
     } as IPartialApplication;
 
     const user = await User.create({
@@ -405,11 +430,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields()).toEqual(["/mlhCOC"]);
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -425,6 +453,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -441,6 +470,12 @@ describe('Submit Real Application', () => {
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
     } as IPartialApplication;
 
     const user = await User.create({
@@ -453,11 +488,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields()).toEqual(["/mlhData"]);
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -473,6 +511,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -489,6 +528,12 @@ describe('Submit Real Application', () => {
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
+      emergencyContact: {
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        relationship: enumOptions['emergencyContactRelationship'][0]
+      }
     } as IPartialApplication;
 
     const user = await User.create({
@@ -498,11 +543,14 @@ describe('Submit Real Application', () => {
       },
     });
 
-    await expect(updateApplication(
-      user.toJSON() as IUser,
-      true,
-      hackerApplication,
-    )).rejects.toThrow(SubmissionDeniedError);
+    const error = await getError<SubmissionDeniedError>(() => updateApplication(
+        user.toJSON() as IUser,
+        true,
+        hackerApplication,
+    ));
+
+    expect(error).toBeInstanceOf(SubmissionDeniedError);
+    expect(error.getFields().sort()).toEqual(["/resumeFileName", "/friendlyResumeFileName"].sort());
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
