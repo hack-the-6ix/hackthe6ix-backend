@@ -1,9 +1,8 @@
 image:
   pullPolicy: Always
-#  tag: Set by the GitHub action
+  tag: latest
 
 ingressRoute:
-  host: api.hackthe6ix.com
   tls:
     secretName: ht6-cforigin
 
@@ -17,7 +16,6 @@ hackthe6ixBackend:
     projectId: hack-the-6ix-production
   mailer:
     enabled: true
-    publicRoot: https://mailtrain.hackthe6ix.com
   initialization:
     secretName: ht6-backend-2023-init
     settings:

@@ -84,6 +84,7 @@ tolerations: []
 affinity: {}
 
 hackthe6ixBackend:
+  revision: "next"
   nodeEnv: production
   secrets:
     vault:

@@ -15,6 +15,7 @@ spec:
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        kubernetes.hackthe6ix.com/app-revision: '{{ .Values.hackthe6ixBackend.revision }}'
         {{- if .Values.hackthe6ixBackend.secrets.vault.enabled }}
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/tls-skip-verify: 'true'

@@ -1,9 +1,8 @@
 image:
   pullPolicy: Always
-#  tag: Set by the GitHub action
+  tag: develop
 
 ingressRoute:
-  host: stagingapi.hackthe6ix.com
   tls:
     secretName: ht6-cforigin
 
@@ -18,7 +17,7 @@ hackthe6ixBackend:
     enabled: false
   mailer:
     enabled: true
-    publicRoot: https://mailtrain-staging.hackthe6ix.com
+    publicRoot:
   initialization:
     secretName: ht6-backend-2023-staging-init
     settings:
