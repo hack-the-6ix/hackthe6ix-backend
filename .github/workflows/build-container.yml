@@ -1,4 +1,4 @@
-name: Build container
+name: Build and deploy container (Production)
 
 on:
   push:
@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Setup environment
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-$latest
@@ -25,14 +25,14 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -40,7 +40,6 @@ jobs:
           push: true
           tags: |
             ${{ vars.REGISTRY_REPO_PATH }}:latest
-            ${{ vars.REGISTRY_REPO_PATH }}:${{ github.sha }}
 
       # Clean up cache
       - name: Move cache
@@ -48,11 +47,12 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # Trigger deployment
-#      - uses: convictional/trigger-workflow-and-wait@v1.3.0
-#        with:
-#          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
-#          workflow_file_name: deploy-container.yml
-#          inputs: '{ "tag": "latest", "dockerrepo": "${{ secrets.DOCKERHUB_REPOSITORY }}" }'
-#          repo: ${{ github.event.repository.name }}
-#          owner: hack-the-6ix
+  deploy:
+    uses: ./.github/workflows/deploy-kubernetes.yml
+    needs: build
+    with:
+      environment: production
+      environment_host: api.hackthe6ix.com
+      values_file: production
+      release_name: production
+    secrets: inherit

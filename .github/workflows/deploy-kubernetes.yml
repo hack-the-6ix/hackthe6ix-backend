@@ -11,6 +11,13 @@ on:
       values_file:
         required: true
         type: string
+      release_name:
+        required: true
+        type: string
+      namespace:
+        required: false
+        type: string
+        default: "ht6-backend"
     secrets:
       CLOUDFLARE_TUNNEL_SERVICE_TOKEN_ID:
         required: true
@@ -48,12 +55,14 @@ jobs:
           KUBECONFIG_B64: ${{secrets.KUBECONFIG_B64}}
       - name: Deploy Helm chart
         run: |
-          helm upgrade --install staging ./chart -f ./deploy/values.${VALUES_FILE}.yaml -n ht6-backend \
+          helm upgrade --install "$RELEASE_NAME" ./chart -f ./deploy/values.${VALUES_FILE}.yaml -n "$NAMESPACE" \
             --set hackthe6ixBackend.revision="$APP_REVISION" \
             --set ingressRoute.host="$DEPLOY_HOSTNAME" \
             --set hackthe6ixBackend.mailer.publicRoot="$MAILER_ROOT"
         shell: bash
         env:
+          RELEASE_NAME: ${{ inputs.release_name }}
+          NAMESPACE: ${{ inputs.namespace }}
           VALUES_FILE: ${{ inputs.values_file }}
           APP_REVISION: ${{ github.sha }}
           DEPLOY_HOSTNAME: ${{ vars.DEPLOY_HOSTNAME }}
