@@ -19,6 +19,45 @@ import {
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
 
+// Hacker emergency contact info
+export const emergencyContact = {
+  writeCheck: true,
+  readCheck: true,
+  FIELDS: {
+    firstName: {
+      type: String,
+      caption: 'Emergency Contact First Name',
+      writeCheck: maxLength(256),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      readCheck: true
+    },
+    lastName: {
+      type: String,
+      caption: 'Emergency Contact Last Name',
+      writeCheck: maxLength(256),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      readCheck: true
+    },
+    phoneNumber: {
+      type: String,
+      caption: 'Emergency Contact Phone Number',
+      inTextSearch: true,
+
+      writeCheck: maxLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
+      readCheck: true,
+    },
+    relationship: {
+      type: String,
+      caption: 'Emergency Contact Relationship',
+
+      writeCheck: inEnum(enumOptions.emergencyContactRelationship, true),
+      submitCheck: inEnum(enumOptions.emergencyContactRelationship),
+      readCheck: true
+    }
+  }
+}
+
 // Main application
 export const hackerApplication = {
   writeCheck: true,
@@ -115,6 +154,14 @@ export const hackerApplication = {
       readCheck: true
     },
 
+    healthWarnings: {
+      type: String,
+      captions: 'Allergies/Dietary Restrictions',
+      writeCheck: maxLength(256),
+      submitCheck: maxLength(256),
+      readCheck: true
+    },
+
 
     /* Address */
 
@@ -137,6 +184,9 @@ export const hackerApplication = {
       submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
+
+    /* Emergency Contact Info */
+    emergencyContact: emergencyContact,
 
     /* Your experience */
     school: {
