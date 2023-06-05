@@ -24,3 +24,6 @@ export const totalAvailablePoints = {
   normal: 14,
   first: 12
 }
+
+export const deadlinesOverrides = (process.env.EMAILS_CAN_ALWAYS_APPLY ? process.env.EMAILS_CAN_ALWAYS_APPLY.split(",") : []).filter(rule => rule.length > 0).map(rule => rule.toLowerCase());
+export const LAST_SECOND_OF_CENTURY = 4102444799000;

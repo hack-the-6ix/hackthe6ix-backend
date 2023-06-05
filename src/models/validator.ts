@@ -2,8 +2,28 @@
 
 import { WriteCheckRequest } from '../types/checker';
 import { UniverseState } from '../types/types';
+import {deadlinesOverrides, LAST_SECOND_OF_CENTURY} from "../consts";
 // Admins can do anything and bypass validation
 import { IUser } from './user/fields';
+
+export const canUserOverrideDeadlines = (requestUser: IUser, overrides?: string[]) => {
+  const userEmail = requestUser.email.toLowerCase();
+
+  if(overrides === undefined) {
+    overrides = deadlinesOverrides;
+  }
+
+  for(const rule of overrides) {
+    if(rule.charAt(0) === '@' && userEmail.endsWith(rule)) {
+      return true;
+    }
+    else if(userEmail === rule) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 export const isAdmin = (requestUser: IUser) => requestUser.roles.admin;
 export const isOrganizer = (requestUser: IUser) => requestUser.roles.organizer;
@@ -48,9 +68,9 @@ export const isStatusReleased = (user: IUser) => user?.status?.statusReleased;
 export const rsvpDecisionSubmitted = (user: IUser) => user?.status?.confirmed || user?.status?.declined;
 
 // NOTE: Personal deadlines will override global deadlines if they are set.
-export const getApplicationOpen = (user: IUser, universeState: UniverseState) => user.personalApplicationOpen === undefined ? universeState.public.globalApplicationOpen : user.personalApplicationOpen;
-export const getApplicationDeadline = (user: IUser, universeState: UniverseState) => user.personalApplicationDeadline === undefined ? universeState.public.globalApplicationDeadline : user.personalApplicationDeadline;
-export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => user.personalRSVPDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalRSVPDeadline;
+export const getApplicationOpen = (user: IUser, universeState: UniverseState) => canUserOverrideDeadlines(user) ? 0 : (user.personalApplicationOpen === undefined ? universeState.public.globalApplicationOpen : user.personalApplicationOpen);
+export const getApplicationDeadline = (user: IUser, universeState: UniverseState) => canUserOverrideDeadlines(user) ? LAST_SECOND_OF_CENTURY : (user.personalApplicationDeadline === undefined ? universeState.public.globalApplicationDeadline : user.personalApplicationDeadline);
+export const getRSVPDeadline = (user: IUser, universeState: UniverseState) => canUserOverrideDeadlines(user) ? LAST_SECOND_OF_CENTURY : (user.personalRSVPDeadline === undefined ? universeState.public.globalConfirmationDeadline : user.personalRSVPDeadline);
 
 export const isApplicationOpen = (user: IUser) => {
   const now = new Date().getTime();
