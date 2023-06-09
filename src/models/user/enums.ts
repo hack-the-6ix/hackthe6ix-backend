@@ -100,6 +100,8 @@ export const enumOptions = {
     'Wyoming'
   ],
   countries: [
+    'Canada',
+    'United States of America (the)',
     'Afghanistan',
     'Albania',
     'Algeria',
@@ -139,7 +141,6 @@ export const enumOptions = {
     'Cabo Verde',
     'Cambodia',
     'Cameroon',
-    'Canada',
     'Cayman Islands (the)',
     'Central African Republic (the)',
     'Chad',
@@ -335,7 +336,6 @@ export const enumOptions = {
     'United Arab Emirates (the)',
     'United Kingdom of Great Britain and Northern Ireland (the)',
     'United States Minor Outlying Islands (the)',
-    'United States of America (the)',
     'Uruguay',
     'Uzbekistan',
     'Vanuatu',
