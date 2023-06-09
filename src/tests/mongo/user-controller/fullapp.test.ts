@@ -288,6 +288,7 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      shirtSize: '',
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
@@ -316,7 +317,7 @@ describe('Submit Real Application', () => {
     ));
 
     expect(error).toBeInstanceOf(SubmissionDeniedError);
-    expect(error.getFields().sort()).toEqual(["/gender", "/pronouns", "/ethnicity"].sort());
+    expect(error.getFields().sort()).toEqual(["/gender", "/pronouns", "/ethnicity", "/age", "/shirtSize"].sort());
 
     const resultObject = await User.findOne({
       _id: hackerUser._id,
@@ -335,7 +336,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
-      phoneNumber: '1234567890',
+      age: 19,
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -350,6 +351,7 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      shirtSize: enumOptions['shirt'][0],
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
@@ -396,6 +398,7 @@ describe('Submit Real Application', () => {
 
     const hackerApplication = {
       phoneNumber: '1234567890',
+      age: 19,
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -409,6 +412,7 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: false,
       mlhData: true,
+      shirtSize: enumOptions['shirt'][0],
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
@@ -454,6 +458,7 @@ describe('Submit Real Application', () => {
 
     const hackerApplication = {
       phoneNumber: '1234567890',
+      age: 19,
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -467,6 +472,7 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: false,
+      shirtSize: enumOptions['shirt'][0],
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
@@ -512,6 +518,7 @@ describe('Submit Real Application', () => {
 
     const hackerApplication = {
       phoneNumber: '1234567890',
+      age: 19,
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -525,6 +532,7 @@ describe('Submit Real Application', () => {
       requestedWorkshops: 'X '.repeat(50),
       mlhCOC: true,
       mlhData: true,
+      shirtSize: enumOptions['shirt'][0],
       city: 'Toronto',
       province: 'Ontario',
       country: 'Canada',
