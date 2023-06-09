@@ -115,6 +115,15 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    age: {
+      type: Number,
+      caption: 'Age',
+
+      writeCheck: (request: WriteCheckRequest<number, IUser>) => request.fieldValue === undefined || !isNaN(request.fieldValue),
+      submitCheck: (request: WriteCheckRequest<number, IUser>) => !isNaN(request.fieldValue),
+      readCheck: true
+    },
+
     pronouns: {
       type: String,
       caption: 'Pronouns',
@@ -150,7 +159,15 @@ export const hackerApplication = {
       caption: 'Shirt Size',
 
       writeCheck: inEnum(enumOptions.shirt, true),
-      submitCheck: inEnum(enumOptions.shirt, true),
+      submitCheck: inEnum(enumOptions.shirt),
+      readCheck: true
+    },
+
+    dietaryRestrictions: {
+      type: String,
+      caption: 'Dietary Restrictions',
+      writeCheck: inEnum(enumOptions.dietaryRestrictions, true),
+      submitCheckL: inEnum(enumOptions.dietaryRestrictions, true),
       readCheck: true
     },
 
@@ -1046,10 +1063,13 @@ export interface IApplication {
   teamCode: string,
   emailConsent: boolean,
   gender: string,
+  age: number,
   pronouns: string,
   ethnicity: string,
   country: string,
   shirtSize: string,
+  dietaryRestrictions: string,
+  healthWarnings: string,
   city: string,
   province: string,
   school: string,

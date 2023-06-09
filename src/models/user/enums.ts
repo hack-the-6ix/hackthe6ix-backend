@@ -393,5 +393,13 @@ export const enumOptions = {
       'Other family member',
       'Friend',
       'Other'
+  ],
+  dietaryRestrictions: [
+    'Vegetarian',
+    'Vegan',
+    'Celiac Disease',
+    'Kosher',
+    'Halal',
+    'Allergies / Other'
   ]
 };
