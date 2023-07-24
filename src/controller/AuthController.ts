@@ -194,7 +194,7 @@ export const handleRefresh = async (providerName: string, refreshToken: string):
   }
 };
 
-export const handleLogout = async (providerName: string, refreshToken: string): Promise<Record<string, never>> => {
+export const handleLogout = async (providerName: string, refreshToken: string): Promise<Record<string, string>> => {
   const tokenInfo = permissions.decodeToken(refreshToken);
   const settings = await _getCachedSettings();
   const provider = _getProviderByName(settings, providerName);
@@ -230,7 +230,9 @@ export const handleLogout = async (providerName: string, refreshToken: string): 
     log.warn(`Unable to log out of IDP session for user with link ID ${tokenInfo.sub}.`, err);
   }
 
-  return {};
+  return {
+    logoutRedirectUrl: provider.logout_redirect_url
+  };
 };
 
 export const createAPIToken = async (requestUser: IUser, groups: string[], description: string): Promise<{
