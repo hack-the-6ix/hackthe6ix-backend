@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as jwt from 'jsonwebtoken';
+import {verify, decode, sign} from 'jsonwebtoken';
 import APIToken from '../models/apitoken/APIToken';
 import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
@@ -7,18 +7,18 @@ import { ErrorMessage } from '../types/types';
 import { jsonify, log } from './logger';
 
 export const verifyToken = (token: string): Record<string, any> => {
-  return jwt.verify(token, process.env.JWT_SECRET!, {
+  return verify(token, process.env.JWT_SECRET!, {
     algorithms: ['HS256'],
     issuer: 'hackthe6ix-backend',
   }) as Record<string, any>;
 };
 
 export const decodeToken = (token: string): Record<string, any> => {
-  return jwt.decode(token) as Record<string, any>;
+  return decode(token) as Record<string, any>;
 };
 
 export const createJwt = (data: Record<string, unknown>): string => {
-  return jwt.sign(data, process.env.JWT_SECRET!, {
+  return sign(data, process.env.JWT_SECRET!, {
     algorithm: 'HS256',
     expiresIn: '1 day',
     issuer: 'hackthe6ix-backend',
