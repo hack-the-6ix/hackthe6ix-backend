@@ -38,6 +38,7 @@ import {
   pushMetadata
 } from "../services/discordApi";
 import {JsonWebTokenError, TokenExpiredError} from "jsonwebtoken";
+import {queueVerification} from "./DiscordController";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -652,7 +653,7 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
 
   const nowTimestamp = Date.now();
 
-  await User.findOneAndUpdate({
+  const newUser = await User.findOneAndUpdate({
     _id: userID
   }, {
     discord: {
@@ -667,11 +668,55 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
         verifyTime: nowTimestamp,
       })
     }
+  }, {
+    new: true
   });
 
+  if(!newUser) {
+    throw new InternalServerError("Unable to update user that was associated with a Discord account.");
+  }
+
   await syncRoles(userID);
+  await queueVerification(userDiscordData.user.id, newUser);
 
   return "OK";
+}
+
+export const disassociateFromDiscord = async (userID: string):Promise<string> => {
+  const user = await User.findOne({
+    _id: userID
+  });
+
+  if(!user) {
+    throw new NotFoundError("Unable to find the given user.");
+  }
+
+  try {
+    let discordTokens = getDiscordTokensFromUser(user);
+    discordTokens = await getAccessToken(userID, discordTokens);
+
+    const userMetadata = {
+      isorganizer: 0,
+      isconfirmedhacker: 0
+    } as DiscordConnectionMetadata;
+
+    await pushMetadata(discordTokens, userMetadata);
+  }
+  catch(e) {
+    log.error("Encountered error pushing metadata on Discord disassociation.", e);
+  }
+
+  if(user.discord.discordID) {
+    await queueVerification(user.discord.discordID, user, true);
+  }
+
+  await User.updateOne({
+    _id: userID
+  }, {
+    discord: {}
+  });
+
+  return "Disassociated user from the linked Discord account.";
 }
 
 export const fetchDiscordConnectionMetadata = async(userID: string):Promise<DiscordConnectionMetadata> => {

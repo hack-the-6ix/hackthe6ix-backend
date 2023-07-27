@@ -7,7 +7,7 @@ import { resumeExport } from '../services/dataexport';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
-import { verifyDiscordUser } from '../controller/DiscordController';
+import {getNextQueuedVerification, verifyDiscordUser} from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
 import {getObject, initializeSettingsMapper} from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
@@ -21,7 +21,7 @@ import {
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID, associateWithDiscord, fetchDiscordConnectionMetadata
+  fetchUserByDiscordID, associateWithDiscord, fetchDiscordConnectionMetadata, disassociateFromDiscord
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -254,6 +254,12 @@ actionRouter.get('/discordMetadata', isHacker, (req: Request, res: Response) => 
       )
   )
 });
+
+/**
+ * (Hacker)
+ *
+ * Disassociate user from Discord account
+ */
 
 // Volunteer endpoints
 
@@ -542,5 +548,33 @@ actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) =
       req,
       res,
       generateCheckInQR(req.executor!, req.body.userList)
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Disassociate Discord account from a user
+ */
+actionRouter.post('/disassociateDiscord', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      disassociateFromDiscord(
+          req.body.userID
+      )
+  )
+});
+
+/**
+ * (Organizer)
+ *
+ * Get next queued Discord verification
+ */
+actionRouter.get('/getNextQueuedDiscordVerification', (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      getNextQueuedVerification()
   )
 })
