@@ -5,6 +5,7 @@ import * as util from 'util';
 import winston from 'winston';
 import { HTTPError } from '../types/errors';
 import * as process from "process";
+import {cleanUserObject} from "../util/cleanUserObject";
 
 const maxMessageSize = 50000; // Cap is 64KB, so we're going a bit lower to be safe
 
@@ -134,7 +135,7 @@ export function logRequest(req: Request, alwaysLog?: boolean, additional?: any):
     ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
     uid: req.executor?._id || 'N/A',
     requestBody: req.body,
-    executorUser: req.executor,
+    executorUser: cleanUserObject(req.executor),
     ...(additional !== undefined ? additional : {})
   });
 
@@ -167,7 +168,6 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
     });
   })
   .catch((error: HTTPError) => {
-
     const status = error.status || 500;
 
     // When we send out the response, we do NOT send the full error by default for security
@@ -192,7 +192,7 @@ export const logResponse = (req: Request, res: Response, promise: Promise<any>, 
       requestBody: req.body,
       error: error,
       responseBody: body,
-      executorUser: req.executor,
+      executorUser: cleanUserObject(req.executor),
     });
 
     log.error(`[${req.method} ${req.url}]`, logPayload);

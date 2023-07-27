@@ -21,7 +21,7 @@ import {
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID
+  fetchUserByDiscordID, associateWithDiscord, fetchDiscordConnectionMetadata
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -31,6 +31,7 @@ import verifyMailingList from '../services/mailer/verifyMailingList';
 import {mongoose} from '../services/mongoose_service';
 import {isAdmin, isHacker, isOrganizer, isVolunteer} from '../services/permissions';
 import { getStatistics } from '../services/statistics';
+import {generateDiscordOAuthUrl} from "../services/discordApi";
 
 const actionRouter = express.Router();
 
@@ -205,7 +206,54 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
           req.executor!._id, "User"
       )
   )
-})
+});
+
+/**
+ * (Hacker)
+ *
+ * Generate Discord link URL
+ */
+actionRouter.post('/discordOAuthUrl', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      generateDiscordOAuthUrl(
+          req.body.redirectUrl
+      )
+  )
+});
+
+/**
+ * (Hacker)
+ *
+ * Associate Discord account given a state and OAuth code
+ */
+actionRouter.post('/associateDiscord', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      associateWithDiscord(
+          req.executor!._id,
+          req.body.state,
+          req.body.code
+      )
+  )
+});
+
+/**
+ * (Hacker)
+ *
+ * Get linked Discord metadata
+ */
+actionRouter.get('/discordMetadata', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      fetchDiscordConnectionMetadata(
+          req.executor!._id
+      )
+  )
+});
 
 // Volunteer endpoints
 
@@ -419,7 +467,7 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) =
 /**
  * (Organizer)
  *
- * Associate a user on Discord
+ * Fetch user by Discord ID
  */
 actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Response) => {
   logResponse(
