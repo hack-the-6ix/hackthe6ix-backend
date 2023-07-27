@@ -240,27 +240,6 @@ actionRouter.post('/associateDiscord', isHacker, (req: Request, res: Response) =
   )
 });
 
-/**
- * (Hacker)
- *
- * Get linked Discord metadata
- */
-actionRouter.get('/discordMetadata', isHacker, (req: Request, res: Response) => {
-  logResponse(
-      req,
-      res,
-      fetchDiscordConnectionMetadata(
-          req.executor!._id
-      )
-  )
-});
-
-/**
- * (Hacker)
- *
- * Disassociate user from Discord account
- */
-
 // Volunteer endpoints
 
 /**
@@ -569,6 +548,21 @@ actionRouter.post('/disassociateDiscord', isOrganizer, (req: Request, res: Respo
 /**
  * (Organizer)
  *
+ * Get linked Discord metadata for a user
+ */
+actionRouter.get('/discordMetadata', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      fetchDiscordConnectionMetadata(
+          req.query.userID as string
+      )
+  )
+});
+
+/**
+ * (Organizer)
+ *
  * Get next queued Discord verification
  */
 actionRouter.get('/getNextQueuedDiscordVerification', (req: Request, res: Response) => {
@@ -577,4 +571,4 @@ actionRouter.get('/getNextQueuedDiscordVerification', (req: Request, res: Respon
       res,
       getNextQueuedVerification()
   )
-})
+});

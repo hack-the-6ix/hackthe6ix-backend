@@ -596,10 +596,8 @@ export const syncRoles = async (userID: string): Promise<string> => {
   await User.updateOne({
     _id: userID
   }, {
-    discord: {
-      lastSyncStatus: "SUCCESS" as DiscordSyncState,
-      lastSyncTime: Date.now()
-    }
+    'discord.lastSyncStatus': "SUCCESS" as DiscordSyncState,
+    'discord.lastSyncTime': Date.now()
   });
 
   return "OK";
@@ -719,7 +717,11 @@ export const disassociateFromDiscord = async (userID: string):Promise<string> =>
   return "Disassociated user from the linked Discord account.";
 }
 
-export const fetchDiscordConnectionMetadata = async(userID: string):Promise<DiscordConnectionMetadata> => {
+export const fetchDiscordConnectionMetadata = async(userID?: string):Promise<DiscordConnectionMetadata> => {
+  if(!userID) {
+    throw new BadRequestError("UserID must be specified.")
+  }
+
   const user = await User.findOne({
     _id: userID
   }, ['discord.accessToken', 'discord.accessTokenExpireTime', 'discord.refreshToken']);

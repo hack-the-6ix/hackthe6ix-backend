@@ -142,10 +142,8 @@ export async function getAccessToken(userID: string, tokens: DiscordTokenRespons
             await User.updateOne({
                 _id: userID
             }, {
-                discord: {
-                    lastSyncStatus: syncStatus,
-                    lastSyncTime: Date.now()
-                }
+                'discord.lastSyncStatus': syncStatus,
+                'discord.lastSyncTime': Date.now()
             }).catch((err) => {
                 log.error(`The was an error writing an updated Discord refresh token for ${userID}.`, err);
             });

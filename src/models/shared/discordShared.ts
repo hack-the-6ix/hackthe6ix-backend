@@ -1,12 +1,11 @@
-import { ReadCheckRequest, WriteCheckRequest } from '../../types/checker';
-import { IExternalUser } from '../externaluser/fields';
+import {ReadCheckRequest, ReadInterceptRequest, WriteCheckRequest} from '../../types/checker';
 import { IUser } from '../user/fields';
 import {isOrganizer, isAdmin} from '../validator';
 
 export default {
 
-  readCheck: (request: ReadCheckRequest<IExternalUser>) => isOrganizer(request.requestUser),
-  writeCheck: (request: WriteCheckRequest<any, IExternalUser>) => isOrganizer(request.requestUser),
+  readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) => isOrganizer(request.requestUser),
 
   FIELDS: {
     discordID: {
@@ -50,18 +49,19 @@ export default {
     },
     refreshToken: {
       type: String,
-      readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isAdmin(request.requestUser)
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) => isAdmin(request.requestUser),
+      readInterceptor: (request: ReadInterceptRequest<string, IUser>) => request.fieldValue ? "***MASKED***" : undefined
     },
     lastSyncTime: {
       type: Number,
-      readCheck: true,
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isAdmin(request.requestUser)
     },
     lastSyncStatus: {
       type: String,
-      readCheck: true,
       index: true,
+      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isAdmin(request.requestUser)
     }
   },
