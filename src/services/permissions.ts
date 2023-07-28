@@ -5,6 +5,7 @@ import { IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { ErrorMessage } from '../types/types';
 import { jsonify, log } from './logger';
+import {cleanUserObject} from "../util/cleanUserObject";
 
 export const verifyToken = (token: string): Record<string, any> => {
   return verify(token, process.env.JWT_SECRET!, {
@@ -17,10 +18,10 @@ export const decodeToken = (token: string): Record<string, any> => {
   return decode(token) as Record<string, any>;
 };
 
-export const createJwt = (data: Record<string, unknown>): string => {
+export const createJwt = (data: Record<string, unknown>, expiresIn?: string): string => {
   return sign(data, process.env.JWT_SECRET!, {
     algorithm: 'HS256',
-    expiresIn: '1 day',
+    expiresIn: expiresIn ?? '1 day',
     issuer: 'hackthe6ix-backend',
     audience: 'hackthe6ix-backend',
   });
@@ -116,7 +117,7 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
       requestBody: req.body,
       role: role,
       responseBody: 'Invalid Token',
-      executorUser: req.executor,
+      executorUser: cleanUserObject(req.executor),
     }));
 
     return res.status(401).send({
@@ -133,7 +134,7 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
       requestBody: req.body,
       role: role,
       responseBody: 'Invalid Token',
-      executorUser: req.executor,
+      executorUser: cleanUserObject(req.executor),
     }));
 
     return res.status(403).send({
