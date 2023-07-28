@@ -660,7 +660,7 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
       accessToken: tokens.access_token,
       accessTokenExpireTime: tokens.expires_at,
       refreshToken: tokens.refresh_token,
-      lastSyncStatus: "SUCCESS" as DiscordSyncState,
+      lastSyncStatus: "SOFTFAIL" as DiscordSyncState,
       lastSyncTime: nowTimestamp,
       ...(userInfo.discord?.refreshToken !== undefined ? {} : {
         verifyTime: nowTimestamp,
@@ -674,7 +674,12 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
     throw new InternalServerError("Unable to update user that was associated with a Discord account.");
   }
 
-  await syncRoles(userID);
+  try {
+    await syncRoles(userID);
+  }
+  catch(e) {
+    log.error(`Unable to complete initial role sync for ${userID}.`, e);
+  }
   await queueVerification(userDiscordData.user.id, newUser);
 
   return "OK";
