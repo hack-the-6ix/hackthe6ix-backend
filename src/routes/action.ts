@@ -565,7 +565,7 @@ actionRouter.get('/discordMetadata', isOrganizer, (req: Request, res: Response) 
  *
  * Get next queued Discord verification
  */
-actionRouter.get('/getNextQueuedDiscordVerification', (req: Request, res: Response) => {
+actionRouter.get('/getNextQueuedDiscordVerification', isOrganizer, (req: Request, res: Response) => {
   logResponse(
       req,
       res,
