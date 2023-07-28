@@ -23,6 +23,16 @@ export const fields = {
             required: true,
             default: false
         },
+        processedTime: {
+            type: Number
+        },
+        earliestProcessTime: {
+            type: Number
+        },
+        guildID: {
+            type: String,
+            required: true
+        },
         discordID: {
             type: String,
             required: true

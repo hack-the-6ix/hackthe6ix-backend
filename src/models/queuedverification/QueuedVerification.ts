@@ -16,4 +16,10 @@ schema.index({
     queuedTime: 1
 });
 
+schema.index({
+    processed: -1,
+    earliestProcessTime: 1,
+    queuedTime: 1
+})
+
 export default mongoose.model<IQueuedVerification>('QueuedVerification', schema);

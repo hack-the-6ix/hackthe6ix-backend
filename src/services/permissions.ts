@@ -108,7 +108,7 @@ export const injectExecutor = async (req: Request): Promise<boolean> => {
   return true;
 };
 
-const isRole = async (req: Request, res: Response, next: NextFunction, role: 'hacker' | 'volunteer' | 'organizer' | 'admin'): Promise<Response | void> => {
+const isRole = async (req: Request, res: Response, next: NextFunction, role?: 'hacker' | 'volunteer' | 'organizer' | 'admin', authorizationCheck=true): Promise<Response | void> => {
   if (!await injectExecutor(req)) {
     log.error(`[${req.method} ${req.url}] [INVALID TOKEN]`, jsonify({
       requestURL: req.url,
@@ -126,7 +126,7 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
     } as ErrorMessage);
   }
 
-  if (!req.executor?.roles[role]) {
+  if (authorizationCheck && (!role || !req.executor?.roles[role])) {
     log.error(`[INSUFFICIENT PERMISSIONS]`, jsonify({
       requestURL: req.url,
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
@@ -144,6 +144,10 @@ const isRole = async (req: Request, res: Response, next: NextFunction, role: 'ha
   }
 
   next();
+};
+
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+  return isRole(req, res, next, undefined, false);
 };
 
 export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {

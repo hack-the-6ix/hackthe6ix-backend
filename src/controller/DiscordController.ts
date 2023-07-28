@@ -94,6 +94,7 @@ export const queueVerification = async (discordID: string, userData: BasicUser, 
   await QueuedVerification.create({
     queuedTime: Date.now(),
     discordID,
+    guildID: process.env.DISCORD_GUILD_ID,
     revert: false,
     verifyData: _assembleReturnInfo(userData)
   });
@@ -101,12 +102,29 @@ export const queueVerification = async (discordID: string, userData: BasicUser, 
 
 export const getNextQueuedVerification = async ():Promise<IQueuedVerification | null | undefined> => {
   return QueuedVerification.findOneAndUpdate({
-    processed: false
+    processed: false,
+    earliestProcessTime: {
+      $lte: Date.now()
+    }
   }, {
-    processed: true
+    processed: true,
+    processedTime: Date.now()
   }, {
     sort: {
       queuedTime: 1
-    }
+    },
+    new: true
   });
+}
+
+export const requeueVerification = async (queuedVerificationID: string, earliestRetryAt: number): Promise<void> => {
+  await QueuedVerification.findOneAndUpdate({
+    _id: queuedVerificationID
+  }, {
+    processed: false,
+    earliestProcessTime: earliestRetryAt ?? 0,
+    $unset: {
+      processedTime: ""
+    }
+  })
 }
