@@ -1,4 +1,4 @@
-import { Mongoose } from 'mongoose';
+import {Mongoose} from 'mongoose';
 import * as qrcode from 'qrcode';
 import { enumOptions } from '../models/user/enums';
 import {fields, IPartialApplication, IUser} from '../models/user/fields';
@@ -18,7 +18,7 @@ import {
 } from '../types/errors';
 import { MailTemplate } from '../types/mailer';
 import {
-  AllUserTypes, BasicUser,
+  AllUserTypes, BasicUser, DiscordSyncState,
   IRSVP,
   QRCodeGenerateBulkResponse,
   QRCodeGenerateRequest
@@ -29,6 +29,16 @@ import { testCanUpdateApplication, validateSubmission } from './util/checker';
 import { fetchUniverseState, getModels } from './util/resources';
 import {log} from "../services/logger";
 import ExternalUser from "../models/externaluser/ExternalUser";
+import {
+  DiscordConnectionMetadata,
+  getAccessToken,
+  getDiscordTokensFromUser, getMetadata,
+  getOAuthTokens,
+  getUserData,
+  pushMetadata
+} from "../services/discordApi";
+import {JsonWebTokenError, TokenExpiredError} from "jsonwebtoken";
+import {queueVerification} from "./DiscordController";
 
 
 export const createFederatedUser = async (linkID: string, email: string, firstName: string, lastName: string, groupsList: string[], groupsHaveIDPPrefix = true): Promise<IUser> => {
@@ -558,4 +568,180 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
   }
 
   throw new BadRequestError("Given user type is invalid.")
+}
+
+/**
+ * Updates the user's Discord linked roles
+ */
+export const syncRoles = async (userID: string): Promise<string> => {
+  const user = await User.findOne({
+    _id: userID
+  });
+
+  if(!user) {
+    throw new NotFoundError("Unable to find user with the given ID.");
+  }
+
+  let discordTokens = getDiscordTokensFromUser(user);
+
+  discordTokens = await getAccessToken(userID, discordTokens);
+
+  const userMetadata = {
+    isorganizer: user.roles.organizer ? 1 : 0,
+    isconfirmedhacker: user.roles.hacker && user.status.confirmed ? 1 : 0
+  } as DiscordConnectionMetadata;
+
+  await pushMetadata(discordTokens, userMetadata);
+
+  await User.updateOne({
+    _id: userID
+  }, {
+    'discord.lastSyncStatus': "SUCCESS" as DiscordSyncState,
+    'discord.lastSyncTime': Date.now()
+  });
+
+  return "OK";
+}
+
+/**
+ * Fetches and stores a user's Discord access and refresh token given a code
+ *
+ * @param userID
+ * @param stateString
+ * @param code
+ */
+
+export const associateWithDiscord = async (userID: string, stateString: string, code: string): Promise<string> => {
+  const userInfo = await User.findOne({
+    _id: userID
+  }, 'discord.discordID discord.accessToken discord.accessTokenExpireTime discord.refreshToken');
+
+  if(!userInfo) {
+    throw new NotFoundError("Unable to find user with the given ID.");
+  }
+
+  let tokens = undefined;
+
+  try {
+    tokens = await getOAuthTokens(stateString, code);
+  }
+  catch(e) {
+    if(e instanceof TokenExpiredError) {
+      throw new BadRequestError("The authorization state is expired.");
+    }
+    else if(e instanceof JsonWebTokenError) {
+      throw new BadRequestError("Unable to verify the state token.");
+    }
+    throw new InternalServerError("Unable to fetch Discord OAuth tokens.");
+  }
+
+  const userDiscordData = await getUserData(tokens);
+
+  if(userInfo.discord?.discordID !== undefined && userDiscordData.user.id !== userInfo.discord?.discordID)  {
+    throw new BadRequestError("The given user is already linked to a Discord account.");
+  }
+
+  const otherUser = await User.findOne({
+    'discord.discordID': userDiscordData.user.id
+  }, ['_id']);
+
+  if(otherUser && !userInfo._id.equals(otherUser?._id)) {
+    throw new BadRequestError("The given Discord user is already linked to a user.");
+  }
+
+  const nowTimestamp = Date.now();
+
+  const newUser = await User.findOneAndUpdate({
+    _id: userID
+  }, {
+    discord: {
+      discordID: userDiscordData.user.id,
+      username: userDiscordData.user.username + (userDiscordData.user.discriminator === "0" ? "" : userDiscordData.user.discriminator),
+      accessToken: tokens.access_token,
+      accessTokenExpireTime: tokens.expires_at,
+      refreshToken: tokens.refresh_token,
+      lastSyncStatus: "SOFTFAIL" as DiscordSyncState,
+      lastSyncTime: nowTimestamp,
+      ...(userInfo.discord?.refreshToken !== undefined ? {} : {
+        verifyTime: nowTimestamp,
+      })
+    }
+  }, {
+    new: true
+  });
+
+  if(!newUser) {
+    throw new InternalServerError("Unable to update user that was associated with a Discord account.");
+  }
+
+  try {
+    await syncRoles(userID);
+  }
+  catch(e) {
+    log.error(`Unable to complete initial role sync for ${userID}.`, e);
+  }
+  await queueVerification(userDiscordData.user.id, newUser);
+
+  return "OK";
+}
+
+export const disassociateFromDiscord = async (userID: string):Promise<string> => {
+  const user = await User.findOne({
+    _id: userID
+  });
+
+  if(!user) {
+    throw new NotFoundError("Unable to find the given user.");
+  }
+
+  try {
+    let discordTokens = getDiscordTokensFromUser(user);
+    discordTokens = await getAccessToken(userID, discordTokens);
+
+    const userMetadata = {
+      isorganizer: 0,
+      isconfirmedhacker: 0
+    } as DiscordConnectionMetadata;
+
+    await pushMetadata(discordTokens, userMetadata);
+  }
+  catch(e) {
+    log.error("Encountered error pushing metadata on Discord disassociation.", e);
+  }
+
+  if(user.discord.discordID) {
+    await queueVerification(user.discord.discordID, user, true);
+  }
+
+  await User.updateOne({
+    _id: userID
+  }, {
+    discord: {}
+  });
+
+  return "Disassociated user from the linked Discord account.";
+}
+
+export const fetchDiscordConnectionMetadata = async(userID?: string):Promise<DiscordConnectionMetadata> => {
+  if(!userID) {
+    throw new BadRequestError("UserID must be specified.")
+  }
+
+  const user = await User.findOne({
+    _id: userID
+  }, ['discord.accessToken', 'discord.accessTokenExpireTime', 'discord.refreshToken']);
+
+  if(!user) {
+    throw new NotFoundError("Unable to find user with the given ID.");
+  }
+
+  if(!user.discord?.accessToken || user.discord?.accessTokenExpireTime === undefined || !user.discord?.refreshToken) {
+    throw new BadRequestError("The given user is not linked to a Discord account via OAuth.");
+  }
+
+  let discordTokens = getDiscordTokensFromUser(user);
+
+  discordTokens = await getAccessToken(userID, discordTokens);
+
+  return getMetadata(discordTokens);
 }

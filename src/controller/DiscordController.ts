@@ -3,6 +3,8 @@ import { IRoles, IUser } from '../models/user/fields';
 import User from '../models/user/User';
 import { BadRequestError, NotFoundError } from '../types/errors';
 import { BasicUser, DiscordVerifyInfo } from '../types/types';
+import QueuedVerification from "../models/queuedverification/QueuedVerification";
+import {IQueuedVerification} from "../models/queuedverification/fields";
 
 const _assembleReturnInfo = (userInfo: BasicUser): DiscordVerifyInfo => {
   const returnInfo = {
@@ -66,8 +68,7 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
   }, {
     'discord.discordID': discordID,
     'discord.username': discordUsername,
-    'discord.verifyTime': timeOverride || Date.now(),
-    'status.checkedIn': true,
+    'discord.verifyTime': timeOverride || Date.now()
   });
 
   if (userInfo) {
@@ -88,3 +89,24 @@ export const verifyDiscordUser = async (email: string, discordID: string, discor
     return _assembleReturnInfo(userInfo);
   }
 };
+
+export const queueVerification = async (discordID: string, userData: BasicUser, revert=false): Promise<void> => {
+  await QueuedVerification.create({
+    queuedTime: Date.now(),
+    discordID,
+    revert: false,
+    verifyData: _assembleReturnInfo(userData)
+  });
+}
+
+export const getNextQueuedVerification = async ():Promise<IQueuedVerification | null | undefined> => {
+  return QueuedVerification.findOneAndUpdate({
+    processed: false
+  }, {
+    processed: true
+  }, {
+    sort: {
+      queuedTime: 1
+    }
+  });
+}

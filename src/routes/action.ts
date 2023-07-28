@@ -7,7 +7,7 @@ import { resumeExport } from '../services/dataexport';
 import assignAdmissionStatus from '../controller/applicationStatus/assignApplicationStatus';
 import getRanks from '../controller/applicationStatus/getRanks';
 import { createAPIToken } from '../controller/AuthController';
-import { verifyDiscordUser } from '../controller/DiscordController';
+import {getNextQueuedVerification, verifyDiscordUser} from '../controller/DiscordController';
 import { recordJoin, recordLeave } from '../controller/MeetingController';
 import {getObject, initializeSettingsMapper} from '../controller/ModelController';
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
@@ -21,7 +21,7 @@ import {
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID
+  fetchUserByDiscordID, associateWithDiscord, fetchDiscordConnectionMetadata, disassociateFromDiscord
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -31,6 +31,7 @@ import verifyMailingList from '../services/mailer/verifyMailingList';
 import {mongoose} from '../services/mongoose_service';
 import {isAdmin, isHacker, isOrganizer, isVolunteer} from '../services/permissions';
 import { getStatistics } from '../services/statistics';
+import {generateDiscordOAuthUrl} from "../services/discordApi";
 
 const actionRouter = express.Router();
 
@@ -205,7 +206,39 @@ actionRouter.get('/checkInQR', isHacker, (req: Request, res:Response) => {
           req.executor!._id, "User"
       )
   )
-})
+});
+
+/**
+ * (Hacker)
+ *
+ * Generate Discord link URL
+ */
+actionRouter.post('/discordOAuthUrl', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      generateDiscordOAuthUrl(
+          req.body.redirectUrl
+      )
+  )
+});
+
+/**
+ * (Hacker)
+ *
+ * Associate Discord account given a state and OAuth code
+ */
+actionRouter.post('/associateDiscord', isHacker, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      associateWithDiscord(
+          req.executor!._id,
+          req.body.state,
+          req.body.code
+      )
+  )
+});
 
 // Volunteer endpoints
 
@@ -419,7 +452,7 @@ actionRouter.post('/verifyDiscord', isOrganizer, (req: Request, res: Response) =
 /**
  * (Organizer)
  *
- * Associate a user on Discord
+ * Fetch user by Discord ID
  */
 actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Response) => {
   logResponse(
@@ -496,3 +529,46 @@ actionRouter.post('/multiCheckInQR', isOrganizer, (req: Request, res:Response) =
       generateCheckInQR(req.executor!, req.body.userList)
   )
 })
+
+/**
+ * (Organizer)
+ *
+ * Disassociate Discord account from a user
+ */
+actionRouter.post('/disassociateDiscord', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      disassociateFromDiscord(
+          req.body.userID
+      )
+  )
+});
+
+/**
+ * (Organizer)
+ *
+ * Get linked Discord metadata for a user
+ */
+actionRouter.get('/discordMetadata', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      fetchDiscordConnectionMetadata(
+          req.query.userID as string
+      )
+  )
+});
+
+/**
+ * (Organizer)
+ *
+ * Get next queued Discord verification
+ */
+actionRouter.get('/getNextQueuedDiscordVerification', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      getNextQueuedVerification()
+  )
+});

@@ -4,6 +4,7 @@ import {IExternalUser} from "../models/externaluser/fields";
 import {Model} from "mongoose";
 
 export type ErrorMessage = { status: number, message: string, error?: string };
+export type DiscordSyncState = "SUCCESS" | "SOFTFAIL" | "HARDFAIL";
 
 /**
  * Status of the universe
@@ -36,7 +37,12 @@ export interface BasicUser extends mongoose.Document {
     username?: string,
     verifyTime?: number,
     additionalRoles?: string[],
-    suffix?: string
+    suffix?: string,
+    accessToken?: string,
+    accessTokenExpireTime?: number,
+    refreshToken?: string,
+    lastSyncTime?: number,
+    lastSyncStatus?: DiscordSyncState
   },
   checkInNotes: string[]
 }
