@@ -27,7 +27,8 @@ export const fields = {
             type: Number
         },
         earliestProcessTime: {
-            type: Number
+            type: Number,
+            required: true
         },
         guildID: {
             type: String,

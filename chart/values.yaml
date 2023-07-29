@@ -95,6 +95,9 @@ hackthe6ixBackend:
       mongoUrl: mongodb://localhost:27017/test
       mailerApiKey: changeme
       jwtSecret: changeme
+      discordClientId: changeme
+      discordClientSecret: changeme
+      discordGuildId: changeme
   initialization:
     secretName: test-secret
     settings:
