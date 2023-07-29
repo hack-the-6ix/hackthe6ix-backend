@@ -95,6 +95,7 @@ export const queueVerification = async (discordID: string, userData: BasicUser, 
     queuedTime: Date.now(),
     discordID,
     guildID: process.env.DISCORD_GUILD_ID,
+    earliestProcessTime: 0,
     revert: false,
     verifyData: _assembleReturnInfo(userData)
   });
