@@ -531,13 +531,13 @@ const status = {
       readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
     },
 
-    // Only admins can read this field
     statusReleased: {
       type: Boolean,
       required: true,
       default: false,
       caption: 'Status Released',
 
+      writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
       readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
     },
 
