@@ -573,7 +573,7 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
 /**
  * Updates the user's Discord linked roles
  */
-export const syncRoles = async (userID: string): Promise<string> => {
+export const syncRoles = async (userID: string): Promise<boolean> => {
   const user = await User.findOne({
     _id: userID
   });
@@ -600,7 +600,7 @@ export const syncRoles = async (userID: string): Promise<string> => {
     'discord.lastSyncTime': Date.now()
   });
 
-  return "OK";
+  return Object.values(userMetadata).reduce((a, b) => a + b, 0) > 0; // return true if at least one role was granted
 }
 
 /**
@@ -674,13 +674,18 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
     throw new InternalServerError("Unable to update user that was associated with a Discord account.");
   }
 
+  let hasRoles = false;
+
   try {
-    await syncRoles(userID);
+    hasRoles = await syncRoles(userID);
   }
   catch(e) {
     log.error(`Unable to complete initial role sync for ${userID}.`, e);
   }
-  await queueVerification(userDiscordData.user.id, newUser);
+
+  if(hasRoles) {
+    await queueVerification(userDiscordData.user.id, newUser);
+  }
 
   return "OK";
 }
