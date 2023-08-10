@@ -540,7 +540,7 @@ export const generateCheckInQR = async (requestUser: IUser, userList: QRCodeGene
 export const checkIn = async (userID: string, userType: AllUserTypes, checkInTime = Date.now()): Promise<string[]> => {
   const newStatus = {
     'status.checkedIn': true,
-    'status.checkInTime': checkInTime
+    'checkInTime': checkInTime
   };
 
   if(userType === "User") {
@@ -549,7 +549,8 @@ export const checkIn = async (userID: string, userType: AllUserTypes, checkInTim
       'status.confirmed': true
     }, newStatus, {
       new: true
-    })
+    });
+
     if(!user){
       throw new NotFoundError("Unable to find RSVP'd user with given ID. Ensure they have RSVP'd and that the user ID/QR matches!");
     }

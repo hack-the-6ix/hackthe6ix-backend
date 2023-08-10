@@ -25,10 +25,6 @@ export const fields = {
         required: true,
         default: false,
         readCheck: true
-      },
-      checkInTime: {
-        type: Number,
-        readCheck: true
       }
     },
     firstName: {
@@ -69,6 +65,10 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true
     },
+    checkInTime: {
+      type: Number,
+      readCheck: true
+    },
     discord: discordShared,
   },
 };
@@ -77,6 +77,5 @@ export interface IExternalUser extends BasicUser {
   notes: string,
   status?: {
     checkedIn?: boolean,
-    checkInTime?: number
   }
 }
