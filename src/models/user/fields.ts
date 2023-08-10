@@ -615,12 +615,6 @@ const status = {
       readCheck: true
     },
 
-    checkInTime: {
-      type: Number,
-      caption: 'Check In Time',
-      readCheck: true
-    },
-
     // Virtual fields
     rsvpExpired: {
       type: Boolean,
@@ -954,6 +948,11 @@ export const fields = {
       writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
       readCheck: true
     },
+    checkInTime: {
+      type: Number,
+      caption: 'Check In Time',
+      readCheck: true
+    },
     rsvpForm: rsvpForm,
     discord: discordShared,
     roles: roles,
@@ -991,7 +990,6 @@ export interface IStatus {
   confirmed?: boolean,
   declined?: boolean,
   checkedIn?: boolean,
-  checkInTime?: number,
 
   // Virtual fields
   canAmendTeam?: boolean,

@@ -53,7 +53,7 @@ describe('Check in user', () => {
                 expect.arrayContaining(CHECK_IN_NOTES)
             )
             expect(newUser.status?.checkedIn).toEqual(true);
-            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
+            expect(newUser.checkInTime).toEqual(SIM_TIME);
         });
         test('User not confirmed', async () => {
             await generateMockUniverseState();
@@ -85,7 +85,7 @@ describe('Check in user', () => {
                 expect.arrayContaining(CHECK_IN_NOTES)
             )
             expect(newUser.status?.checkedIn).toEqual(true);
-            expect(newUser.status?.checkInTime).toEqual(SIM_TIME);
+            expect(newUser.checkInTime).toEqual(SIM_TIME);
         });
 
     });
