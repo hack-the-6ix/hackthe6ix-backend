@@ -373,6 +373,63 @@ Get the user's current team
 }
 ```
 
+### GET - Get Application Settings
+`/api/action/applicationSettings`
+
+Returns the global settings object
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    ...
+  }
+}
+```
+
+### POST - Generate Discord OAuth URL
+`/api/action/discordOAuthUrl`
+
+Returns a URL to begin the Discord OAuth process.
+
+#### Input Specification
+```
+{
+ redirectUrl: "<string>"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "<url>"
+}
+```
+
+### POST - Associate Discord
+`/api/action/discordOAuthUrl`
+
+Finishes the Discord OAuth process and associates the user, given a state and code.
+
+#### Input Specification
+```
+{
+ state: "<string>",
+ code: "<code>"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "OK"
+}
+```
+
+
 ### GET - Get statistics
 `/api/action/getStatistics?update=false`
 
@@ -600,23 +657,6 @@ Once a user has declined, they cannot retract this decision.
 }
 ```
 
-### POST - Submit COVID-19 Vaccine QR
-`/api/action/submitVaccineQR`
-
-Submits a COVID-19 vaccine QR code for verification. Accepts PDF (max. 2 pages) and PNG files.
-The QR code is discarded immediately after verification.
-
-##### Input Specification
-
-Send the PDF or PNG as a file in the `qrCode` field.
-
-#### Output Specification
-```
-{
-  "status": 200,
-  "message": true|false
-}
-```
 
 ### GET - Get candidate (Organizer)
 `/api/action/getCandidate?category=<category goes here>`
@@ -694,6 +734,7 @@ Attempt to associate a user with a given Discord account. Will fail if the user 
 
 The user's Discord roles is taken from the user's permission roles as well as any in their `discord.additionalRoles` field.
 
+
 ### GET - Resume Export (Organizer)
 `/api/action/resumeExport`
 
@@ -701,6 +742,87 @@ Returns a ZIP of all the resumes of users who were accepted or waitlisted and co
 
 #### Output Specification
 Binary blob
+
+
+### POST - Disassociate Discord (Organizer)
+`/api/action/disassociateDiscord`
+
+Disassociates a user from their associated Discord account.
+
+#### Input Specification
+```
+{
+ userID: "<userID>"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: "OK"
+}
+```
+
+### GET - Get user Discord Metadata (Organizer)
+`/api/action/disassociateDiscord`
+
+Returns the application's metadata that is stored by Discord.
+
+#### Input Specification
+```
+{
+ userID: "<userID>"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    ...
+  }
+}
+```
+
+
+### GET - Get next queued Discord verification (Organizer)
+`/api/action/getNextQueuedDiscordVerification`
+
+Returns information about the next user that is in the Discord server verification queue. Note that this also removes the entry from the queue.
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: {
+    ...
+  }
+}
+```
+
+### POST - Requeue Discord verification (Organizer)
+`/api/action/requeueDiscordVerification`
+
+Requeue a Discord verification request.
+
+#### Input Specification
+```
+{
+  queuedVerificationID: "<queueVerificationID>",
+  earliestRetryAt: "<unix time (ms)>"
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: ""
+}
+```
+
 
 ### GET - Check in QR Code
 `/api/action/checkInQR`
@@ -761,6 +883,30 @@ Generates check in QR codes for multiple (external) users.
       "userID": "<userID>",
       "userType": "<User|ExternalUser>"
       "code": "<base64-encoded image>"
+  }]
+}
+```
+
+### POST - Create API Token (Admin)
+`/api/action/createAPIToken`
+
+Generates an API token that can be used to access the API programmatically.
+
+##### Input Specification
+
+```
+{
+  "groups": ["<hacker|volunteer|organizer|admin>"],
+  "description": "<string>"
+}
+```
+
+#### Output Specification
+```
+{
+  "status": 200,
+  "message": [{
+      "token": "<token>",
   }]
 }
 ```
