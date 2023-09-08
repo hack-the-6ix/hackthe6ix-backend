@@ -480,7 +480,7 @@ actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Respons
  *
  * Create an API token for programmatic access
  */
-actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) => {
+actionRouter.post('/createAPIToken', isAdmin, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
