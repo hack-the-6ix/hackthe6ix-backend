@@ -823,6 +823,49 @@ Requeue a Discord verification request.
 }
 ```
 
+### POST - Add Check In Notes (Organizer)
+`/api/action/addCheckInNotes`
+
+Adds the given check in notes to a user's check in notes. Returns all the user's new check in notes.
+
+#### Input Specification
+```
+{
+  userID: "<userID>",
+  checkInNotes: ["<string>"]
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: ["<string>"]
+}
+```
+
+
+### POST - Remove Check In Notes (Organizer)
+`/api/action/removeCheckInNotes`
+
+Remove the given check in notes to a user's check in notes. Returns all the user's new check in notes.
+
+#### Input Specification
+```
+{
+  userID: "<userID>",
+  checkInNotes: ["<string>"]
+}
+```
+
+#### Output Specification
+```
+{
+  status: 200,
+  message: ["<string>"]
+}
+```
+
 
 ### GET - Check in QR Code
 `/api/action/checkInQR`
