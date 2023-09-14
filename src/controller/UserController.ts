@@ -691,6 +691,12 @@ export const associateWithDiscord = async (userID: string, stateString: string, 
   return "OK";
 }
 
+/**
+ * Removes a user's Discord information from our database. This lets them link to another Discord account.
+ * Note that this doesn't revoke the app grant on their end.
+ *
+ * @param userID
+ */
 export const disassociateFromDiscord = async (userID: string):Promise<string> => {
   const user = await User.findOne({
     _id: userID
@@ -728,6 +734,11 @@ export const disassociateFromDiscord = async (userID: string):Promise<string> =>
   return "Disassociated user from the linked Discord account.";
 }
 
+/**
+ * Gets the currently stored Discord metadata for the user
+ *
+ * @param userID
+ */
 export const fetchDiscordConnectionMetadata = async(userID?: string):Promise<DiscordConnectionMetadata> => {
   if(!userID) {
     throw new BadRequestError("UserID must be specified.")
@@ -750,4 +761,52 @@ export const fetchDiscordConnectionMetadata = async(userID?: string):Promise<Dis
   discordTokens = await getAccessToken(userID, discordTokens);
 
   return getMetadata(discordTokens);
+}
+
+export const addCheckInNotes = async (userID: string, notes: string[]):Promise<string[]> => {
+  if(!userID) {
+    throw new BadRequestError("UserID must be specified.");
+  }
+
+  const user = await User.findOneAndUpdate({
+    _id: userID
+  }, {
+    $push: {
+      checkInNotes: {
+        $each: notes
+      }
+    }
+  }, {
+    new: true
+  });
+
+  if(!user) {
+    throw new NotFoundError("Unable to find user with the given ID.");
+  }
+
+  return user.checkInNotes;
+}
+
+export const removeCheckInNotes = async (userID: string, notes: string[]): Promise<string[]> => {
+  if(!userID) {
+    throw new BadRequestError("UserID must be specified.");
+  }
+
+  const user = await User.findOneAndUpdate({
+    _id: userID
+  }, {
+    $pull: {
+      checkInNotes: {
+        $in: notes
+      }
+    }
+  }, {
+    new: true
+  });
+
+  if(!user) {
+    throw new NotFoundError("Unable to find user with the given ID.");
+  }
+
+  return user.checkInNotes;
 }

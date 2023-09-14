@@ -17,15 +17,22 @@ import {getObject, initializeSettingsMapper} from '../controller/ModelController
 import { createTeam, getTeam, joinTeam, leaveTeam } from '../controller/TeamController';
 import {
   checkIn,
-  fetchUser, generateCheckInQR,
-  getCandidate, getCheckInQR,
+  fetchUser,
+  generateCheckInQR,
+  getCandidate,
+  getCheckInQR,
   getEnumOptions,
   gradeCandidate,
   releaseApplicationStatus,
   rsvp,
   updateApplication,
   updateResume,
-  fetchUserByDiscordID, associateWithDiscord, fetchDiscordConnectionMetadata, disassociateFromDiscord
+  fetchUserByDiscordID,
+  associateWithDiscord,
+  fetchDiscordConnectionMetadata,
+  disassociateFromDiscord,
+  addCheckInNotes,
+  removeCheckInNotes
 } from '../controller/UserController';
 import { logResponse } from '../services/logger';
 import sendAllTemplates from '../services/mailer/sendAllTemplates';
@@ -473,7 +480,7 @@ actionRouter.get('/getUserByDiscordID', isOrganizer, (req: Request, res: Respons
  *
  * Create an API token for programmatic access
  */
-actionRouter.post('/createAPIToken', isOrganizer, (req: Request, res: Response) => {
+actionRouter.post('/createAPIToken', isAdmin, (req: Request, res: Response) => {
   logResponse(
     req,
     res,
@@ -590,3 +597,29 @@ actionRouter.post('/requeueDiscordVerification', isOrganizer, (req: Request, res
       requeueVerification(req.body.queuedVerificationID, req.body.earliestRetryAt)
   )
 });
+
+/**
+ * (Organizer)
+ *
+ * Add check in notes to user
+ */
+actionRouter.post('/addCheckInNotes', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      addCheckInNotes(req.body.userID, req.body.checkInNotes)
+  )
+})
+
+/**
+ * (Organizer)
+ *
+ * Remove check in notes from user
+ */
+actionRouter.post('/removeCheckInNotes', isOrganizer, (req: Request, res: Response) => {
+  logResponse(
+      req,
+      res,
+      removeCheckInNotes(req.body.userID, req.body.checkInNotes)
+  )
+})
