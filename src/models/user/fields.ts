@@ -12,9 +12,10 @@ import {
   isAdmin,
   isOrganizer,
   isUserOrOrganizer,
-  maxLength, maxWordLength,
+  maxLength,
+  maxWordLength,
   minLength,
-  minWordLength
+  minWordLength,
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
@@ -28,15 +29,17 @@ export const emergencyContact = {
       type: String,
       caption: 'Emergency Contact First Name',
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
-      readCheck: true
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
+      readCheck: true,
     },
     lastName: {
       type: String,
       caption: 'Emergency Contact Last Name',
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
-      readCheck: true
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
+      readCheck: true,
     },
     phoneNumber: {
       type: String,
@@ -44,7 +47,8 @@ export const emergencyContact = {
       inTextSearch: true,
 
       writeCheck: maxLength(50),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(50)(request),
       readCheck: true,
     },
     relationship: {
@@ -53,10 +57,10 @@ export const emergencyContact = {
 
       writeCheck: inEnum(enumOptions.emergencyContactRelationship, true),
       submitCheck: inEnum(enumOptions.emergencyContactRelationship),
-      readCheck: true
-    }
-  }
-}
+      readCheck: true,
+    },
+  },
+};
 
 // Main application
 export const hackerApplication = {
@@ -64,7 +68,6 @@ export const hackerApplication = {
   readCheck: true,
 
   FIELDS: {
-
     // We will set this internally when the application is updated
     lastUpdated: {
       type: Number,
@@ -95,16 +98,6 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    phoneNumber: {
-      type: String,
-      caption: 'Phone Number',
-      inTextSearch: true,
-
-      writeCheck: maxLength(50),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(50)(request),
-      readCheck: true,
-    },
-
     gender: {
       type: String,
       caption: 'Gender',
@@ -112,25 +105,6 @@ export const hackerApplication = {
 
       writeCheck: inEnum(enumOptions.gender, true),
       submitCheck: inEnum(enumOptions.gender),
-      readCheck: true,
-    },
-
-    age: {
-      type: Number,
-      caption: 'Age',
-
-      writeCheck: (request: WriteCheckRequest<number, IUser>) => request.fieldValue === undefined || !isNaN(request.fieldValue),
-      submitCheck: (request: WriteCheckRequest<number, IUser>) => !isNaN(request.fieldValue),
-      readCheck: true
-    },
-
-    pronouns: {
-      type: String,
-      caption: 'Pronouns',
-      inTextSearch: true,
-
-      writeCheck: inEnum(enumOptions.pronouns, true),
-      submitCheck: inEnum(enumOptions.pronouns),
       readCheck: true,
     },
 
@@ -150,7 +124,8 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -160,7 +135,7 @@ export const hackerApplication = {
 
       writeCheck: inEnum(enumOptions.shirt, true),
       submitCheck: inEnum(enumOptions.shirt),
-      readCheck: true
+      readCheck: true,
     },
 
     dietaryRestrictions: {
@@ -168,7 +143,7 @@ export const hackerApplication = {
       caption: 'Dietary Restrictions',
       writeCheck: inEnum(enumOptions.dietaryRestrictions, true),
       submitCheckL: inEnum(enumOptions.dietaryRestrictions, true),
-      readCheck: true
+      readCheck: true,
     },
 
     healthWarnings: {
@@ -176,9 +151,8 @@ export const hackerApplication = {
       captions: 'Allergies/Dietary Restrictions',
       writeCheck: maxLength(256),
       submitCheck: maxLength(256),
-      readCheck: true
+      readCheck: true,
     },
-
 
     /* Address */
 
@@ -187,8 +161,10 @@ export const hackerApplication = {
       caption: 'City',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -197,8 +173,10 @@ export const hackerApplication = {
       caption: 'Province/State',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -212,7 +190,8 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -222,7 +201,8 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(256),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minLength(1)(request) && maxLength(256)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(256)(request),
       readCheck: true,
     },
 
@@ -255,7 +235,8 @@ export const hackerApplication = {
 
       readCheck: true,
       writeCheck: false,
-      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
+      submitCheck: (request: WriteCheckRequest<any, IUser>) =>
+        request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
     },
 
     // The user cannot directly edit this field, but they can view it
@@ -267,12 +248,14 @@ export const hackerApplication = {
 
       readCheck: true,
       writeCheck: false,
-      submitCheck: (request: WriteCheckRequest<any, IUser>) => request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
+      submitCheck: (request: WriteCheckRequest<any, IUser>) =>
+        request.targetObject?.hackerApplication?.resumeFileName?.length > 0,
     },
 
     resumeSharePermission: {
       type: Boolean,
-      caption: 'I allow Hack the 6ix to distribute my resume to its event sponsors',
+      caption:
+        'I allow Hack the 6ix to distribute my resume to its event sponsors',
 
       writeCheck: true,
       readCheck: true,
@@ -311,7 +294,8 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minWordLength(50)(request) && maxWordLength(200)(request),
       readCheck: true,
     },
 
@@ -321,36 +305,19 @@ export const hackerApplication = {
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
-      readCheck: true,
-    },
-
-    creativeResponseEssay: {
-      type: String,
-      caption: 'Technology/Innovation Essay',
-      inTextSearch: true,
-
-      writeCheck: maxLength(2056),
-      submitCheck: (request: WriteCheckRequest<string, IUser>) => minWordLength(50)(request) && maxWordLength(200)(request),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minWordLength(50)(request) && maxWordLength(200)(request),
       readCheck: true,
     },
 
     /* At HT6 */
-    requestedWorkshops: {
-      type: String,
-      caption: 'Requested Workshops',
-      inTextSearch: true,
-
-      writeCheck: maxLength(2056),
-      readCheck: true,
-    },
-
     mlhCOC: {
       type: Boolean,
       caption: 'MLH COC',
 
       writeCheck: true,
-      submitCheck: (request: WriteCheckRequest<boolean, IUser>) => request.fieldValue,
+      submitCheck: (request: WriteCheckRequest<boolean, IUser>) =>
+        request.fieldValue,
       readCheck: true,
     },
 
@@ -367,7 +334,8 @@ export const hackerApplication = {
       caption: 'MLH Data',
 
       writeCheck: true,
-      submitCheck: (request: WriteCheckRequest<boolean, IUser>) => request.fieldValue,
+      submitCheck: (request: WriteCheckRequest<boolean, IUser>) =>
+        request.fieldValue,
       readCheck: true,
     },
   },
@@ -383,22 +351,24 @@ const rsvpForm = {
       caption: 'Selected companies',
 
       writeCheck: true,
-      readCheck: true
+      readCheck: true,
     },
     remindInPersonRSVP: {
       type: Boolean,
       default: false,
       caption: 'In person RSVP reminder',
       writeCheck: true,
-      readCheck: true
-    }
-  }
-}
+      readCheck: true,
+    },
+  },
+};
 
 // Internal FIELDS; Only organizers can access them
 const internal = {
-  writeCheck: (request: WriteCheckRequest<any, IUser>) => isOrganizer(request.requestUser),
-  readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) =>
+    isOrganizer(request.requestUser),
+  readCheck: (request: ReadCheckRequest<IUser>) =>
+    isOrganizer(request.requestUser),
 
   FIELDS: {
     notes: {
@@ -419,7 +389,8 @@ const internal = {
     },
 
     applicationScores: {
-      writeCheck: (request: WriteCheckRequest<any, IUser>) => isAdmin(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<any, IUser>) =>
+        isAdmin(request.requestUser),
       readCheck: true,
 
       FIELDS: {
@@ -509,9 +480,9 @@ const internal = {
 
 // User application state
 const status = {
-
   // Only organizers can modify statuses
-  writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+  writeCheck: (request: ReadCheckRequest<IUser>) =>
+    isOrganizer(request.requestUser),
   readCheck: true,
 
   FIELDS: {
@@ -528,7 +499,8 @@ const status = {
       virtual: true,
       caption: 'Internal Status',
 
-      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+      readCheck: (request: ReadCheckRequest<IUser>) =>
+        isOrganizer(request.requestUser),
     },
 
     statusReleased: {
@@ -537,8 +509,10 @@ const status = {
       default: false,
       caption: 'Status Released',
 
-      writeCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
-      readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: ReadCheckRequest<IUser>) =>
+        isOrganizer(request.requestUser),
+      readCheck: (request: ReadCheckRequest<IUser>) =>
+        isOrganizer(request.requestUser),
     },
 
     applied: {
@@ -612,7 +586,7 @@ const status = {
       required: true,
       default: false,
       caption: 'Checked In',
-      readCheck: true
+      readCheck: true,
     },
 
     // Virtual fields
@@ -666,10 +640,10 @@ const status = {
   },
 };
 
-
 // Fields to inject into mailmerge
 const mailmerge = {
-  readCheck: (request: ReadCheckRequest<IUser>) => isOrganizer(request.requestUser),
+  readCheck: (request: ReadCheckRequest<IUser>) =>
+    isOrganizer(request.requestUser),
 
   FIELDS: {
     FIRST_NAME: {
@@ -705,7 +679,7 @@ const mailmerge = {
       type: String,
       readCheck: true,
       virtual: true,
-    }
+    },
   },
 };
 
@@ -716,7 +690,6 @@ const mailmerge = {
 //  list all of them, e.g. admin has organizer access implicitly)
 // **
 const roles = {
-
   writeCheck: false,
   readCheck: true,
   virtual: true,
@@ -769,7 +742,6 @@ const roles = {
 //  roles a user has. Please use the "roles" field fro that
 // **
 const groups = {
-
   writeCheck: false,
   readCheck: false,
 
@@ -805,7 +777,6 @@ const groups = {
 };
 
 export const fields = {
-
   /**
    * NOTE: READ/WRITE RULES ARE TESTED OUTSIDE IN.
    *       THIS MEANS THAT IF AN "OUTER" RULE FAILS, WE STOP AND DO NOT
@@ -816,11 +787,15 @@ export const fields = {
    *
    * Omitted readCheck/writeCheck rules will default to false to be safe (aka always reject)
    */
-  writeCheck: (request: WriteCheckRequest<any, IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
-  readCheck: (request: ReadCheckRequest<IUser>) => isUserOrOrganizer(request.requestUser, request.targetObject),
+  writeCheck: (request: WriteCheckRequest<any, IUser>) =>
+    isUserOrOrganizer(request.requestUser, request.targetObject),
+  readCheck: (request: ReadCheckRequest<IUser>) =>
+    isUserOrOrganizer(request.requestUser, request.targetObject),
 
-  deleteCheck: (request: DeleteCheckRequest<IUser>) => isAdmin(request.requestUser),
-  createCheck: (request: CreateCheckRequest<any, IUser>) => isAdmin(request.requestUser),
+  deleteCheck: (request: DeleteCheckRequest<IUser>) =>
+    isAdmin(request.requestUser),
+  createCheck: (request: CreateCheckRequest<any, IUser>) =>
+    isAdmin(request.requestUser),
 
   // Root FIELDS
   FIELDS: {
@@ -836,7 +811,8 @@ export const fields = {
       default: 0,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
     },
 
     idpLinkID: {
@@ -846,7 +822,8 @@ export const fields = {
       index: true,
 
       readCheck: false,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
     },
 
     fullName: {
@@ -865,7 +842,8 @@ export const fields = {
       caption: 'First Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -875,7 +853,8 @@ export const fields = {
       caption: 'Last Name',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -885,7 +864,8 @@ export const fields = {
       caption: 'Email',
       inTextSearch: true,
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser) && maxLength(64)(request),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser) && maxLength(64)(request),
       readCheck: true,
     },
 
@@ -900,12 +880,13 @@ export const fields = {
       type: Number,
       caption: 'RSVP Deadline',
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
       readCheck: true,
     },
     checkInQR: {
       type: String,
-      readCheck: true
+      readCheck: true,
     },
 
     // Some users (mostly for testing/won admission) are special and should be allowed to apply before everyone else
@@ -913,7 +894,8 @@ export const fields = {
       type: Number,
       caption: 'Personal Application Open',
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -922,7 +904,8 @@ export const fields = {
       type: Number,
       caption: 'Personal Application Deadline',
 
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
       readCheck: true,
     },
 
@@ -945,13 +928,14 @@ export const fields = {
     checkInNotes: {
       type: [String],
       default: [] as any,
-      writeCheck: (request: WriteCheckRequest<string, IUser>) => isOrganizer(request.requestUser),
-      readCheck: true
+      writeCheck: (request: WriteCheckRequest<string, IUser>) =>
+        isOrganizer(request.requestUser),
+      readCheck: true,
     },
     checkInTime: {
       type: Number,
       caption: 'Check In Time',
-      readCheck: true
+      readCheck: true,
     },
     rsvpForm: rsvpForm,
     discord: discordShared,
@@ -974,129 +958,130 @@ export const fields = {
   },
 };
 
-export interface IRoles { // Virtual field with all "lesser" roles populated
-  hacker: boolean,
-  admin: boolean,
-  organizer: boolean,
-  volunteer: boolean
+export interface IRoles {
+  // Virtual field with all "lesser" roles populated
+  hacker: boolean;
+  admin: boolean;
+  organizer: boolean;
+  volunteer: boolean;
 }
 
 export interface IStatus {
-  statusReleased?: boolean,
-  applied?: boolean,
-  accepted?: boolean,
-  rejected?: boolean,
-  waitlisted?: boolean,
-  confirmed?: boolean,
-  declined?: boolean,
-  checkedIn?: boolean,
+  statusReleased?: boolean;
+  applied?: boolean;
+  accepted?: boolean;
+  rejected?: boolean;
+  waitlisted?: boolean;
+  confirmed?: boolean;
+  declined?: boolean;
+  checkedIn?: boolean;
 
   // Virtual fields
-  canAmendTeam?: boolean,
-  canApply?: boolean,
-  canRSVP?: boolean,
-  isRSVPOpen?: boolean,
+  canAmendTeam?: boolean;
+  canApply?: boolean;
+  canRSVP?: boolean;
+  isRSVPOpen?: boolean;
 
-  rsvpExpired?: boolean,
-  applicationExpired?: boolean,
+  rsvpExpired?: boolean;
+  applicationExpired?: boolean;
 
-  textStatus: string
-  internalTextStatus: string
+  textStatus: string;
+  internalTextStatus: string;
 }
 
 export interface IUser extends BasicUser {
-  lastLogout: number,
-  idpLinkID: string,
-  fullName: string,
-  created: number,
-  personalApplicationOpen?: number,
-  personalRSVPDeadline?: number,
-  personalApplicationDeadline?: number,
-  roles: IRoles,
-  groups: IRoles, // Raw group from KEYCLOAK
-  status: IStatus,
-  hackerApplication: IApplication,
-  rsvpForm: IRSVPForm,
+  lastLogout: number;
+  idpLinkID: string;
+  fullName: string;
+  created: number;
+  personalApplicationOpen?: number;
+  personalRSVPDeadline?: number;
+  personalApplicationDeadline?: number;
+  roles: IRoles;
+  groups: IRoles; // Raw group from KEYCLOAK
+  status: IStatus;
+  hackerApplication: IApplication;
+  rsvpForm: IRSVPForm;
   internal: {
-    notes?: string,
-    computedApplicationScore?: number,
-    computedFinalApplicationScore?: number, // This value is added by get-rank and usually isn't populated
+    notes?: string;
+    computedApplicationScore?: number;
+    computedFinalApplicationScore?: number; // This value is added by get-rank and usually isn't populated
     applicationScores?: {
       creativeResponse: {
-        score: number
-        reviewer: string
-      },
+        score: number;
+        reviewer: string;
+      };
       whyHT6: {
-        score: number
-        reviewer: string
-      },
+        score: number;
+        reviewer: string;
+      };
       project: {
-        score: number
-        reviewer: string
-      },
+        score: number;
+        reviewer: string;
+      };
       portfolio: {
-        score: number
-        reviewer: string
-      },
-    }
-  },
-  mailmerge: IMailMerge,
-  computedApplicationOpen: number,
-  computedApplicationDeadline: number,
-  computedRSVPDeadline: number
+        score: number;
+        reviewer: string;
+      };
+    };
+  };
+  mailmerge: IMailMerge;
+  computedApplicationOpen: number;
+  computedApplicationDeadline: number;
+  computedRSVPDeadline: number;
 }
 
 export interface IMailMerge {
-  FIRST_NAME: string,
-  LAST_NAME: string,
-  MERGE_FIRST_NAME: string,
-  MERGE_LAST_NAME: string,
-  MERGE_APPLICATION_DEADLINE: string,
-  MERGE_CONFIRMATION_DEADLINE: string
+  FIRST_NAME: string;
+  LAST_NAME: string;
+  MERGE_FIRST_NAME: string;
+  MERGE_LAST_NAME: string;
+  MERGE_APPLICATION_DEADLINE: string;
+  MERGE_CONFIRMATION_DEADLINE: string;
 }
 
 export interface IApplication {
-  lastUpdated: number,
-  phoneNumber: string,
-  teamCode: string,
-  emailConsent: boolean,
-  gender: string,
-  age: number,
-  pronouns: string,
-  ethnicity: string,
-  country: string,
-  shirtSize: string,
-  dietaryRestrictions: string,
-  healthWarnings: string,
-  city: string,
-  province: string,
-  school: string,
-  program: string,
-  levelOfStudy: string,
-  hackathonsAttended: string,
-  resumeFileName: string,
-  friendlyResumeFileName: string,
-  resumeSharePermission: boolean,
-  githubLink: string,
-  portfolioLink: string,
-  linkedinLink: string,
-  projectEssay: string,
-  whyHT6Essay: string,
-  creativeResponseEssay: string,
-  mlhCOC: boolean,
-  mlhEmail: boolean,
-  mlhData: boolean,
+  lastUpdated: number;
+  phoneNumber: string;
+  teamCode: string;
+  emailConsent: boolean;
+  gender: string;
+  age: number;
+  pronouns: string;
+  ethnicity: string;
+  country: string;
+  shirtSize: string;
+  dietaryRestrictions: string;
+  healthWarnings: string;
+  city: string;
+  province: string;
+  school: string;
+  program: string;
+  levelOfStudy: string;
+  hackathonsAttended: string;
+  resumeFileName: string;
+  friendlyResumeFileName: string;
+  resumeSharePermission: boolean;
+  githubLink: string;
+  portfolioLink: string;
+  linkedinLink: string;
+  projectEssay: string;
+  whyHT6Essay: string;
+  creativeResponseEssay: string;
+  mlhCOC: boolean;
+  mlhEmail: boolean;
+  mlhData: boolean;
   emergencyContact: {
-    firstName: string,
-    lastName: string,
-    phoneNumber: string,
-    relationship: string
-  }
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    relationship: string;
+  };
 }
 
 export type IPartialApplication = Partial<IApplication>;
 
 export interface IRSVPForm {
-  selectedCompanies?: string[],
-  remindInPersonRSVP?: boolean
+  selectedCompanies?: string[];
+  remindInPersonRSVP?: boolean;
 }
