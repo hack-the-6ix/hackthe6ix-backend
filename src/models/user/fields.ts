@@ -290,9 +290,9 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    projectEssay: {
+    creativeResponseEssay: {
       type: String,
-      caption: 'Project Essay',
+      caption: 'Technology/Innovation Essay',
       inTextSearch: true,
 
       writeCheck: maxLength(2056),
@@ -1064,7 +1064,7 @@ export interface IApplication {
   githubLink: string;
   portfolioLink: string;
   linkedinLink: string;
-  projectEssay: string;
+  creativeResponseEssay: string;
   whyHT6Essay: string;
   mlhCOC: boolean;
   mlhEmail: boolean;
