@@ -208,7 +208,7 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    graudationYear: {
+    graduationYear: {
       type: Number,
       caption: 'Graduation Year',
       inTextSearch: true,
@@ -1044,22 +1044,19 @@ export interface IMailMerge {
 
 export interface IApplication {
   lastUpdated: number;
-  phoneNumber: string;
   teamCode: string;
   emailConsent: boolean;
   gender: string;
-  age: number;
-  pronouns: string;
   ethnicity: string;
   country: string;
   shirtSize: string;
   dietaryRestrictions: string;
-  healthWarnings: string;
   city: string;
   province: string;
   school: string;
   program: string;
   levelOfStudy: string;
+  graduationYear: number;
   hackathonsAttended: string;
   resumeFileName: string;
   friendlyResumeFileName: string;
@@ -1069,7 +1066,6 @@ export interface IApplication {
   linkedinLink: string;
   projectEssay: string;
   whyHT6Essay: string;
-  creativeResponseEssay: string;
   mlhCOC: boolean;
   mlhEmail: boolean;
   mlhData: boolean;
