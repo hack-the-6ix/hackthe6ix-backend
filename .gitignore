@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 logs
+coverage
 config/settings.json
 config/mailer.json
 config/gcp.json

@@ -15,9 +15,8 @@ mongoose.connect(database).then(async () => {
   dbState = true;
   dbEvents.emit('connected');
 }).catch((err) => {
-  console.error("hello", err);
   log.error('Error connecting to mongodb. Exiting.', err);
-  // process.exit(1);
+  process.exit(1);
 });
 
 function isConnected():boolean {
