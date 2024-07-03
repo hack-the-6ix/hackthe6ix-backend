@@ -16,6 +16,7 @@ import {
   maxWordLength,
   minLength,
   minWordLength,
+  withinInt,
 } from '../validator';
 import { enumOptions } from './enums';
 import { maskStatus } from './interceptors';
@@ -146,16 +147,7 @@ export const hackerApplication = {
       readCheck: true,
     },
 
-    healthWarnings: {
-      type: String,
-      captions: 'Allergies/Dietary Restrictions',
-      writeCheck: maxLength(256),
-      submitCheck: maxLength(256),
-      readCheck: true,
-    },
-
     /* Address */
-
     city: {
       type: String,
       caption: 'City',
@@ -213,6 +205,16 @@ export const hackerApplication = {
 
       writeCheck: inEnum(enumOptions.levelOfStudy, true),
       submitCheck: inEnum(enumOptions.levelOfStudy),
+      readCheck: true,
+    },
+
+    graudationYear: {
+      type: Number,
+      caption: 'Graduation Year',
+      inTextSearch: true,
+
+      writeCheck: true,
+      submitCheck: withinInt(2023, 2031),
       readCheck: true,
     },
 
