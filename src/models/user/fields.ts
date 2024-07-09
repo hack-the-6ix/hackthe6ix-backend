@@ -99,6 +99,27 @@ export const hackerApplication = {
       readCheck: true,
     },
 
+    phoneNumber: {
+      type: String,
+      caption: 'Phone Number',
+      inTextSearch: true,
+
+      writeCheck: maxLength(50),
+      submitCheck: (request: WriteCheckRequest<string, IUser>) =>
+        minLength(1)(request) && maxLength(50)(request),
+      readCheck: true,
+    },
+
+    age:{
+      type: Number,
+      caption: 'Age by August 2nd',
+      inTextSearch: true,
+
+      writeCheck: true,
+      submitCheck: withinInt(14, 100),
+      readCheck: true,
+    },
+
     gender: {
       type: String,
       caption: 'Gender',
@@ -1046,6 +1067,8 @@ export interface IApplication {
   lastUpdated: number;
   teamCode: string;
   emailConsent: boolean;
+  phoneNumber: string;
+  age: number;
   gender: string;
   ethnicity: string;
   country: string;
