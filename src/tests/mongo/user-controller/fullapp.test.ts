@@ -64,11 +64,13 @@ jest.mock('../../../services/logger', () => {
 describe('Update Real Application', () => {
   test('Valid update', async () => {
     const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
+    const restoreDateMock = mockDate(mockTS);
 
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '4169782011',
+      age: 14,
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
@@ -103,10 +105,12 @@ describe('Update Real Application', () => {
 
   test('Enum is falsy', async () => {
     const mockTS = 696969;
-    let restoreDateMock = mockDate(mockTS);
+    const restoreDateMock = mockDate(mockTS);
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '',
+      age: 10,
       gender: '',
       ethnicity: null as unknown as string,
       school: 'University of Toronto',
@@ -144,6 +148,8 @@ describe('Update Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '4169782011',
+      age: 14,
       gender: enumOptions['gender'][0],
       pronouns: enumOptions['pronouns'][0],
       ethnicity: enumOptions['ethnicity'][0],
@@ -218,6 +224,8 @@ describe('Update Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '2'.repeat(50),
+      age: 14,
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
@@ -255,6 +263,7 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      age: 17,
       school: 'University of Toronto',
       program: 'Computer Science',
       phoneNumber: '123123123',
@@ -317,6 +326,8 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '4169782011',
+      age: 18,
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
@@ -370,6 +381,8 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      age: 15,
+      phoneNumber: '1234567890',
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
@@ -424,6 +437,8 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '4169782011',
+      age: 18,
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
@@ -478,6 +493,8 @@ describe('Submit Real Application', () => {
     await generateMockUniverseState();
 
     const hackerApplication = {
+      phoneNumber: '4169782011',
+      age: 18,
       gender: enumOptions['gender'][0],
       ethnicity: enumOptions['ethnicity'][0],
       school: 'University of Toronto',
