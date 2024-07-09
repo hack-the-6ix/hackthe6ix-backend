@@ -314,7 +314,7 @@ export const enumOptions = {
     "I'm not currently a student",
     'Prefer not to answer',
   ],
-  hackathonsAttended: ['1-3', '4-6', '7-9', '10+'],
+  hackathonsAttended: ['None','1-3', '4-6', '7-9', '10+'],
   requestedWorkshops: [
     'APIs 101',
     'Basics of Python',
