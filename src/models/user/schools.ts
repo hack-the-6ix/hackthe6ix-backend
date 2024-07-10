@@ -1288,7 +1288,6 @@ export default [
   'Orleans Technical Institute',
   'Osbourn Park High School',
   'Ostbayerische Technische Hochschule Regensburg',
-  'Other',
   'Otterbein University',
   'Overbrook High School - Philadelphia',
   'Oxford Academy High School',
@@ -2225,4 +2224,5 @@ export default [
   'Zespół Szkół nr 1 im. Jana Pawła II w Przysusze',
   'Zespół szkół nr 1 im. Stanisława Staszica w Bochni',
   'Zespół Szkół Nr.2 im. Jana Pawła II w Miechowie',
+  'Other',
 ];
