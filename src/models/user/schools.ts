@@ -1288,6 +1288,7 @@ export default [
   'Orleans Technical Institute',
   'Osbourn Park High School',
   'Ostbayerische Technische Hochschule Regensburg',
+  'Other',
   'Otterbein University',
   'Overbrook High School - Philadelphia',
   'Oxford Academy High School',
