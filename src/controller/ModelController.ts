@@ -24,8 +24,11 @@ import { fetchUniverseState, getModels } from './util/resources';
  * @param object
  * @param request
  */
-export const cleanObject = (rawFields: any, object: any, request: ReadCheckRequest<any>) => {
-
+export const cleanObject = (
+  rawFields: any,
+  object: any,
+  request: ReadCheckRequest<any>,
+) => {
   const out: any = {};
 
   if (!rawFields || !object) {
@@ -34,24 +37,19 @@ export const cleanObject = (rawFields: any, object: any, request: ReadCheckReque
 
   // If the user cannot read fields at this level, we don't need to check any further
   if (evaluateChecker(rawFields.readCheck, request)) {
-
     for (const k of Object.keys(rawFields.FIELDS)) {
-
       const fieldMetadata = rawFields.FIELDS[k];
 
       if (fieldMetadata) {
         if (fieldMetadata.FIELDS !== undefined) {
-
           if (evaluateChecker(fieldMetadata.readCheck, request)) {
             // This is another nested dictionary, so we can recurse
             out[k] = cleanObject(fieldMetadata, object[k], request);
           }
-
         } else {
           // This is just a regular field, so we'll check to make sure we have access to that field
 
           if (evaluateChecker(fieldMetadata.readCheck, request)) {
-
             // Handle read interceptor
             if (!fieldMetadata.readInterceptor) {
               out[k] = object[k];
@@ -84,14 +82,14 @@ export const getObject = async (
   requestUser: IUser,
   objectTypeName: string,
   query: {
-    page?: string,
-    size?: string,
-    sortField?: string,
-    sortCriteria?: 'asc' | 'desc',
-    text?: string,
-    filter?: any
-  }) => {
-
+    page?: string;
+    size?: string;
+    sortField?: string;
+    sortCriteria?: 'asc' | 'desc';
+    text?: string;
+    filter?: any;
+  },
+) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
 
@@ -145,7 +143,10 @@ export const getObject = async (
   if (text) {
     const regex = new RegExp(escapeStringRegexp(text), 'i'); // filters regex chars, sets to case insensitive
 
-    const inTextSearchFields = getInTextSearchableFields(objectModel.rawFields);
+    const inTextSearchFields = getInTextSearchableFields(
+      objectModel.rawFields,
+      text,
+    );
 
     // Apply regex against fields with in text search
     for (const f of inTextSearchFields) {
@@ -173,10 +174,11 @@ export const getObject = async (
     }
   }
 
-  const results = await objectModel.mongoose.find(filters)
-  .sort(sort)
-  .skip((page - 1) * size)
-  .limit(size);
+  const results = await objectModel.mongoose
+    .find(filters)
+    .sort(sort)
+    .skip((page - 1) * size)
+    .limit(size);
 
   const out: any[] = [];
 
@@ -201,7 +203,11 @@ export const getObject = async (
   return out;
 };
 
-const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckRequest<any, any>) => {
+const validateObjectEdit = (
+  rawFields: any,
+  changes: any,
+  request: WriteCheckRequest<any, any>,
+) => {
   if (!rawFields || !changes) {
     throw Error('Field or object is not truthy!');
   }
@@ -216,22 +222,31 @@ const validateObjectEdit = (rawFields: any, changes: any, request: WriteCheckReq
         if (fieldMetadata.FIELDS !== undefined) {
           // Nested object; Recurse
           validateObjectEdit(fieldMetadata, changes[k], request);
-
         } else {
           // Top level field
 
-          if (!evaluateChecker(fieldMetadata.writeCheck, {
-            ...request,
-            fieldValue: changes[k],
-          }) || fieldMetadata.virtual) {
+          if (
+            !evaluateChecker(fieldMetadata.writeCheck, {
+              ...request,
+              fieldValue: changes[k],
+            }) ||
+            fieldMetadata.virtual
+          ) {
             // Validation failed for this field
-            throw new WriteDeniedError(fieldMetadata, fieldMetadata.writeCheck, request);
+            throw new WriteDeniedError(
+              fieldMetadata,
+              fieldMetadata.writeCheck,
+              request,
+            );
           }
-
         }
       } else {
         // Invalid field
-        throw new WriteDeniedError(`Invalid field: ${k}`, 'Update fields must be part of schema', request);
+        throw new WriteDeniedError(
+          `Invalid field: ${k}`,
+          'Update fields must be part of schema',
+          request,
+        );
       }
     }
 
@@ -252,7 +267,6 @@ export const flattenFields = (fields: any, prefix = '') => {
   let out: any = {};
 
   for (const k of Object.keys(fields)) {
-
     const value = fields[k];
     const name = `${prefix}${prefix.length > 0 ? '.' : ''}${k}`;
 
@@ -287,14 +301,19 @@ export const flattenFields = (fields: any, prefix = '') => {
  *                    explicitly mentioned in changes will be touched.
  * @param logEvent - whether to write this event to the system log
  */
-export const editObject = async (requestUser: IUser, objectTypeName: string, filter: any, changes: any, noFlatten?: boolean, logEvent?: boolean) => {
-
+export const editObject = async (
+  requestUser: IUser,
+  objectTypeName: string,
+  filter: any,
+  changes: any,
+  noFlatten?: boolean,
+  logEvent?: boolean,
+) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
 
   if (objectModel === undefined) {
     throw new BadRequestError('Invalid Object type');
-
   }
 
   if (filter === undefined) {
@@ -327,13 +346,16 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
     amendedIDs.push(results[o]._id);
 
     if (logEvent) {
-      log.info('[OBJECT EDITED]', jsonify({
-        requestUser: requestUser,
-        filter: filter,
-        objectType: objectTypeName,
-        objectEdited: results[o],
-        changes: changes,
-      }));
+      log.info(
+        '[OBJECT EDITED]',
+        jsonify({
+          requestUser: requestUser,
+          filter: filter,
+          objectType: objectTypeName,
+          objectEdited: results[o],
+          changes: changes,
+        }),
+      );
     }
   }
 
@@ -350,8 +372,10 @@ export const editObject = async (requestUser: IUser, objectTypeName: string, fil
   return amendedIDs;
 };
 
-
-const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) => {
+const validateObjectDelete = (
+  rawFields: any,
+  request: DeleteCheckRequest<any>,
+) => {
   if (!rawFields) {
     throw Error('Field is not truthy!');
   }
@@ -374,7 +398,11 @@ const validateObjectDelete = (rawFields: any, request: DeleteCheckRequest<any>) 
  * @param objectTypeName
  * @param filter - filter map (same format as query selector for find())
  */
-export const deleteObject = async (requestUser: IUser, objectTypeName: string, filter: any) => {
+export const deleteObject = async (
+  requestUser: IUser,
+  objectTypeName: string,
+  filter: any,
+) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
 
@@ -405,36 +433,39 @@ export const deleteObject = async (requestUser: IUser, objectTypeName: string, f
   for (const o of Object.keys(results)) {
     amendedIDs.push(results[o]._id);
 
-    log.info('[OBJECT DELETION]', jsonify({
-      requestUser: requestUser,
-      filter: filter,
-      objectType: objectTypeName,
-      objectDeleted: results[o],
-    }));
+    log.info(
+      '[OBJECT DELETION]',
+      jsonify({
+        requestUser: requestUser,
+        filter: filter,
+        objectType: objectTypeName,
+        objectDeleted: results[o],
+      }),
+    );
   }
 
   // Changes accepted and are made
-  await objectModel.mongoose.deleteMany(
-    filter,
-  );
+  await objectModel.mongoose.deleteMany(filter);
 
   return amendedIDs;
 };
 
-const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCheckRequest<any, any>) => {
+const validateObjectCreate = (
+  rawFields: any,
+  parameters: any,
+  request: CreateCheckRequest<any, any>,
+) => {
   if (!rawFields || !parameters) {
     throw Error('Field or object is not truthy!');
   }
 
   // If the user cannot create the object, we don't need to go any further
   if (evaluateChecker(rawFields.createCheck, request)) {
-
     // Call the edit checker to validate the fields
     validateObjectEdit(rawFields, parameters, {
       ...request,
       targetObject: {}, // The object doesn't exist yet, so we cannot rely on any validation metrics that rely on existing values
     });
-
   } else {
     throw new CreateDeniedError(rawFields.createCheck, request);
   }
@@ -450,7 +481,11 @@ const validateObjectCreate = (rawFields: any, parameters: any, request: CreateCh
  * @param objectTypeName
  * @param parameters - initial parameters to initialize the object
  */
-export const createObject = async (requestUser: IUser, objectTypeName: string, parameters: any) => {
+export const createObject = async (
+  requestUser: IUser,
+  objectTypeName: string,
+  parameters: any,
+) => {
   // Since this function can handle any model type, we must fetch the mongoose schema first
   const objectModel: any = (getModels() as any)[objectTypeName];
 
@@ -488,13 +523,16 @@ export const initializeSettingsMapper = async () => {
 
     console.log('Initializing', name);
 
-    await mongooseModel.updateMany({}, {
-      settingsMapper: 0,
-    }, {
-      upsert: true,
-      setDefaultsOnInsert: true,
-      new: true,
-    });
+    await mongooseModel.updateMany(
+      {},
+      {
+        settingsMapper: 0,
+      },
+      {
+        upsert: true,
+        setDefaultsOnInsert: true,
+        new: true,
+      },
+    );
   }
 };
-

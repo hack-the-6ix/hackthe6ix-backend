@@ -37,7 +37,6 @@
  * @param rawFields
  */
 export const extractFields = (rawFields: any) => {
-
   // Precondition: rawFields meets the input specification
 
   const out: any = {
@@ -60,7 +59,6 @@ export const extractFields = (rawFields: any) => {
   }
 
   return out;
-
 };
 
 /**
@@ -68,8 +66,11 @@ export const extractFields = (rawFields: any) => {
  * @param rawFields
  * @param prefix
  */
-export const getInTextSearchableFields = (rawFields: any, prefix = '') => {
-
+export const getInTextSearchableFields = (
+  rawFields: any,
+  input: string,
+  prefix = '',
+) => {
   let out: string[] = [];
 
   for (const k of Object.keys(rawFields.FIELDS)) {
@@ -78,11 +79,15 @@ export const getInTextSearchableFields = (rawFields: any, prefix = '') => {
     if (v.FIELDS !== undefined) {
       // This field itself has fields, so we're going to need to recurse
 
-      out = [...out, ...getInTextSearchableFields(v, k)];
+      out = [...out, ...getInTextSearchableFields(v, input, k)];
     } else {
       // This is a plain old field
 
       if (v.inTextSearch) {
+        // If input is not numberable - ignore it so it doesn't break mongo
+        if (v.type === Number && isNaN(input as any)) {
+          continue;
+        }
         out.push(`${prefix}${prefix.length > 0 ? '.' : ''}${k}`);
       }
     }
