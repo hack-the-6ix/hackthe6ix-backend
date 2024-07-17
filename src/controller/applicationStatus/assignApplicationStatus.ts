@@ -180,7 +180,9 @@ export default async (legit?: boolean, waitlistOver?: boolean, rawAcceptedFromWa
     }
   }
 
-  await syncMailingLists(undefined, true);
-
+  if (legit) {
+    await syncMailingLists(undefined, true);
+  }
+  
   return { dead, accepted, rejected, waitlisted };
 };
