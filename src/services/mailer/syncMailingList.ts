@@ -60,12 +60,13 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
   // Step 3: Delete users that are on the list that shouldn't be
   const toBeDeleted = [...beforeSubscribers].filter(x => !expctedAfterSubscribers.has(x) && x);
 
-  const deleteOldResults = await Promise.all(toBeDeleted.map(
+  const deleteOldResults = await Promise.allSettled(toBeDeleted.map(
     (userEmail: string) => deleteSubscriptionRequest(mailingListID, userEmail),
   ));
 
   for (const result of deleteOldResults) {
-    if (result.status != 200 || !result.data) {
+    if ((result.status === 'fulfilled' && !result.value) 
+      || (result.status === 'rejected' && result.reason != 'failed to fetch') ) {
       throw new InternalServerError('Unable to delete subscriber');
     }
   }
