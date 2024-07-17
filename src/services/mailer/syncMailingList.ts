@@ -66,7 +66,7 @@ export default async (mailingListID: string, emails: string[], forceUpdate?: boo
 
   for (const result of deleteOldResults) {
     if ((result.status === 'fulfilled' && !result.value) 
-      || !(result.status === 'rejected' && result.reason === 'failed to fetch') ) {
+      || (result.status === 'rejected' && result.reason != 'failed to fetch') ) {
       throw new InternalServerError('Unable to delete subscriber');
     }
   }
