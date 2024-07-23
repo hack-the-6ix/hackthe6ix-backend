@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type {GridFSBucket, Db} from "mongoose/node_modules/mongodb";
+import type {GridFSBucket, Db} from "mongodb";
 import {BadRequestError} from "../types/errors";
 
 export const GRIDFS_BUCKETS = ['resumes'] as const;
