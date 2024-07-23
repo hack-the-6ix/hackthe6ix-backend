@@ -27,7 +27,11 @@ export const init = (serviceName: string) => {
 
   registerInstrumentations({
     instrumentations: [
-      new HttpInstrumentation(),
+      new HttpInstrumentation({
+        ignoreIncomingRequestHook(req) {
+          return req.url?.startsWith('/health') ?? false;
+        }
+      }),
       new ExpressInstrumentation(),
       new MongoDBInstrumentation()
     ]
