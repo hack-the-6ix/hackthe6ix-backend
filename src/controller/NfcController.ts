@@ -28,3 +28,19 @@ export const assignNFCToUser = async (nfcId: string, userId: string) => {
         throw new Error(`Error saving document: ${error.message}`);
     }
 };
+
+
+export const getUserIdFromNfcId = async (nfcId: string) => {
+    if (!nfcId) {
+        console.log('nfcId is required');
+        throw new Error('nfcId is required');
+    }
+
+    try {
+        const assignment = await NfcModel.findOne({ nfcId: nfcId });
+        return assignment?.userId;
+    } catch (error: any) {
+        console.log(error);
+        throw new Error(`Error finding document: ${error.message}`);
+    }
+};
