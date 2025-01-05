@@ -7,9 +7,14 @@ const NfcSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+const UserSchema = new mongoose.Schema({
+    checkIns: { type: Object, default: {} }
+})
+
 const NfcModel = mongoose.model('nfc-user-assignments', NfcSchema);
 
-const UserModel = mongoose.model('User');
+delete mongoose.models.User;
+const UserModel = mongoose.model('User', UserSchema);
 
 export const assignNFCToUser = async (nfcId: string, userId: string) => {
     if (!nfcId || !userId) {
@@ -109,13 +114,14 @@ export const updateCheckInField = async (nfcId: string, field: string, value: bo
 
     try {
         const response = await UserModel.updateOne(
-            { _id: new ObjectId(userId) },
+            { _id: new ObjectId(userId), checkIns: { $exists: true } },
             { $set: { 
                 checkIns: {
                     ...existingUser.checkIns,
                     [field]: value
                 }
-            } }
+
+            } },
         );
         return response;
     } catch (error: any) {
