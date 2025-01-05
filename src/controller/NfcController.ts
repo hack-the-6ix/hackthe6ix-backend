@@ -29,6 +29,35 @@ export const assignNFCToUser = async (nfcId: string, userId: string) => {
     }
 };
 
+export const deleteAssignmentByNfc = async (nfcId: string) => {
+    if (!nfcId) {
+        console.log('nfcId is required');
+        throw new Error('nfcId is required');
+    }
+
+    try {
+        await NfcModel.deleteOne({ nfcId: nfcId });
+        console.log(`NFC assignment with nfcId ${nfcId} deleted successfully`);
+    } catch (error: any) {
+        console.log(error);
+        throw new Error(`Error deleting document: ${error.message}`);
+    }
+}
+
+export const deleteAssignmentByUser = async (userId: string) => {
+    if (!userId) {
+        console.log('userId is required');
+        throw new Error('userId is required');
+    }
+
+    try {
+        await NfcModel.deleteOne({ userId: userId });
+        console.log(`NFC assignment with userId ${userId} deleted successfully`);
+    } catch (error: any) {
+        console.log(error);
+        throw new Error(`Error deleting document: ${error.message}`);
+    }
+}
 
 export const getUserIdFromNfcId = async (nfcId: string) => {
     if (!nfcId) {
