@@ -1,4 +1,5 @@
 import { mongoose } from "../services/mongoose_service";
+const ObjectId = mongoose.Types.ObjectId;
 
 const NfcSchema = new mongoose.Schema({
     nfcId: { type: String, required: true },
@@ -96,4 +97,29 @@ export const getUserFromNfcId = async (nfcId: string) => {
         throw new Error(`Error finding user: ${error.message}`);
     }
 
+}
+
+export const updateCheckInField = async (nfcId: string, field: string, value: boolean) => {
+    const userId = await getUserIdFromNfcId(nfcId);
+
+    const existingUser = await UserModel.findById(userId);
+    if (!existingUser) {
+        throw new Error(`User with ID ${userId} does not exist.`);
+    }
+
+    try {
+        const response = await UserModel.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { 
+                checkIns: {
+                    ...existingUser.checkIns,
+                    [field]: value
+                }
+            } }
+        );
+        return response;
+    } catch (error: any) {
+        console.log(error);
+        throw new Error(`Error updating check-ins: ${error.message}`);
+    }
 }

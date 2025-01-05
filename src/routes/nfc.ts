@@ -2,7 +2,7 @@ import express, {Request, Response} from "express";
 
 import { isConnected } from "../services/mongoose_service";
 
-import { assignNFCToUser, getUserIdFromNfcId, getUserFromNfcId, deleteAssignmentByNfc, deleteAssignmentByUser } from "../controller/NfcController";
+import { assignNFCToUser, getUserIdFromNfcId, getUserFromNfcId, deleteAssignmentByNfc, deleteAssignmentByUser, updateCheckInField } from "../controller/NfcController";
 
 import { isVolunteer } from "../models/validator";
 
@@ -55,6 +55,18 @@ nfcRouter.get('/getUser/:nfcId', async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get user' });
     }
+});
+
+nfcRouter.post('/updateCheckInsFromNFC', async (req: Request, res: Response) => {
+    const { nfcId, checkInEvent, value } = req.body;
+    
+    try {
+        const response = await updateCheckInField(nfcId, checkInEvent, value);
+        return res.status(200).json({ response });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update check-ins' });
+    }
+
 });
 
 export default nfcRouter;
