@@ -2,7 +2,7 @@ import express, {Request, Response} from "express";
 
 import { isConnected } from "../services/mongoose_service";
 
-import { assignNFCToUser, getUserIdFromNfcId, deleteAssignmentByNfc, deleteAssignmentByUser } from "../controller/NfcController";
+import { assignNFCToUser, getUserIdFromNfcId, getUserFromNfcId, deleteAssignmentByNfc, deleteAssignmentByUser } from "../controller/NfcController";
 
 import { isVolunteer } from "../models/validator";
 
@@ -46,6 +46,15 @@ nfcRouter.delete('/deleteAssignmentByUser/:userId', async (req: Request, res: Re
 
 nfcRouter.get('/test', (req: Request, res: Response) => { 
     return res.json({test: 'true'})
-})
+});
+
+nfcRouter.get('/getUser/:nfcId', async (req: Request, res: Response) => {
+    try {
+        const user = await getUserFromNfcId(req.params.nfcId);
+        return res.status(200).json({ user });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get user' });
+    }
+});
 
 export default nfcRouter;

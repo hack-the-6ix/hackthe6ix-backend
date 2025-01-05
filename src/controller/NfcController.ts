@@ -8,6 +8,8 @@ const NfcSchema = new mongoose.Schema({
 
 const NfcModel = mongoose.model('nfc-user-assignments', NfcSchema);
 
+const UserModel = mongoose.model('User');
+
 export const assignNFCToUser = async (nfcId: string, userId: string) => {
     if (!nfcId || !userId) {
         console.log('nfcId and userId are required');
@@ -73,3 +75,25 @@ export const getUserIdFromNfcId = async (nfcId: string) => {
         throw new Error(`Error finding document: ${error.message}`);
     }
 };
+
+export const getUserFromNfcId = async (nfcId: string) => {
+    if (!nfcId) {
+        console.log('nfcId is required');
+        throw new Error('nfcId is required');
+    }
+
+    const userId = await getUserIdFromNfcId(nfcId);
+    if (!userId) {
+        console.log('No user found for the given nfcId');
+        return null;
+    }
+
+    try {
+        const user = await UserModel.findById(userId);
+        return user;
+    } catch (error: any) {
+        console.log(error);
+        throw new Error(`Error finding user: ${error.message}`);
+    }
+
+}
