@@ -59,7 +59,21 @@ nfcRouter.get('/getUser/:nfcId', async (req: Request, res: Response) => {
 
 nfcRouter.post('/updateCheckInsFromNFC', async (req: Request, res: Response) => {
     const { nfcId, checkInEvent, value } = req.body;
-    
+
+    const events = [
+        'hackerCheckIn',
+        'lunchOne',
+        'dinnerOne',
+        'eventOne',
+        'snackOne',
+        'lunchTwo',
+        'dinnerTwo'
+    ]
+
+    if (checkInEvent === undefined || !events.includes(checkInEvent)) {
+        return res.status(400).json({ error: 'Invalid check-in event' });
+    }
+
     try {
         const response = await updateCheckInField(nfcId, checkInEvent, value);
         return res.status(200).json({ response });
